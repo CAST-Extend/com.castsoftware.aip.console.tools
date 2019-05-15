@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>3.25</version>
+        <relativePath />
+    </parent>
+    <groupId>com.castsoftware.aip.jenkins</groupId>
+    <artifactId>aip-console-jenkins</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>hpi</packaging>
+    <properties>
+        <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
+        <jenkins.version>2.60.3</jenkins.version>
+        <java.level>8</java.level>
+        <!-- Other properties you may want to use:
+          ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
+          ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
+          ~ stapler-plugin.version: The Stapler Maven plugin version required by the plugin.
+     -->
+        <aip.integration.version>0.0.1-SNAPSHOT</aip.integration.version>
+        <hpi-plugin.version>3.5</hpi-plugin.version>
+    </properties>
+    <name>AIP Console Jenkins Plugin</name>
+    <description>This plugin aims at helping users of AIP Console integrate the analysis of their applications with
+        Jenkins Jobs.
+    </description>
+    <!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for the applicable one if needed. -->
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+    <dependencyManagement>
+        <dependencies>
+            <!-- aip integration dependency -->
+            <dependency>
+                <groupId>com.castsoftware.uc.aip.console.tools</groupId>
+                <artifactId>aip-console-tools-core</artifactId>
+                <version>${aip.integration.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>structs</artifactId>
+            <version>1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.castsoftware.uc.aip.console.tools</groupId>
+            <artifactId>aip-console-tools-core</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <version>2.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-cps</artifactId>
+            <version>2.39</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-job</artifactId>
+            <version>2.11.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-basic-steps</artifactId>
+            <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-durable-task-step</artifactId>
+            <version>2.13</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-api</artifactId>
+            <version>2.20</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-support</artifactId>
+            <version>2.14</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.27.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jenkins-ci.tools</groupId>
+                <artifactId>maven-hpi-plugin</artifactId>
+                <version>${hpi-plugin.version}</version>
+                <configuration>
+                    <minimumJavaVersion>${java.level}</minimumJavaVersion>
+                    <pluginFirstClassLoader>true</pluginFirstClassLoader>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <configuration>
+                    <rules>
+                        <enforceBytecodeVersion>
+                            <ignoreClasses>
+                                <ignoreClass>module-info</ignoreClass>
+                            </ignoreClasses>
+                        </enforceBytecodeVersion>
+                    </rules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- If you want this to appear on the wiki page:
+    <developers>
+      <developer>
+        <id>bhacker</id>
+        <name>Bob Q. Hacker</name>
+        <email>bhacker@nowhere.net</email>
+      </developer>
+    </developers> -->
+
+    <!-- Assuming you want to host on @jenkinsci:
+    <url>https://wiki.jenkins.io/display/JENKINS/TODO+Plugin</url>
+    <scm>
+        <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
+    </scm>
+    -->
+    <repositories>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+</project>
