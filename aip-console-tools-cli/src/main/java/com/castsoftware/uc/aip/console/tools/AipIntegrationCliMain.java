@@ -5,6 +5,7 @@ import com.castsoftware.uc.aip.console.tools.core.utils.Constants;
 import com.castsoftware.uc.aip.console.tools.factories.SpringAwareCommandFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -23,6 +24,9 @@ public class AipIntegrationCliMain implements CommandLineRunner {
     @Autowired
     private ParentCommand parentCommand;
 
+    @Value("${picocli.usage.width:120}")
+    private int consoleUsageWidth;
+
     public static void main(String... args) {
         new SpringApplicationBuilder(AipIntegrationCliMain.class)
                 .logStartupInfo(false)
@@ -35,6 +39,8 @@ public class AipIntegrationCliMain implements CommandLineRunner {
 
         try {
             CommandLine cli = new CommandLine(parentCommand, springAwareCommandFactory);
+            cli.setUsageHelpWidth(consoleUsageWidth);
+
             List<Object> returnedResults = cli.parseWithHandler(new CommandLine.RunLast(), args);
             if (returnedResults != null) {
                 result = returnedResults.stream()
