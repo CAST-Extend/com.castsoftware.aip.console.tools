@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>com.castsoftware.uc.aip.console.tools</id>
+        <version>0.0.1-SNAPSHOT</version>
+        <title>AIP Console integration tools</title>
+        <authors>CAST User Community</authors>
+        <owners>CAST</owners>
+        <licenseUrl>
+            https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/master/LICENSEhttps://extend-beta.castsoftware.com/V2/Licenses/Cast-Licence-UserCommunity-1.0.html
+        </licenseUrl>
+        <projectUrl>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Examples of tools leveraging the AIP Console REST API for automation</description>
+        <releaseNotes>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools</releaseNotes>
+        <tags />
+        <dependencies />
+    </metadata>
+</package>
