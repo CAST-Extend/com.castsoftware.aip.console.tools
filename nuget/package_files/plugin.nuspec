@@ -8,7 +8,7 @@
         <owners>CAST</owners>
         <licenseUrl>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/master/LICENSE</licenseUrl>
         <projectUrl>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools</projectUrl>
-		<iconUrl>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/nuget/logo console.png</iconUrl>
+		<iconUrl>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/nuget/logo_console.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Examples of tools leveraging the AIP Console REST API for automation</description>
         <releaseNotes>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/master/README.md</releaseNotes>
