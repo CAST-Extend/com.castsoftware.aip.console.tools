@@ -70,7 +70,7 @@ robocopy %ROBOPT% %ACTOOLSDIR%\aip-console-tools-cli\target %PACKDIR% aip-consol
 if errorlevel 8 goto endclean
 robocopy %ROBOPT% %ACTOOLSDIR%\aip-console-jenkins\target %PACKDIR% aip-console-jenkins*.hpi
 if errorlevel 8 goto endclean
-robocopy %ROBOPT% %ACTOOLSDIR%\nuspec\package_files %PACKDIR% plugin.nuspec
+robocopy %ROBOPT% %ACTOOLSDIR%\nuget\package_files %PACKDIR% plugin.nuspec
 if errorlevel 8 goto endclean
  
 :: ========================================================================================
