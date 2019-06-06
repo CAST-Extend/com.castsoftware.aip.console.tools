@@ -10,7 +10,7 @@ Please check each folder for more details on each elements.
 
 ### Modules
 
-This project contains 3 modules :
+This project contains 3 modules, Please use unzip tool to extract the .nupkg file if downloaded from CAST-EXTEND to get the components :
 
 * AIP Jenkins Plugin : Module containing the code to our Jenkins plugin to create an application or add a version
 * AIP Integration CLI : Module containing the CLI to create an application or add a version
