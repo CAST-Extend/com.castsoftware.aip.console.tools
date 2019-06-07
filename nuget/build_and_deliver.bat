@@ -12,6 +12,9 @@ set CMDPATH=%0
 
 cd /d %WORKSPACE%
 
+set VERSION=1.0.2
+set ID=com.castsoftware.uc.aip.console.tools
+
 :: Checking arguments
 set BUILDDIR=
 set ACTOOLSDIR=
@@ -65,13 +68,22 @@ for %%a in (%PACKDIR%) do (
     if errorlevel 1 goto endclean
 )
 
-set ROBOPT=/ndl /njh /njs /np
-robocopy %ROBOPT% %ACTOOLSDIR%\aip-console-tools-cli\target %PACKDIR% aip-console-tools-cli*.jar
-if errorlevel 8 goto endclean
-robocopy %ROBOPT% %ACTOOLSDIR%\aip-console-jenkins\target %PACKDIR% aip-console-jenkins*.hpi
-if errorlevel 8 goto endclean
-robocopy %ROBOPT% %ACTOOLSDIR%\nuget\package_files %PACKDIR% plugin.nuspec
-if errorlevel 8 goto endclean
+set ZIPNAME=%ID%.%VERSION%.zip
+pushd %ACTOOLSDIR%\aip-console-tools-cli\target
+7z.exe a -y -r %PACKDIR%/%ZIPNAME% aip-console-tools-cli*.jar
+if errorlevel 1 goto endclean
+popd
+pushd %ACTOOLSDIR%\aip-console-jenkins\target
+7z.exe a -y -r %PACKDIR%/%ZIPNAME% aip-console-jenkins*.hpi
+if errorlevel 1 goto endclean
+
+xcopy /f /y plugin.nuspec %PACKDIR%
+if errorlevel 1 goto endclean
+
+sed -i 's/_THE_VERSION_/%VERSION%/' %PACKDIR%/plugin.nuspec
+if errorlevel 1 goto endclean
+sed -i 's/_THE_ID_/%ID%/' %PACKDIR%/plugin.nuspec
+if errorlevel 1 goto endclean
  
 :: ========================================================================================
 :: Nuget packaging

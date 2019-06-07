@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>com.castsoftware.uc.aip.console.tools</id>
-        <version>1.0.1-build_BUILDNO_</version>
+        <id>_THE_ID_</id>
+        <version>_THE_VERSION_-build_BUILDNO_</version>
         <title>AIP Console integration tools</title>
         <authors>User Community</authors>
         <owners>CAST</owners>
