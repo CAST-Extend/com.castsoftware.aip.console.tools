@@ -15,6 +15,8 @@ cd /d %WORKSPACE%
 set VERSION=1.0.2
 set ID=com.castsoftware.uc.aip.console.tools
 
+set PATH=%PATH%;c:\Tools\Git\usr\bin;C:\CAST-Caches\Win64
+
 :: Checking arguments
 set BUILDDIR=
 set ACTOOLSDIR=
