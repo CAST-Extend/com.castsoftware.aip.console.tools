@@ -78,8 +78,9 @@ popd
 pushd %ACTOOLSDIR%\aip-console-jenkins\target
 7z.exe a -y -r %PACKDIR%/%ZIPNAME% aip-console-jenkins*.hpi
 if errorlevel 1 goto endclean
+popd
 
-xcopy /f /y plugin.nuspec %PACKDIR%
+xcopy /f /y %ACTOOLSDIR%\nuget\package_files\plugin.nuspec %PACKDIR%
 if errorlevel 1 goto endclean
 
 sed -i 's/_THE_VERSION_/%VERSION%/' %PACKDIR%/plugin.nuspec
