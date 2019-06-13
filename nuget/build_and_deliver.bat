@@ -64,11 +64,16 @@ for %%a in (%BUILDDIR% %ACTOOLSDIR%) do (
     )
 )
 
+
 for %%a in (%PACKDIR%) do (
     if exist %%a rmdir /s /q %%a
     mkdir %%a
     if errorlevel 1 goto endclean
 )
+
+pushd %PACKDIR%
+for /f "delims=/" %%a in ('cd') do set PACKDIR=%%a
+popd
 
 set ZIPNAME=%ID%.%VERSION%.zip
 pushd %ACTOOLSDIR%\aip-console-tools-cli\target
