@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.doReturn;
 
 @Ignore
 public class AddVersionBuilderTest {
-    private static final String TEST_APP_GUID = "appGuid";
+    private static final String TEST_APP_NAME = "appName";
     private static final String TEST_ARCHIVE_NAME = "archive.zip";
     private static final String TEST_JOB_GUID = "jobGuid";
 
@@ -46,7 +47,7 @@ public class AddVersionBuilderTest {
 
     @Before
     public void setUp() {
-        addVersionBuilder = new AddVersionBuilder(TEST_APP_GUID, TEST_ARCHIVE_NAME);
+        addVersionBuilder = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
         MockitoAnnotations.initMocks(this);
     }
 
@@ -55,7 +56,7 @@ public class AddVersionBuilderTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(addVersionBuilder);
         project = jenkins.configRoundtrip(project);
-        jenkins.assertEqualDataBoundBeans(new AddVersionBuilder(TEST_APP_GUID, TEST_ARCHIVE_NAME), project.getBuildersList().get(0));
+        jenkins.assertEqualDataBoundBeans(new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME), project.getBuildersList().get(0));
     }
 
     @Test
@@ -66,9 +67,9 @@ public class AddVersionBuilderTest {
         doNothing().
             when(restApiService).validateUrlAndKey("http://localhost:8081", "cast", "cast");
         doReturn(true)
-                .when(chunkedUploadService).uploadFile(TEST_APP_GUID, TEST_ARCHIVE_NAME);
+                .when(chunkedUploadService).uploadFile(TEST_APP_NAME, new File(TEST_ARCHIVE_NAME));
         doReturn(TEST_JOB_GUID)
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_GUID), eq(TEST_ARCHIVE_NAME), anyString(), any(Date.class), eq(false));
+                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_ARCHIVE_NAME), anyString(), any(Date.class), eq(false));
         doReturn(JobState.COMPLETED)
                 .when(jobsService).pollAndWaitForJobFinished(TEST_JOB_GUID);
 

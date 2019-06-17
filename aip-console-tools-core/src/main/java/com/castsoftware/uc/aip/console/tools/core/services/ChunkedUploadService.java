@@ -2,6 +2,8 @@ package com.castsoftware.uc.aip.console.tools.core.services;
 
 import com.castsoftware.uc.aip.console.tools.core.exceptions.UploadException;
 
+import java.io.File;
+
 public interface ChunkedUploadService {
 
     /**
@@ -12,5 +14,5 @@ public interface ChunkedUploadService {
      * @return True if the upload was successful, false otherwise
      * @throws UploadException if the upload was not completed successfully
      */
-    boolean uploadFile(String appGuid, String zipFile) throws UploadException;
+    boolean uploadFile(String appGuid, File zipFile) throws UploadException;
 }

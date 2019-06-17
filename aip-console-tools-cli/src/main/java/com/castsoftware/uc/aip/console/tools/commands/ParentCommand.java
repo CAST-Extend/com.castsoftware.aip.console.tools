@@ -29,6 +29,6 @@ public class ParentCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         log.error("No COMMAND provided");
         CommandLine.usage(this, System.out);
-        return null;
+        return 0;
     }
 }

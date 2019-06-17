@@ -41,7 +41,9 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public String startCreateApplication(String applicationName) throws JobServiceException {
-        assert StringUtils.isNotBlank(applicationName);
+        if (StringUtils.isBlank(applicationName)) {
+            throw new JobServiceException("Application name is empty. Unable to create application");
+        }
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
         //FIXME add target node ? Get by name ? GUID ? Or let AIP Console handle it ?
@@ -63,7 +65,20 @@ public class JobsServiceImpl implements JobsService {
     @Override
     public String startAddVersionJob(String appGuid, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion)
             throws JobServiceException {
-        assert StringUtils.isNoneEmpty(appGuid, zipFileName, versionName);
+        if (StringUtils.isBlank(appGuid)) {
+            throw new JobServiceException("No application GUID provided");
+        }
+        if (StringUtils.isBlank(zipFileName)) {
+            throw new JobServiceException("No Archive File name provided to create the new version");
+        }
+        if (versionReleaseDate == null) {
+            throw new JobServiceException("No release date provided.");
+        }
+
+        if (StringUtils.isBlank(versionName)) {
+            DateFormat formatVersionName = new SimpleDateFormat("yyMMdd.HHmmss");
+            versionName = "v" + formatVersionName.format(versionReleaseDate);
+        }
 
         String jobsEndpoint = ApiEndpointHelper.getJobsEndpoint();
 
@@ -84,6 +99,7 @@ public class JobsServiceImpl implements JobsService {
 
         Map<String, String> jobParameters = new HashMap<>();
         jobParameters.put(Constants.PARAM_APP_GUID, appGuid);
+        // Force removing any path from filename
         String fileName = FilenameUtils.getName(zipFileName);
         jobParameters.put(Constants.PARAM_SOURCE_ARCHIVE, FilenameUtils.getName(zipFileName));
         jobParameters.put("fileName", FilenameUtils.getName(zipFileName));

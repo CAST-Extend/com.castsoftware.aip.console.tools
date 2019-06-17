@@ -52,7 +52,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
     private List<String> unmatchedOptions;
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         try {
             restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
         } catch (ApiKeyMissingException e) {

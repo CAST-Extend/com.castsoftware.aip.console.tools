@@ -1,25 +1,22 @@
 package com.castsoftware.uc.aip.console.tools;
 
+import com.castsoftware.uc.aip.console.tools.core.services.ApplicationService;
+import com.castsoftware.uc.aip.console.tools.core.services.ApplicationServiceImpl;
 import com.castsoftware.uc.aip.console.tools.core.services.ChunkedUploadService;
 import com.castsoftware.uc.aip.console.tools.core.services.ChunkedUploadServiceImpl;
 import com.castsoftware.uc.aip.console.tools.core.services.JobsService;
 import com.castsoftware.uc.aip.console.tools.core.services.JobsServiceImpl;
 import com.castsoftware.uc.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.uc.aip.console.tools.core.services.RestApiServiceImpl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @ComponentScan
@@ -35,23 +32,6 @@ public class ApiIntegrationConfig {
     }
 
     @Bean
-    public ClientHttpRequestFactory getClientHttpRequestFactory() {
-        HttpComponentsClientHttpRequestFactory factory =
-                new HttpComponentsClientHttpRequestFactory();
-
-        CloseableHttpClient client = HttpClients.custom()
-                .setDefaultCookieStore(getCookieStore())
-                .useSystemProperties()
-                .build();
-
-        factory.setConnectTimeout(CONNECT_TIMEOUT);
-        factory.setReadTimeout(READ_TIMEOUT);
-        factory.setHttpClient(client);
-
-        return factory;
-    }
-
-    @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
@@ -61,11 +41,8 @@ public class ApiIntegrationConfig {
     }
 
     @Bean
-    public RestTemplate restTemplate() {
-        RestTemplate template = new RestTemplate(getClientHttpRequestFactory());
-
-        template.getMessageConverters().add(new MappingJackson2HttpMessageConverter(objectMapper()));
-        return template;
+    public RestApiService restApiService(@Autowired ObjectMapper objectMapper) {
+        return new RestApiServiceImpl(objectMapper);
     }
 
     @Bean
@@ -76,5 +53,10 @@ public class ApiIntegrationConfig {
     @Bean
     public ChunkedUploadService chunkedUploadService(@Autowired RestApiService restApiService) {
         return new ChunkedUploadServiceImpl(restApiService);
+    }
+
+    @Bean
+    public ApplicationService applicationService(@Autowired RestApiService restApiService, @Autowired JobsService jobsService) {
+        return new ApplicationServiceImpl(restApiService, jobsService);
     }
 }

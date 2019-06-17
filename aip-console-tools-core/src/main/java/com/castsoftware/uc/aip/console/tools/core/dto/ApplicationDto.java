@@ -1,4 +1,4 @@
-package com.castsoftware.uc.aip.console.tools.core.dto.upload;
+package com.castsoftware.uc.aip.console.tools.core.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,12 +10,13 @@ import lombok.ToString;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @EqualsAndHashCode
 @ToString
-public class CreateUploadRequest {
-    private String fileName;
-    private long fileSize;
+public class ApplicationDto {
+    private String guid;
+    private String name;
+    private String state;
 }

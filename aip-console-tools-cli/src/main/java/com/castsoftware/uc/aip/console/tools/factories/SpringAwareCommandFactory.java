@@ -26,5 +26,4 @@ public class SpringAwareCommandFactory implements CommandLine.IFactory, Applicat
         return applicationContext.getBean(cls);
     }
 
-
 }

@@ -9,14 +9,14 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import hudson.Extension;
-import io.jenkins.plugins.aipconsole.extensions.RestApiServiceImpl;
+import io.jenkins.plugins.aipconsole.extensions.RestApiServiceExtension;
 
 @Extension
 public class AipConsoleModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(RestApiService.class).toInstance(new RestApiServiceImpl());
+        bind(RestApiService.class).toInstance(new RestApiServiceExtension());
     }
 
     @Provides

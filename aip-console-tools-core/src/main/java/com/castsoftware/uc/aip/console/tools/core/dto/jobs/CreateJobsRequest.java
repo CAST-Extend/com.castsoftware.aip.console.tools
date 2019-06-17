@@ -1,8 +1,17 @@
 package com.castsoftware.uc.aip.console.tools.core.dto.jobs;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class CreateJobsRequest {
     private JobType jobType;
     private Map<String, String> jobParameters = new HashMap<>();

@@ -3,8 +3,10 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.uc.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.uc.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.uc.aip.console.tools.core.exceptions.ApiCallException;
+import com.castsoftware.uc.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.uc.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.uc.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.uc.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.uc.aip.console.tools.core.services.ChunkedUploadService;
 import com.castsoftware.uc.aip.console.tools.core.services.JobsService;
 import com.castsoftware.uc.aip.console.tools.core.services.RestApiService;
@@ -31,16 +33,30 @@ import org.kohsuke.stapler.DataBoundSetter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static io.jenkins.plugins.aipconsole.Messages.*;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_accessDenied;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appCreateError;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_missingRequiredParameters;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_noApiKey;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_noServerUrl;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_uploadFailed;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_pollJobMessage;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startAddVersionJob;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startUpload;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_DescriptorImpl_displayName;
+import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
 public class AddVersionBuilder extends Builder implements SimpleBuildStep {
-
 
     @Inject
     private JobsService jobsService;
@@ -51,24 +67,28 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @Inject
     private RestApiService apiService;
 
-    private String applicationGuid;
+    @Inject
+    private ApplicationService applicationService;
+
+    private String applicationName;
     private String filePath;
+    private boolean autoCreate = false;
     private boolean cloneVersion = false;
     @Nullable
     private String versionName = "";
 
     @DataBoundConstructor
-    public AddVersionBuilder(String applicationGuid, String filePath) {
-        this.applicationGuid = applicationGuid;
+    public AddVersionBuilder(String applicationName, String filePath) {
+        this.applicationName = applicationName;
         this.filePath = filePath;
     }
 
-    public String getApplicationGuid() {
-        return applicationGuid;
+    public String getApplicationName() {
+        return applicationName;
     }
 
-    public void setApplicationGuid(String applicationGuid) {
-        this.applicationGuid = applicationGuid;
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
     public String getFilePath() {
@@ -77,6 +97,14 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public boolean isAutoCreate() {
+        return autoCreate;
+    }
+
+    public void setAutoCreate(boolean autoCreate) {
+        this.autoCreate = autoCreate;
     }
 
     public boolean isCloneVersion() {
@@ -111,7 +139,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             Guice.createInjector(new AipConsoleModule()).injectMembers(this);
         }
 
-        if (StringUtils.isAnyBlank(applicationGuid, filePath)) {
+        if (StringUtils.isAnyBlank(applicationName, filePath)) {
             listener.error(AddVersionBuilder_AddVersion_error_missingRequiredParameters());
             run.setResult(Result.ABORTED);
             return;
@@ -145,12 +173,25 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             return;
         }
         EnvVars vars = run.getEnvironment(listener);
+        String applicationGuid;
 
         try {
+            applicationGuid = applicationService.getOrCreateApplicationByName(applicationName, autoCreate);
+            if (StringUtils.isBlank(applicationGuid)) {
+                listener.error(AddVersionBuilder_AddVersion_error_appNotFound(applicationName));
+                run.setResult(Result.FAILURE);
+                return;
+            }
+
             String resolvedFilePath = vars.expand(filePath);
             log.println(AddVersionBuilder_AddVersion_info_startUpload());
-            chunkedUploadService.uploadFile(this.applicationGuid, workspace.child(resolvedFilePath).getRemote());
+            chunkedUploadService.uploadFile(applicationGuid, new File(workspace.child(resolvedFilePath).toURI()));
 
+        } catch (ApplicationServiceException e) {
+            listener.error(AddVersionBuilder_AddVersion_error_appCreateError(applicationName));
+            e.printStackTrace(listener.getLogger());
+            run.setResult(Result.FAILURE);
+            return;
         } catch (UploadException e) {
             listener.error(AddVersionBuilder_AddVersion_error_uploadFailed());
             e.printStackTrace(listener.getLogger());
@@ -162,7 +203,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             // Create a value for versionName
             String resolvedVersionName = vars.expand(versionName);
 
-            if(StringUtils.isBlank(resolvedVersionName)) {
+            if (StringUtils.isBlank(resolvedVersionName)) {
                 DateFormat formatVersionName = new SimpleDateFormat("yyMMdd.HHmmss");
                 resolvedVersionName = String.format("v%s", formatVersionName.format(new Date()));
             }

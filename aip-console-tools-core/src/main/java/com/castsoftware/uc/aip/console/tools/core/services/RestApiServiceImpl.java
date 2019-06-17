@@ -1,14 +1,11 @@
-package io.jenkins.plugins.aipconsole.extensions;
+package com.castsoftware.uc.aip.console.tools.core.services;
 
 import com.castsoftware.uc.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.uc.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.uc.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.uc.aip.console.tools.core.utils.Constants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.google.common.collect.Lists;
-import hudson.Extension;
-import hudson.ExtensionPoint;
 import lombok.extern.java.Log;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -22,13 +19,15 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,13 +36,12 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-@Extension
 @Log
-public class RestApiServiceImpl implements ExtensionPoint, RestApiService {
-    private static final List<Integer> ACCEPTED_HTTP_CODES = Lists.newArrayList(200, 201, 202, 204);
+public class RestApiServiceImpl implements RestApiService {
+    private static final List<Integer> ACCEPTED_HTTP_CODES = Arrays.asList(200, 201, 202, 204);
 
     private OkHttpClient client;
-    private ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper;
     private QueryableCookieJar cookieJar;
     private String serverUrl;
     private String username;
@@ -55,11 +53,26 @@ public class RestApiServiceImpl implements ExtensionPoint, RestApiService {
                 .addInterceptor(getAuthInterceptor())
                 .cookieJar(cookieJar)
                 .build();
+        this.mapper = new ObjectMapper();
+    }
+
+    public RestApiServiceImpl(ObjectMapper preConfiguredMapper) {
+        this.cookieJar = new QueryableCookieJar();
+        this.client = new OkHttpClient.Builder()
+                .addInterceptor(getAuthInterceptor())
+                .cookieJar(cookieJar)
+                .build();
+        this.mapper = preConfiguredMapper;
     }
 
     @Override
     public void validateUrlAndKey(String serverUrl, String apiKey) throws ApiCallException {
-        assert StringUtils.isNoneBlank(serverUrl, apiKey);
+        assert StringUtils.isNoneBlank(serverUrl);
+
+        if(StringUtils.isBlank(apiKey)) {
+            throw new ApiKeyMissingException("No Password or API Key provided to log in to AIP Console.");
+        }
+
         if (!StringUtils.startsWithIgnoreCase(serverUrl, "http")) {
             serverUrl = "http://" + serverUrl;
         }
@@ -158,7 +171,11 @@ public class RestApiServiceImpl implements ExtensionPoint, RestApiService {
                 ResponseBody responseBody = response.body();
                 if (responseBody != null) {
                     try (InputStream bodyStream = responseBody.byteStream()) {
-                        return mapper.readValue(bodyStream, responseClass);
+                        if(responseClass.equals(String.class)) {
+                            return (T) IOUtils.toString(bodyStream, StandardCharsets.UTF_8);
+                        } else {
+                            return mapper.readValue(bodyStream, responseClass);
+                        }
                     } catch (MismatchedInputException e) {
                         log.warning("Unable to parse object as " + responseClass.getName() + "(expected ?). Returning null instead.");
                         return null;
@@ -245,7 +262,6 @@ public class RestApiServiceImpl implements ExtensionPoint, RestApiService {
         private Set<Cookie> cookieSet = new HashSet<>();
 
         @Override
-        @ParametersAreNonnullByDefault
         public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
             cookies.forEach(c -> {
                 Optional<Cookie> optCookie = cookieSet.stream()
@@ -257,7 +273,6 @@ public class RestApiServiceImpl implements ExtensionPoint, RestApiService {
         }
 
         @Override
-        @ParametersAreNonnullByDefault
         public List<Cookie> loadForRequest(HttpUrl url) {
             return new ArrayList<>(cookieSet);
         }

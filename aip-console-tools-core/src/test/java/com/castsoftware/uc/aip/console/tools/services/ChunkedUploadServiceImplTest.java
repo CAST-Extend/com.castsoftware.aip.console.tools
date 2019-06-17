@@ -9,9 +9,8 @@ import com.castsoftware.uc.aip.console.tools.core.services.ChunkedUploadService;
 import com.castsoftware.uc.aip.console.tools.core.services.ChunkedUploadServiceImpl;
 import com.castsoftware.uc.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.uc.aip.console.tools.core.utils.ApiEndpointHelper;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -36,8 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-@Slf4j
-@Ignore
+@Log
 public class ChunkedUploadServiceImplTest {
     private static final String TEST_UPLOAD_GUID = "uploadGuid";
     private static final String TEST_APP_GUID = "appGuid";
@@ -60,24 +58,24 @@ public class ChunkedUploadServiceImplTest {
         Files.write(fakeZip.toPath(), "Some random content".getBytes(StandardCharsets.UTF_8));
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = UploadException.class)
     public void testAssertionErrorNoAppGuid() throws Exception {
         uploadService.uploadFile(null, null);
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = UploadException.class)
     public void testAssertionErrorNoUploadFile() throws Exception {
         uploadService.uploadFile(TEST_APP_GUID, null);
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = UploadException.class)
     public void testAssertionErrorFileNotAZip() throws Exception {
-        uploadService.uploadFile(TEST_APP_GUID, "somefile.notzip");
+        uploadService.uploadFile(TEST_APP_GUID, new File("somefile.notzip"));
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = UploadException.class)
     public void testAssertionErrorFileNotExists() throws Exception {
-        uploadService.uploadFile(TEST_APP_GUID, "C:/somefile.ZIP");
+        uploadService.uploadFile(TEST_APP_GUID, new File("C:/somefile.ZIP"));
     }
 
     @Test(expected = UploadException.class)
@@ -94,31 +92,33 @@ public class ChunkedUploadServiceImplTest {
                         eq(ChunkedUploadDto.class)
                 );
 
-        uploadService.uploadFile(TEST_APP_GUID, fakeZip.getAbsolutePath());
+        uploadService.uploadFile(TEST_APP_GUID, fakeZip);
     }
 
     @Test(expected = UploadException.class)
     public void testFirstContentUploadThrowsException() throws Exception {
+        log.info("Setting up");
         long fileSize = fakeZip.length();
         CreateUploadRequest expectedRequest = new CreateUploadRequest();
         expectedRequest.setFileName(TEST_ZIP_FILENAME);
         expectedRequest.setFileSize(fileSize);
+
         ChunkedUploadDto expectedDto = ChunkedUploadDto.builder()
+                .guid(TEST_UPLOAD_GUID)
                 .fileName(TEST_ZIP_FILENAME)
                 .fileSize(fileSize)
                 .applicationGuid(TEST_APP_GUID)
                 .build();
-        expectedDto.setApplicationGuid(TEST_UPLOAD_GUID);
 
         String uploadEndpoint = ApiEndpointHelper.getApplicationUploadPath(TEST_APP_GUID, TEST_UPLOAD_GUID);
-        when(restApiService.postForEntity(anyString(), eq(expectedRequest), eq(ChunkedUploadDto.class)))
+        when(restApiService.postForEntity(eq("/api/applications/appGuid/upload"), eq(expectedRequest), eq(ChunkedUploadDto.class)))
                 .thenReturn(expectedDto);
         when(restApiService.exchangeMultipartForEntity(eq("PATCH"), eq(uploadEndpoint), argThat(getChunkUploadMatcher()), argThat(getChunkUploadMatcher()), eq(ChunkedUploadDto.class)))
                 .thenThrow(new ApiCallException());
         when(restApiService.deleteForEntity(anyString(), eq(null), eq(String.class)))
                 .thenReturn("");
 
-        uploadService.uploadFile(TEST_APP_GUID, fakeZip.getAbsolutePath());
+        uploadService.uploadFile(TEST_APP_GUID, fakeZip);
     }
 
     @Test
@@ -148,7 +148,7 @@ public class ChunkedUploadServiceImplTest {
         doReturn(afterUploadExpectedDto).
                 when(restApiService).exchangeMultipartForEntity(eq("PATCH"), eq(uploadEndpoint), argThat(getChunkUploadMatcher()), argThat(getChunkUploadMatcher()), eq(ChunkedUploadDto.class));
 
-        assertTrue(uploadService.uploadFile(TEST_APP_GUID, fakeZip.getAbsolutePath()));
+        assertTrue(uploadService.uploadFile(TEST_APP_GUID, fakeZip));
 
         verify(restApiService, Mockito.never()).deleteForEntity(anyString(), eq(null), eq(String.class));
     }

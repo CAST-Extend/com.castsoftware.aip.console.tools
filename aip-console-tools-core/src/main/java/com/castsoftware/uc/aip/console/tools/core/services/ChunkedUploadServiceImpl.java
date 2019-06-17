@@ -12,11 +12,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,12 +32,15 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
     }
 
     @Override
-    public boolean uploadFile(String appGuid, String archiveFile) throws UploadException {
-        assert StringUtils.isNotEmpty(appGuid);
-        assert StringUtils.isNotEmpty(archiveFile);
+    public boolean uploadFile(String appGuid, File archiveFile) throws UploadException {
+        if (StringUtils.isBlank(appGuid)) {
+            throw new UploadException("No Application GUID provided.");
+        }
 
-        Path archivePath = Paths.get(archiveFile);
-        assert Files.exists(archivePath);
+        Path archivePath = archiveFile != null ? archiveFile.toPath() : null;
+        if (archivePath == null || !Files.exists(archiveFile.toPath())) {
+            throw new UploadException("No file provided for upload");
+        }
 
         long fileSize;
         try {
@@ -52,17 +55,20 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
 
         ChunkedUploadDto dto;
         try {
-            log.fine("Creating a new upload for application");
-            log.fine("Params : " + createUploadEndpoint + " " + request.getFileName() + " " + request.getFileSize());
+            log.info("Creating a new upload for application");
+            log.info("Params : " + createUploadEndpoint + "\n" + request.toString());
             dto = restApiService.postForEntity(createUploadEndpoint, request, ChunkedUploadDto.class);
         } catch (ApiCallException e) {
             throw new UploadException("Unable to create upload", e);
         }
 
-        assert StringUtils.isNotEmpty(dto.getGuid());
+        if (dto == null || StringUtils.isBlank(dto.getGuid())) {
+            throw new UploadException("Upload was not created on AIP Console");
+        }
         String uploadChunkEndpoint = ApiEndpointHelper.getApplicationUploadPath(appGuid, dto.getGuid());
 
         try (InputStream is = FileUtils.openInputStream(archivePath.toFile())) {
+            log.info("Starting chunks uploads");
             int currentOffset = 0;
             int totalChunks = (int) Math.ceil((double) fileSize / (double) MAX_CHUNK_SIZE);
             int currentChunk = 1;
@@ -70,12 +76,11 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
                 byte[] buffer = new byte[MAX_CHUNK_SIZE];
                 int nbBytesRead = is.read(buffer);
                 if (nbBytesRead < 0) {
-                    throw new UploadException("Could not read more content from file, but did not reach EOF. Exiting.");
+                    throw new UploadException("No more content to read, but file not complete (the file might be modified by another program?).");
                 }
 
                 ChunkedUploadMetadataRequest metadata = new ChunkedUploadMetadataRequest();
                 metadata.setChunkSize(nbBytesRead);
-
 
                 Map<String, String> metadataHeaderMap = new HashMap<>();
                 metadataHeaderMap.put("Content-Type", "application/json");
@@ -106,7 +111,8 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
                 assert dto.getCurrentOffset() == currentOffset;
             }
 
-        } catch (Exception e) {
+        } catch (ApiCallException | IOException e) {
+            log.info("Error occurred during upload. Trying to delete before failing.");
             try {
                 restApiService.deleteForEntity(uploadChunkEndpoint, null, String.class);
             } catch (ApiCallException inner) {

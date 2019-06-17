@@ -1,6 +1,5 @@
 package com.castsoftware.uc.aip.console.tools.commands;
 
-import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
@@ -21,13 +20,51 @@ public class SharedOptions {
     @CommandLine.Option(names = {"--apikey:env"}, paramLabel = "ENV_VAR_NAME", description = "The name of the environment variable containing the AIP Key to access AIP Console")
     private String apiKeyEnvVariable;
 
-    @Getter
     @CommandLine.Option(names = {"--user"}, description = "User name. Use this if no API Key generation is available on AIP Console. Provide the user's password in the apikey parameter.")
     private String username;
 
-
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
+
+    public String getServerRootUrl() {
+        return serverRootUrl;
+    }
+
+    public void setServerRootUrl(String serverRootUrl) {
+        this.serverRootUrl = serverRootUrl;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public String getApiKeyEnvVariable() {
+        return apiKeyEnvVariable;
+    }
+
+    public void setApiKeyEnvVariable(String apiKeyEnvVariable) {
+        this.apiKeyEnvVariable = apiKeyEnvVariable;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public List<String> getUnmatchedOptions() {
+        return unmatchedOptions;
+    }
+
+    public void setUnmatchedOptions(List<String> unmatchedOptions) {
+        this.unmatchedOptions = unmatchedOptions;
+    }
 
     public String getApiKeyValue() {
         if (apiKeyEnvVariable != null) {

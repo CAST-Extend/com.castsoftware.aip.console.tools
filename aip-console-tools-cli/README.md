@@ -168,4 +168,6 @@ Here is a list of returned error codes :
 * 3 : Upload Error. An error occurred during upload to AIP Console. Check the standard output to see more details.
 * 4 : Add Version Job Error. Creation of the Add Version job failed, or AIP CLI is unable to get the status of the running job. Please see the standard output for more details regarding this error.
 * 5 : Job terminated. The Add Version job did not finish in an expected state. Check the standard output or AIP Console for more details about the state of the job.
+* 6 : Application name or GUID missing. The AddVersion job cannot run due to a missing application name or missing application guid.
+* 7 : Application Not Found. The given Application Name or GUID could not be found.
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.

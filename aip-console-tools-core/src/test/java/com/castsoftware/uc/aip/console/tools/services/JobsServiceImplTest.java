@@ -13,9 +13,8 @@ import com.castsoftware.uc.aip.console.tools.core.services.JobsService;
 import com.castsoftware.uc.aip.console.tools.core.services.JobsServiceImpl;
 import com.castsoftware.uc.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.uc.aip.console.tools.core.utils.Constants;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
@@ -30,17 +29,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
-@Slf4j
-@Ignore
+@Log
 public class JobsServiceImplTest {
+    private static final String TEST_APP_NAME = "appName";
     private static final String TEST_APP_GUID = "appGuid";
     private static final String TEST_ZIP_NAME = "file.zip";
     private static final String TEST_VERSION_NAME = "versionName";
@@ -56,25 +57,66 @@ public class JobsServiceImplTest {
         service = new JobsServiceImpl(restApiService);
     }
 
-    @Test(expected = AssertionError.class)
-    public void testMissingAppGuid() throws Exception {
+    @Test(expected = JobServiceException.class)
+    public void testCreateApplicationMissingAppName() throws Exception {
+        service.startCreateApplication(null);
+        fail("Creating application null name should throw an exception");
+    }
+
+    @Test(expected = JobServiceException.class)
+    public void testCreateApplicationCreateJobFailed() throws Exception {
+        Map<String, String> jobParams = new HashMap<>();
+        jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
+        CreateJobsRequest expectedRequest = new CreateJobsRequest();
+        expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
+        expectedRequest.setJobParameters(jobParams);
+
+        when(restApiService
+                .postForEntity(eq("/api/jobs"), eq(expectedRequest), eq(SuccessfulJobStartDto.class))
+        ).thenThrow(new ApiCallException());
+
+        service.startCreateApplication(TEST_APP_NAME);
+        fail("Create application should have failed due to api call exception");
+    }
+
+    @Test
+    public void testCreateApplicationOk() throws Exception {
+        Map<String, String> jobParams = new HashMap<>();
+        jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
+        CreateJobsRequest expectedRequest = new CreateJobsRequest();
+        expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
+        expectedRequest.setJobParameters(jobParams);
+        SuccessfulJobStartDto expectedResult = new SuccessfulJobStartDto();
+        expectedResult.setJobGuid(TEST_JOB_GUID);
+        expectedResult.setAppGuid(TEST_APP_GUID);
+
+        when(restApiService
+                .postForEntity(eq("/api/jobs"), eq(expectedRequest), eq(SuccessfulJobStartDto.class))
+        ).thenReturn(expectedResult);
+
+        String jobGuid = service.startCreateApplication(TEST_APP_NAME);
+        assertEquals("Job guid should be the same as mocked guid returned", TEST_JOB_GUID, jobGuid);
+    }
+
+    @Test(expected = JobServiceException.class)
+    public void testAddVersionMissingAppGuid() throws Exception {
         service.startAddVersionJob(null, null, null, null, false);
         fail("Method call should have thrown an exception");
     }
 
-    @Test(expected = AssertionError.class)
-    public void testMissingZipFileName() throws Exception {
+    @Test(expected = JobServiceException.class)
+    public void testAddVersionMissingZipFileName() throws Exception {
         service.startAddVersionJob(TEST_APP_GUID, null, null, null, false);
     }
 
-    @Test(expected = AssertionError.class)
-    public void testMissingVersionName() throws Exception {
+    @Test(expected = JobServiceException.class)
+    public void testAddVersionMissingVersionReleaseDate() throws Exception {
         service.startAddVersionJob(TEST_APP_GUID, TEST_ZIP_NAME, null, null, false);
         fail("Method call should have thrown an exception");
     }
 
     @Test(expected = JobServiceException.class)
-    public void testCreateJobFailed() throws Exception {
+    public void testAddVersionCreateJobFailed() throws Exception {
         when(restApiService
                 .postForEntity(anyString(), argThat(getCreateJobsRequestMatcher()), ArgumentMatchers.eq(SuccessfulJobStartDto.class))
         ).thenThrow(new ApiCallException());
@@ -84,7 +126,7 @@ public class JobsServiceImplTest {
     }
 
     @Test(expected = JobServiceException.class)
-    public void testResumeJobFailed() throws Exception {
+    public void testAddVersionResumeJobFailed() throws Exception {
         SuccessfulJobStartDto dto = new SuccessfulJobStartDto();
         dto.setAppGuid(TEST_APP_GUID);
         dto.setJobGuid(TEST_JOB_GUID);
@@ -107,7 +149,7 @@ public class JobsServiceImplTest {
     }
 
     @Test
-    public void testCreateJobOk() throws Exception {
+    public void testAddVersionCreateJobOk() throws Exception {
         SuccessfulJobStartDto dto = new SuccessfulJobStartDto();
         dto.setAppGuid(TEST_APP_GUID);
         dto.setJobGuid(TEST_JOB_GUID);
@@ -126,7 +168,7 @@ public class JobsServiceImplTest {
             String jobGuid = service.startAddVersionJob(TEST_APP_GUID, TEST_ZIP_NAME, TEST_VERSION_NAME, new Date(), false);
             assertEquals(dto.getJobGuid(), jobGuid);
         } catch (JobServiceException e) {
-            log.error("JobServiceException : ", e);
+            log.log(Level.SEVERE, "JobServiceException : ", e);
             fail("Method call should not throw an exception");
         }
     }

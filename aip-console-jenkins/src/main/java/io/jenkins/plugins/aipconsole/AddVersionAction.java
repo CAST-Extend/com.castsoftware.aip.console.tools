@@ -4,7 +4,6 @@ import hudson.model.Run;
 import jenkins.model.RunAction2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.jenkins.plugins.aipconsole.Messages;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -13,7 +12,7 @@ public class AddVersionAction implements RunAction2 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddVersionAction.class);
 
     @CheckForNull
-    private String applicationGuid;
+    private String applicationName;
     @CheckForNull
     private String filePath;
     private boolean cloneVersion = false;
@@ -21,18 +20,18 @@ public class AddVersionAction implements RunAction2 {
     private String versionName;
     private transient Run run;
 
-    public AddVersionAction(@CheckForNull String applicationGuid, @CheckForNull String filePath) {
-        this.applicationGuid = applicationGuid;
+    public AddVersionAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
+        this.applicationName = applicationName;
         this.filePath = filePath;
     }
 
     @CheckForNull
-    public String getApplicationGuid() {
-        return applicationGuid;
+    public String getApplicationName() {
+        return applicationName;
     }
 
-    public void setApplicationGuid(@CheckForNull String applicationGuid) {
-        this.applicationGuid = applicationGuid;
+    public void setApplicationName(@CheckForNull String applicationName) {
+        this.applicationName = applicationName;
     }
 
     @CheckForNull

@@ -15,6 +15,8 @@ public class Constants {
     public static final int RETURN_UPLOAD_ERROR = 3;
     public static final int RETURN_JOB_POLL_ERROR = 4;
     public static final int RETURN_JOB_FAILED = 5;
+    public static final int RETURN_APPLICATION_INFO_MISSING = 6;
+    public static final int RETURN_APPLICATION_NOT_FOUND = 7;
 
     public static final int UNKNOWN_ERROR = 1000;
 

@@ -12,10 +12,14 @@ public class ApiEndpointHelper {
         return ROOT_PATH + "/";
     }
 
+    public static String getApplicationsPath() {
+        return ROOT_PATH + APPLICATIONS_ENDPOINT;
+    }
+
     public static String getApplicationPath(String appGuid) {
         assert appGuid != null && !appGuid.isEmpty();
 
-        return ROOT_PATH + APPLICATIONS_ENDPOINT + "/" + appGuid;
+        return getApplicationsPath() + "/" + appGuid;
     }
 
     public static String getApplicationVersionsPath(String appGuid) {
