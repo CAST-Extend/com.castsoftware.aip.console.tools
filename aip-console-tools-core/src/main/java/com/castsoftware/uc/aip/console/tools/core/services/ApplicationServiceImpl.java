@@ -55,6 +55,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 return null;
             }
             try {
+                log.info("Application not found and 'auto create' enabled. Starting application creation");
                 String jobGuid = jobService.startCreateApplication(applicationName);
                 return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
             } catch (JobServiceException e) {

@@ -56,7 +56,7 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
         ChunkedUploadDto dto;
         try {
             log.info("Creating a new upload for application");
-            log.info("Params : " + createUploadEndpoint + "\n" + request.toString());
+            log.fine("Params : " + createUploadEndpoint + "\n" + request.toString());
             dto = restApiService.postForEntity(createUploadEndpoint, request, ChunkedUploadDto.class);
         } catch (ApiCallException e) {
             throw new UploadException("Unable to create upload", e);

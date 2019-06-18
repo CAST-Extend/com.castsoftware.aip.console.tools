@@ -76,6 +76,7 @@ public class RestApiServiceImpl implements RestApiService {
         assert StringUtils.isNoneBlank(serverUrl);
 
         if(StringUtils.isBlank(apiKey)) {
+            log.severe("No Password or API Key provided to log in to AIP Console.");
             throw new ApiKeyMissingException("No Password or API Key provided to log in to AIP Console.");
         }
 

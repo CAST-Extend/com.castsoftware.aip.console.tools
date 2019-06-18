@@ -45,9 +45,15 @@ In the "Build" of your job, add a new Build Step, then click "Add Application ve
 
 ![Add Application Version capture](./doc/images/add-version.png)
 
-You must give an Application GUID and a path to a `zip` file as the first 2 parameters. The Zip file will be uploaded to AIP Console, extracted and the run through the whole analysis workflow, as if you had done so through the AIP Console UI.
+You must give an Application Name and a path to a `zip` file as the first 2 parameters.
 
-If you check the "Copy configuration" checkbox, this new version will copy the previous version's configuration (packages, extensions, etc.). 
+The application name will be checked on AIP Console, and the application GUID will be obtained this way (it'll be saved in the job configuration and displayed in the read only field Application GUID)
+
+The Zip file will be uploaded to AIP Console, extracted and then run through the whole analysis workflow, as if you had done so through the AIP Console UI.
+
+If you check the "Rescan" checkbox, this new version will copy the previous version's configuration (packages, extensions, etc.). 
+
+If you check the "Auto Create" checkbox, when searching for the application name on AIP Console, if it doesn't exists, it'll create it automatically.
 
 You can provide a version name. If left empty, the following version will be based o nthe current date and time and formatted as such: "vyyMMdd.HHmmss"
 
@@ -69,6 +75,8 @@ Current step of job is Create snapshot
 Current step of job is Consolidate snapshot and publish to Health Dashboard
 Analysis of application is completed.
 ```
+
+NB: Information regarding the creation of the application will also be added to the job output if Auto create is checked and the application does not exist on AIP Console.
 
 As with the Create Application step, you can also use this step in a Pipeline Project:
 

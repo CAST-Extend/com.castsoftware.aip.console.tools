@@ -111,6 +111,7 @@ public class AddVersionCommand implements Callable<Integer> {
 
         try {
             if (StringUtils.isBlank(applicationGuid)) {
+                log.info("Search for application '{}' or AIP Console", applicationName);
                 applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate);
                 if (StringUtils.isBlank(applicationGuid)) {
                     String message;

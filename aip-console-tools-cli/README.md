@@ -85,7 +85,9 @@ $ $JAVA_HOME/bin/java -jar aip-console-tools-cli.jar AddVersion --apikey:env=AIP
 Here is the output for this command :
 
 ```bash
-$ $JAVA_HOME/bin/java -jar aip-console-tools-cli.jar AddVersion --apikey:env=AIP_CONSOLE_KEY -a de7655a3-ecaa-4cd7-b860-5079a138db96 -f /tmp/jenkins-2.171.zip
+$ $JAVA_HOME/bin/java -jar aip-console-tools-cli.jar AddVersion --apikey:env=AIP_CONSOLE_KEY -n "my cli application" -f /tmp/jenkins-2.171.zip
+2019-06-18 15:56:50.248 - INFO --- Search for application 'my cli application' or AIP Console
+2019-06-18 15:58:02.236 - INFO --- Creating a new upload for application
 2019-04-12 16:26:07.625 - INFO --- Uploading chunk 1 of 2
 2019-04-12 16:26:07.850 - INFO --- Uploading chunk 2 of 2
 2019-04-12 16:26:08.115 - INFO --- Upload completed.
@@ -107,7 +109,7 @@ $ $JAVA_HOME/bin/java -jar aip-console-tools-cli.jar AddVersion --apikey:env=AIP
 2019-04-12 17:36:13.745 - INFO --- Job completed successfully.
 ```
 
-This will upload the file `jenkins-2.171.zip` to AIP Console, located at http://localhost:8081, for the application with guid `de7655a3-ecaa-4cd7-b860-5079a138db96`. Once the upload is complete, the CLI tool will ask AIP Console to start an "Add Version" job, with snapshot creation.
+This command will first search for the application `my cli application` on AIP Console server located at `http://localhost:8081` and then upload the file `jenkins-2.171.zip`. Once the upload is complete, the CLI tool will ask AIP Console to start an "Add Version" job, with snapshot creation.
 
 It'll then wait until the job is complete on AIP Console before closing, continuously monitoring the status of the job on AIP Console.
 The AIP Console CLI Tool will output information in the standard output, including error messages.
@@ -116,28 +118,34 @@ Here is a detailed look at the options available for `AddVersion` :
 
 ```bash
 $ java -jar target/aip-console-tools-cli.jar AddVersion -h
-Usage: aip-console-tools-cli AddVersion [-chV] [--apikey=<apiKey>] [--apikey:
-                                       env=ENV_VAR_NAME] -a=APPLICATION_GUID
-                                       -f=FILE [-s=AIP_CONSOLE_URL]
-                                       [-v=VERSION-NAME]
+Usage: aip-integration-tool AddVersion [-chV] [--auto-create] [--apikey[=<apiKey>]] [--apikey:env=ENV_VAR_NAME]
+                                       [--user=<username>] [-a=APPLICATION_GUID] -f=FILE [-n=APPLICATION_NAME]
+                                       [-s=AIP_CONSOLE_URL] [-v=VERSION-NAME]
 Creates a new version for an application on AIP Console
-      --apikey=<apiKey>   Enable prompt to enter password after start of CLI
+      --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt entry if no value is passed.
       --apikey:env=ENV_VAR_NAME
-                          The name of the environment variable containing the user\'s
-                            access token to AIP Console
+                            The name of the environment variable containing the AIP Key to access AIP Console
+      --auto-create         If the given application name doesn't exist on the target server, it'll be automatically created
+                              before creating a new version
+      --user=<username>     User name. Use this if no API Key generation is available on AIP Console. Provide the user's
+                              password in the apikey parameter.
   -a, --app-guid=APPLICATION_GUID
-                          The GUID of the application to rescan
-  -c, --clone             Clones the latest version configuration instead of
-                            creating a new version
-  -f, --file=FILE         The ZIP file containing the source to rescan
-  -h, --help              Show this help message and exit.
+                            The GUID of the application to rescan
+  -c, --clone, --rescan     Clones the latest version configuration instead of creating a new application
+  -f, --file=FILE           The ZIP file containing the source to rescan
+  -h, --help                Show this help message and exit.
+  -n, --app-name=APPLICATION_NAME
+                            The Name of the application to rescan
   -s, --server-url=AIP_CONSOLE_URL
-                          The base URL for AIP Console (defaults to http://localhost:
-                            8081)
+                            The base URL for AIP Console (defaults to http://localhost:8081)
   -v, --version-name=VERSION-NAME
-                          The name of the version to create (defaults to "vYYMMDD.HHmmss")
-  -V, --version           Print version information and exit.
+                            The name of the version to create
+  -V, --version             Print version information and exit.
 ```
+
+When starting the CLI, you can either provide an application name or an application GUID. If an application name is provided, it'll be looked up on AIP Console before continuing. If the CLI cannot find the application, it'll exit.
+
+Note that by default, the CLI will not create the application if it cannot be found. You have to provide the `--auto-create` flat. In which case, the application will be created before the version is added.
 
 By default, `AddVersion` will create a new version. If you want to clone an existing version, you will have to provide the `-c` flag, which will copy the previous version configuration.
 
