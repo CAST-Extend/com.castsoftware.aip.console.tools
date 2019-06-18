@@ -13,6 +13,7 @@ public class AddVersionAction implements RunAction2 {
 
     @CheckForNull
     private String applicationName;
+    @Nullable
     private String applicationGuid;
     @CheckForNull
     private String filePath;
@@ -36,11 +37,12 @@ public class AddVersionAction implements RunAction2 {
         this.applicationName = applicationName;
     }
 
+    @Nullable
     public String getApplicationGuid() {
         return applicationGuid;
     }
 
-    public void setApplicationGuid(String applicationGuid) {
+    public void setApplicationGuid(@Nullable String applicationGuid) {
         this.applicationGuid = applicationGuid;
     }
 

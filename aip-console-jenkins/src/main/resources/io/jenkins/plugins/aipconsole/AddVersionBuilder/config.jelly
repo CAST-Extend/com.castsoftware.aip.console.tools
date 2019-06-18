@@ -3,7 +3,7 @@
     <f:entry title="${%appName}" field="applicationName" description="${%appName.descr}">
         <f:textbox />
     </f:entry>
-    <f:entry title="${%appGuid}" field="applicationGuid" description="${%appName.descr}">
+    <f:entry title="${%appGuid}" field="applicationGuid" description="${%appGuid.descr}">
         <f:readOnlyTextbox/>
     </f:entry>
     <f:entry title="${%filePath}" field="filePath" description="${%filePath.descr}">
