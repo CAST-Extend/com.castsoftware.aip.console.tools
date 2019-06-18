@@ -1,5 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.uc.aip.console.tools.core.services.ApplicationService;
+import com.castsoftware.uc.aip.console.tools.core.services.ApplicationServiceImpl;
 import com.castsoftware.uc.aip.console.tools.core.services.ChunkedUploadService;
 import com.castsoftware.uc.aip.console.tools.core.services.ChunkedUploadServiceImpl;
 import com.castsoftware.uc.aip.console.tools.core.services.JobsService;
@@ -29,5 +31,11 @@ public class AipConsoleModule extends AbstractModule {
     @Singleton
     public ChunkedUploadService getChunkedUploadService(RestApiService restApiService) {
         return new ChunkedUploadServiceImpl(restApiService);
+    }
+
+    @Provides
+    @Singleton
+    public ApplicationService getApplicationService(RestApiService restApiService, JobsService jobsService) {
+        return new ApplicationServiceImpl(restApiService, jobsService);
     }
 }

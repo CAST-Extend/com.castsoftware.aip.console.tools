@@ -111,7 +111,7 @@ public class AddVersionCommand implements Callable<Integer> {
 
         try {
             if (StringUtils.isBlank(applicationGuid)) {
-                applicationGuid = applicationService.getOrCreateApplicationByName(applicationName, autoCreate);
+                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate);
                 if (StringUtils.isBlank(applicationGuid)) {
                     String message;
                     if (autoCreate) {

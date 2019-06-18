@@ -49,11 +49,13 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_noApiKey;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_noServerUrl;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_uploadFailed;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_pollJobMessage;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startAddVersionJob;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startUpload;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_DescriptorImpl_displayName;
+import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
 public class AddVersionBuilder extends Builder implements SimpleBuildStep {
@@ -71,6 +73,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private ApplicationService applicationService;
 
     private String applicationName;
+    private String applicationGuid;
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = false;
@@ -91,6 +94,15 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         this.applicationName = applicationName;
     }
 
+    public String getApplicationGuid() {
+        return applicationGuid;
+    }
+
+    @DataBoundSetter
+    public void setApplicationGuid(String applicationGuid) {
+        this.applicationGuid = applicationGuid;
+    }
+
     public String getFilePath() {
         return filePath;
     }
@@ -103,6 +115,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         return autoCreate;
     }
 
+    @DataBoundSetter
     public void setAutoCreate(boolean autoCreate) {
         this.autoCreate = autoCreate;
     }
@@ -173,14 +186,31 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             return;
         }
         EnvVars vars = run.getEnvironment(listener);
-        String applicationGuid;
 
         try {
-            applicationGuid = applicationService.getOrCreateApplicationByName(applicationName, autoCreate);
+
+            // Get the GUID from AIP Console if it is blank/null
             if (StringUtils.isBlank(applicationGuid)) {
-                listener.error(AddVersionBuilder_AddVersion_error_appNotFound(applicationName));
-                run.setResult(Result.FAILURE);
-                return;
+                applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
+            }
+
+            // Check again for blank/null and check if you should create it
+            if (StringUtils.isBlank(applicationGuid)) {
+                if (!autoCreate) {
+                    listener.error(AddVersionBuilder_AddVersion_error_appNotFound(applicationName));
+                    run.setResult(Result.FAILURE);
+                    return;
+                }
+                log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(applicationName));
+                String jobGuid = jobsService.startCreateApplication(applicationName);
+                applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
+                        jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                        s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
+                if (StringUtils.isBlank(applicationGuid)) {
+                    listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(applicationName, apiServerUrl));
+                    run.setResult(Result.FAILURE);
+                    return;
+                }
             }
 
             String resolvedFilePath = vars.expand(filePath);
@@ -194,6 +224,11 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             return;
         } catch (UploadException e) {
             listener.error(AddVersionBuilder_AddVersion_error_uploadFailed());
+            e.printStackTrace(listener.getLogger());
+            run.setResult(Result.FAILURE);
+            return;
+        } catch (JobServiceException e) {
+            listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(applicationName, apiServerUrl));
             e.printStackTrace(listener.getLogger());
             run.setResult(Result.FAILURE);
             return;
@@ -211,9 +246,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob());
             String jobGuid = jobsService.startAddVersionJob(applicationGuid, FilenameUtils.getName(filePath), resolvedVersionName, new Date(), this.cloneVersion);
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
-            JobState state = jobsService.pollAndWaitForJobFinished(jobGuid,
-                    jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
-                    JobStatus::getState);
+            JobState state = pollJob(jobGuid, log);
             if (state != JobState.COMPLETED) {
                 listener.error(AddVersionBuilder_AddVersion_error_jobFailure(state.toString()));
                 run.setResult(Result.FAILURE);
@@ -226,6 +259,12 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             e.printStackTrace(listener.getLogger());
             run.setResult(Result.FAILURE);
         }
+    }
+
+    private JobState pollJob(String jobGuid, PrintStream log) throws JobServiceException {
+        return jobsService.pollAndWaitForJobFinished(jobGuid,
+                jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                JobStatus::getState);
     }
 
     @Symbol("aipAddVersion")

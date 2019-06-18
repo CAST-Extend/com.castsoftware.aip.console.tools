@@ -4,7 +4,10 @@ import com.castsoftware.uc.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.uc.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.uc.aip.console.tools.core.utils.Constants;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.extern.java.Log;
 import okhttp3.Cookie;
@@ -54,6 +57,9 @@ public class RestApiServiceImpl implements RestApiService {
                 .cookieJar(cookieJar)
                 .build();
         this.mapper = new ObjectMapper();
+        this.mapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
+        this.mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+        this.mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
     public RestApiServiceImpl(ObjectMapper preConfiguredMapper) {
@@ -144,10 +150,15 @@ public class RestApiServiceImpl implements RestApiService {
                 .build();
 
         try (Response response = client.newCall(req).execute()) {
-            if (ArrayUtils.contains(new int[]{200, 201, 202, 204}, response.code())) {
+            if (ACCEPTED_HTTP_CODES.contains(response.code())) {
                 ResponseBody responseBody = response.body();
                 if (responseBody != null) {
-                    return mapper.readValue(responseBody.byteStream(), responseClass);
+                    try (InputStream bodyStream = responseBody.byteStream()) {
+                        return mapper.readValue(bodyStream, responseClass);
+                    } catch (MismatchedInputException e) {
+                        log.log(Level.WARNING, "Unable to parse object as " + responseClass.getName() + "(expected ?). Returning null instead.", e);
+                        throw e;
+                    }
                 }
             }
             log.log(Level.SEVERE, "Response code from API was unexpected : " + response.code());
@@ -172,12 +183,13 @@ public class RestApiServiceImpl implements RestApiService {
                 if (responseBody != null) {
                     try (InputStream bodyStream = responseBody.byteStream()) {
                         if(responseClass.equals(String.class)) {
+                            // may be used dfor debug purposes
                             return (T) IOUtils.toString(bodyStream, StandardCharsets.UTF_8);
                         } else {
                             return mapper.readValue(bodyStream, responseClass);
                         }
                     } catch (MismatchedInputException e) {
-                        log.warning("Unable to parse object as " + responseClass.getName() + "(expected ?). Returning null instead.");
+                        log.log(Level.WARNING, "Unable to parse object as " + responseClass.getName() + "(expected ?). Returning null instead.", e);
                         return null;
                     }
                 }

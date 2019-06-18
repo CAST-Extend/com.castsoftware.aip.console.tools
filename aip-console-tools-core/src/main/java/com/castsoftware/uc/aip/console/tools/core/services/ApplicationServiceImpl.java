@@ -26,7 +26,19 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String getOrCreateApplicationByName(String applicationName, boolean autoCreate) throws ApplicationServiceException {
+    public String getApplicationGuidFromName(String applicationName) throws ApplicationServiceException {
+        return getApplications()
+                .getApplications()
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationName, a.getName()))
+                .findFirst()
+                .map(ApplicationDto::getGuid)
+                .orElse(null);
+    }
+
+    @Override
+    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate) throws ApplicationServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new ApplicationServiceException("No application name provided.");
         }
@@ -55,7 +67,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     private Applications getApplications() throws ApplicationServiceException {
         try {
-            return restApiService.getForEntity(ApiEndpointHelper.getApplicationsPath(), Applications.class);
+            Applications result = restApiService.getForEntity(ApiEndpointHelper.getApplicationsPath(), Applications.class);
+            return result == null ? new Applications() : result;
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to get applications from AIP Console", e);
         }

@@ -13,8 +13,10 @@ public class AddVersionAction implements RunAction2 {
 
     @CheckForNull
     private String applicationName;
+    private String applicationGuid;
     @CheckForNull
     private String filePath;
+    private boolean autoCreate = false;
     private boolean cloneVersion = false;
     @Nullable
     private String versionName;
@@ -34,6 +36,14 @@ public class AddVersionAction implements RunAction2 {
         this.applicationName = applicationName;
     }
 
+    public String getApplicationGuid() {
+        return applicationGuid;
+    }
+
+    public void setApplicationGuid(String applicationGuid) {
+        this.applicationGuid = applicationGuid;
+    }
+
     @CheckForNull
     public String getFilePath() {
         return filePath;
@@ -41,6 +51,14 @@ public class AddVersionAction implements RunAction2 {
 
     public void setFilePath(@CheckForNull String filePath) {
         this.filePath = filePath;
+    }
+
+    public boolean isAutoCreate() {
+        return autoCreate;
+    }
+
+    public void setAutoCreate(boolean autoCreate) {
+        this.autoCreate = autoCreate;
     }
 
     public boolean isCloneVersion() {

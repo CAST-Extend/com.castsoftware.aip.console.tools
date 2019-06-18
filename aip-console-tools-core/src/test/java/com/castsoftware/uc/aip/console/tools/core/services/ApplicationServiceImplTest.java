@@ -46,7 +46,7 @@ public class ApplicationServiceImplTest {
 
     @Test(expected = ApplicationServiceException.class)
     public void testGetOrCreateApplicationNoApplicationName() throws Exception {
-        applicationService.getOrCreateApplicationByName(null, false);
+        applicationService.getOrCreateApplicationFromName(null, false);
         fail("Application service should throw an exception when application name is null");
     }
 
@@ -55,7 +55,7 @@ public class ApplicationServiceImplTest {
         when(restApiService.getForEntity(API_APP_ENDPOINT, Applications.class))
                 .thenReturn(new Applications());
 
-        String appGuid = applicationService.getOrCreateApplicationByName(TEST_APP_NAME, false);
+        String appGuid = applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, false);
         assertNull("getOrCreateApplication should return null", appGuid);
     }
 
@@ -64,7 +64,7 @@ public class ApplicationServiceImplTest {
         when(restApiService.getForEntity(API_APP_ENDPOINT, Applications.class))
                 .thenThrow(new ApiCallException("fake exception"));
 
-        applicationService.getOrCreateApplicationByName(TEST_APP_NAME, false);
+        applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, false);
         fail("Method should throw an exception due to error in restapiservice");
     }
 
@@ -85,7 +85,7 @@ public class ApplicationServiceImplTest {
         when(restApiService.getForEntity(API_APP_ENDPOINT, Applications.class))
                 .thenReturn(apps);
 
-        String appGuid = applicationService.getOrCreateApplicationByName(TEST_APP_NAME, false);
+        String appGuid = applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, false);
         assertEquals("Result from getOrCreateApplication should be the test app guid 'appGuid'", TEST_APP_GUID, appGuid);
     }
 
@@ -96,7 +96,7 @@ public class ApplicationServiceImplTest {
         when(jobsService.startCreateApplication(TEST_APP_NAME))
                 .thenThrow(new JobServiceException());
 
-        applicationService.getOrCreateApplicationByName(TEST_APP_NAME, true);
+        applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, true);
         fail("Method should throw an exception when trying to create the application");
     }
 
@@ -109,7 +109,7 @@ public class ApplicationServiceImplTest {
         when(jobsService.pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any()))
                 .thenReturn(null);
 
-        String appGuid = applicationService.getOrCreateApplicationByName(TEST_APP_NAME, true);
+        String appGuid = applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, true);
         assertNull("Application GUID should be null, as the create app job didn't finish properly", appGuid);
     }
 
@@ -122,7 +122,7 @@ public class ApplicationServiceImplTest {
         when(jobsService.pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any()))
                 .thenReturn(TEST_APP_GUID);
 
-        String appGuid = applicationService.getOrCreateApplicationByName(TEST_APP_NAME, true);
+        String appGuid = applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, true);
         assertEquals("Appguid should be the expected value", TEST_APP_GUID, appGuid);
     }
 }
