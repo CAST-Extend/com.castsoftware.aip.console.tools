@@ -21,7 +21,7 @@
           ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
           ~ stapler-plugin.version: The Stapler Maven plugin version required by the plugin.
      -->
-        <aip.integration.version>0.0.1-SNAPSHOT</aip.integration.version>
+        <aip.integration.version>0.0.2-SNAPSHOT</aip.integration.version>
         <hpi-plugin.version>3.5</hpi-plugin.version>
     </properties>
     <name>AIP Console Jenkins Plugin</name>
