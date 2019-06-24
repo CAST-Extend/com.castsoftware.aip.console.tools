@@ -126,7 +126,7 @@ public class RestApiServiceImpl implements RestApiService {
     @Override
     public <T> T exchangeMultipartForEntity(String method, String endpoint, Map<String, Map<String, String>> headers, Map<String, Object> content, Class<T> responseClass) throws ApiCallException {
         Request.Builder reqBuilder = getRequestBuilder(endpoint);
-        log.fine(String.format("Executing MULTIPART call with method %s to endpoint %s", method, endpoint));
+        log.finer(String.format("Executing MULTIPART call with method %s to endpoint %s", method, endpoint));
 
         MultipartBody.Builder builder = new MultipartBody.Builder();
 

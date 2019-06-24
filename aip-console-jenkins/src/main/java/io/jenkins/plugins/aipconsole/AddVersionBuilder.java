@@ -33,8 +33,9 @@ import org.kohsuke.stapler.DataBoundSetter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import java.io.File;
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -214,8 +215,21 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             }
 
             String resolvedFilePath = vars.expand(filePath);
-            log.println(AddVersionBuilder_AddVersion_info_startUpload());
-            chunkedUploadService.uploadFile(applicationGuid, new File(workspace.child(resolvedFilePath).toURI()));
+            log.println(AddVersionBuilder_AddVersion_info_startUpload(FilenameUtils.getName(resolvedFilePath)));
+            FilePath workspaceFile = workspace.child(resolvedFilePath);
+            if (!workspaceFile.exists()) {
+
+                log.println("File " + workspaceFile.getBaseName() + " doesnt exists");
+                run.setResult(Result.FAILURE);
+                return;
+            }
+            try (InputStream workspaceFileStream = workspaceFile.read();
+                 InputStream bufferedStream = new BufferedInputStream(workspaceFileStream, 10 * 1024 * 1024)) {
+                log.println("Uploading file " + workspaceFile.getName());
+                if (!chunkedUploadService.uploadInputStream(applicationGuid, workspaceFile.getName(), workspaceFile.length(), bufferedStream)) {
+                    throw new UploadException("Uploading was not completed successfully.");
+                }
+            }
 
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(applicationName));

@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 @Log
 public class ChunkedUploadServiceImpl implements ChunkedUploadService {
@@ -48,9 +49,20 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
         } catch (IOException e) {
             throw new UploadException("Unable to get archive size for given file " + archivePath, e);
         }
+        try (InputStream is = FileUtils.openInputStream(archivePath.toFile())) {
+            return uploadInputStream(appGuid, FilenameUtils.getName(archivePath.toString()), fileSize, is);
+        } catch (IOException e) {
+            throw new UploadException("Unable to read file", e);
+        }
+    }
+
+    @Override
+    public boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content)
+            throws UploadException {
+
         String createUploadEndpoint = ApiEndpointHelper.getApplicationCreateUploadPath(appGuid);
         CreateUploadRequest request = new CreateUploadRequest();
-        request.setFileName(FilenameUtils.getName(archivePath.toString()));
+        request.setFileName(fileName);
         request.setFileSize(fileSize);
 
         ChunkedUploadDto dto;
@@ -59,6 +71,7 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
             log.fine("Params : " + createUploadEndpoint + "\n" + request.toString());
             dto = restApiService.postForEntity(createUploadEndpoint, request, ChunkedUploadDto.class);
         } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Error while tryign to create upload", e);
             throw new UploadException("Unable to create upload", e);
         }
 
@@ -67,14 +80,15 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
         }
         String uploadChunkEndpoint = ApiEndpointHelper.getApplicationUploadPath(appGuid, dto.getGuid());
 
-        try (InputStream is = FileUtils.openInputStream(archivePath.toFile())) {
+        try {
             log.info("Starting chunks uploads");
             int currentOffset = 0;
             int totalChunks = (int) Math.ceil((double) fileSize / (double) MAX_CHUNK_SIZE);
             int currentChunk = 1;
             for (; currentOffset < fileSize; currentChunk++) {
                 byte[] buffer = new byte[MAX_CHUNK_SIZE];
-                int nbBytesRead = is.read(buffer);
+                int nbBytesRead = content.read(buffer);
+                log.finer("Read " + nbBytesRead + " from file");
                 if (nbBytesRead < 0) {
                     throw new UploadException("No more content to read, but file not complete (the file might be modified by another program?).");
                 }
@@ -93,18 +107,18 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
                 headers.put("metadata", metadataHeaderMap);
                 headers.put("content", contentHeaderMap);
 
-                Map<String, Object> content = new HashMap<>();
-                content.put("metadata", metadata);
+                Map<String, Object> body = new HashMap<>();
+                body.put("metadata", metadata);
                 if (nbBytesRead < MAX_CHUNK_SIZE) {
-                    content.put("content", ArrayUtils.subarray(buffer, 0, nbBytesRead));
+                    body.put("content", ArrayUtils.subarray(buffer, 0, nbBytesRead));
                 } else {
-                    content.put("content", buffer);
+                    body.put("content", buffer);
                 }
 
                 log.info(String.format("Uploading chunk %s of %s", currentChunk, totalChunks));
                 log.fine("Uploading a chunk of " + fileSize + " bytes");
 
-                dto = restApiService.exchangeMultipartForEntity("PATCH", uploadChunkEndpoint, headers, content, ChunkedUploadDto.class);
+                dto = restApiService.exchangeMultipartForEntity("PATCH", uploadChunkEndpoint, headers, body, ChunkedUploadDto.class);
                 currentOffset += nbBytesRead;
 
                 assert dto != null;
