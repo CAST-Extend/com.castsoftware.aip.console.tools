@@ -73,7 +73,7 @@ public class JobsServiceImplTest {
 
         when(restApiService
                 .postForEntity(eq("/api/jobs"), eq(expectedRequest), eq(SuccessfulJobStartDto.class))
-        ).thenThrow(new ApiCallException());
+        ).thenThrow(new ApiCallException(500));
 
         service.startCreateApplication(TEST_APP_NAME);
         fail("Create application should have failed due to api call exception");
@@ -119,7 +119,7 @@ public class JobsServiceImplTest {
     public void testAddVersionCreateJobFailed() throws Exception {
         when(restApiService
                 .postForEntity(anyString(), argThat(getCreateJobsRequestMatcher()), ArgumentMatchers.eq(SuccessfulJobStartDto.class))
-        ).thenThrow(new ApiCallException());
+        ).thenThrow(new ApiCallException(500));
 
         service.startAddVersionJob(TEST_APP_GUID, TEST_ZIP_NAME, TEST_VERSION_NAME, new Date(), false);
         fail("Method call should have thrown an exception");
@@ -142,7 +142,7 @@ public class JobsServiceImplTest {
         ).thenReturn(status);
         when(restApiService
                 .putForEntity(anyString(), ArgumentMatchers.any(ChangeJobStateRequest.class), ArgumentMatchers.eq(String.class))
-        ).thenThrow(new ApiCallException());
+        ).thenThrow(new ApiCallException(500));
 
         service.startAddVersionJob(TEST_APP_GUID, TEST_ZIP_NAME, TEST_VERSION_NAME, new Date(), false);
         fail("Method call should have thrown an exception");
@@ -182,7 +182,7 @@ public class JobsServiceImplTest {
     public void testPollAndWaitForJobApiCallException() throws Exception {
         when(restApiService
                 .getForEntity(ArgumentMatchers.eq("/api/jobs/" + TEST_JOB_GUID), ArgumentMatchers.eq(JobStatusWithSteps.class))
-        ).thenThrow(new ApiCallException());
+        ).thenThrow(new ApiCallException(500));
 
         service.pollAndWaitForJobFinished(TEST_JOB_GUID);
     }

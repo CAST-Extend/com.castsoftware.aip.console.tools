@@ -84,7 +84,7 @@ public class ChunkedUploadServiceImplTest {
         expectedRequest.setFileName(TEST_ZIP_FILENAME);
         expectedRequest.setFileSize(fakeZip.length());
 
-        doThrow(new ApiCallException())
+        doThrow(new ApiCallException(500))
                 .when(restApiService)
                 .postForEntity(
                         eq(ApiEndpointHelper.getApplicationCreateUploadPath(TEST_APP_GUID)),
@@ -114,7 +114,7 @@ public class ChunkedUploadServiceImplTest {
         when(restApiService.postForEntity(eq("/api/applications/appGuid/upload"), eq(expectedRequest), eq(ChunkedUploadDto.class)))
                 .thenReturn(expectedDto);
         when(restApiService.exchangeMultipartForEntity(eq("PATCH"), eq(uploadEndpoint), argThat(getChunkUploadMatcher()), argThat(getChunkUploadMatcher()), eq(ChunkedUploadDto.class)))
-                .thenThrow(new ApiCallException());
+                .thenThrow(new ApiCallException(500));
         when(restApiService.deleteForEntity(anyString(), eq(null), eq(String.class)))
                 .thenReturn("");
 

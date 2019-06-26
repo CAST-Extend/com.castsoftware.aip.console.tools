@@ -62,7 +62,7 @@ public class ApplicationServiceImplTest {
     @Test(expected = ApplicationServiceException.class)
     public void testGetOrCreateApplicationAipConsoleUnavailable() throws Exception {
         when(restApiService.getForEntity(API_APP_ENDPOINT, Applications.class))
-                .thenThrow(new ApiCallException("fake exception"));
+                .thenThrow(new ApiCallException(500, "fake exception"));
 
         applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, false);
         fail("Method should throw an exception due to error in restapiservice");

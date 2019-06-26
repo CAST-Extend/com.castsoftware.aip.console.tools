@@ -9,6 +9,13 @@ public interface RestApiService {
 
     void validateUrlAndKey(String serverUrl, String username, String password) throws ApiCallException;
 
+    /**
+     * This method authenticates the user with provided credentials in validate Url and Key
+     *
+     * @throws ApiCallException
+     */
+    void login() throws ApiCallException;
+
     <T> T getForEntity(String endpoint, Class<T> clazz) throws ApiCallException;
 
     <T> T postForEntity(String endpoint, Object entity, Class<T> responseClass) throws ApiCallException;

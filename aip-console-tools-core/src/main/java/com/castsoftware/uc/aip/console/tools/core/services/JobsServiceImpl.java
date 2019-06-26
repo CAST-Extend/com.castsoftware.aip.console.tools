@@ -169,6 +169,8 @@ public class JobsServiceImpl implements JobsService {
         try {
             JobStatusWithSteps jobStatus;
             while (true) {
+                // Force login to keep session alive (jobs endpoint doesn't refresh session status)
+                restApiService.login();
                 jobStatus = restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
                 String currentStep = jobStatus.getProgressStep();
 
@@ -186,7 +188,7 @@ public class JobsServiceImpl implements JobsService {
                 Thread.sleep(POLL_SLEEP_DURATION);
             }
             return completionCallback.apply(jobStatus);
-        } catch (ApiCallException | InterruptedException e) {
+        } catch (InterruptedException | ApiCallException e) {
             log.log(Level.SEVERE, "Error occurred while polling the job status", e);
             throw new JobServiceException(e);
         }

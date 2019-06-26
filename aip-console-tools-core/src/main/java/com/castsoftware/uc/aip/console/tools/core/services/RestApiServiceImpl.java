@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 @Log
@@ -164,10 +163,10 @@ public class RestApiServiceImpl implements RestApiService {
             }
             log.log(Level.SEVERE, "Response code from API was unexpected : " + response.code());
             log.log(Level.SEVERE, "Content was " + (response.body() == null ? "EMPTY" : response.body().string()));
-            throw new ApiCallException("Unable to execute multipart form data with provided content");
+            throw new ApiCallException(response.code(), "Unable to execute multipart form data with provided content");
         } catch (IOException e) {
             log.log(Level.SEVERE, "IOException when calling endpoint " + endpoint, e);
-            throw new ApiCallException(e);
+            throw new ApiCallException(500, e);
         }
     }
 
@@ -199,14 +198,15 @@ public class RestApiServiceImpl implements RestApiService {
             }
             String message = "Response code from API was unexpected : " + response.code();
             message += "\nContent was " + (response.body() == null ? "EMPTY" : response.body().string());
-            throw new ApiCallException(message);
+            throw new ApiCallException(response.code(), message);
         } catch (IOException e) {
             log.log(Level.SEVERE, "Unable to send request", e);
-            throw new ApiCallException(e);
+            throw new ApiCallException(500, e);
         }
     }
 
-    private void login() throws ApiCallException {
+    @Override
+    public void login() throws ApiCallException {
         Request request = getRequestBuilder("/api/user")
                 .get()
                 .build();
@@ -217,15 +217,14 @@ public class RestApiServiceImpl implements RestApiService {
                 if (responseBody != null) {
                     log.finest("Body is " + responseBody.string());
                 }
-                log.info("Login successful");
                 return;
             }
             log.severe("Login to AIP Console failed (http status is " + response.code() + ")");
             log.severe("Content was " + (response.body() == null ? "EMPTY" : response.body().string()));
-            throw new ApiCallException("Unable to login to AIP Console");
+            throw new ApiCallException(response.code(), "Unable to login to AIP Console");
         } catch (IOException e) {
             log.log(Level.SEVERE, "Unable to send request", e);
-            throw new ApiCallException(e);
+            throw new ApiCallException(500, e);
         }
     }
 
@@ -253,7 +252,7 @@ public class RestApiServiceImpl implements RestApiService {
                     mapper.writeValueAsString(entity));
         } catch (JsonProcessingException e) {
             log.log(Level.SEVERE, "Unable to map object of type " + entity.getClass().getName() + " to JSON", e);
-            throw new ApiCallException(e);
+            throw new ApiCallException(500, e);
         }
     }
 
@@ -300,9 +299,6 @@ public class RestApiServiceImpl implements RestApiService {
     }
 
     private class AipLoginInterceptor implements Interceptor {
-        private final long xsrfCookieTtl = TimeUnit.MINUTES.toMillis(5);
-        private long xsrfExpirationTime = 0L;
-
         @Override
         public Response intercept(Chain chain) throws IOException {
             Request request = chain.request();
@@ -313,30 +309,25 @@ public class RestApiServiceImpl implements RestApiService {
             Request.Builder reqBuilder = request.newBuilder();
 
             // get xsrf cookie
-            if (xsrfCookie != null &&
-                    System.currentTimeMillis() < xsrfExpirationTime) {
-
-                log.fine("Cookie and expiration time not passed (" + xsrfExpirationTime + ")");
+            if (xsrfCookie != null) {
+                log.finest("Setting XSRF-TOKEN header to " + xsrfCookie.value());
                 reqBuilder.header("X-XSRF-TOKEN", xsrfCookie.value());
             } else {
-                log.fine("No xsrf cookie, next request should set it");
-                xsrfExpirationTime = System.currentTimeMillis() + xsrfCookieTtl;
+                log.finest("No xsrf cookie, next request should set it");
             }
 
             if (request.header("Authorization") != null ||
                     request.header(Constants.API_KEY_HEADER) != null) {
                 // authentication already defined
-                response = chain.proceed(reqBuilder.build());
+                return chain.proceed(reqBuilder.build());
             } else {
                 if (!StringUtils.isBlank(username)) {
                     reqBuilder.header("Authorization", Credentials.basic(username, key));
                 } else {
                     reqBuilder.header(Constants.API_KEY_HEADER, key);
                 }
-                response = chain.proceed(reqBuilder.build());
+                return chain.proceed(reqBuilder.build());
             }
-
-            return response;
         }
     }
 }
