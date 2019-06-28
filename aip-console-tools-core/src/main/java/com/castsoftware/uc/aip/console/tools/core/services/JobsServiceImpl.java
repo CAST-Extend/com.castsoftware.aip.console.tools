@@ -30,7 +30,7 @@ import java.util.logging.Level;
 @Log
 public class JobsServiceImpl implements JobsService {
 
-    private static final DateFormat formatReleaseDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
+    private static final DateFormat formatReleaseDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(10);
 
     private RestApiService restApiService;
@@ -46,7 +46,7 @@ public class JobsServiceImpl implements JobsService {
         }
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
-        //FIXME add target node ? Get by name ? GUID ? Or let AIP Console handle it ?
+        // TODO: target a specific node ?
         //jobParams.put(JobConstants.PARAM_NODE_GUID, nodeGuid);
 
         try {
