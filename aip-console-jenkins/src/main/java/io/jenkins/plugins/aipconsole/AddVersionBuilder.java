@@ -40,6 +40,7 @@ import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_accessDenied;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appCreateError;
@@ -162,6 +163,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         String apiServerUrl = getDescriptor().getAipConsoleUrl();
         String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
         String username = getDescriptor().getAipConsoleUsername();
+        int timeout = getDescriptor().getTimeout();
 
         if (StringUtils.isBlank(apiServerUrl)) {
             listener.error(AddVersionBuilder_AddVersion_error_noServerUrl());
@@ -176,6 +178,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
         try {
             // legacy basic auth
+            apiService.setTimeout(timeout, TimeUnit.SECONDS);
             if (StringUtils.isNotBlank(username)) {
                 apiService.validateUrlAndKey(apiServerUrl, username, apiKey);
             } else {
@@ -309,6 +312,10 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
         public String getAipConsoleUsername() {
             return configuration.getUsername();
+        }
+
+        public int getTimeout() {
+            return configuration.getTimeout();
         }
     }
 }

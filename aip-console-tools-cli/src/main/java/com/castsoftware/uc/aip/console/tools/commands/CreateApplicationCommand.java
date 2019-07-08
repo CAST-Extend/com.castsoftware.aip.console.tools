@@ -18,6 +18,7 @@ import picocli.CommandLine;
 
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @CommandLine.Command(
@@ -54,6 +55,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         try {
+            restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
             restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
         } catch (ApiKeyMissingException e) {
             return Constants.RETURN_NO_PASSWORD;

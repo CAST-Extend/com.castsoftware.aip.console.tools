@@ -3,10 +3,30 @@ package com.castsoftware.uc.aip.console.tools.core.services;
 import com.castsoftware.uc.aip.console.tools.core.exceptions.ApiCallException;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public interface RestApiService {
+    /**
+     * Update the OkHttpClient with the given timeout
+     *
+     * @param timeout  the timeout, between 0 and {@link Integer#MAX_VALUE}
+     * @param timeUnit A time unit for the timeout
+     */
+    void setTimeout(int timeout, TimeUnit timeUnit);
+
+    /**
+     * @param serverUrl
+     * @param apiKey
+     * @throws ApiCallException
+     */
     void validateUrlAndKey(String serverUrl, String apiKey) throws ApiCallException;
 
+    /**
+     * @param serverUrl
+     * @param username
+     * @param password
+     * @throws ApiCallException
+     */
     void validateUrlAndKey(String serverUrl, String username, String password) throws ApiCallException;
 
     /**

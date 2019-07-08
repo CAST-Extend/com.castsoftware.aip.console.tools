@@ -4,11 +4,9 @@ import hudson.Extension;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.GlobalConfiguration;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 
 @Extension
 public class AipConsoleGlobalConfiguration extends GlobalConfiguration {
@@ -16,6 +14,7 @@ public class AipConsoleGlobalConfiguration extends GlobalConfiguration {
     private String aipConsoleUrl;
     private Secret apiKey;
     private String username;
+    private int timeout = 30;
 
     public static AipConsoleGlobalConfiguration get() {
         return GlobalConfiguration.all().get(AipConsoleGlobalConfiguration.class);
@@ -53,6 +52,15 @@ public class AipConsoleGlobalConfiguration extends GlobalConfiguration {
     public void setUsername(String username) {
         this.username = username;
         save();
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    @DataBoundSetter
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     public FormValidation doCheckAipConsoleUrl(@QueryParameter String value) {

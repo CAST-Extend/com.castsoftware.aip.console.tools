@@ -23,6 +23,9 @@ public class SharedOptions {
     @CommandLine.Option(names = {"--user"}, description = "User name. Use this if no API Key generation is available on AIP Console. Provide the user's password in the apikey parameter.")
     private String username;
 
+    @CommandLine.Option(names = {"--timeout"}, description = "The timeout in seconds for calls to AIP Console. Defaults to a 30 timeout", defaultValue = "30")
+    private int timeout;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -64,6 +67,14 @@ public class SharedOptions {
 
     public void setUnmatchedOptions(List<String> unmatchedOptions) {
         this.unmatchedOptions = unmatchedOptions;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     public String getApiKeyValue() {
