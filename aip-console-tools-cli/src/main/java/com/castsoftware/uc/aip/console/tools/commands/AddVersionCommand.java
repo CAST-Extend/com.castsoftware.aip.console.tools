@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static com.castsoftware.uc.aip.console.tools.core.utils.Constants.DEFAULT_HTTP_TIMEOUT;
+
 @Component
 @CommandLine.Command(
         name = "AddVersion",
@@ -98,7 +100,9 @@ public class AddVersionCommand implements Callable<Integer> {
     public Integer call() {
 
         try {
-            restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
+            if (sharedOptions.getTimeout() != DEFAULT_HTTP_TIMEOUT) {
+                restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
+            }
             restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
         } catch (ApiKeyMissingException e) {
             return Constants.RETURN_NO_PASSWORD;

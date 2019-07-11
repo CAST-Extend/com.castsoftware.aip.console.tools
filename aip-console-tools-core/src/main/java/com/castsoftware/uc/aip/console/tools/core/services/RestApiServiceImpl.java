@@ -39,11 +39,11 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+import static com.castsoftware.uc.aip.console.tools.core.utils.Constants.DEFAULT_HTTP_TIMEOUT;
+
 @Log
 public class RestApiServiceImpl implements RestApiService {
     private static final List<Integer> ACCEPTED_HTTP_CODES = Arrays.asList(200, 201, 202, 204);
-    // Set a timeout of 30s on okhttp request
-    private static final int OK_HTTP_TIMEOUT = 30;
 
     private OkHttpClient client;
     private ObjectMapper mapper;
@@ -57,9 +57,9 @@ public class RestApiServiceImpl implements RestApiService {
         this.client = new OkHttpClient.Builder()
                 .addInterceptor(getAuthInterceptor())
                 .cookieJar(cookieJar)
-                .connectTimeout(OK_HTTP_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(OK_HTTP_TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(OK_HTTP_TIMEOUT, TimeUnit.SECONDS)
+                .connectTimeout(DEFAULT_HTTP_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(DEFAULT_HTTP_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(DEFAULT_HTTP_TIMEOUT, TimeUnit.SECONDS)
                 .build();
         this.mapper = new ObjectMapper();
         this.mapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
@@ -72,15 +72,19 @@ public class RestApiServiceImpl implements RestApiService {
         this.client = new OkHttpClient.Builder()
                 .addInterceptor(getAuthInterceptor())
                 .cookieJar(cookieJar)
-                .connectTimeout(OK_HTTP_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(OK_HTTP_TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(OK_HTTP_TIMEOUT, TimeUnit.SECONDS)
+                .connectTimeout(DEFAULT_HTTP_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(DEFAULT_HTTP_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(DEFAULT_HTTP_TIMEOUT, TimeUnit.SECONDS)
                 .build();
         this.mapper = preConfiguredMapper;
     }
 
     @Override
-    public void setTimeout(int timeout, TimeUnit timeUnit) {
+    public void setTimeout(long timeout, TimeUnit timeUnit) {
+        if (timeout < 0) {
+            // negative timeout ? don't update the client
+            return;
+        }
         // Get a new builder from initial client and update timeouts
         this.client = this.client.newBuilder()
                 .connectTimeout(timeout, timeUnit)

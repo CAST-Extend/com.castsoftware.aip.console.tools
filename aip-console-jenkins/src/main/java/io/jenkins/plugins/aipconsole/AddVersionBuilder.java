@@ -10,6 +10,7 @@ import com.castsoftware.uc.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.uc.aip.console.tools.core.services.ChunkedUploadService;
 import com.castsoftware.uc.aip.console.tools.core.services.JobsService;
 import com.castsoftware.uc.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.uc.aip.console.tools.core.utils.Constants;
 import com.google.inject.Guice;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -81,6 +82,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private boolean cloneVersion = false;
     @Nullable
     private String versionName = "";
+    private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+    private boolean failureIgnored = false;
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -141,6 +144,15 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         this.versionName = versionName;
     }
 
+    public boolean isFailureIgnored() {
+        return failureIgnored;
+    }
+
+    @DataBoundSetter
+    public void setFailureIgnored(boolean failureIgnored) {
+        this.failureIgnored = failureIgnored;
+    }
+
     @Override
     public AddVersionDescriptorImpl getDescriptor() {
         return (AddVersionDescriptorImpl) super.getDescriptor();
@@ -149,6 +161,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
+        Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
 
         if (apiService == null || chunkedUploadService == null || jobsService == null) {
             Guice.createInjector(new AipConsoleModule()).injectMembers(this);
@@ -163,7 +176,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         String apiServerUrl = getDescriptor().getAipConsoleUrl();
         String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
         String username = getDescriptor().getAipConsoleUsername();
-        int timeout = getDescriptor().getTimeout();
+        long actualTimeout = timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout();
 
         if (StringUtils.isBlank(apiServerUrl)) {
             listener.error(AddVersionBuilder_AddVersion_error_noServerUrl());
@@ -177,8 +190,11 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         }
 
         try {
+            // update timeout of HTTP Client if different from default
+            if (actualTimeout != Constants.DEFAULT_HTTP_TIMEOUT) {
+                apiService.setTimeout(actualTimeout, TimeUnit.SECONDS);
+            }
             // legacy basic auth
-            apiService.setTimeout(timeout, TimeUnit.SECONDS);
             if (StringUtils.isNotBlank(username)) {
                 apiService.validateUrlAndKey(apiServerUrl, username, apiKey);
             } else {
@@ -186,7 +202,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             }
         } catch (ApiCallException e) {
             listener.error(AddVersionBuilder_AddVersion_error_accessDenied(apiServerUrl));
-            run.setResult(Result.FAILURE);
+            run.setResult(defaultResult);
             return;
         }
         EnvVars vars = run.getEnvironment(listener);
@@ -202,7 +218,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             if (StringUtils.isBlank(applicationGuid)) {
                 if (!autoCreate) {
                     listener.error(AddVersionBuilder_AddVersion_error_appNotFound(applicationName));
-                    run.setResult(Result.FAILURE);
+                    run.setResult(defaultResult);
                     return;
                 }
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(applicationName));
@@ -212,7 +228,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                         s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
                 if (StringUtils.isBlank(applicationGuid)) {
                     listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(applicationName, apiServerUrl));
-                    run.setResult(Result.FAILURE);
+                    run.setResult(defaultResult);
                     return;
                 }
             }
@@ -223,7 +239,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             if (!workspaceFile.exists()) {
 
                 log.println("File " + workspaceFile.getBaseName() + " doesnt exists");
-                run.setResult(Result.FAILURE);
+                run.setResult(defaultResult);
                 return;
             }
             try (InputStream workspaceFileStream = workspaceFile.read();
@@ -237,17 +253,17 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(applicationName));
             e.printStackTrace(listener.getLogger());
-            run.setResult(Result.FAILURE);
+            run.setResult(defaultResult);
             return;
         } catch (UploadException e) {
             listener.error(AddVersionBuilder_AddVersion_error_uploadFailed());
             e.printStackTrace(listener.getLogger());
-            run.setResult(Result.FAILURE);
+            run.setResult(defaultResult);
             return;
         } catch (JobServiceException e) {
             listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(applicationName, apiServerUrl));
             e.printStackTrace(listener.getLogger());
-            run.setResult(Result.FAILURE);
+            run.setResult(defaultResult);
             return;
         }
 
@@ -260,13 +276,13 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 resolvedVersionName = String.format("v%s", formatVersionName.format(new Date()));
             }
 
-            log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob());
+            log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(applicationName));
             String jobGuid = jobsService.startAddVersionJob(applicationGuid, FilenameUtils.getName(filePath), resolvedVersionName, new Date(), this.cloneVersion);
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
             if (state != JobState.COMPLETED) {
                 listener.error(AddVersionBuilder_AddVersion_error_jobFailure(state.toString()));
-                run.setResult(Result.FAILURE);
+                run.setResult(defaultResult);
             } else {
                 log.println(AddVersionBuilder_AddVersion_success_analysisComplete());
                 run.setResult(Result.SUCCESS);
@@ -274,13 +290,16 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         } catch (JobServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
             e.printStackTrace(listener.getLogger());
-            run.setResult(Result.FAILURE);
+            run.setResult(defaultResult);
         }
     }
 
     private JobState pollJob(String jobGuid, PrintStream log) throws JobServiceException {
         return jobsService.pollAndWaitForJobFinished(jobGuid,
-                jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                jobStatusWithSteps -> log.println(
+                        jobStatusWithSteps.getAppName() + " - " +
+                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
+                ),
                 JobStatus::getState);
     }
 

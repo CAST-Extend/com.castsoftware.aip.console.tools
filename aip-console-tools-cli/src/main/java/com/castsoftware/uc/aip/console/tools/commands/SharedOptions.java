@@ -24,7 +24,7 @@ public class SharedOptions {
     private String username;
 
     @CommandLine.Option(names = {"--timeout"}, description = "The timeout in seconds for calls to AIP Console. Defaults to a 30 timeout", defaultValue = "30")
-    private int timeout;
+    private long timeout;
 
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
@@ -69,11 +69,11 @@ public class SharedOptions {
         this.unmatchedOptions = unmatchedOptions;
     }
 
-    public int getTimeout() {
+    public long getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(int timeout) {
+    public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
 

@@ -1,7 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.uc.aip.console.tools.core.utils.Constants;
 import hudson.model.Run;
-import io.jenkins.plugins.aipconsole.Messages;
 import jenkins.model.RunAction2;
 
 import javax.annotation.CheckForNull;
@@ -13,6 +13,8 @@ import javax.annotation.CheckForNull;
 public class CreateApplicationAction implements RunAction2 {
     private Run run;
     private String applicationName;
+    private boolean failureIgnored = false;
+    private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
     public Run getRun() {
         return run;
@@ -24,6 +26,22 @@ public class CreateApplicationAction implements RunAction2 {
 
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    public boolean isFailureIgnored() {
+        return failureIgnored;
+    }
+
+    public void setFailureIgnored(boolean failureIgnored) {
+        this.failureIgnored = failureIgnored;
+    }
+
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
     }
 
     @Override

@@ -12,7 +12,7 @@ public interface RestApiService {
      * @param timeout  the timeout, between 0 and {@link Integer#MAX_VALUE}
      * @param timeUnit A time unit for the timeout
      */
-    void setTimeout(int timeout, TimeUnit timeUnit);
+    void setTimeout(long timeout, TimeUnit timeUnit);
 
     /**
      * @param serverUrl

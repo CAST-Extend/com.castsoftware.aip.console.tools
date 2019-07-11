@@ -18,4 +18,10 @@
     <f:entry title="${%versionName}" field="versionName" description="${%versionName.descr}">
         <f:textbox />
     </f:entry>
+    <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
+        <f:number default="30"/>
+    </f:entry>
+    <f:entry title="${%failureIgnored}" field="failureIgnored" description="${%failureIgnored.descr}">
+        <f:checkbox/>
+    </f:entry>
 </j:jelly>

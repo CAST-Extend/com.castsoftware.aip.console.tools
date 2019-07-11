@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.uc.aip.console.tools.core.utils.Constants;
 import hudson.model.Run;
 import jenkins.model.RunAction2;
 import org.slf4j.Logger;
@@ -21,6 +22,9 @@ public class AddVersionAction implements RunAction2 {
     private boolean cloneVersion = false;
     @Nullable
     private String versionName;
+    private boolean failureIgnored = false;
+    private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+
     private transient Run run;
 
     public AddVersionAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
@@ -78,6 +82,22 @@ public class AddVersionAction implements RunAction2 {
 
     public void setVersionName(@Nullable String versionName) {
         this.versionName = versionName;
+    }
+
+    public boolean isFailureIgnored() {
+        return failureIgnored;
+    }
+
+    public void setFailureIgnored(boolean failureIgnored) {
+        this.failureIgnored = failureIgnored;
+    }
+
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
     }
 
     @Override

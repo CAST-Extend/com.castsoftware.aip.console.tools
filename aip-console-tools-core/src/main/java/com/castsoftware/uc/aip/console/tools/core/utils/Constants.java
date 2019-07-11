@@ -66,5 +66,8 @@ public class Constants {
     public static final String ANALYSIS_STEP_NAME = "analyze";
     public static final String SNAPSHOT_STEP_NAME = "snapshot";
     public static final String CONSOLIDATE_STEP_NAME = "consolidate_snapshot";
+
+    // Other constants
+    public static final long DEFAULT_HTTP_TIMEOUT = 30L;
 }
 
