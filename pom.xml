@@ -18,9 +18,7 @@
     <description>Integration tools used for AIP Console</description>
     <scm>
         <connection>scm:git:git@github.com:CAST-Extend/com.castsoftware.uc.aip.console.tools.git</connection>
-        <url>scm:git:git@github.com:CAST-Extend/com.castsoftware.uc.aip.console.tools.git</url>
-        <developerConnection>scm:git:git@github.com:CAST-Extend/com.castsoftware.uc.aip.console.tools.git
-        </developerConnection>
+        <url>https://github.com:CAST-Extend/com.castsoftware.uc.aip.console.tools.git</url>
     </scm>
 
     <modules>
