@@ -106,6 +106,7 @@ public class JobsServiceImpl implements JobsService {
         jobParameters.put(Constants.PARAM_VERSION_NAME, versionName);
         jobParameters.put(Constants.PARAM_START_STEP, Constants.EXTRACT_STEP_NAME);
         jobParameters.put(Constants.PARAM_END_STEP, Constants.CONSOLIDATE_STEP_NAME);
+        jobParameters.put(Constants.PARAM_IGNORE_CHECK, "true");
         if (versionReleaseDate != null) {
             String versionReleaseStr = formatReleaseDate.format(versionReleaseDate);
             log.info(String.format("Creating version '%s' for application '%s' with release date '%s'", versionName, appGuid, versionReleaseStr));

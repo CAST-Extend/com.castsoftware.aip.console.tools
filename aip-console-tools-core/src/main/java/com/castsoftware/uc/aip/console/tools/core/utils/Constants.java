@@ -55,6 +55,7 @@ public class Constants {
     public static final String PARAM_END_STEP = "endStep";
     public static final String PARAM_APP_GUID = "appGuid";
     public static final String PARAM_SUSPEND = "suspend";
+    public static final String PARAM_IGNORE_CHECK = "ignoreFileStructureCheck";
 
     public static final String PARAM_RELEASE_DATE = "releaseDate";
     public static final String PARAM_SOURCE_ARCHIVE = "sourceArchive";
