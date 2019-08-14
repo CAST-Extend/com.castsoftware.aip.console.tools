@@ -16,6 +16,12 @@
     <packaging>pom</packaging>
     <name>aip-integration-tools</name>
     <description>Integration tools used for AIP Console</description>
+    <scm>
+        <connection>scm:git:git@github.com:CAST-Extend/com.castsoftware.uc.aip.console.tools.git</connection>
+        <url>scm:git:git@github.com:CAST-Extend/com.castsoftware.uc.aip.console.tools.git</url>
+        <developerConnection>scm:git:git@github.com:CAST-Extend/com.castsoftware.uc.aip.console.tools.git
+        </developerConnection>
+    </scm>
 
     <modules>
         <module>aip-console-tools-core</module>
@@ -100,6 +106,14 @@
                 <version>3.0.0-M2</version>
                 <configuration>
                     <rules><dependencyConvergence/></rules>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
         </plugins>
