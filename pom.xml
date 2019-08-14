@@ -12,7 +12,7 @@
     </parent>
     <groupId>com.castsoftware.uc.aip.console.tools</groupId>
     <artifactId>aip-console-tools</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>1.0.3</version>
     <packaging>pom</packaging>
     <name>aip-integration-tools</name>
     <description>Integration tools used for AIP Console</description>

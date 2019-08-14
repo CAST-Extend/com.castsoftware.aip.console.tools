@@ -13,12 +13,10 @@ HotSpot (AdoptOpenJDK, Oracle) JVMs have been tested and work well; other JVMs (
 
 Before using this tool, you will have to :
 
-* Create an application on AIP Console and keep its GUID, as it is our only way to uniquely identify which application is targeted.
-* NOT YET IMPLEMENTED <s>Generate an API Token for your user. See below in the "Token" chapter to see different methods for passing the token to AIP Console CLI Tool.</s>
+* Generate an API Token for your user. See below in the "Token" chapter to see different methods for passing the token to AIP Console CLI Tool.
 * Prepare your source code as a ZIP file that will be uploaded to AIP Console.
 
 **NB:** The provided ZIP file structure will be better processed if you separate each technology into a specific root folder.
-  
 
 ### Basic Usage
 
@@ -28,8 +26,10 @@ This tool accept 2 different actions :
 
 The following options are common to both actions  
 * `-s` or `--server-url` : URL to access AIP Console. Defaults to http://localhost:8081
+* `--user`: If using basic authentication, this will be used for the user name. Password will be taken from the below api key parameter.
 * `--apikey` : Option to prompt the user for an API Key to access AIP Console
 * `--apikey:env` :  Option to read the API key value from an environment variable.
+* `--timeout`: Option to define a connection timeout in seconds (default is 30 seconds)
 
 **NB**: If either `--apikey` or `--apikey:env` is missing, the tool will fail to access AIP Console.
 
@@ -59,20 +59,22 @@ $ java -jar aip-console-tools-cli.jar CreateApplication --apikey:env=AIP_CONSOLE
 The parameters for `CreateApplication` are the following :
 
 ```bash
-Usage: aip-console-tools-cli CreateApplication [-hV] [--apikey=<apiKey>]
-                                              [--apikey:env=ENV_VAR_NAME]
-                                              -n=APPLICATION_NAME
+Usage: aip-integration-tool CreateApplication [-hV] [--apikey[=<apiKey>]] [--apikey:env=ENV_VAR_NAME]
+                                              [--timeout=<timeout>] [--user=<username>] -n=APPLICATION_NAME
                                               [-s=AIP_CONSOLE_URL]
 Creates a new application on AIP Console
-      --apikey=<apiKey>   Enable prompt to enter password after start of CLI
+      --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt entry if no value is passed.
       --apikey:env=ENV_VAR_NAME
-                          The name of the environment variable containing the user's access token to AIP Console
-  -h, --help              Show this help message and exit.
+                            The name of the environment variable containing the AIP Key to access AIP Console
+      --timeout=<timeout>   The timeout in seconds for calls to AIP Console. Defaults to a 30 timeout
+      --user=<username>     User name. Use this if no API Key generation is available on AIP Console. Provide the user's
+                              password in the apikey parameter.
+  -h, --help                Show this help message and exit.
   -n, --app-name=APPLICATION_NAME
-                          The name of the application to create
+                            The name of the application to create
   -s, --server-url=AIP_CONSOLE_URL
-                          The base URL for AIP Console (defaults to http://localhost:8081)
-  -V, --version           Print version information and exit.
+                            The base URL for AIP Console (defaults to http://localhost:8081)
+  -V, --version             Print version information and exit.
 ```
 
 #### Add Version
@@ -119,19 +121,20 @@ Here is a detailed look at the options available for `AddVersion` :
 ```bash
 $ java -jar target/aip-console-tools-cli.jar AddVersion -h
 Usage: aip-integration-tool AddVersion [-chV] [--auto-create] [--apikey[=<apiKey>]] [--apikey:env=ENV_VAR_NAME]
-                                       [--user=<username>] [-a=APPLICATION_GUID] -f=FILE [-n=APPLICATION_NAME]
-                                       [-s=AIP_CONSOLE_URL] [-v=VERSION-NAME]
+                                       [--timeout=<timeout>] [--user=<username>] [-a=APPLICATION_GUID] -f=FILE
+                                       [-n=APPLICATION_NAME] [-s=AIP_CONSOLE_URL] [-v=VERSION-NAME]
 Creates a new version for an application on AIP Console
       --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt entry if no value is passed.
       --apikey:env=ENV_VAR_NAME
                             The name of the environment variable containing the AIP Key to access AIP Console
       --auto-create         If the given application name doesn't exist on the target server, it'll be automatically created
                               before creating a new version
+      --timeout=<timeout>   The timeout in seconds for calls to AIP Console. Defaults to a 30 timeout
       --user=<username>     User name. Use this if no API Key generation is available on AIP Console. Provide the user's
                               password in the apikey parameter.
   -a, --app-guid=APPLICATION_GUID
                             The GUID of the application to rescan
-  -c, --clone, --rescan     Clones the latest version configuration instead of creating a new application
+  -c, --clone, --rescan     Clones the latest version configuration instead of creating a new version
   -f, --file=FILE           The ZIP file containing the source to rescan
   -h, --help                Show this help message and exit.
   -n, --app-name=APPLICATION_NAME
@@ -154,7 +157,7 @@ See below for details on which return code corresponds to which potential issue.
 
 ### API Key
 
-To access AIP Console, you have to provide an API key by generating one on AIP Console.
+To access AIP Console, you should provide an API key by generating one on AIP Console (1.10.0 and above).
 
 You can provide the `--apikey` parameter to be prompted to enter your password without passing it as an argument.
 
@@ -164,7 +167,7 @@ To create an API key for your account, log in to AIP Console, click on your user
 
 You will be able to generate an API key that will be shown to you. Copy it and save it to a secure location.
 
-**NB**: For backwards compatibility purposes, you can provide the `--user` parameter to specify a user name. In the `--apikey` or `--apikey:env`, you should specify the password (or the environment variable with the password) and we'll let you authenticate this way. This will not be supported in later versions of the CLI and should be used only if you are using AIP Console where API Key generation isn't available.
+**NB**: For AIP Console below version 1.10.0, you can provide the `--user` parameter to specify a user name. In the `--apikey` or `--apikey:env`, you should specify the password (or the environment variable with the password) and we'll let you authenticate this way. This will not be supported in later versions of the CLI and should be used only if you are using AIP Console where API Key generation isn't available.
 
 ### Return Codes
 

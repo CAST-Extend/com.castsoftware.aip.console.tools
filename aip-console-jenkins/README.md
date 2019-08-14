@@ -55,6 +55,8 @@ If you check the "Rescan" checkbox, this new version will copy the previous vers
 
 If you check the "Auto Create" checkbox, when searching for the application name on AIP Console, if it doesn't exists, it'll create it automatically.
 
+If you check the "Ignore failures" check box, the failure of the AIP Console job will not result in a failure of the Jenkins Job. Instead, it'll be marked as unstable, this letting you know of issues without breaking your job.
+
 You can provide a version name. If left empty, the following version will be based o nthe current date and time and formatted as such: "vyyMMdd.HHmmss"
 
 Here is a sample output of the Add Version step : 
