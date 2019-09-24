@@ -12,7 +12,7 @@ set CMDPATH=%0
 
 cd /d %WORKSPACE%
 
-set VERSION=1.0.3
+set VERSION=1.0.4
 set ID=com.castsoftware.uc.aip.console.tools
 
 set PATH=%PATH%;c:\Tools\Git\usr\bin;C:\CAST-Caches\Win64

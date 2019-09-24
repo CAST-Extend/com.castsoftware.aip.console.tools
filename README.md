@@ -26,6 +26,14 @@ If you need to compile the plugin with a different Java version, you can pass th
 
 ## Release Notes :
 
+#### 1.0.4 : 
+
+⚠ Default request timeout is now 90s. This is to avoid errors when uploading very large files (over 1GB). 
+
+Fix :
+* An error with the message `UploadException: No more content to read, but file not complete (the file might be modified by another program?).` occured for evry large file. This was due to an integer overflow that has been fixed.
+* Updated library `com.fasterxml.jackson.core` libraries to version 2.9.10, to fix a vulnerability (see https://nvd.nist.gov/vuln/detail/CVE-2019-14540 and https://nvd.nist.gov/vuln/detail/CVE-2019-16335)
+
 #### 1.0.3:
 
 Aligning version with CAST Extend version.
