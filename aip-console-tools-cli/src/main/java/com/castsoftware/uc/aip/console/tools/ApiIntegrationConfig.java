@@ -21,10 +21,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan
 public class ApiIntegrationConfig {
-    // 10s connect timeout
-    private static final int CONNECT_TIMEOUT = 10_000;
-    // 30s read timeout
-    private static final int READ_TIMEOUT = 30_000;
 
     @Bean
     public BasicCookieStore getCookieStore() {

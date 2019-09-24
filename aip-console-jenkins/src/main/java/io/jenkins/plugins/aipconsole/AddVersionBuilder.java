@@ -153,6 +153,15 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         this.failureIgnored = failureIgnored;
     }
 
+    public long getTimeout() {
+        return timeout;
+    }
+
+    @DataBoundSetter
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
+
     @Override
     public AddVersionDescriptorImpl getDescriptor() {
         return (AddVersionDescriptorImpl) super.getDescriptor();
@@ -176,7 +185,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         String apiServerUrl = getDescriptor().getAipConsoleUrl();
         String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
         String username = getDescriptor().getAipConsoleUsername();
-        long actualTimeout = timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout();
+        long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());
 
         if (StringUtils.isBlank(apiServerUrl)) {
             listener.error(AddVersionBuilder_AddVersion_error_noServerUrl());

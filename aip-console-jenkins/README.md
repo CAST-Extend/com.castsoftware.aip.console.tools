@@ -39,7 +39,7 @@ It'll then show the Application GUID if the newly created application.
 
 You can use this step both with a Freestyle Job and a Pipeline Job.
 
-### Add Version Step
+### Add Version Step 
 
 In the "Build" of your job, add a new Build Step, then click "Add Application version on AIP Console".
 
@@ -51,13 +51,15 @@ The application name will be checked on AIP Console, and the application GUID wi
 
 The Zip file will be uploaded to AIP Console, extracted and then run through the whole analysis workflow, as if you had done so through the AIP Console UI.
 
+⚠ *When creating versions for very large applications (above 1Gb of source code), be careful of the timeout configuration, either globally or in your job. As the upload completes, there is a copy operation and depending on your machines specs, it might take more than the default timeout (30s).*
+
 If you check the "Rescan" checkbox, this new version will copy the previous version's configuration (packages, extensions, etc.). 
 
 If you check the "Auto Create" checkbox, when searching for the application name on AIP Console, if it doesn't exists, it'll create it automatically.
 
 If you check the "Ignore failures" check box, the failure of the AIP Console job will not result in a failure of the Jenkins Job. Instead, it'll be marked as unstable, this letting you know of issues without breaking your job.
 
-You can provide a version name. If left empty, the following version will be based o nthe current date and time and formatted as such: "vyyMMdd.HHmmss"
+You can provide a version name. If left empty, the following version will be based on the current date and time and formatted as such: "vyyMMdd.HHmmss"
 
 Here is a sample output of the Add Version step : 
 

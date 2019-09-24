@@ -69,6 +69,6 @@ public class Constants {
     public static final String CONSOLIDATE_STEP_NAME = "consolidate_snapshot";
 
     // Other constants
-    public static final long DEFAULT_HTTP_TIMEOUT = 30L;
+    public static final long DEFAULT_HTTP_TIMEOUT = 90L;
 }
 

@@ -14,7 +14,7 @@ public class AipConsoleGlobalConfiguration extends GlobalConfiguration {
     private String aipConsoleUrl;
     private Secret apiKey;
     private String username;
-    private int timeout = 30;
+    private int timeout = 90;
 
     public static AipConsoleGlobalConfiguration get() {
         return GlobalConfiguration.all().get(AipConsoleGlobalConfiguration.class);
