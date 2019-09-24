@@ -79,12 +79,11 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
             throw new UploadException("Upload was not created on AIP Console");
         }
         String uploadChunkEndpoint = ApiEndpointHelper.getApplicationUploadPath(appGuid, dto.getGuid());
-
+        int currentChunk = 1;
         try {
             log.info("Starting chunks uploads");
-            int currentOffset = 0;
+            long currentOffset = 0;
             int totalChunks = (int) Math.ceil((double) fileSize / (double) MAX_CHUNK_SIZE);
-            int currentChunk = 1;
             for (; currentOffset < fileSize; currentChunk++) {
                 byte[] buffer = new byte[MAX_CHUNK_SIZE];
                 int nbBytesRead = content.read(buffer);
@@ -134,7 +133,7 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
                     log.warning("Unable to remove failed upload with GUID '" + dto.getGuid() + "'");
                 }
             }
-            throw new UploadException("Error occurred during file upload", e);
+            throw new UploadException("Error occurred while uploading chunk number " + currentChunk, e);
         }
 
         return StringUtils.equalsAnyIgnoreCase(dto.getStatus(), "completed", "uploaded");
