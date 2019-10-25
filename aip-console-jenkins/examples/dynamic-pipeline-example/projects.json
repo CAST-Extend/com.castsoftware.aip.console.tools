@@ -1,0 +1,159 @@
+[
+  {
+    "enabled": true,
+    "name": "AIP Console tools",
+    "url": "https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools.git",
+    "versions": [
+      {
+        "versionName": "tools-0.0.1-${BUILD_ID}",
+        "branch": "refs/tags/0.0.1",
+        "rescan": false
+      },
+      {
+        "versionName": "tools-master-${BUILD_ID}",
+        "branch": "refs/heads/master",
+        "rescan": true
+      }
+    ]
+  },
+  {
+    "enabled": false,
+    "name": "Django",
+    "url": "https://github.com/django/django",
+    "versions": [
+      {
+        "versionName": "django-master-${BUILD_ID}",
+        "branch": "refs/heads/master",
+        "rescan": false
+      }
+    ]
+  },
+  {
+    "enabled": false,
+    "name": "Wordpress",
+    "url": "https://github.com/WordPress/WordPress",
+    "versions": [
+      {
+        "versionName": "wordpress-master-${BUILD_ID}",
+        "branch": "refs/heads/master",
+        "rescan": false
+      }
+    ]
+  },
+  {
+    "enabled": false,
+    "name": "ASP .NET Core",
+    "url": "https://github.com/aspnet/AspNetCore",
+    "versions": [
+      {
+        "versionName": "aspnetcore-master-${BUILD_ID}",
+        "branch": "refs/heads/master",
+        "rescan": false
+      }
+    ]
+  },
+  {
+    "enabled": true,
+    "name": "Tomcat",
+    "url": "https://github.com/apache/tomcat.git",
+    "versions": [
+      {
+        "versionName": "tomcat-9.0.22-${BUILD_ID}",
+        "branch": "refs/tags/9.0.22",
+        "rescan": false
+      },
+      {
+        "versionName": "tomcat-master-${BUILD_ID}",
+        "branch": "refs/heads/master",
+        "rescan": true
+      }
+    ]
+  },
+  {
+    "enabled": false,
+    "name": "Wagtail",
+    "url": "https://github.com/wagtail/wagtail",
+    "versions": [
+      {
+        "versionName": "wagtail-master-${BUILD_ID}",
+        "branch": "refs/heads/master",
+        "rescan": false
+      }
+    ]
+  },
+  {
+    "enabled": false,
+    "name": "nopCommerce",
+    "url": "https://github.com/nopSolutions/nopCommerce",
+    "versions": [
+      {
+        "versionName": "nopcommerce-develop-${BUILD_ID}",
+        "branch": "refs/heads/develop",
+        "rescan": false
+      }
+    ]
+  },
+  {
+    "enabled": true,
+    "name": "webgoat",
+    "url": "https://github.com/WebGoat/WebGoat.git",
+    "versions": [
+      {
+        "versionName": "webgoat-v7-${BUILD_ID}",
+        "branch": "refs/tags/7.1",
+        "rescan": false
+      },
+      {
+        "versionName": "webgoat-v8-${BUILD_ID}",
+        "branch": "refs/tags/v8.0.0.M25",
+        "rescan": true
+      },
+      {
+        "versionName": "webgoat-develop-${BUILD_ID}",
+        "branch": "refs/heads/develop",
+        "rescan": true
+      }
+    ]
+  },
+  {
+    "enabled": true,
+    "name": "shopizer",
+    "url": "https://github.com/shopizer-ecommerce/shopizer.git",
+    "versions": [
+      {
+        "versionName": "shopizer-2.2.0-${BUILD_ID}",
+        "branch": "refs/tags/2.2.0",
+        "rescan": false
+      },
+      {
+        "versionName": "shopizer-master-${BUILD_ID}",
+        "branch": "refs/heads/master",
+        "rescan": true
+      }
+    ]
+  },
+  {
+    "enabled": false,
+    "name": "Liferay-faces",
+    "url": "https://github.com/liferay/liferay-faces.git",
+    "versions":[
+      {
+        "versionName": "lf-master-${BUILD_ID}",
+        "branch": "refs/heads/master",
+        "rescan": false
+      }
+    ]
+  },
+  {
+    "enabled": false,
+    "name": "Google API Dotnet client",
+    "url": "https://github.com/googleapis/google-api-dotnet-client.git",
+    "versions":[
+      {
+        "versionName": "g-dotnet-client-master-${BUILD_ID}",
+        "branch": "refs/heads/master",
+        "rescan": false
+      }
+    ]
+  }
+]

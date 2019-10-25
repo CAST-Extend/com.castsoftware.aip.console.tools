@@ -1,0 +1,170 @@
+#!/usr/bin/env groovy
+import groovy.json.JsonSlurper
+import groovy.json.internal.LazyMap
+
+agentLabel = 'WebiTests'
+timeout = '60'
+ignoreFailure = true
+dryRun = false
+
+node() {
+    timestamps {
+        stage('Prepare Projects') {
+            checkout scm
+            parallelSteps = getSteps(false)
+        }
+        stage('Application Analysis') {
+            node() {
+                if (dryRun) {
+                    echo "Not running the steps, only checking their execution configuration."
+                }
+                parallel parallelSteps
+            }
+        }
+    }
+}
+
+/**
+ * This method will return a map containing all the steps for every projects inside the projects.json file
+ * This map is to be passed to a parallel step
+ * Each parallel stage in this map will retrieve the source code for the given project,
+ * checkout the given ref (branch name, or tag, or specific commit reference, depends on what you need),
+ * zip it, and launch the add version
+ */
+def getSteps(failFast = true) {
+    def stages = [failFast: failFast]
+    def list = parseJson(readFile('projects.json'))
+    int lockIndex = 0
+    list.findAll { it.enabled == true }
+            .each { project ->
+                stages["${project.name}"] = {
+                    dir("${project.name}") {
+                        for (version in project.versions) {
+                            def versionName = parsePlaceholders(version.versionName)
+                            stage("Analyzing ${project.name} - ${versionName}") {
+                                if (!dryRun) {
+                                    lock("demo-deploy-app-lock-${(lockIndex++) % 2}") {
+                                        //retrieve source and generate the zip file
+                                        def scmConfig = getScmConfig(versionName, project.url, project.credId, version.branch)
+                                        stage("Prepare ${versionName}") {
+                                            echo "Retrieving source code for version ${versionName} with ref ${branch}"
+                                            checkout scmConfig
+                                            if (isUnix()) {
+                                                sh "git archive -o source.zip HEAD"
+                                            } else {
+                                                bat "c:\\Tools\\Git\\bin\\git.exe archive -o source.zip HEAD"
+                                            }
+                                        }
+                                        // start add version
+                                        aipAddVersion getAipAddVersionConfig(project.name, versionName, timeout, version.rescan, true)
+                                    }
+                                } else {
+                                    echo "Would user lock 'demo-deploy-app-lock-${(lockIndex++) % 2}'"
+                                    echo "SCM configuration : "
+                                    echo "${getScmConfig(versionName, project.url, project.credId, version.branch)}"
+                                    echo "Would run AddVersion with configuration : "
+                                    echo "${getAipAddVersionConfig(project.name, versionName, timeout, version.rescan, true)}"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+    return stages
+}
+
+/**
+ * Retrieve an SCM Config definition for the given version, git url, credential id and branch
+ * credential ids and branch can be empty/null, we'll retrieve the code without any credentials from the /refs/heads/master branch
+ */
+def getScmConfig(versionName, gitUrl, credentialsId, branch) {
+    // TODO url to an archive (zip or tgz ?) ? retrieve locally and us it to push to aip console
+
+    // default to /refs/heads/master, i.e. the master branch
+    if (!branch) {
+        branch = "refs/heads/master"
+    }
+    // no slash in branchName ? change the refs/heads/branchName to make it as unambiguous as possible
+    // allows passing a simple branch name directly as parameter, or a more specific ref (like a tag)
+    // TODO : check if it is a commit id, to avoid adding the refs/heads before ?
+    if (!branch.contains('/')) {
+        branch = "refs/heads/${branch}"
+    }
+
+    def userRemoteConfigs = [url: gitUrl]
+    if (credentialsId) {
+        userRemoteConfigs['credentialsId'] = credentialsId
+    }
+    def scmConfig = [changelog: false,
+                     poll     : false,
+                     scm      : [
+                             $class                           : 'GitSCM',
+                             branches                         : [[name: "${branch}"]],
+                             doGenerateSubmoduleConfigurations: false,
+                             extensions                       : [[$class: 'CheckoutOption', timeout: 20]],
+                             submoduleCfg                     : [],
+                             userRemoteConfigs                : [userRemoteConfigs]
+                     ]
+    ]
+
+    return scmConfig
+}
+
+/* builds an 'add version' configuration to start the add version step */
+
+def getAipAddVersionConfig(appName, versionName, timeout = 60, rescan = false, ignoreFailure = false) {
+    return [
+            applicationName: "${appName}",
+            autoCreate     : true,
+            filePath       : 'source.zip',
+            versionName    : "${versionName}",
+            cloneVersion   : rescan,
+            timeout        : timeout,
+            ignoredFailure : ignoreFailure
+    ]
+}
+
+// Replace placeholders in the passed content
+@NonCPS
+def parsePlaceholders(content) {
+    // FIXME: Add more placeholders that could be parsed
+    def bindings = [BUILD_ID: "${BUILD_ID}"]
+
+    for (def entry : bindings) {
+        if (content.contains("\${" + entry.getKey() + "}")) {
+            content = content.replace("\${" + entry.getKey() + "}", entry.getValue().toString())
+        }
+    }
+    return content
+}
+
+/**
+ * This is necessary because JsonSlurper returns a LazyMap which is not serializable
+ * And Jenkins requires pretty much everything to be serializable
+ * This causes issues if you have any reference to a LazyMap
+ * Here, we replace LazyMaps with basic Maps
+ */
+@NonCPS
+static def convertLazyMapToLinkedHashMap(Object value) {
+    if (value instanceof List) {
+        List copy = []
+        for (element in (value as List)) {
+            copy.add(convertLazyMapToLinkedHashMap(element))
+        }
+        return copy
+    } else if (value instanceof LazyMap) {
+        Map copy = [:]
+        for (pair in (value as LazyMap)) {
+            copy[pair.key] = convertLazyMapToLinkedHashMap(pair.value)
+        }
+        return copy
+    }
+    return value
+}
+
+@NonCPS
+def parseJson(def content) {
+    def slurper = new JsonSlurper()
+    return convertLazyMapToLinkedHashMap(slurper.parseText(content))
+}
