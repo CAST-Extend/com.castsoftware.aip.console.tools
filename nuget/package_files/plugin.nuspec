@@ -12,8 +12,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Package containing the AIP Console Jenkins Plugin and AIP Console Tools CLI.
 
-            These components aims to simplify the automation of on-boarding and deploying new versions of your
-            applications in AIP Console.
+            These components aims to help automating application on-boarding and/or analysis in AIP Console.
 
             If you need more details about the AIP Console Jenkins Plugin, you can check the following page :
             https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/develop/aip-console-jenkins/README.md
@@ -21,7 +20,9 @@
             If you need details about the AIP Console Tools CLI, you can find them here :
             https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/develop/aip-console-tools-cli/README.md
         </description>
-        <releaseNotes>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/master/README.md</releaseNotes>
+        <releaseNotes>
+            https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/master/RELEASE-NOTES.md
+        </releaseNotes>
 		<tags>aipconsole</tags>
 		<dependencies>
 			<dependency id="CAIP" version="8.3.0" />
