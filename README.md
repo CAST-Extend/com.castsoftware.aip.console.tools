@@ -10,17 +10,19 @@ Please check each folder for more details on each elements.
 
 ### Modules
 
-This project contains 3 modules, Please use unzip tool to extract the .nupkg file if downloaded from CAST-EXTEND to get the components :
+**NB**: If you have downloaded this project from CAST Extend, you can use a ZIP extraction tool (like 7zip) to extract the content of the `.nupkg` file.
 
-* AIP Jenkins Plugin : Module containing the code to our Jenkins plugin to create an application or add a version
-* AIP Integration CLI : Module containing the CLI to create an application or add a version
-* AIP Integration Core : library containing shared code between the Jenkins Plugin and the AIP Integration CLI
+This project contains 3 modules :
+
+* *AIP Console Jenkins Plugin* : Module containing the code to our Jenkins plugin to create an application or add a version
+* *AIP Console Tools CLI* : Module containing the CLI to create an application or add a version
+* *AIP Console Tools Core* : library containing shared code between the Jenkins Plugin and the AIP Integration CLI
 
 ### Java Version
 
-AIP Integration Core and AIP Integration CLI will compile fine on JDK versions 8 through 12. The source will be compiled to be used with Java 8. 
+AIP Console Tools Core and AIP Console Tools CLI will compile fine on JDK versions 8 through 12. The source will be compiled to be used with Java 8. 
 
-AIP Jenkins Plugin will only compile for Java 8. This is due to the baseline version we target (2.60.3) which, while not particularly recent, covers a wider range of users.
+AIP Console Jenkins Plugin will only compile for Java 8. This is due to the baseline version we target (2.60.3) which, while not particularly recent, covers a wider range of users.
 
 If you need to compile the plugin with a different Java version, you can pass the `-Djenkins.version=2.XXX` to the maven command.
 

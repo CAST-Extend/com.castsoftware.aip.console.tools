@@ -9,7 +9,6 @@ In the project, you'll find the following packages:
 * `dto`: Java representation of JSON object sent and retrieved from AIP Console API
 * `services`: The interfaces and implementation for calls to the API.
     * Impl classes : These are the actual implementation for the upload and jobs services that are shared between the Jenkins Plugin and the CLI.
-    
 * `utils`: Some utility classes
 
 ### How to build

@@ -11,7 +11,8 @@ Under Manage Jenkins > Configure System > AIP Console global configuration
 Here you can define:
 * AIP Console URL: The main URL to access AIP Console. If you access the AIP Console UI with, for example, http://my-aip-console:8081/ui/index.html, then the AIP Console URL will be http://my-aip-console:8081. If left blank this will default to http://localhost:8081
 * API Key: An API Key, generated inside AIP Console (top right menu). If this option is missing from your AIP Console instance, you can set this field to a user's aip console password and set the `user name` field inside "Legacy Settings"
-* User Name: The user name to use for basic authentication. This should only be used if your AIP Console is 1.9.0 or below.
+* Timeout: The default timeout for all exchanges between Jenkins and AIP Console. This can be changed at the Job level as well. 
+* User Name: The user name to use for basic authentication. This should only be used if your AIP Console version is 1.9.0 or below.
 
 ### Create Application Step
 
