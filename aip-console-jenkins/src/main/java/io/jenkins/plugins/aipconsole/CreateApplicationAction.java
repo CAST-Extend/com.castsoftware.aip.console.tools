@@ -1,6 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
-import com.castsoftware.uc.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.Constants;
 import hudson.model.Run;
 import jenkins.model.RunAction2;
 

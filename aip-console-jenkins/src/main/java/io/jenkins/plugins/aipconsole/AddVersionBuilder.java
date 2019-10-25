@@ -1,16 +1,16 @@
 package io.jenkins.plugins.aipconsole;
 
-import com.castsoftware.uc.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.uc.aip.console.tools.core.dto.jobs.JobStatus;
-import com.castsoftware.uc.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.uc.aip.console.tools.core.exceptions.ApplicationServiceException;
-import com.castsoftware.uc.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.uc.aip.console.tools.core.exceptions.UploadException;
-import com.castsoftware.uc.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.uc.aip.console.tools.core.services.ChunkedUploadService;
-import com.castsoftware.uc.aip.console.tools.core.services.JobsService;
-import com.castsoftware.uc.aip.console.tools.core.services.RestApiService;
-import com.castsoftware.uc.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
+import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.services.ApplicationService;
+import com.castsoftware.aip.console.tools.core.services.ChunkedUploadService;
+import com.castsoftware.aip.console.tools.core.services.JobsService;
+import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.google.inject.Guice;
 import hudson.EnvVars;
 import hudson.Extension;

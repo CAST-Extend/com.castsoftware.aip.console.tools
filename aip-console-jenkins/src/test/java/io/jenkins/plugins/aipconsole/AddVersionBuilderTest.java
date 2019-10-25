@@ -1,9 +1,9 @@
 package io.jenkins.plugins.aipconsole;
 
-import com.castsoftware.uc.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.uc.aip.console.tools.core.services.ChunkedUploadService;
-import com.castsoftware.uc.aip.console.tools.core.services.JobsService;
-import com.castsoftware.uc.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.services.ChunkedUploadService;
+import com.castsoftware.aip.console.tools.core.services.JobsService;
+import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import org.junit.Before;
