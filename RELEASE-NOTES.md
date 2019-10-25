@@ -1,5 +1,12 @@
 ## Release Notes :
 
+#### 1.0.5 :
+
+Minor release with changes to the Java package in the CLI and Core lib.
+Updates to the documentation.
+
+Added an example for the Jenkins Plugin use in a Jenkins Pipeline Job
+
 #### 1.0.4 : 
 
 ⚠ Default request timeout is now 90s. This is to avoid errors when uploading very large files (over 1GB). 
