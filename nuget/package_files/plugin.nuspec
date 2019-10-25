@@ -10,7 +10,17 @@
         <projectUrl>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools</projectUrl>
 		<iconUrl>https://raw.githubusercontent.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/master/nuget/logo_console.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Examples of tools leveraging the AIP Console REST API for automation</description>
+        <description>Package containing the AIP Console Jenkins Plugin and AIP Console Tools CLI.
+
+            These components aims to simplify the automation of on-boarding and deploying new versions of your
+            applications in AIP Console.
+
+            If you need more details about the AIP Console Jenkins Plugin, you can check the following page :
+            https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/develop/aip-console-jenkins/README.md
+
+            If you need details about the AIP Console Tools CLI, you can find them here :
+            https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/develop/aip-console-tools-cli/README.md
+        </description>
         <releaseNotes>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/master/README.md</releaseNotes>
 		<tags>aipconsole</tags>
 		<dependencies>
