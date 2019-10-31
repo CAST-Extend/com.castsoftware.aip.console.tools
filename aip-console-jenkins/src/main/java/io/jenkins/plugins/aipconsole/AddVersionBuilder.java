@@ -269,6 +269,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 if (!chunkedUploadService.uploadInputStream(applicationGuid, uploadFile.getName(), uploadFile.length(), bufferedStream)) {
                     throw new UploadException("Uploading was not completed successfully.");
                 }
+                // Cleanup the workspace
+                uploadFile.delete();
             }
 
         } catch (ApplicationServiceException e) {
