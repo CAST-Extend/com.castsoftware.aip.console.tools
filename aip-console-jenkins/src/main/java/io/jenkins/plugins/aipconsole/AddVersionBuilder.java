@@ -41,6 +41,7 @@ import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_accessDenied;
@@ -215,6 +216,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             return;
         }
         EnvVars vars = run.getEnvironment(listener);
+        String resolvedFilePath = vars.expand(filePath);
+        FilePath uploadFile;
 
         try {
 
@@ -242,7 +245,6 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 }
             }
 
-            String resolvedFilePath = vars.expand(filePath);
             log.println(AddVersionBuilder_AddVersion_info_startUpload(FilenameUtils.getName(resolvedFilePath)));
             FilePath workspaceFile = workspace.child(resolvedFilePath);
             if (!workspaceFile.exists()) {
@@ -251,10 +253,20 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(defaultResult);
                 return;
             }
-            try (InputStream workspaceFileStream = workspaceFile.read();
+            // Rename the file to applicationName-versionName.ext
+            String extension = FilenameUtils.getExtension(resolvedFilePath);
+            if (StringUtils.endsWithIgnoreCase(resolvedFilePath, ".tar.gz")) {
+                // getExtension only returns the last extension, so specific case for .tar.gz
+                extension = ".tar.gz";
+            }
+            uploadFile = workspace.child(String.format("%s.%s", UUID.randomUUID().toString(), extension));
+            // if it already exists, delete it (might be a remnant of a previous execution)
+            // move source file to another file name, to avoid conflicts when uploading the same zip file for multiple applications
+            workspaceFile.renameTo(uploadFile);
+            try (InputStream workspaceFileStream = uploadFile.read();
                  InputStream bufferedStream = new BufferedInputStream(workspaceFileStream, 10 * 1024 * 1024)) {
-                log.println("Uploading file " + workspaceFile.getName());
-                if (!chunkedUploadService.uploadInputStream(applicationGuid, workspaceFile.getName(), workspaceFile.length(), bufferedStream)) {
+                log.println("Uploading file " + uploadFile.getName());
+                if (!chunkedUploadService.uploadInputStream(applicationGuid, uploadFile.getName(), uploadFile.length(), bufferedStream)) {
                     throw new UploadException("Uploading was not completed successfully.");
                 }
             }
@@ -286,7 +298,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             }
 
             log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(applicationName));
-            String jobGuid = jobsService.startAddVersionJob(applicationGuid, FilenameUtils.getName(filePath), resolvedVersionName, new Date(), this.cloneVersion);
+            String jobGuid = jobsService.startAddVersionJob(applicationGuid, uploadFile.getName(), resolvedVersionName, new Date(), this.cloneVersion);
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
             if (state != JobState.COMPLETED) {
