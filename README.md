@@ -3,10 +3,12 @@
 The AIP Integration tools are a couple of components to ease the automation of application analysis on AIP Console.
 
 It offers 2 main methods of automation:
-* [AIP Console Jenkins Plugin](./aip-console-jenkins/README.md)
+* [AIP Console Jenkins Plugin](./aip-console-jenkins/README.md) with an example [Jenkinsfile](./aip-console-jenkins/examples/dynamic-pipeline-example/README.md) to automate retrieving and analysing multiple applications.  
 * [AIP Console Tool CLI](./aip-console-tools-cli/README.md) 
 
-You can find the latest releases on the [Release page](https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/releases). You can also find the latest changes in the [Release Notes](./RELEASE-NOTES.md)  
+The latest releases are available on the [Release page](https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/releases).
+
+The latest changes are described in the [Release Notes](./RELEASE-NOTES.md)  
 
 ### Modules
 
