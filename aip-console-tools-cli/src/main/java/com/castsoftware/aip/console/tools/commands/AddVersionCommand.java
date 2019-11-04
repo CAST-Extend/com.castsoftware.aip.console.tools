@@ -16,14 +16,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -128,13 +133,19 @@ public class AddVersionCommand implements Callable<Integer> {
                     return Constants.RETURN_APPLICATION_NOT_FOUND;
                 }
             }
-
-            if (!uploadService.uploadFile(applicationGuid, archiveFilePath)) {
-                log.error("Upload wasn't transmitted but was not considered complete by server. Check the file you provided wasn't modified since the start of the CLI");
-                return Constants.RETURN_UPLOAD_ERROR;
+            String randomizedFileName = UUID.randomUUID().toString() + "." + getFileExtension(archiveFilePath.getName());
+            try (InputStream stream = Files.newInputStream(archiveFilePath.toPath())) {
+                long fileSize = archiveFilePath.length();
+                if (!uploadService.uploadInputStream(applicationGuid, randomizedFileName, fileSize, stream)) {
+                    log.error("Upload wasn't transmitted but was not considered complete by server. Check the file you provided wasn't modified since the start of the CLI");
+                    return Constants.RETURN_UPLOAD_ERROR;
+                }
+            } catch (IOException e) {
+                log.error("Unable to read archive content to be uploaded.", e);
+                throw new UploadException(e);
             }
 
-            String jobGuid = jobsService.startAddVersionJob(applicationGuid, archiveFilePath.getName(), versionName, new Date(), cloneVersion);
+            String jobGuid = jobsService.startAddVersionJob(applicationGuid, randomizedFileName, versionName, new Date(), cloneVersion);
             JobState jobState = jobsService.pollAndWaitForJobFinished(jobGuid);
             if (JobState.COMPLETED == jobState) {
                 log.info("Job completed successfully.");
@@ -152,5 +163,12 @@ public class AddVersionCommand implements Callable<Integer> {
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
         }
+    }
+
+    private static String getFileExtension(String filename) {
+        if (StringUtils.endsWithIgnoreCase(filename, ".tar.gz")) {
+            return "tar.gz";
+        }
+        return FilenameUtils.getExtension(filename);
     }
 }
