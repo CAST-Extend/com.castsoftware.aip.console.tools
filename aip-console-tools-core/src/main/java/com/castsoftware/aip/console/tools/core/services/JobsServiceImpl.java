@@ -44,10 +44,16 @@ public class JobsServiceImpl implements JobsService {
         if (StringUtils.isBlank(applicationName)) {
             throw new JobServiceException("Application name is empty. Unable to create application");
         }
+        return startCreateApplication(applicationName, null);
+    }
+
+    @Override
+    public String startCreateApplication(String applicationName, String nodeGuid) throws JobServiceException {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
-        // TODO: target a specific node ?
-        //jobParams.put(JobConstants.PARAM_NODE_GUID, nodeGuid);
+        if (StringUtils.isNotBlank(nodeGuid)) {
+            jobParams.put(Constants.PARAM_NODE_GUID, nodeGuid);
+        }
 
         try {
             String jobsEndpoint = ApiEndpointHelper.getJobsEndpoint();

@@ -12,7 +12,7 @@
     </parent>
     <groupId>com.castsoftware.uc.aip.console.tools</groupId>
     <artifactId>aip-console-tools</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.0.7-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>AIP Console Integration Tools</name>
     <description>Integration tools used for AIP Console</description>
@@ -112,7 +112,8 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.3</version>
                 <configuration>
-                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <tagNameFormat>@{project.version}</tagNameFormat>
+                    <pushChanges>false</pushChanges>
                 </configuration>
             </plugin>
         </plugins>

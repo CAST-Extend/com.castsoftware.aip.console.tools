@@ -1,5 +1,9 @@
 ## Release Notes :
 
+#### 1.0.6
+
+Files to be uploaded are renamed prior to upload. This is to avoid an issue with file name overlapping in AIP Console.
+
 #### 1.0.5 :
 
 Minor release with changes to the Java package in the CLI and Core lib.

@@ -24,6 +24,8 @@ public class AddVersionAction implements RunAction2 {
     private String versionName;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+    @Nullable
+    private String nodeName;
 
     private transient Run run;
 
