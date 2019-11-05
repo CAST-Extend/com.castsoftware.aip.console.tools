@@ -19,6 +19,16 @@ public interface JobsService {
     String startCreateApplication(String applicationName) throws JobServiceException;
 
     /**
+     * Start the "Create application" job, which will create a new application on the target AIP Console instance
+     *
+     * @param applicationName The name of the application
+     * @param nodeGuid        The Node GUID on which the application should be created
+     * @return The job GUID on AIP Console
+     * @throws JobServiceException If an error occurs while starting the job
+     */
+    String startCreateApplication(String applicationName, String nodeGuid) throws JobServiceException;
+
+    /**
      * Start the "Create Version" job, which will create a new version for an application on AIP Console
      *
      * @param appGuid            The application GUID for which the version should be created

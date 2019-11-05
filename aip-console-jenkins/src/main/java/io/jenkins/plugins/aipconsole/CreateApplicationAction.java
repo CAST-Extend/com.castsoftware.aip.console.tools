@@ -5,6 +5,7 @@ import hudson.model.Run;
 import jenkins.model.RunAction2;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 /**
  * Action for the Create Application step
@@ -15,6 +16,8 @@ public class CreateApplicationAction implements RunAction2 {
     private String applicationName;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+    @Nullable
+    private String nodeName;
 
     public Run getRun() {
         return run;

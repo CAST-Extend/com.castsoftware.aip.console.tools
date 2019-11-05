@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
+import com.castsoftware.aip.console.tools.core.dto.Versions;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
@@ -35,6 +36,12 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .findFirst()
                 .map(ApplicationDto::getGuid)
                 .orElse(null);
+    }
+
+    @Override
+    public boolean isApplicationVersionsListEmpty(String applicationGuid) throws ApplicationServiceException {
+        Versions appVersions = getApplicationVersion(applicationGuid);
+        return appVersions != null && !appVersions.getVersions().isEmpty();
     }
 
     @Override
@@ -72,6 +79,14 @@ public class ApplicationServiceImpl implements ApplicationService {
             return result == null ? new Applications() : result;
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to get applications from AIP Console", e);
+        }
+    }
+
+    private Versions getApplicationVersion(String appGuid) throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getApplicationVersionsPath(appGuid), Versions.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to retrieve the applications' versions", e);
         }
     }
 }
