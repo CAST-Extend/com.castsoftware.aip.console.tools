@@ -13,6 +13,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -210,9 +211,12 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        // Initialize the services
+        // Check the services have been properly initialized
         if (apiService == null || chunkedUploadService == null || jobsService == null) {
-            Guice.createInjector(new AipConsoleModule()).injectMembers(this);
+            Injector injector = Guice.createInjector(new AipConsoleModule());
+            apiService = injector.getInstance(RestApiService.class);
+            chunkedUploadService = injector.getInstance(ChunkedUploadService.class);
+            jobsService = injector.getInstance(JobsService.class);
         }
 
         String apiServerUrl = getDescriptor().getAipConsoleUrl();
