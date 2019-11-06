@@ -1,5 +1,20 @@
 ## Release Notes :
 
+#### 1.0.7
+
+When creating an application, either with the Create Application or using the `--auto-create` parameter, you can specify a node name to create the application on a specific node.
+
+When the copying the previous version's configuration, if no version exists, it will no longer fail but rather will run the default "Add Version" job.
+
+Jenkins Plugin 
+* Rolled back the behaviour of 1.0.6 : the files are not renamed, but the name inside AIP Console will be randomized instead.
+
+CLI
+* Send a randomized name to AIP Console for the ZIP file with the same content as the provided file.
+
+Fix:
+* Updated library `com.fasterxml.jackson.core` libraries to version 2.10.0, to fix a security vulnerability
+
 #### 1.0.6
 
 Files to be uploaded are renamed prior to upload. This is to avoid an issue with file name overlapping in AIP Console.

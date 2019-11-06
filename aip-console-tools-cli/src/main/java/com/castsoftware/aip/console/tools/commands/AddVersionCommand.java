@@ -61,10 +61,6 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
-    /*
-     * options for the upload and job startup
-     */
-
     /**
      * The application name to look for on AIP Console
      */
@@ -83,7 +79,7 @@ public class AddVersionCommand implements Callable<Integer> {
     /**
      * The Name fo the version from the command line
      */
-    @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION-NAME", description = "The name of the version to create")
+    @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION_NAME", description = "The name of the version to create")
     private String versionName;
     /**
      * Whether or not to clone previous version
@@ -95,6 +91,12 @@ public class AddVersionCommand implements Callable<Integer> {
      */
     @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
     private boolean autoCreate = false;
+
+    /**
+     * The name of the target node where application will be created. Only used if --auto-create is true and the application doesn't exists
+     */
+    @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME", description = "The name of the node on which the application will be created. Ignored if no --auto-create or the application already exists.")
+    private String nodeName;
 
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;

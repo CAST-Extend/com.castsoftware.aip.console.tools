@@ -12,6 +12,7 @@ import com.castsoftware.aip.console.tools.core.services.ChunkedUploadService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import hudson.EnvVars;
@@ -28,7 +29,6 @@ import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -44,6 +44,7 @@ import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -214,6 +215,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         // Check the services have been properly initialized
         if (apiService == null || chunkedUploadService == null || jobsService == null) {
             Injector injector = Guice.createInjector(new AipConsoleModule());
+            // Guice can automatically inject those, but then findbugs, not seeing the change,
+            // will fail the build considering they will provoke an NPE
+            // So, to avoid this, set them explicitly (if they were not set)
             apiService = injector.getInstance(RestApiService.class);
             chunkedUploadService = injector.getInstance(ChunkedUploadService.class);
             jobsService = injector.getInstance(JobsService.class);
@@ -228,12 +232,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             if (actualTimeout != Constants.DEFAULT_HTTP_TIMEOUT) {
                 apiService.setTimeout(actualTimeout, TimeUnit.SECONDS);
             }
-            // legacy basic auth
-            if (StringUtils.isNotBlank(username)) {
-                apiService.validateUrlAndKey(apiServerUrl, username, apiKey);
-            } else {
-                apiService.validateUrlAndKey(apiServerUrl, apiKey);
-            }
+            // Authentication (if username is null or empty, we'll authenticate with api key
+            apiService.validateUrlAndKey(apiServerUrl, username, apiKey);
         } catch (ApiCallException e) {
             listener.error(AddVersionBuilder_AddVersion_error_accessDenied(apiServerUrl));
             run.setResult(defaultResult);
@@ -260,20 +260,18 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 String nodeGuid = null;
                 if (StringUtils.isNotBlank(nodeName)) {
                     try {
-                        NodeDto[] nodes = apiService.getForEntity("/api/nodes", NodeDto[].class);
-                        if (!ArrayUtils.isEmpty(nodes)) {
-                            for (NodeDto node : nodes) {
-                                if (StringUtils.equalsIgnoreCase(node.getName(), nodeName)) {
-                                    nodeGuid = node.getGuid();
-                                    break;
-                                }
-                            }
-                            // fail if not is not found ? Or just warn ?
-                            if (StringUtils.isBlank(nodeGuid)) {
-                                listener.error(AddVersionBuilder_AddVersion_error_nodeNotFound(nodeName));
-                                run.setResult(defaultResult);
-                                return;
-                            }
+                        nodeGuid = apiService.getForEntity("/api/nodes",
+                                new TypeReference<List<NodeDto>>() {
+                                }).stream()
+                                .filter(n -> StringUtils.equalsIgnoreCase(n.getName(), nodeName))
+                                .map(NodeDto::getGuid)
+                                .findFirst()
+                                .orElse(null);
+
+                        if (StringUtils.isBlank(nodeGuid)) {
+                            listener.error(AddVersionBuilder_AddVersion_error_nodeNotFound(nodeName));
+                            run.setResult(defaultResult);
+                            return;
                         }
                     } catch (ApiCallException e) {
                         listener.error("Unable to retrieve the node guid from the given name");

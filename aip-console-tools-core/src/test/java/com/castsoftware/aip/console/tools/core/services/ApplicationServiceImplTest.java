@@ -93,7 +93,7 @@ public class ApplicationServiceImplTest {
     public void testGetOrCreateApplicationCreateJobFailure() throws Exception {
         when(restApiService.getForEntity(API_APP_ENDPOINT, Applications.class))
                 .thenReturn(new Applications());
-        when(jobsService.startCreateApplication(TEST_APP_NAME))
+        when(jobsService.startCreateApplication(TEST_APP_NAME, null))
                 .thenThrow(new JobServiceException());
 
         applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, true);
@@ -104,7 +104,7 @@ public class ApplicationServiceImplTest {
     public void testGetOrCreateApplicationJobFailed() throws Exception {
         when(restApiService.getForEntity(API_APP_ENDPOINT, Applications.class))
                 .thenReturn(new Applications());
-        when(jobsService.startCreateApplication(TEST_APP_NAME))
+        when(jobsService.startCreateApplication(TEST_APP_NAME, null))
                 .thenReturn(TEST_JOB_GUID);
         when(jobsService.pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any()))
                 .thenReturn(null);
@@ -117,7 +117,7 @@ public class ApplicationServiceImplTest {
     public void testGetOrCreateApplicationOk() throws Exception {
         when(restApiService.getForEntity(API_APP_ENDPOINT, Applications.class))
                 .thenReturn(new Applications());
-        when(jobsService.startCreateApplication(TEST_APP_NAME))
+        when(jobsService.startCreateApplication(TEST_APP_NAME, null))
                 .thenReturn(TEST_JOB_GUID);
         when(jobsService.pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any()))
                 .thenReturn(TEST_APP_GUID);
