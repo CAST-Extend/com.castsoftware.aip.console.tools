@@ -42,6 +42,20 @@ public interface JobsService {
     String startAddVersionJob(String appGuid, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion) throws JobServiceException;
 
     /**
+     * Start the "Create Version" job, which will create a new version for an application on AIP Console
+     *
+     * @param appGuid                The application GUID for which the version should be created
+     * @param zipFileName            THe name of the ZIP File that was uploaded before
+     * @param versionName            The name fo the version to create
+     * @param versionReleaseDate     The release date of this version
+     * @param cloneVersion           Whether to clone an existing version or not (rescan)
+     * @param enableSecurityDataflow Whether the security dataflow parameter should be enabled in this version
+     * @return The GUID of the job that was started on AIP Console
+     * @throws JobServiceException IF any error occurs while starting the job
+     */
+    String startAddVersionJob(String appGuid, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow) throws JobServiceException;
+
+    /**
      * Polls AIP Console to get the status of the job with the given GUID.
      *
      * @param jobGuid The job GUID to poll

@@ -46,7 +46,7 @@ public class JobsServiceImplTest {
     private static final String TEST_ZIP_NAME = "file.zip";
     private static final String TEST_VERSION_NAME = "versionName";
     private static final String TEST_JOB_GUID = "jobGuid";
-    private static final String DEFAULT_OBJECTIVES = "GLOBAL_RISK,SECURITY,FUNCTIONAL_POINTS";
+    private static final String DEFAULT_OBJECTIVES = "GLOBAL_RISK,FUNCTIONAL_POINTS";
 
     @Mock
     private RestApiService restApiService;
@@ -68,7 +68,6 @@ public class JobsServiceImplTest {
     public void testCreateApplicationCreateJobFailed() throws Exception {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
-        jobParams.put(Constants.PARAM_VERSION_OBJECTIVES, DEFAULT_OBJECTIVES);
         CreateJobsRequest expectedRequest = new CreateJobsRequest();
         expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
         expectedRequest.setJobParameters(jobParams);
@@ -85,7 +84,6 @@ public class JobsServiceImplTest {
     public void testCreateApplicationOk() throws Exception {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
-        jobParams.put(Constants.PARAM_VERSION_OBJECTIVES, DEFAULT_OBJECTIVES);
         CreateJobsRequest expectedRequest = new CreateJobsRequest();
         expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
         expectedRequest.setJobParameters(jobParams);
@@ -214,7 +212,8 @@ public class JobsServiceImplTest {
             return argument.getJobType() == JobType.ADD_VERSION &&
                     jobParams.size() > 0 &&
                     TEST_APP_GUID.equalsIgnoreCase(jobParams.get(Constants.PARAM_APP_GUID)) &&
-                    TEST_ZIP_NAME.equalsIgnoreCase(jobParams.get(Constants.PARAM_SOURCE_ARCHIVE));
+                    TEST_ZIP_NAME.equalsIgnoreCase(jobParams.get(Constants.PARAM_SOURCE_ARCHIVE)) &&
+                    DEFAULT_OBJECTIVES.equalsIgnoreCase(jobParams.get(Constants.PARAM_VERSION_OBJECTIVES));
         };
     }
 

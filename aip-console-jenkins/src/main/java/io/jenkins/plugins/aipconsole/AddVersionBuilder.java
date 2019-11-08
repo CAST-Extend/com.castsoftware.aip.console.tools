@@ -96,6 +96,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private boolean failureIgnored = false;
     @Nullable
     private String nodeName;
+    private boolean enableSecurityDataflow = false;
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -182,6 +183,15 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setNodeName(@Nullable String nodeName) {
         this.nodeName = nodeName;
+    }
+
+    public boolean isEnableSecurityDataflow() {
+        return enableSecurityDataflow;
+    }
+
+    @DataBoundSetter
+    public void setEnableSecurityDataflow(boolean enableSecurityDataflow) {
+        this.enableSecurityDataflow = enableSecurityDataflow;
     }
 
     @Override

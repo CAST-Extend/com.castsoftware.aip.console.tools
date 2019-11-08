@@ -92,6 +92,9 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
     private boolean autoCreate = false;
 
+    @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version")
+    private boolean enableSecurityDataflow = false;
+
     /**
      * The name of the target node where application will be created. Only used if --auto-create is true and the application doesn't exists
      */
@@ -147,7 +150,7 @@ public class AddVersionCommand implements Callable<Integer> {
                 throw new UploadException(e);
             }
 
-            String jobGuid = jobsService.startAddVersionJob(applicationGuid, randomizedFileName, versionName, new Date(), cloneVersion);
+            String jobGuid = jobsService.startAddVersionJob(applicationGuid, randomizedFileName, versionName, new Date(), cloneVersion, enableSecurityDataflow);
             JobState jobState = jobsService.pollAndWaitForJobFinished(jobGuid);
             if (JobState.COMPLETED == jobState) {
                 log.info("Job completed successfully.");
