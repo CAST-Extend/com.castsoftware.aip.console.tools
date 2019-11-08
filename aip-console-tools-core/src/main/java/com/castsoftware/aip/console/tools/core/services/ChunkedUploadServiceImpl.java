@@ -7,11 +7,12 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import lombok.extern.java.Log;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,12 +25,26 @@ import java.util.logging.Level;
 @Log
 public class ChunkedUploadServiceImpl implements ChunkedUploadService {
 
-    private static final int MAX_CHUNK_SIZE = 10 * 1024 * 1024;
+    /**
+     * Maximum chunk size allowed by AIP Console
+     */
+    private static final int MAX_CHUNK_SIZE = 50 * 1024 * 1024;
+    /**
+     * Default chunk size if none is provided
+     */
+    private static final int DEFAULT_CHUNK_SIZE = 10 * 1024 * 1024;
 
     private RestApiService restApiService;
 
+    private int chunkSize = DEFAULT_CHUNK_SIZE;
+
     public ChunkedUploadServiceImpl(RestApiService restApiService) {
         this.restApiService = restApiService;
+    }
+
+    public ChunkedUploadServiceImpl(RestApiService restApiService, int maxChunkSize) {
+        this.restApiService = restApiService;
+        this.chunkSize = Math.min(maxChunkSize, MAX_CHUNK_SIZE);
     }
 
     @Override
@@ -49,7 +64,7 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
         } catch (IOException e) {
             throw new UploadException("Unable to get archive size for given file " + archivePath, e);
         }
-        try (InputStream is = FileUtils.openInputStream(archivePath.toFile())) {
+        try (InputStream is = new BufferedInputStream(Files.newInputStream(archivePath))) {
             return uploadInputStream(appGuid, FilenameUtils.getName(archivePath.toString()), fileSize, is);
         } catch (IOException e) {
             throw new UploadException("Unable to read file", e);
@@ -81,15 +96,20 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
         String uploadChunkEndpoint = ApiEndpointHelper.getApplicationUploadPath(appGuid, dto.getGuid());
         int currentChunk = 1;
         try {
-            log.info("Starting chunks uploads");
             long currentOffset = 0;
-            int totalChunks = (int) Math.ceil((double) fileSize / (double) MAX_CHUNK_SIZE);
-            for (; currentOffset < fileSize; currentChunk++) {
-                byte[] buffer = new byte[MAX_CHUNK_SIZE];
-                int nbBytesRead = content.read(buffer);
-                log.finer("Read " + nbBytesRead + " from file");
+            int totalChunks = (int) Math.ceil((double) fileSize / (double) chunkSize);
+            log.info("Starting chunks uploads. Expected number of chunks is " + totalChunks);
+            while (currentOffset < fileSize) {
+                byte[] buffer = new byte[chunkSize];
+                // IOUtils.read will try to fill the buffer (unless it arrives at EOF)
+                int nbBytesRead = IOUtils.read(content, buffer);
+                log.info("Read " + nbBytesRead + " from file");
                 if (nbBytesRead < 0) {
-                    throw new UploadException("No more content to read, but file not complete (the file might be modified by another program?).");
+                    throw new UploadException("No more content to read but expected file size was not attained. Is a process modifying the file being read ?");
+                }
+                if (nbBytesRead == 0) {
+                    log.fine("No content could be read from the file, but end of file was not reached. Trying again.");
+                    continue;
                 }
 
                 ChunkedUploadMetadataRequest metadata = new ChunkedUploadMetadataRequest();
@@ -108,17 +128,18 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
 
                 Map<String, Object> body = new HashMap<>();
                 body.put("metadata", metadata);
-                if (nbBytesRead < MAX_CHUNK_SIZE) {
+                if (nbBytesRead < chunkSize) {
                     body.put("content", ArrayUtils.subarray(buffer, 0, nbBytesRead));
                 } else {
                     body.put("content", buffer);
                 }
 
                 log.info(String.format("Uploading chunk %s of %s", currentChunk, totalChunks));
-                log.fine("Uploading a chunk of " + fileSize + " bytes");
+                log.fine("Uploading a chunk of " + nbBytesRead + " bytes");
 
                 dto = restApiService.exchangeMultipartForEntity("PATCH", uploadChunkEndpoint, headers, body, ChunkedUploadDto.class);
                 currentOffset += nbBytesRead;
+                currentChunk++;
 
                 assert dto != null;
                 assert dto.getCurrentOffset() == currentOffset;

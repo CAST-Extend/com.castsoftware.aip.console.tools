@@ -213,7 +213,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         }
 
         // Check the services have been properly initialized
-        if (apiService == null || chunkedUploadService == null || jobsService == null) {
+        if (apiService == null || chunkedUploadService == null || jobsService == null || applicationService == null) {
             Injector injector = Guice.createInjector(new AipConsoleModule());
             // Guice can automatically inject those, but then findbugs, not seeing the change,
             // will fail the build considering they will provoke an NPE
@@ -221,6 +221,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             apiService = injector.getInstance(RestApiService.class);
             chunkedUploadService = injector.getInstance(ChunkedUploadService.class);
             jobsService = injector.getInstance(JobsService.class);
+            applicationService = injector.getInstance(ApplicationService.class);
         }
 
         String apiServerUrl = getDescriptor().getAipConsoleUrl();

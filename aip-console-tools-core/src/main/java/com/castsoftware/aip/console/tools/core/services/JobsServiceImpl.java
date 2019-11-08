@@ -32,6 +32,7 @@ public class JobsServiceImpl implements JobsService {
 
     private static final DateFormat formatReleaseDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(10);
+    private static final String DEFAULT_VERSION_OBJECTIVES = "GLOBAL_RISK,SECURITY,FUNCTIONAL_POINTS";
 
     private RestApiService restApiService;
 
@@ -51,6 +52,7 @@ public class JobsServiceImpl implements JobsService {
     public String startCreateApplication(String applicationName, String nodeGuid) throws JobServiceException {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
+        jobParams.put(Constants.PARAM_VERSION_OBJECTIVES, DEFAULT_VERSION_OBJECTIVES);
         if (StringUtils.isNotBlank(nodeGuid)) {
             jobParams.put(Constants.PARAM_NODE_GUID, nodeGuid);
         }

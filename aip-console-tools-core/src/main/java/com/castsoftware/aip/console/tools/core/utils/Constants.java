@@ -57,10 +57,11 @@ public class Constants {
     public static final String PARAM_APP_GUID = "appGuid";
     public static final String PARAM_SUSPEND = "suspend";
     public static final String PARAM_IGNORE_CHECK = "ignoreFileStructureCheck";
-
     public static final String PARAM_RELEASE_DATE = "releaseDate";
     public static final String PARAM_SOURCE_ARCHIVE = "sourceArchive";
+    public static final String PARAM_VERSION_OBJECTIVES = "objectives";
 
+    // Job Step Names
     public static final String EXTRACT_STEP_NAME = "unzip_source";
     public static final String CODE_SCANNER_STEP_NAME = "code_scanner";
     public static final String SET_CURRENT_STEP_NAME = "setcurrent";
