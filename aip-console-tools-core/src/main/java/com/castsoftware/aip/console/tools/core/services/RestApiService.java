@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -38,13 +39,23 @@ public interface RestApiService {
 
     <T> T getForEntity(String endpoint, Class<T> clazz) throws ApiCallException;
 
+    <T> T getForEntity(String endpoint, TypeReference<T> clazz) throws ApiCallException;
+
     <T> T postForEntity(String endpoint, Object entity, Class<T> responseClass) throws ApiCallException;
+
+    <T> T postForEntity(String endpoint, Object entity, TypeReference<T> responseClass) throws ApiCallException;
 
     <T> T patchForEntity(String endpoint, Object entity, Class<T> responseClass) throws ApiCallException;
 
+    <T> T patchForEntity(String endpoint, Object entity, TypeReference<T> responseClass) throws ApiCallException;
+
     <T> T putForEntity(String endpoint, Object entity, Class<T> responseClass) throws ApiCallException;
 
+    <T> T putForEntity(String endpoint, Object entity, TypeReference<T> responseClass) throws ApiCallException;
+
     <T> T deleteForEntity(String endpoint, Object entity, Class<T> clazz) throws ApiCallException;
+
+    <T> T deleteForEntity(String endpoint, Object entity, TypeReference<T> clazz) throws ApiCallException;
 
     /**
      * This method is used for multipart content exchange

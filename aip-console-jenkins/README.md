@@ -46,21 +46,27 @@ In the "Build" of your job, add a new Build Step, then click "Add Application ve
 
 ![Add Application Version capture](./doc/images/add-version.png)
 
-You must give an Application Name and a path to a `zip` file as the first 2 parameters.
+You must give an Application Name and a path to a an Archive File, either `zip`, `tgz` or `tar.gz`.
 
 The application name will be checked on AIP Console, and the application GUID will be obtained this way (it'll be saved in the job configuration and displayed in the read only field Application GUID)
 
-The Zip file will be uploaded to AIP Console, extracted and then run through the whole analysis workflow, as if you had done so through the AIP Console UI.
+This Archive file will be uploaded to AIP Console, extracted and then run through the whole analysis workflow, as if you had done so through the AIP Console UI.
 
 ⚠ *When creating versions for very large applications (above 1Gb of source code), be careful of the timeout configuration, either globally or in your job. As the upload completes, there is a copy operation and depending on your machines specs, it might take more than the default timeout (30s).*
 
-If you check the "Rescan" checkbox, this new version will copy the previous version's configuration (packages, extensions, etc.). 
+Here is an explanation of the other parameters :
+* *Create application if missing ?* : This will create the application automatically if it doesn't exist on AIP Console.
+* *Version Name* : The name of the version that will be created on AIP Console. If not provided, the version will of the following form`vyyMMdd.HHmmss` (for example `v191108.133152`)
+* *Rescan* : Whether we should copy a previous version's configuration or not. If this is checked and no version exists, this parameter will be ignored.
+* *Enable Security Dataflow* : Enabled the Security Dataflow for this version. This parameter will be ignored if you are copying a previous version.
 
-If you check the "Auto Create" checkbox, when searching for the application name on AIP Console, if it doesn't exists, it'll create it automatically.
+Under the **Advanced Settings** button are some more parameters for advanced usage of the plugin.
 
-If you check the "Ignore failures" check box, the failure of the AIP Console job will not result in a failure of the Jenkins Job. Instead, it'll be marked as unstable, this letting you know of issues without breaking your job.
+![Add Application Version capture](./doc/images/add-version-advanced.png)
 
-You can provide a version name. If left empty, the following version will be based on the current date and time and formatted as such: "vyyMMdd.HHmmss"
+* *Ignore Analysis Failure ?* : By default, failed analysis will mark the Jenkins Build as a Failure. Checking this will mark them as Unstable instead of failing the entire build.
+* *Node Name* : Enter the name of a node where the application will be created if it will be created. This parameter is ignored if the application already exists.
+* *Connection Timeout (in seconds)* : The time (in seconds) before a connection to AIP Console is considered timed out (i.e. that AIP console might be unavailable). For unlimited wait, you can set this to `0`
 
 Here is a sample output of the Add Version step : 
 
@@ -86,7 +92,7 @@ NB: Information regarding the creation of the application will also be added to 
 As with the Create Application step, you can also use this step in a Pipeline Project:
 
 ```
-aipAddVersion applicationGuid: 'a2b41b7e-538a-4ec8-8ddf-8ec7baa5a980', filePath: 'source.zip', versionName: '$BUILD_ID'
+aipAddVersion applicationName: 'My Application', filePath: 'source.zip', versionName: '$BUILD_ID'
 ```
 
 ## Development 

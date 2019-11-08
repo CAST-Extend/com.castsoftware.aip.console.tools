@@ -4,11 +4,14 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.extern.java.Log;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -124,8 +127,18 @@ public class RestApiServiceImpl implements RestApiService {
     }
 
     @Override
+    public <T> T getForEntity(String endpoint, TypeReference<T> type) throws ApiCallException {
+        return exchangeForEntity("GET", endpoint, null, type);
+    }
+
+    @Override
     public <T> T postForEntity(String endpoint, Object entity, Class<T> responseClass) throws ApiCallException {
         return exchangeForEntity("POST", endpoint, entity, responseClass);
+    }
+
+    @Override
+    public <T> T postForEntity(String endpoint, Object entity, TypeReference<T> type) throws ApiCallException {
+        return exchangeForEntity("POST", endpoint, entity, type);
     }
 
     @Override
@@ -134,13 +147,28 @@ public class RestApiServiceImpl implements RestApiService {
     }
 
     @Override
+    public <T> T patchForEntity(String endpoint, Object entity, TypeReference<T> type) throws ApiCallException {
+        return exchangeForEntity("PATCH", endpoint, entity, type);
+    }
+
+    @Override
     public <T> T putForEntity(String endpoint, Object entity, Class<T> responseClass) throws ApiCallException {
         return exchangeForEntity("PUT", endpoint, entity, responseClass);
     }
 
     @Override
+    public <T> T putForEntity(String endpoint, Object entity, TypeReference<T> type) throws ApiCallException {
+        return exchangeForEntity("PUT", endpoint, entity, type);
+    }
+
+    @Override
     public <T> T deleteForEntity(String endpoint, Object entity, Class<T> responseClass) throws ApiCallException {
         return exchangeForEntity("DELETE", endpoint, entity, responseClass);
+    }
+
+    @Override
+    public <T> T deleteForEntity(String endpoint, Object entity, TypeReference<T> type) throws ApiCallException {
+        return exchangeForEntity("DELETE", endpoint, entity, type);
     }
 
     @Override
@@ -192,6 +220,14 @@ public class RestApiServiceImpl implements RestApiService {
     }
 
     private <T> T exchangeForEntity(String method, String endpoint, Object entity, Class<T> responseClass) throws ApiCallException {
+        return exchangeForEntity(method, endpoint, entity, TypeFactory.defaultInstance().constructType(responseClass));
+    }
+
+    private <T> T exchangeForEntity(String method, String endpoint, Object entity, TypeReference<T> typeReference) throws ApiCallException {
+        return exchangeForEntity(method, endpoint, entity, TypeFactory.defaultInstance().constructType(typeReference));
+    }
+
+    private <T> T exchangeForEntity(String method, String endpoint, Object entity, JavaType javaType) throws ApiCallException {
         Request request = getRequestBuilder(endpoint)
                 .method(method, getRequestBodyForEntity(entity))
                 .build();
@@ -203,14 +239,14 @@ public class RestApiServiceImpl implements RestApiService {
                 ResponseBody responseBody = response.body();
                 if (responseBody != null) {
                     try (InputStream bodyStream = responseBody.byteStream()) {
-                        if(responseClass.equals(String.class)) {
-                            // may be used dfor debug purposes
+                        if (String.class.isAssignableFrom(javaType.getRawClass())) {
+                            // may be used for debug purposes
                             return (T) IOUtils.toString(bodyStream, StandardCharsets.UTF_8);
                         } else {
-                            return mapper.readValue(bodyStream, responseClass);
+                            return mapper.readValue(bodyStream, javaType);
                         }
                     } catch (MismatchedInputException e) {
-                        log.log(Level.WARNING, "Unable to parse object as " + responseClass.getName() + "(expected ?). Returning null instead.", e);
+                        log.log(Level.WARNING, "Unable to parse object as " + javaType.getRawClass().getName() + "(expected ?). Returning null instead.", e);
                         return null;
                     }
                 }

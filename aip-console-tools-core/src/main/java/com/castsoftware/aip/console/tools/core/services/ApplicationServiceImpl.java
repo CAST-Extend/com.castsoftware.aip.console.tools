@@ -2,14 +2,18 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
+import com.castsoftware.aip.console.tools.core.dto.NodeDto;
+import com.castsoftware.aip.console.tools.core.dto.Versions;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -38,7 +42,18 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public boolean isApplicationVersionsListEmpty(String applicationGuid) throws ApplicationServiceException {
+        Versions appVersions = getApplicationVersion(applicationGuid);
+        return appVersions != null && !appVersions.getVersions().isEmpty();
+    }
+
+    @Override
     public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate) throws ApplicationServiceException {
+        return getOrCreateApplicationFromName(applicationName, autoCreate, null);
+    }
+
+    @Override
+    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName) throws ApplicationServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new ApplicationServiceException("No application name provided.");
         }
@@ -55,10 +70,27 @@ public class ApplicationServiceImpl implements ApplicationService {
                 return null;
             }
             try {
-                log.info("Application not found and 'auto create' enabled. Starting application creation");
-                String jobGuid = jobService.startCreateApplication(applicationName);
+                String nodeGuid = null;
+                if (StringUtils.isNotBlank(nodeName)) {
+                    nodeGuid = restApiService.getForEntity("/api/nodes", new TypeReference<List<NodeDto>>() {
+                    }).stream()
+                            .filter(n -> StringUtils.equalsIgnoreCase(nodeName, n.getName()))
+                            .map(NodeDto::getGuid)
+                            .findFirst()
+                            .orElse(null);
+                    if (nodeGuid == null) {
+                        throw new ApplicationServiceException("Node with name " + nodeName + " could not be found on AIP Console to create the new application");
+                    }
+                }
+                String infoMessage = String.format("Application '%s' not found and 'auto create' enabled. Starting application creation", applicationName);
+                if (nodeGuid != null) {
+                    infoMessage += " on node " + nodeName;
+                }
+                log.info(infoMessage);
+
+                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid);
                 return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
-            } catch (JobServiceException e) {
+            } catch (JobServiceException | ApiCallException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);
                 throw new ApplicationServiceException("Unable to create application automatically.", e);
             }
@@ -72,6 +104,14 @@ public class ApplicationServiceImpl implements ApplicationService {
             return result == null ? new Applications() : result;
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to get applications from AIP Console", e);
+        }
+    }
+
+    private Versions getApplicationVersion(String appGuid) throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getApplicationVersionsPath(appGuid), Versions.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to retrieve the applications' versions", e);
         }
     }
 }

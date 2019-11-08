@@ -32,6 +32,8 @@ public class JobsServiceImpl implements JobsService {
 
     private static final DateFormat formatReleaseDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(10);
+    private static final String DEFAULT_VERSION_OBJECTIVES = "GLOBAL_RISK,FUNCTIONAL_POINTS";
+    private static final String VERSION_OBJECTIVES_WITH_SECURITY = DEFAULT_VERSION_OBJECTIVES + ",SECURITY";
 
     private RestApiService restApiService;
 
@@ -44,10 +46,16 @@ public class JobsServiceImpl implements JobsService {
         if (StringUtils.isBlank(applicationName)) {
             throw new JobServiceException("Application name is empty. Unable to create application");
         }
+        return startCreateApplication(applicationName, null);
+    }
+
+    @Override
+    public String startCreateApplication(String applicationName, String nodeGuid) throws JobServiceException {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
-        // TODO: target a specific node ?
-        //jobParams.put(JobConstants.PARAM_NODE_GUID, nodeGuid);
+        if (StringUtils.isNotBlank(nodeGuid)) {
+            jobParams.put(Constants.PARAM_NODE_GUID, nodeGuid);
+        }
 
         try {
             String jobsEndpoint = ApiEndpointHelper.getJobsEndpoint();
@@ -64,6 +72,12 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public String startAddVersionJob(String appGuid, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion)
+            throws JobServiceException {
+        return startAddVersionJob(appGuid, zipFileName, versionName, versionReleaseDate, cloneVersion, false);
+    }
+
+    @Override
+    public String startAddVersionJob(String appGuid, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow)
             throws JobServiceException {
         if (StringUtils.isBlank(appGuid)) {
             throw new JobServiceException("No application GUID provided");
@@ -107,6 +121,8 @@ public class JobsServiceImpl implements JobsService {
         jobParameters.put(Constants.PARAM_START_STEP, Constants.EXTRACT_STEP_NAME);
         jobParameters.put(Constants.PARAM_END_STEP, Constants.CONSOLIDATE_STEP_NAME);
         jobParameters.put(Constants.PARAM_IGNORE_CHECK, "true");
+        jobParameters.put(Constants.PARAM_VERSION_OBJECTIVES, enableSecurityDataflow ? VERSION_OBJECTIVES_WITH_SECURITY : DEFAULT_VERSION_OBJECTIVES);
+
         if (versionReleaseDate != null) {
             String versionReleaseStr = formatReleaseDate.format(versionReleaseDate);
             log.info(String.format("Creating version '%s' for application '%s' with release date '%s'", versionName, appGuid, versionReleaseStr));
@@ -156,7 +172,7 @@ public class JobsServiceImpl implements JobsService {
     @Override
     public <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobStatusWithSteps, R> callback) throws JobServiceException {
         return pollAndWaitForJobFinished(jobGuid,
-                jobStep -> log.info("Current step is : " +  jobStep.getProgressStep()),
+                jobStep -> log.info("Current step is : " + jobStep.getProgressStep()),
                 callback);
     }
 
@@ -177,7 +193,7 @@ public class JobsServiceImpl implements JobsService {
 
                 if (currentStep != null && !currentStep.equalsIgnoreCase(previousStep)) {
                     previousStep = currentStep;
-                    if(stepChangedCallback != null) {
+                    if (stepChangedCallback != null) {
                         stepChangedCallback.accept(jobStatus);
                     }
                 }

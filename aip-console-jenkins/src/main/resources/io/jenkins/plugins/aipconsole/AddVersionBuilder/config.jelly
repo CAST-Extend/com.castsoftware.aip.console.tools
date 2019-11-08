@@ -3,25 +3,30 @@
     <f:entry title="${%appName}" field="applicationName" description="${%appName.descr}">
         <f:textbox />
     </f:entry>
-    <f:entry title="${%appGuid}" field="applicationGuid" description="${%appGuid.descr}">
-        <f:readOnlyTextbox/>
-    </f:entry>
     <f:entry title="${%filePath}" field="filePath" description="${%filePath.descr}">
         <f:textbox />
     </f:entry>
     <f:entry title="${%autoCreate}" field="autoCreate" description="${%autoCreate.descr}">
         <f:checkbox default="false" />
     </f:entry>
+    <f:entry title="${%versionName}" field="versionName" description="${%versionName.descr}">
+        <f:textbox/>
+    </f:entry>
     <f:entry title="${%cloneVersion}" field="cloneVersion" description="${%cloneVersion.descr}">
         <f:checkbox default="false"/>
     </f:entry>
-    <f:entry title="${%versionName}" field="versionName" description="${%versionName.descr}">
-        <f:textbox />
-    </f:entry>
-    <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
-        <f:number default="90"/>
-    </f:entry>
-    <f:entry title="${%failureIgnored}" field="failureIgnored" description="${%failureIgnored.descr}">
+    <f:entry title="${%enableSecurity}" field="enableSecurityDataflow" description="${%enableSecurity.descr}">
         <f:checkbox/>
     </f:entry>
+    <f:advanced title="${%advancedSettings}">
+        <f:entry title="${%failureIgnored}" field="failureIgnored" description="${%failureIgnored.descr}">
+            <f:checkbox/>
+        </f:entry>
+        <f:entry title="${%nodeName}" field="nodeName" description="${%nodeName.descr}">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
+            <f:number default="90"/>
+        </f:entry>
+    </f:advanced>
 </j:jelly>

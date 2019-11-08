@@ -111,7 +111,8 @@ $ $JAVA_HOME/bin/java -jar aip-console-tools-cli.jar AddVersion --apikey:env=AIP
 2019-04-12 17:36:13.745 - INFO --- Job completed successfully.
 ```
 
-This command will first search for the application `my cli application` on AIP Console server located at `http://localhost:8081` and then upload the file `jenkins-2.171.zip`. Once the upload is complete, the CLI tool will ask AIP Console to start an "Add Version" job, with snapshot creation.
+This command will first search for the application `my cli application` on AIP Console server located at `http://localhost:8081` and then upload the file `jenkins-2.171.zip`.
+Once the upload is complete, the CLI tool will ask AIP Console to start an "Add Version" job, with Snapshot Creation.
 
 It'll then wait until the job is complete on AIP Console before closing, continuously monitoring the status of the job on AIP Console.
 The AIP Console CLI Tool will output information in the standard output, including error messages.
@@ -120,15 +121,20 @@ Here is a detailed look at the options available for `AddVersion` :
 
 ```bash
 $ java -jar target/aip-console-tools-cli.jar AddVersion -h
-Usage: aip-integration-tool AddVersion [-chV] [--auto-create] [--apikey[=<apiKey>]] [--apikey:env=ENV_VAR_NAME]
-                                       [--timeout=<timeout>] [--user=<username>] [-a=APPLICATION_GUID] -f=FILE
-                                       [-n=APPLICATION_NAME] [-s=AIP_CONSOLE_URL] [-v=VERSION-NAME]
+Usage: aip-integration-tool AddVersion [-chV] [--auto-create] [--enable-security-dataflow] [--apikey[=<apiKey>]]
+                                       [--apikey:env=ENV_VAR_NAME] [--node-name=NODE_NAME] [--timeout=<timeout>]
+                                       [--user=<username>] [-a=APPLICATION_GUID] -f=FILE [-n=APPLICATION_NAME]
+                                       [-s=AIP_CONSOLE_URL] [-v=VERSION_NAME]
 Creates a new version for an application on AIP Console
       --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt entry if no value is passed.
       --apikey:env=ENV_VAR_NAME
                             The name of the environment variable containing the AIP Key to access AIP Console
       --auto-create         If the given application name doesn't exist on the target server, it'll be automatically created
                               before creating a new version
+      --enable-security-dataflow
+                            If defined, this will activate the security dataflow for this version
+      --node-name=NODE_NAME The name of the node on which the application will be created. Ignored if no --auto-create or
+                              the application already exists.
       --timeout=<timeout>   The timeout in seconds for calls to AIP Console. Defaults to a 30 timeout
       --user=<username>     User name. Use this if no API Key generation is available on AIP Console. Provide the user's
                               password in the apikey parameter.

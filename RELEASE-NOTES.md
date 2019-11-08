@@ -1,5 +1,25 @@
 ## Release Notes :
 
+#### 1.0.7
+
+List of added features :
+* You can specify a node name when creating a new application
+* When using the "Rescan" parameter, if no version exists for the application, the version creation will not fail anymore but just launch an Add Version Job
+* Versions will now be created with Version Objectives by default : Global Risks, Functional Points.
+* You can also check the "Enable Security Dataflow" to add the Version Objective "Security" and enable analysis with a Security Dataflow.
+
+Jenkins Plugin 
+* Rolled back the behaviour of 1.0.6 : the files are not renamed, but the name inside AIP Console will be randomized instead, leaving your source zip file as is.
+* ⚠ Some parameter are now hidden behind the "Advanced Settings" button in the "Add Version" step. 
+
+CLI
+* Send a randomized name to AIP Console for the ZIP file with the same content as the provided file.
+
+Fix:
+* In some cases, chunks uploaded to AIP Console were much smaller than the 10 MB fixed chunk size. The upload will now fill the buffer with 10MB (unless it reaches the end of the file) before sending it to AIP Console.
+    * The size of the chunk will remain fixed for now, but will be parameterized in a later version.
+* Updated library `com.fasterxml.jackson.core` libraries to version 2.10.0, to fix a security vulnerability
+
 #### 1.0.6
 
 Files to be uploaded are renamed prior to upload. This is to avoid an issue with file name overlapping in AIP Console.

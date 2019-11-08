@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
@@ -12,10 +13,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +52,9 @@ public class CreateApplicationCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-n", "--app-name"}, paramLabel = "APPLICATION_NAME", description = "The name of the application to create", required = true)
     private String applicationName;
 
+    @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME", description = "The name of the node on which the application will be created.")
+    private String nodeName;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -66,7 +72,20 @@ public class CreateApplicationCommand implements Callable<Integer> {
         }
 
         try {
-            String jobGuid = jobsService.startCreateApplication(applicationName);
+            String nodeGuid = null;
+            if (StringUtils.isNotBlank(nodeName)) {
+                NodeDto[] nodes = restApiService.getForEntity("/api/nodes", NodeDto[].class);
+                nodeGuid = Arrays.stream(nodes)
+                        .filter(node -> StringUtils.equalsIgnoreCase(nodeName, node.getName()))
+                        .map(NodeDto::getGuid)
+                        .findFirst()
+                        .orElse(null);
+                if (nodeGuid == null) {
+                    log.error("Node with name '%s' could not be found on AIP Console.");
+                    return Constants.RETURN_APPLICATION_NOT_FOUND;
+                }
+            }
+            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid);
             log.info("Started job to create new application.");
             return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {
@@ -78,6 +97,9 @@ public class CreateApplicationCommand implements Callable<Integer> {
             });
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_FAILED;
+        } catch (ApiCallException e) {
+            log.error("Call to AIP Console resulted in an error.", e);
+            return Constants.UNKNOWN_ERROR;
         }
     }
 

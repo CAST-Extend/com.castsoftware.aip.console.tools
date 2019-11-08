@@ -27,6 +27,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +66,9 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
 
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
+    @Nullable
+    private String nodeName;
+
     @DataBoundConstructor
     public CreateApplicationBuilder(String applicationName) {
         this.applicationName = applicationName;
@@ -90,6 +94,16 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
     @DataBoundSetter
     public void setTimeout(long timeout) {
         this.timeout = timeout;
+    }
+
+    @Nullable
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    @DataBoundSetter
+    public void setNodeName(@Nullable String nodeName) {
+        this.nodeName = nodeName;
     }
 
     @Override

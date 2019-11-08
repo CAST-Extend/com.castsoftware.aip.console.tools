@@ -9,4 +9,7 @@
     <f:entry title="${%failureIgnored}" field="failureIgnored" description="${%failureIgnored.descr}">
         <f:checkbox/>
     </f:entry>
+    <f:entry title="${%nodeName}" field="nodeName" description="${%nodeName.descr}">
+        <f:textbox/>
+    </f:entry>
 </j:jelly>

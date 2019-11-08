@@ -13,6 +13,15 @@ public interface ApplicationService {
     String getApplicationGuidFromName(String applicationName) throws ApplicationServiceException;
 
     /**
+     * Checks whether the application has any versions
+     *
+     * @param applicationGuid The application GUID
+     * @return True if no version exists for the given application, false otherwise
+     * @throws ApplicationServiceException If any error occurs while retrieving the list of version from AIP Console
+     */
+    boolean isApplicationVersionsListEmpty(String applicationGuid) throws ApplicationServiceException;
+
+    /**
      * Retrieve an application's GUID from the given application name.
      * <p/>
      * If the "autoCreate" parameter is true and the application doesn't exist on AIP Console, it'll automatically create it
@@ -24,4 +33,18 @@ public interface ApplicationService {
      * @throws ApplicationServiceException If any error occurs during the retrieval or creation of the application
      */
     String getOrCreateApplicationFromName(String applicationName, boolean autoCreate) throws ApplicationServiceException;
+
+    /**
+     * Retrieve an application's GUID from the given application name.
+     * <p/>
+     * If the "autoCreate" parameter is true and the application doesn't exist on AIP Console, it'll automatically create it
+     * before returning the GUID.
+     *
+     * @param applicationName The name of the application to look up
+     * @param autoCreate      Whether the application should be created if it couldn't be found
+     * @param nodeName        The name of the node on which the application
+     * @return An application GUID or null if non was found
+     * @throws ApplicationServiceException
+     */
+    String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName) throws ApplicationServiceException;
 }
