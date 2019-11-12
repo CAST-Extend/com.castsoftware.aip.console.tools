@@ -7,7 +7,7 @@
         <authors>CAST Product</authors>
         <owners>CAST</owners>
         <licenseUrl>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/blob/master/LICENSE</licenseUrl>
-        <projectUrl>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools</projectUrl>
+        <projectUrl>https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/wiki/1.1</projectUrl>
 		<iconUrl>https://raw.githubusercontent.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/master/nuget/logo_console.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Package containing the AIP Console Jenkins Plugin and AIP Console Tools CLI.
