@@ -1,6 +1,6 @@
 ## Release Notes :
 
-#### 1.0.7
+#### 1.1.0
 
 List of added features :
 * You can specify a node name when creating a new application
