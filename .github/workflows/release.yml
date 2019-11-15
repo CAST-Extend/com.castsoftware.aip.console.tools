@@ -23,8 +23,8 @@ jobs:
     steps:
     - name: Checkout tag
       uses: actions/checkout@v1
-        with:
-          ref: ${{ github.ref }}
+      with:
+        ref: ${{ github.ref }}
     - uses: actions/setup-java@v1
       with:
         java-version: 1.8
