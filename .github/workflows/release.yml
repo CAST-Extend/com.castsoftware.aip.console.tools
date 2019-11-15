@@ -1,0 +1,58 @@
+# Creates a Github Release with the required assets once a tag is pushed to the repository
+
+# Trigger when there is a semver tag pushed to master branch
+name: Create Github Draft Release
+on:
+  push:
+    branches:
+    - master
+    tags:
+    - [0-9]+.[0-9]+.[0-9]+
+
+# Job steps :
+# * Checkout the tag
+# * Get JDK 8
+# * Run maven build
+# * Create a Github Release with the tag for the release name (as a draft to add some details)
+# * Upload the jenkins hpi file and the jar file (needs to be 2 separate actions)
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout tag
+      uses: actions/checkout@v1
+        with:
+          ref: ${{ github.ref }}
+    - uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Maven Build
+      run: mvn -B package --file pom.xml
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
+    - name: Upload Jenkins Plugin
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./aip-console-jenkins/target/aip-console-jenkins.hpi
+        asset_name: aip-console-jenkins.hpi
+        asset_content_type: application/zip
+    - name: Upload AIP Console Tools CLI
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./aip-console-tools-cli/target/aip-console-tools-cli.jar
+        asset_name: aip-console-tools-cli.jar
+        asset_content_type: application/java-archive
