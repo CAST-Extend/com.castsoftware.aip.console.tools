@@ -12,6 +12,7 @@ on:
 # Job steps :
 # * Checkout the tag
 # * Get JDK 8
+# * Get the maven repo cache
 # * Run maven build
 # * Create a Github Release with the tag for the release name (as a draft to add some details)
 # * Upload the jenkins hpi file and the jar file (needs to be 2 separate actions)
@@ -26,6 +27,12 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
     - name: Maven Build
       run: mvn -B package --file pom.xml
     - name: Create Release
