@@ -19,7 +19,7 @@ public interface ApplicationService {
      * @return True if no version exists for the given application, false otherwise
      * @throws ApplicationServiceException If any error occurs while retrieving the list of version from AIP Console
      */
-    boolean isApplicationVersionsListEmpty(String applicationGuid) throws ApplicationServiceException;
+    boolean applicationHasVersion(String applicationGuid) throws ApplicationServiceException;
 
     /**
      * Retrieve an application's GUID from the given application name.

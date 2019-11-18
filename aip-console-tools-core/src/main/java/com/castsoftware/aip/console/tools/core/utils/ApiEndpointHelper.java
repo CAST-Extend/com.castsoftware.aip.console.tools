@@ -24,7 +24,7 @@ public class ApiEndpointHelper {
 
     public static String getApplicationVersionsPath(String appGuid) {
         assert appGuid != null && !appGuid.isEmpty();
-        return getApplicationPath(appGuid) + "/" + VERSIONS_ENDPOINT;
+        return getApplicationPath(appGuid) + VERSIONS_ENDPOINT;
     }
 
     public static String getApplicationCreateUploadPath(String appGuid) {

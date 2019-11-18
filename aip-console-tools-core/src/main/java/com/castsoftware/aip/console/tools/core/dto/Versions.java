@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 @Getter
 @Setter
@@ -14,6 +15,6 @@ import java.util.Collection;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Versions {
-    private Collection<VersionDto> versions;
+    private Collection<VersionDto> versions = new HashSet<>();
     private String currentVersion;
 }

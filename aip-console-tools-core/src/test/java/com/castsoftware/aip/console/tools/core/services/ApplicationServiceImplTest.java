@@ -2,9 +2,12 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
+import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.Versions;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import lombok.extern.java.Log;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,11 +15,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -124,5 +130,22 @@ public class ApplicationServiceImplTest {
 
         String appGuid = applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, true);
         assertEquals("Appguid should be the expected value", TEST_APP_GUID, appGuid);
+    }
+
+    @Test
+    public void testApplicationHasVersionNoVersionFound() throws Exception {
+        String versionEndpoint = ApiEndpointHelper.getApplicationVersionsPath(TEST_APP_GUID);
+        when(restApiService.getForEntity(versionEndpoint, Versions.class))
+                .thenReturn(new Versions());
+        assertFalse("The application should have no versions", applicationService.applicationHasVersion(TEST_APP_GUID));
+    }
+
+    @Test
+    public void testApplicationHasVersionOneVersionFound() throws Exception {
+        VersionDto version = new VersionDto();
+        Versions versions = new Versions(Collections.singletonList(version), "");
+        String versionEndpoint = ApiEndpointHelper.getApplicationVersionsPath(TEST_APP_GUID);
+        when(restApiService.getForEntity(versionEndpoint, Versions.class)).thenReturn(versions);
+        assertTrue("The application should have at least one version", applicationService.applicationHasVersion(TEST_APP_GUID));
     }
 }

@@ -309,7 +309,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             // If user asks for a "rescan" (i.e. clone previous version config)
             // check that there are versions on the application before launching the clone job
             if (applicationHasVersion) {
-                applicationHasVersion = applicationService.isApplicationVersionsListEmpty(applicationGuid);
+                applicationHasVersion = applicationService.applicationHasVersion(applicationGuid);
             }
 
             log.println(AddVersionBuilder_AddVersion_info_startUpload(FilenameUtils.getName(resolvedFilePath)));

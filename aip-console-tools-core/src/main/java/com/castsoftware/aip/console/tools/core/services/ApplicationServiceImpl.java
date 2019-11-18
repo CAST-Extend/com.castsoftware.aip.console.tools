@@ -42,9 +42,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public boolean isApplicationVersionsListEmpty(String applicationGuid) throws ApplicationServiceException {
+    public boolean applicationHasVersion(String applicationGuid) throws ApplicationServiceException {
         Versions appVersions = getApplicationVersion(applicationGuid);
-        return appVersions != null && !appVersions.getVersions().isEmpty();
+        return appVersions != null &&
+                appVersions.getVersions() != null &&
+                !appVersions.getVersions().isEmpty();
     }
 
     @Override
