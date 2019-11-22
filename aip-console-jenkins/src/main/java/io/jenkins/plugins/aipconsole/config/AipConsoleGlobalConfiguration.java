@@ -64,16 +64,14 @@ public class AipConsoleGlobalConfiguration extends GlobalConfiguration {
     }
 
     public FormValidation doCheckAipConsoleUrl(@QueryParameter String value) {
-        if(StringUtils.isBlank(value)) {
-            return FormValidation.error("AIP Console URL cannot be empty");
-        }
-        return FormValidation.ok();
+        return StringUtils.isBlank(value) ?
+                FormValidation.error("AIP Console URL cannot be empty") :
+                FormValidation.ok();
     }
 
     public FormValidation doCheckApiKey(@QueryParameter String value) {
-        if(StringUtils.isBlank(value)) {
-            return FormValidation.error("AIP Console URL cannot be empty");
-        }
-        return FormValidation.ok();
+        return StringUtils.isBlank(value) ?
+                FormValidation.error("AIP Console Key cannot be empty") :
+                FormValidation.ok();
     }
 }
