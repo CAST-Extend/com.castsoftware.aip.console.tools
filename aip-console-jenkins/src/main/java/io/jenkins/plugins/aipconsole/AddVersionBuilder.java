@@ -257,12 +257,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
         try {
 
-            // Get the GUID from AIP Console if it is blank/null
-            if (StringUtils.isBlank(applicationGuid)) {
-                applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
-            }
+            // Get the GUID from AIP Console
+            applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
 
-            // Check again for blank/null and check if you should create it
             if (StringUtils.isBlank(applicationGuid)) {
                 if (!autoCreate) {
                     listener.error(AddVersionBuilder_AddVersion_error_appNotFound(applicationName));
