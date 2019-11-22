@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.java.Log;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -63,9 +64,11 @@ public class RestApiServiceImpl implements RestApiService {
                 .writeTimeout(Constants.DEFAULT_HTTP_TIMEOUT, TimeUnit.SECONDS)
                 .build();
         this.mapper = new ObjectMapper();
+        this.mapper.registerModule(new JavaTimeModule());
         this.mapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
         this.mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
         this.mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        this.mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     public RestApiServiceImpl(ObjectMapper preConfiguredMapper) {
