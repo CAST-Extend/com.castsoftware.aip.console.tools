@@ -150,6 +150,11 @@ public class AddVersionCommand implements Callable<Integer> {
                 throw new UploadException(e);
             }
 
+            if (cloneVersion) {
+                // check that the application actually has versions, otherwise it's just an add version job
+                cloneVersion = applicationService.applicationHasVersion(applicationGuid);
+            }
+
             String jobGuid = jobsService.startAddVersionJob(applicationGuid, randomizedFileName, versionName, new Date(), cloneVersion, enableSecurityDataflow);
             JobState jobState = jobsService.pollAndWaitForJobFinished(jobGuid);
             if (JobState.COMPLETED == jobState) {
