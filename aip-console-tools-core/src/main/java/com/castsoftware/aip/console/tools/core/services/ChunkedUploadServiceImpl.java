@@ -103,7 +103,7 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
                 byte[] buffer = new byte[chunkSize];
                 // IOUtils.read will try to fill the buffer (unless it arrives at EOF)
                 int nbBytesRead = IOUtils.read(content, buffer);
-                log.info("Read " + nbBytesRead + " from file");
+                log.fine("Read " + nbBytesRead + " from file");
                 if (nbBytesRead < 0) {
                     throw new UploadException("No more content to read but expected file size was not attained. Is a process modifying the file being read ?");
                 }
