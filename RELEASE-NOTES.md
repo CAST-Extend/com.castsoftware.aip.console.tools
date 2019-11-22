@@ -1,5 +1,15 @@
 ## Release Notes :
 
+#### 1.1.1
+
+Various fixes for Jenkins Plugin and CLI :
+
+Fix :
+* Reworked app version parsing
+* Incorrect log level for amount of data read from file
+* Always get the application guid from AIP Console
+* fixed logger for CLI not showing information messages ABR
+
 #### 1.1.0
 
 List of added features :
