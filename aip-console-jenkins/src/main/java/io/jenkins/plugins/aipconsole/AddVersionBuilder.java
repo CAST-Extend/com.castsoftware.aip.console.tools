@@ -95,7 +95,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean failureIgnored = false;
     @Nullable
-    private String nodeName;
+    private String nodeName = "";
     private boolean enableSecurityDataflow = false;
 
     @DataBoundConstructor
@@ -203,7 +203,6 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
-        long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());
         boolean applicationHasVersion = this.cloneVersion;
 
         String errorMessage;
@@ -224,6 +223,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
         // Check the services have been properly initialized
         if (apiService == null || chunkedUploadService == null || jobsService == null || applicationService == null) {
+            // Manually setup Guice Injector using Module (Didn't find any way to make this automatically)
             Injector injector = Guice.createInjector(new AipConsoleModule());
             // Guice can automatically inject those, but then findbugs, not seeing the change,
             // will fail the build considering they will provoke an NPE
@@ -237,6 +237,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         String apiServerUrl = getDescriptor().getAipConsoleUrl();
         String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
         String username = getDescriptor().getAipConsoleUsername();
+        // Job level timeout different from default ? use it, else use the global config level timeout
+        long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());
 
         try {
             // update timeout of HTTP Client if different from default
@@ -255,12 +257,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
         try {
 
-            // Get the GUID from AIP Console if it is blank/null
-            if (StringUtils.isBlank(applicationGuid)) {
-                applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
-            }
+            // Get the GUID from AIP Console
+            applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
 
-            // Check again for blank/null and check if you should create it
             if (StringUtils.isBlank(applicationGuid)) {
                 if (!autoCreate) {
                     listener.error(AddVersionBuilder_AddVersion_error_appNotFound(applicationName));
@@ -309,7 +308,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             // If user asks for a "rescan" (i.e. clone previous version config)
             // check that there are versions on the application before launching the clone job
             if (applicationHasVersion) {
-                applicationHasVersion = applicationService.isApplicationVersionsListEmpty(applicationGuid);
+                applicationHasVersion = applicationService.applicationHasVersion(applicationGuid);
             }
 
             log.println(AddVersionBuilder_AddVersion_info_startUpload(FilenameUtils.getName(resolvedFilePath)));
@@ -363,12 +362,19 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 } else {
                     log.println(AddVersionBuilder_AddVersion_info_noVersionAvailable(applicationName));
                 }
-            }
-            if (!this.cloneVersion) {
+            } else {
                 log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(applicationName));
             }
 
-            String jobGuid = jobsService.startAddVersionJob(applicationGuid, randomizedFileName, resolvedVersionName, new Date(), applicationHasVersion);
+            String jobGuid = jobsService.startAddVersionJob(
+                    applicationGuid,
+                    randomizedFileName,
+                    resolvedVersionName,
+                    new Date(),
+                    applicationHasVersion,
+                    enableSecurityDataflow
+            );
+
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
             if (state != JobState.COMPLETED) {

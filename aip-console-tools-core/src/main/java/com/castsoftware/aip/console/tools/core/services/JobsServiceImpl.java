@@ -1,7 +1,5 @@
 package com.castsoftware.aip.console.tools.core.services;
 
-import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
-import com.castsoftware.aip.console.tools.core.dto.Versions;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -95,21 +93,6 @@ public class JobsServiceImpl implements JobsService {
         }
 
         String jobsEndpoint = ApiEndpointHelper.getJobsEndpoint();
-
-        if (cloneVersion) {
-            try {
-                String versionsEndpoint = ApiEndpointHelper.getApplicationVersionsPath(appGuid);
-                Versions versions = restApiService.getForEntity(versionsEndpoint, Versions.class);
-                if (versions == null ||
-                        versions.getVersions() == null ||
-                        versions.getVersions().stream().noneMatch(v -> v.getStatus().ordinal() > VersionStatus.OPENED.ordinal())) {
-                    log.log(Level.SEVERE, "Cannot clone version, there is no version to copy.");
-                    throw new JobServiceException("Cannot clone version, there is no version to copy.");
-                }
-            } catch (ApiCallException e) {
-                log.warning("Unable to check versions for application. Starting job may fail.");
-            }
-        }
 
         Map<String, String> jobParameters = new HashMap<>();
         jobParameters.put(Constants.PARAM_APP_GUID, appGuid);
