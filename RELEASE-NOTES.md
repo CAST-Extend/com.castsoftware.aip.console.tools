@@ -1,5 +1,12 @@
 ## Release Notes :
 
+#### 1.1.2
+
+Compatibility with the latest version of AIP Console (1.13.0) :
+* Check AIP Console version
+* Upload and Extract content in ChunkUploadService if AIP Console has `enablePackagePath` option enabled
+* Changed Job Parameters if AIP Console has `enablePackagePath` option enabled
+
 #### 1.1.1
 
 Various fixes for Jenkins Plugin and CLI :
