@@ -1,7 +1,9 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadDto;
 import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadMetadataRequest;
+import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadStatus;
 import com.castsoftware.aip.console.tools.core.dto.upload.CreateUploadRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
@@ -20,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 @Log
@@ -33,18 +36,30 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
      * Default chunk size if none is provided
      */
     private static final int DEFAULT_CHUNK_SIZE = 10 * 1024 * 1024;
+    private static final long EXTRACT_SLEEP_TIME = TimeUnit.SECONDS.toMillis(10);
+    private static final long LOG_INFO_TIME_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
 
     private RestApiService restApiService;
 
     private int chunkSize = DEFAULT_CHUNK_SIZE;
 
+    private final long extractPollSleep;
+
     public ChunkedUploadServiceImpl(RestApiService restApiService) {
         this.restApiService = restApiService;
+        this.extractPollSleep = EXTRACT_SLEEP_TIME;
     }
 
     public ChunkedUploadServiceImpl(RestApiService restApiService, int maxChunkSize) {
         this.restApiService = restApiService;
         this.chunkSize = Math.min(maxChunkSize, MAX_CHUNK_SIZE);
+        this.extractPollSleep = EXTRACT_SLEEP_TIME;
+    }
+
+    public ChunkedUploadServiceImpl(RestApiService restApiService, int maxChunkSize, long extractPollSleep) {
+        this.restApiService = restApiService;
+        this.chunkSize = Math.min(maxChunkSize, MAX_CHUNK_SIZE);
+        this.extractPollSleep = extractPollSleep;
     }
 
     @Override
@@ -64,8 +79,9 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
         } catch (IOException e) {
             throw new UploadException("Unable to get archive size for given file " + archivePath, e);
         }
+        ApiInfoDto aipConsoleInfo = restApiService.getAipConsoleApiInfo();
         try (InputStream is = new BufferedInputStream(Files.newInputStream(archivePath))) {
-            return uploadInputStream(appGuid, FilenameUtils.getName(archivePath.toString()), fileSize, is);
+            return uploadAndExtractInputStream(appGuid, FilenameUtils.getName(archivePath.toString()), fileSize, is, aipConsoleInfo.isEnablePackagePathCheck());
         } catch (IOException e) {
             throw new UploadException("Unable to read file", e);
         }
@@ -74,7 +90,13 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
     @Override
     public boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content)
             throws UploadException {
+        ApiInfoDto aipConsoleInfo = restApiService.getAipConsoleApiInfo();
+        return uploadAndExtractInputStream(appGuid, fileName, fileSize, content, aipConsoleInfo.isEnablePackagePathCheck());
+    }
 
+    @Override
+    public boolean uploadAndExtractInputStream(String appGuid, String fileName, long fileSize, InputStream content, boolean extract)
+            throws UploadException {
         String createUploadEndpoint = ApiEndpointHelper.getApplicationCreateUploadPath(appGuid);
         CreateUploadRequest request = new CreateUploadRequest();
         request.setFileName(fileName);
@@ -157,6 +179,34 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
             throw new UploadException("Error occurred while uploading chunk number " + currentChunk, e);
         }
 
-        return StringUtils.equalsAnyIgnoreCase(dto.getStatus(), "completed", "uploaded");
+        // if enablePackagePath is true, we need to extract manually
+        log.info("Should extract content ? " + extract);
+        boolean uploadComplete = StringUtils.equalsAnyIgnoreCase(dto.getStatus(), ChunkedUploadStatus.UPLOADED.name(), "completed");
+        // return if enablePackagePath is false or the upload was not complete
+        if (!uploadComplete || !extract) {
+            return uploadComplete;
+        }
+
+        log.info("Extracting archive on AIP Console");
+        long waitTime = 0;
+        String extractEndpoint = ApiEndpointHelper.getApplicationExtractUploadPath(appGuid, dto.getGuid());
+        while (StringUtils.equalsAnyIgnoreCase(dto.getStatus(), ChunkedUploadStatus.UPLOADED.name(), ChunkedUploadStatus.EXTRACTING.name())) {
+            try {
+                dto = restApiService.putForEntity(extractEndpoint, null, ChunkedUploadDto.class);
+                Thread.sleep(extractPollSleep);
+                waitTime += extractPollSleep;
+                // Notify every X minutes (check LOG_INFO_TIME_THRESHOLD for value) that we're still waiting for extraction from AIP Console
+                if (waitTime > LOG_INFO_TIME_THRESHOLD) {
+                    waitTime = 0;
+                    log.info("Waiting for AIP Console to finish extraction. Current status is " + dto.getStatus());
+                }
+            } catch (InterruptedException e) {
+                log.log(Level.WARNING, "Thread.sleep was interrupted. Trying to continue polling AIP Console", e);
+            } catch (ApiCallException e) {
+                log.log(Level.SEVERE, "Unable to extract source code archive on AIP Console", e);
+                throw new UploadException("Failed to extract source code in AIP Console", e);
+            }
+        }
+        return StringUtils.equalsIgnoreCase(dto.getStatus(), "EXTRACTED");
     }
 }

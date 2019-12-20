@@ -7,8 +7,9 @@ public class ApiEndpointHelper {
     private static final String JOBS_ENDPOINT = "/jobs";
     private static final String UPLOAD_ENDPOINT = "/upload";
     private static final String VERSIONS_ENDPOINT = "/versions";
+    private static final String EXTRACT_ENDPOINT = "/extract";
 
-    public static String getLoginPath() {
+    public static String getRootPath() {
         return ROOT_PATH + "/";
     }
 
@@ -38,6 +39,10 @@ public class ApiEndpointHelper {
         assert uploadGuid != null && !uploadGuid.isEmpty();
 
         return getApplicationCreateUploadPath(appGuid) + "/" + uploadGuid;
+    }
+
+    public static String getApplicationExtractUploadPath(String appGuid, String uploadGuid) {
+        return getApplicationUploadPath(appGuid, uploadGuid) + EXTRACT_ENDPOINT;
     }
 
     public static String getJobsEndpoint() {

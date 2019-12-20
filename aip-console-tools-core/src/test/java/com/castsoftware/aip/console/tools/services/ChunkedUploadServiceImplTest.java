@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.services;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadDto;
 import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadStatus;
 import com.castsoftware.aip.console.tools.core.dto.upload.CreateUploadRequest;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,6 +33,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +43,8 @@ public class ChunkedUploadServiceImplTest {
     private static final String TEST_UPLOAD_GUID = "uploadGuid";
     private static final String TEST_APP_GUID = "appGuid";
     private static final String TEST_ZIP_FILENAME = "fake.zip";
+    private static final long TEST_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(1);
+    private static final int TEST_CHUNK_SIZE = 10 * 1024 * 1024;
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -53,9 +58,14 @@ public class ChunkedUploadServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        uploadService = new ChunkedUploadServiceImpl(restApiService);
+        uploadService = new ChunkedUploadServiceImpl(restApiService, TEST_CHUNK_SIZE, TEST_SLEEP_DURATION);
         fakeZip = temporaryFolder.newFile(TEST_ZIP_FILENAME);
         Files.write(fakeZip.toPath(), "Some random content".getBytes(StandardCharsets.UTF_8));
+        doReturn(ApiInfoDto.builder()
+                .apiVersion("1.13.0")
+                .enablePackagePathCheck(false)
+                .build()
+        ).when(restApiService).getAipConsoleApiInfo();
     }
 
     @Test(expected = UploadException.class)
@@ -122,7 +132,7 @@ public class ChunkedUploadServiceImplTest {
     }
 
     @Test
-    public void testUploadComplete() throws Exception {
+    public void testUploadCompleteNoExtraction() throws Exception {
         long fileSize = fakeZip.length();
         CreateUploadRequest expectedRequest = new CreateUploadRequest();
         expectedRequest.setFileName(TEST_ZIP_FILENAME);
@@ -144,12 +154,62 @@ public class ChunkedUploadServiceImplTest {
 
         doReturn(expectedDto).
                 when(restApiService).postForEntity(anyString(), eq(expectedRequest), eq(ChunkedUploadDto.class));
-
         doReturn(afterUploadExpectedDto).
                 when(restApiService).exchangeMultipartForEntity(eq("PATCH"), eq(uploadEndpoint), argThat(getChunkUploadMatcher()), argThat(getChunkUploadMatcher()), eq(ChunkedUploadDto.class));
 
         assertTrue(uploadService.uploadFile(TEST_APP_GUID, fakeZip));
 
+        // Check neither of these 2 methods were called
+        verify(restApiService, Mockito.never()).deleteForEntity(anyString(), eq(null), eq(String.class));
+        verify(restApiService, never())
+                .getForEntity(ApiEndpointHelper.getApplicationUploadPath(TEST_APP_GUID, TEST_UPLOAD_GUID) + "/extract", ApiInfoDto.class);
+    }
+
+    @Test
+    public void testUploadCompleteWithExtraction() throws Exception {
+        long fileSize = fakeZip.length();
+        CreateUploadRequest expectedRequest = new CreateUploadRequest();
+        expectedRequest.setFileName(TEST_ZIP_FILENAME);
+        expectedRequest.setFileSize(fileSize);
+        ChunkedUploadDto.ChunkedUploadDtoBuilder expectedDtoBuilder = ChunkedUploadDto.builder()
+                .guid(TEST_UPLOAD_GUID)
+                .fileName(TEST_ZIP_FILENAME)
+                .fileSize(fileSize)
+                .applicationGuid(TEST_APP_GUID);
+
+        ChunkedUploadDto expectedDto = expectedDtoBuilder
+                .build();
+        ChunkedUploadDto afterUploadExpectedDto = expectedDtoBuilder
+                .status(ChunkedUploadStatus.UPLOADED.name())
+                .currentOffset(fileSize)
+                .build();
+        ChunkedUploadDto extractingDto = expectedDtoBuilder
+                .status(ChunkedUploadStatus.EXTRACTING.name())
+                .currentOffset(fileSize)
+                .build();
+        ChunkedUploadDto extractedDto = expectedDtoBuilder
+                .status(ChunkedUploadStatus.EXTRACTED.name())
+                .currentOffset(fileSize)
+                .build();
+
+        String uploadEndpoint = ApiEndpointHelper.getApplicationUploadPath(TEST_APP_GUID, TEST_UPLOAD_GUID);
+
+        doReturn(ApiInfoDto.builder()
+                .apiVersion("1.13.0")
+                .enablePackagePathCheck(true)
+                .build()
+        ).when(restApiService).getAipConsoleApiInfo();
+
+        doReturn(expectedDto)
+                .when(restApiService).postForEntity(anyString(), eq(expectedRequest), eq(ChunkedUploadDto.class));
+        doReturn(afterUploadExpectedDto)
+                .when(restApiService).exchangeMultipartForEntity(eq("PATCH"), eq(uploadEndpoint), argThat(getChunkUploadMatcher()), argThat(getChunkUploadMatcher()), eq(ChunkedUploadDto.class));
+        doReturn(extractingDto, extractedDto)
+                .when(restApiService).putForEntity(ApiEndpointHelper.getApplicationExtractUploadPath(TEST_APP_GUID, TEST_UPLOAD_GUID), null, ChunkedUploadDto.class);
+
+        assertTrue(uploadService.uploadFile(TEST_APP_GUID, fakeZip));
+
+        // Check neither of these 2 methods were called
         verify(restApiService, Mockito.never()).deleteForEntity(anyString(), eq(null), eq(String.class));
     }
 

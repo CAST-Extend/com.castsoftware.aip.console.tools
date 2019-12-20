@@ -39,7 +39,7 @@ public interface JobsService {
      * @return The GUID of the job that was started on AIP Console
      * @throws JobServiceException IF any error occurs while starting the job
      */
-    String startAddVersionJob(String appGuid, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion) throws JobServiceException;
+    String startAddVersionJob(String appGuid, String applicationName, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion) throws JobServiceException;
 
     /**
      * Start the "Create Version" job, which will create a new version for an application on AIP Console
@@ -53,7 +53,7 @@ public interface JobsService {
      * @return The GUID of the job that was started on AIP Console
      * @throws JobServiceException IF any error occurs while starting the job
      */
-    String startAddVersionJob(String appGuid, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow) throws JobServiceException;
+    String startAddVersionJob(String appGuid, String applicationName, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow) throws JobServiceException;
 
     /**
      * Polls AIP Console to get the status of the job with the given GUID.

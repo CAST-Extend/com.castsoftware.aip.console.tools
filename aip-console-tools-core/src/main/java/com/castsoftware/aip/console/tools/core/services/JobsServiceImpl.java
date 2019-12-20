@@ -1,7 +1,10 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.SemVer;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobParametersBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -27,16 +30,20 @@ import java.util.logging.Level;
 
 @Log
 public class JobsServiceImpl implements JobsService {
-
-    private static final DateFormat formatReleaseDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(10);
-    private static final String DEFAULT_VERSION_OBJECTIVES = "GLOBAL_RISK,FUNCTIONAL_POINTS";
-    private static final String VERSION_OBJECTIVES_WITH_SECURITY = DEFAULT_VERSION_OBJECTIVES + ",SECURITY";
 
-    private RestApiService restApiService;
+    private final RestApiService restApiService;
+
+    private final long pollingSleepDuration;
 
     public JobsServiceImpl(RestApiService restApiService) {
         this.restApiService = restApiService;
+        this.pollingSleepDuration = POLL_SLEEP_DURATION;
+    }
+
+    public JobsServiceImpl(RestApiService restApiService, long pollingSleepDuration) {
+        this.restApiService = restApiService;
+        this.pollingSleepDuration = pollingSleepDuration;
     }
 
     @Override
@@ -69,13 +76,13 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startAddVersionJob(String appGuid, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion)
+    public String startAddVersionJob(String appGuid, String applicationName, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion)
             throws JobServiceException {
-        return startAddVersionJob(appGuid, zipFileName, versionName, versionReleaseDate, cloneVersion, false);
+        return startAddVersionJob(appGuid, applicationName, zipFileName, versionName, versionReleaseDate, cloneVersion, false);
     }
 
     @Override
-    public String startAddVersionJob(String appGuid, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow)
+    public String startAddVersionJob(String appGuid, String applicationName, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow)
             throws JobServiceException {
         if (StringUtils.isBlank(appGuid)) {
             throw new JobServiceException("No application GUID provided");
@@ -86,58 +93,45 @@ public class JobsServiceImpl implements JobsService {
         if (versionReleaseDate == null) {
             throw new JobServiceException("No release date provided.");
         }
-
         if (StringUtils.isBlank(versionName)) {
             DateFormat formatVersionName = new SimpleDateFormat("yyMMdd.HHmmss");
             versionName = "v" + formatVersionName.format(versionReleaseDate);
         }
 
-        String jobsEndpoint = ApiEndpointHelper.getJobsEndpoint();
+        ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
 
-        Map<String, String> jobParameters = new HashMap<>();
-        jobParameters.put(Constants.PARAM_APP_GUID, appGuid);
-        // Force removing any path from filename
-        String fileName = FilenameUtils.getName(zipFileName);
-        jobParameters.put(Constants.PARAM_SOURCE_ARCHIVE, FilenameUtils.getName(zipFileName));
-        jobParameters.put("fileName", FilenameUtils.getName(zipFileName));
-        jobParameters.put(Constants.PARAM_VERSION_NAME, versionName);
-        jobParameters.put(Constants.PARAM_START_STEP, Constants.EXTRACT_STEP_NAME);
-        jobParameters.put(Constants.PARAM_END_STEP, Constants.CONSOLIDATE_STEP_NAME);
-        jobParameters.put(Constants.PARAM_IGNORE_CHECK, "true");
-        jobParameters.put(Constants.PARAM_VERSION_OBJECTIVES, enableSecurityDataflow ? VERSION_OBJECTIVES_WITH_SECURITY : DEFAULT_VERSION_OBJECTIVES);
-
-        if (versionReleaseDate != null) {
-            String versionReleaseStr = formatReleaseDate.format(versionReleaseDate);
-            log.info(String.format("Creating version '%s' for application '%s' with release date '%s'", versionName, appGuid, versionReleaseStr));
-
-            jobParameters.put(Constants.PARAM_RELEASE_DATE, versionReleaseStr);
-            jobParameters.put(Constants.PARAM_SNAPSHOT_CAPTURE_DATE, versionReleaseStr);
+        JobParametersBuilder builder = JobParametersBuilder.newInstance(appGuid, FilenameUtils.getName(zipFileName))
+                .versionName(versionName)
+                .securityObjective(enableSecurityDataflow);
+        if (apiInfoDto.isEnablePackagePathCheck()) {
+            builder.startStep(Constants.CODE_SCANNER_STEP_NAME)
+                    .sourceFolder(applicationName);
         } else {
-            log.info(String.format("Creating version '%s' for application '%s'", versionName, appGuid));
+            builder.startStep(Constants.EXTRACT_STEP_NAME);
         }
-        CreateJobsRequest jobsRequest = new CreateJobsRequest();
 
-        if (cloneVersion) {
-            jobsRequest.setJobType(JobType.CLONE_VERSION);
-        } else {
-            jobsRequest.setJobType(JobType.ADD_VERSION);
-        }
-        jobsRequest.setJobParameters(jobParameters);
+        CreateJobsRequest jobRequest = builder.releaseAndSnapshotDate(versionReleaseDate)
+                .buildJobRequestWithParameters(cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
 
         try {
-            SuccessfulJobStartDto dto = restApiService.postForEntity(jobsEndpoint, jobsRequest, SuccessfulJobStartDto.class);
-            assert dto != null;
-            assert StringUtils.isNotBlank(dto.getJobGuid());
+            SuccessfulJobStartDto dto = restApiService.postForEntity(ApiEndpointHelper.getJobsEndpoint(), jobRequest, SuccessfulJobStartDto.class);
 
-            // Add_Version may be started in "suspended" mode.
-            // We check the status and start it automatically if it is not started yet
-            String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(dto.getJobGuid());
-            JobStatusWithSteps jobStatusWithSteps = restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
-            if (jobStatusWithSteps.getState() == JobState.STARTING) {
-                log.finest("Resuming suspended job");
-                ChangeJobStateRequest resumeRequest = new ChangeJobStateRequest();
-                resumeRequest.setState(JobState.STARTED);
-                restApiService.putForEntity(jobDetailsEndpoint, resumeRequest, String.class);
+            if (dto == null || StringUtils.isBlank(dto.getJobGuid())) {
+                throw new JobServiceException("No response from AIP Console when start the job");
+            }
+
+            // State was suspended after uploading for versions <= 1.9
+            // After that, suspended jobs mean that no job executor is available for now (so don't do the update)
+            SemVer aipConsoleVersion = SemVer.parse(apiInfoDto.getApiVersion());
+            if (aipConsoleVersion.getMajor() <= 1 && aipConsoleVersion.getMinor() <= 9) {
+                String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(dto.getJobGuid());
+                JobStatusWithSteps jobStatusWithSteps = restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
+                if (jobStatusWithSteps.getState() == JobState.STARTING) {
+                    log.finest("Resuming suspended job");
+                    ChangeJobStateRequest resumeRequest = new ChangeJobStateRequest();
+                    resumeRequest.setState(JobState.STARTED);
+                    restApiService.putForEntity(jobDetailsEndpoint, resumeRequest, String.class);
+                }
             }
             log.info("Successfully started Job");
             return dto.getJobGuid();
@@ -185,7 +179,7 @@ public class JobsServiceImpl implements JobsService {
                     break;
                 }
 
-                Thread.sleep(POLL_SLEEP_DURATION);
+                Thread.sleep(pollingSleepDuration);
             }
             return completionCallback.apply(jobStatus);
         } catch (InterruptedException | ApiCallException e) {

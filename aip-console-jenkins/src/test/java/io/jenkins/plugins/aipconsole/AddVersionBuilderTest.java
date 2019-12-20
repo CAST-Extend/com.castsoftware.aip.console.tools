@@ -121,7 +121,7 @@ public class AddVersionBuilderTest {
         doReturn(true)
                 .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
+                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
         doReturn(JobState.COMPLETED)
                 .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
 
@@ -147,7 +147,7 @@ public class AddVersionBuilderTest {
         doReturn(true)
                 .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
+                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
         doReturn(JobState.COMPLETED)
                 .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
 
@@ -229,7 +229,7 @@ public class AddVersionBuilderTest {
         doReturn(true)
                 .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doThrow(new JobServiceException("fake exception"))
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
+                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
@@ -248,7 +248,7 @@ public class AddVersionBuilderTest {
         doReturn(true)
                 .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
+                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
         doReturn(JobState.CANCELED)
                 .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
 
@@ -317,7 +317,7 @@ public class AddVersionBuilderTest {
         doReturn(true)
                 .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
+                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
         doReturn(JobState.COMPLETED)
                 .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
 

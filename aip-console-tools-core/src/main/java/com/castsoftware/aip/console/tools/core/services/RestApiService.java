@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -36,6 +37,13 @@ public interface RestApiService {
      * @throws ApiCallException
      */
     void login() throws ApiCallException;
+
+    /**
+     * Retrieve the API Info from AIP Console
+     *
+     * @return an {@link ApiInfoDto} instance
+     */
+    ApiInfoDto getAipConsoleApiInfo();
 
     <T> T getForEntity(String endpoint, Class<T> clazz) throws ApiCallException;
 

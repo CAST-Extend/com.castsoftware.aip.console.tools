@@ -59,6 +59,8 @@ public class Constants {
     public static final String PARAM_IGNORE_CHECK = "ignoreFileStructureCheck";
     public static final String PARAM_RELEASE_DATE = "releaseDate";
     public static final String PARAM_SOURCE_ARCHIVE = "sourceArchive";
+    public static final String PARAM_SOURCE_FOLDER = "sourceFolder";
+    public static final String PARAM_FILENAME = "fileName";
     public static final String PARAM_VERSION_OBJECTIVES = "objectives";
 
     // Job Step Names

@@ -1,7 +1,9 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
+import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -26,6 +28,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okhttp3.internal.http.HttpMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +49,7 @@ import java.util.logging.Level;
 @Log
 public class RestApiServiceImpl implements RestApiService {
     private static final List<Integer> ACCEPTED_HTTP_CODES = Arrays.asList(200, 201, 202, 204);
+    private static final String JSON_MEDIA_TYPE = "application/json";
 
     private OkHttpClient client;
     private ObjectMapper mapper;
@@ -116,6 +120,16 @@ public class RestApiServiceImpl implements RestApiService {
         this.serverUrl = serverUrl;
         this.key = apiKey;
         login();
+    }
+
+    @Override
+    public ApiInfoDto getAipConsoleApiInfo() {
+        try {
+            return getForEntity(ApiEndpointHelper.getRootPath(), ApiInfoDto.class);
+        } catch (ApiCallException e) {
+            log.log(Level.WARNING, "Unable to retrieve AIP Console information.", e);
+            return new ApiInfoDto();
+        }
     }
 
     @Override
@@ -231,8 +245,9 @@ public class RestApiServiceImpl implements RestApiService {
     }
 
     private <T> T exchangeForEntity(String method, String endpoint, Object entity, JavaType javaType) throws ApiCallException {
+        RequestBody body = HttpMethod.requiresRequestBody(method) ? getRequestBodyForEntity(entity) : null;
         Request request = getRequestBuilder(endpoint)
-                .method(method, getRequestBodyForEntity(entity))
+                .method(method, body)
                 .build();
         log.fine(String.format("Executing call with method %s to endpoint %s", method, endpoint));
         log.finest("Entity is " + entity);
@@ -303,13 +318,11 @@ public class RestApiServiceImpl implements RestApiService {
     }
 
     private RequestBody getRequestBodyForEntity(Object entity) throws ApiCallException {
-        if (entity == null) {
-            return null;
-        }
+        MediaType jsonMediaType = MediaType.parse(JSON_MEDIA_TYPE);
         try {
             return RequestBody.create(
-                    MediaType.parse("application/json"),
-                    mapper.writeValueAsString(entity));
+                    jsonMediaType,
+                    entity == null ? "" : mapper.writeValueAsString(entity));
         } catch (JsonProcessingException e) {
             log.log(Level.SEVERE, "Unable to map object of type " + entity.getClass().getName() + " to JSON", e);
             throw new ApiCallException(500, e);

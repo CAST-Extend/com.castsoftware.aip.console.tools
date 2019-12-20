@@ -29,6 +29,7 @@ import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -222,7 +223,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         }
 
         // Check the services have been properly initialized
-        if (apiService == null || chunkedUploadService == null || jobsService == null || applicationService == null) {
+
+        if (!ObjectUtils.allNotNull(apiService, chunkedUploadService, jobsService, applicationService)) {
             // Manually setup Guice Injector using Module (Didn't find any way to make this automatically)
             Injector injector = Guice.createInjector(new AipConsoleModule());
             // Guice can automatically inject those, but then findbugs, not seeing the change,
@@ -368,6 +370,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
             String jobGuid = jobsService.startAddVersionJob(
                     applicationGuid,
+                    applicationName,
                     randomizedFileName,
                     resolvedVersionName,
                     new Date(),

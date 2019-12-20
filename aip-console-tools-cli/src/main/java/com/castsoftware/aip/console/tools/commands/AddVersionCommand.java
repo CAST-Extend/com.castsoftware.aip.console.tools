@@ -125,15 +125,12 @@ public class AddVersionCommand implements Callable<Integer> {
 
         try {
             if (StringUtils.isBlank(applicationGuid)) {
-                log.info("Search for application '{}' or AIP Console", applicationName);
+                log.info("Searching for application '{}' on AIP Console", applicationName);
                 applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate);
                 if (StringUtils.isBlank(applicationGuid)) {
-                    String message;
-                    if (autoCreate) {
-                        message = "Creation of the application '{}' failed on AIP Console";
-                    } else {
-                        message = "Application '{}' was not found on AIP Console";
-                    }
+                    String message = autoCreate ?
+                            "Creation of the application '{}' failed on AIP Console" :
+                            "Application '{}' was not found on AIP Console";
                     log.error(message, applicationName);
                     return Constants.RETURN_APPLICATION_NOT_FOUND;
                 }
@@ -142,7 +139,7 @@ public class AddVersionCommand implements Callable<Integer> {
             try (InputStream stream = Files.newInputStream(archiveFilePath.toPath())) {
                 long fileSize = archiveFilePath.length();
                 if (!uploadService.uploadInputStream(applicationGuid, randomizedFileName, fileSize, stream)) {
-                    log.error("Upload wasn't transmitted but was not considered complete by server. Check the file you provided wasn't modified since the start of the CLI");
+                    log.error("Local file fully uploaded, but AIP Console expects more content (fileSize on AIP Console not reached). Check the file you provided wasn't modified since the start of the CLI");
                     return Constants.RETURN_UPLOAD_ERROR;
                 }
             } catch (IOException e) {
@@ -150,12 +147,10 @@ public class AddVersionCommand implements Callable<Integer> {
                 throw new UploadException(e);
             }
 
-            if (cloneVersion) {
-                // check that the application actually has versions, otherwise it's just an add version job
-                cloneVersion = applicationService.applicationHasVersion(applicationGuid);
-            }
+            // check that the application actually has versions, otherwise it's just an add version job
+            cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
 
-            String jobGuid = jobsService.startAddVersionJob(applicationGuid, randomizedFileName, versionName, new Date(), cloneVersion, enableSecurityDataflow);
+            String jobGuid = jobsService.startAddVersionJob(applicationGuid, applicationName, randomizedFileName, versionName, new Date(), cloneVersion, enableSecurityDataflow);
             JobState jobState = jobsService.pollAndWaitForJobFinished(jobGuid);
             if (JobState.COMPLETED == jobState) {
                 log.info("Job completed successfully.");
