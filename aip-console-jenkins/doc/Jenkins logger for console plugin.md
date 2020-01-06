@@ -13,7 +13,7 @@ On the side : New Log Recorder. Define a name like "AIP Console Plugin Log"
 Add 2 Loggers:
 
 * `io.jenkins.plugins.aipconsole` : for the AIP Console plugin "" and one for the AIP Console Tools Core ""
-* `com.castsoftware.uc.aip.console.tools` : For the library that handles the calls to AIP Console
+* `com.castsoftware.aip.console.tools` : For the library that handles the calls to AIP Console
 
 **NOTE**: Version 1.0.5 and above no longer have the "uc" package for the core library. So change the logger accordingly with your version of the plugin.
 
