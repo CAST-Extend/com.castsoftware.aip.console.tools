@@ -12,6 +12,8 @@ public interface ApplicationService {
      */
     String getApplicationGuidFromName(String applicationName) throws ApplicationServiceException;
 
+    String getApplicationNameFromGuid(String applicationGuid) throws ApplicationServiceException;
+
     /**
      * Checks whether the application has any versions
      *

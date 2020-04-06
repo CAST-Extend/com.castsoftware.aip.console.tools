@@ -111,6 +111,7 @@ public class JobsServiceImpl implements JobsService {
         }
 
         CreateJobsRequest jobRequest = builder.releaseAndSnapshotDate(versionReleaseDate)
+                .sourcePath("upload:" + applicationName + "/main_sources")
                 .buildJobRequestWithParameters(cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
 
         try {

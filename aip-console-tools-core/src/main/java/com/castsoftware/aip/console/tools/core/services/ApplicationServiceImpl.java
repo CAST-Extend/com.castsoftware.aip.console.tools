@@ -43,6 +43,18 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public String getApplicationNameFromGuid(String applicationGuid) throws ApplicationServiceException {
+        return getApplications()
+                .getApplications()
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationGuid, a.getGuid()))
+                .findFirst()
+                .map(ApplicationDto::getName)
+                .orElse(null);
+    }
+
+    @Override
     public boolean applicationHasVersion(String applicationGuid) throws ApplicationServiceException {
         Set<VersionDto> appVersions = getApplicationVersion(applicationGuid);
         return appVersions != null &&

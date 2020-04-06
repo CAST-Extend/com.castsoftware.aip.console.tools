@@ -29,6 +29,7 @@ public class JobParametersBuilder {
     private String releaseDateStr;
     private String snapshotDateStr;
     private String sourceFolder;
+    private String sourcePath;
 
     private JobParametersBuilder(String appGuid, String fileName) {
         this.appGuid = appGuid;
@@ -98,6 +99,11 @@ public class JobParametersBuilder {
                 .snapshotDateStr(dateStr);
     }
 
+    public JobParametersBuilder sourcePath(String sourcePath) {
+        this.sourcePath = sourcePath;
+        return this;
+    }
+
     public JobParametersBuilder snapshotDateStr(String snapshotDateStr) {
         this.snapshotDateStr = snapshotDateStr;
         return this;
@@ -113,8 +119,8 @@ public class JobParametersBuilder {
     public Map<String, String> build() {
         Map<String, String> parameters = new HashMap<>();
         parameters.put(Constants.PARAM_APP_GUID, this.appGuid);
-        parameters.put(Constants.PARAM_SOURCE_ARCHIVE, this.fileName);
-        parameters.put(Constants.PARAM_FILENAME, this.fileName);
+        // parameters.put(Constants.PARAM_SOURC7E_ARCHIVE, this.fileName);
+        //parameters.put(Constants.PARAM_FILENAME, this.fileName);
         parameters.put(Constants.PARAM_VERSION_NAME, this.versionName);
         if (StringUtils.isNotBlank(this.nodeGuid)) {
             parameters.put(Constants.PARAM_NODE_GUID, this.nodeGuid);
@@ -128,6 +134,7 @@ public class JobParametersBuilder {
         parameters.put(Constants.PARAM_VERSION_OBJECTIVES, String.join(",", this.objectives));
         parameters.put(Constants.PARAM_RELEASE_DATE, this.releaseDateStr);
         parameters.put(Constants.PARAM_SNAPSHOT_CAPTURE_DATE, this.snapshotDateStr);
+        parameters.put(Constants.PARAM_SOURCE_PATH, this.sourcePath);
 
         return parameters;
     }

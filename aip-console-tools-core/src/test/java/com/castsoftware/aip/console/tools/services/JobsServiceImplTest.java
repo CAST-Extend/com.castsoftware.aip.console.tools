@@ -236,10 +236,6 @@ public class JobsServiceImplTest {
                 log.severe("Wrong app guid. Expected 'appGuid' but was " + jobParams.get(Constants.PARAM_APP_GUID));
                 return false;
             }
-            if (!TEST_ZIP_NAME.equalsIgnoreCase(jobParams.get(Constants.PARAM_SOURCE_ARCHIVE))) {
-                log.severe("Wrong source archive. Expected 'file.zip' but was " + jobParams.get(Constants.PARAM_SOURCE_ARCHIVE));
-                return false;
-            }
             if (!DEFAULT_OBJECTIVES.equalsIgnoreCase(jobParams.get(Constants.PARAM_VERSION_OBJECTIVES))) {
                 log.severe("Wrong version objectives. Expected 'GLOBAL_RISK,FUNCTIONAL_POINTS' but was " + jobParams.get(Constants.PARAM_VERSION_OBJECTIVES));
                 return false;

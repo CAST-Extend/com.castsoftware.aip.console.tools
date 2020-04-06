@@ -135,6 +135,11 @@ public class AddVersionCommand implements Callable<Integer> {
                     return Constants.RETURN_APPLICATION_NOT_FOUND;
                 }
             }
+
+            if (StringUtils.isEmpty(applicationName) && StringUtils.isNotEmpty(applicationGuid)) {
+                applicationName = applicationService.getApplicationNameFromGuid(applicationGuid);
+            }
+
             String randomizedFileName = UUID.randomUUID().toString() + "." + getFileExtension(archiveFilePath.getName());
             try (InputStream stream = Files.newInputStream(archiveFilePath.toPath())) {
                 long fileSize = archiveFilePath.length();
