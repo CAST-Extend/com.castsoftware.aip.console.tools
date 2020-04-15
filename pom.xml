@@ -128,11 +128,19 @@
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
+        <repository>
+            <id>internal repo</id>
+            <url>http://jnk-maven:8081/artifactory/ext-release-local</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>internal plugins</id>
+            <url>http://jnk-maven:8081/artifactory/ext-release-local</url>
         </pluginRepository>
     </pluginRepositories>
 </project>
