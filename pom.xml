@@ -146,14 +146,30 @@
             <id>internal</id>
             <repositories>
                 <repository>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
                     <id>repo.jenkins-ci.org</id>
                     <url>http://jnk-maven:8081/artifactory/ext-release-local</url>
+                </repository>
+                <repository>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <id>central</id>
+                    <name>cast_maven</name>
+                    <url>http://jnk-maven:8081/artifactory/cast_maven</url>
                 </repository>
             </repositories>
             <pluginRepositories>
                 <pluginRepository>
                     <id>repo.jenkins-ci.org</id>
                     <url>http://jnk-maven:8081/artifactory/ext-release-local</url>
+                </pluginRepository>
+                <pluginRepository>
+                    <id>central</id>
+                    <name>cast_maven</name>
+                    <url>http://jnk-maven:8081/artifactory/cast_maven</url>
                 </pluginRepository>
             </pluginRepositories>
         </profile>
