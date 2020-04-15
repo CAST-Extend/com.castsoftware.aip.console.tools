@@ -123,16 +123,40 @@
             </plugin>
         </plugins>
     </build>
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/list/public/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/list/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
+    <profiles>
+        <profile>
+            <id>github</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>repo.jenkins-ci.org</id>
+                    <url>https://repo.jenkins-ci.org/list/public/</url>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>repo.jenkins-ci.org</id>
+                    <url>https://repo.jenkins-ci.org/list/public/</url>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+        <profile>
+            <id>internal</id>
+            <repositories>
+                <repository>
+                    <id>repo.jenkins-ci.org</id>
+                    <url>http://jnk-maven:8081/artifactory/ext-release-local</url>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>repo.jenkins-ci.org</id>
+                    <url>http://jnk-maven:8081/artifactory/ext-release-local</url>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+
 </project>
