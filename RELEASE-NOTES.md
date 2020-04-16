@@ -1,5 +1,9 @@
 ## Release Notes :
 
+#### 1.1.3
+
+Added compatibility with version 1.15.x of AIP Console 
+
 #### 1.1.2
 
 Compatibility with the latest version of AIP Console (1.13.0) :
