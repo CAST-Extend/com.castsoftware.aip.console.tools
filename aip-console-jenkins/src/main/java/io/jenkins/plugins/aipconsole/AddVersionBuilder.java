@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -42,6 +43,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -205,6 +207,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         PrintStream log = listener.getLogger();
         Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
         boolean applicationHasVersion = this.cloneVersion;
+        boolean isUpload = false;
 
         String errorMessage;
         if ((errorMessage = checkJobParameters()) != null) {
@@ -213,17 +216,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        EnvVars vars = run.getEnvironment(listener);
-        String resolvedFilePath = vars.expand(filePath);
-        FilePath workspaceFile = workspace.child(resolvedFilePath);
-        if (!workspaceFile.exists()) {
-            listener.error(AddVersionBuilder_AddVersion_error_fileNotFound(filePath));
-            run.setResult(Result.NOT_BUILT);
-            return;
-        }
-
         // Check the services have been properly initialized
-
         if (!ObjectUtils.allNotNull(apiService, chunkedUploadService, jobsService, applicationService)) {
             // Manually setup Guice Injector using Module (Didn't find any way to make this automatically)
             Injector injector = Guice.createInjector(new AipConsoleModule());
@@ -255,13 +248,33 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        String randomizedFileName = UUID.randomUUID().toString();
+        try {
+            applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
+        } catch (ApplicationServiceException e) {
+            listener.error(AddVersionBuilder_AddVersion_error_appCreateError(applicationName));
+            e.printStackTrace(listener.getLogger());
+            run.setResult(defaultResult);
+            return;
+        }
+
+        EnvVars vars = run.getEnvironment(listener);
+        String resolvedFilePath = vars.expand(filePath);
+        FilePath workspaceFile = null;
+        if (StringUtils.equalsAnyIgnoreCase(FilenameUtils.getExtension(filePath), "zip", "tar.gz")) {
+            workspaceFile = workspace.child(resolvedFilePath);
+            isUpload = true;
+            if (!workspaceFile.exists()) {
+                listener.error(AddVersionBuilder_AddVersion_error_fileNotFound(filePath));
+                run.setResult(Result.NOT_BUILT);
+                return;
+            }
+        }
+
+        String fileName = UUID.randomUUID().toString();
 
         try {
 
             // Get the GUID from AIP Console
-            applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
-
             if (StringUtils.isBlank(applicationGuid)) {
                 if (!autoCreate) {
                     listener.error(AddVersionBuilder_AddVersion_error_appNotFound(applicationName));
@@ -313,25 +326,39 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 applicationHasVersion = applicationService.applicationHasVersion(applicationGuid);
             }
 
-            log.println(AddVersionBuilder_AddVersion_info_startUpload(FilenameUtils.getName(resolvedFilePath)));
-            // Rename the file to applicationName-versionName.ext
-            if (StringUtils.endsWithIgnoreCase(resolvedFilePath, ".tar.gz")) {
-                // getExtension only returns the last extension, so specific case for .tar.gz
-                randomizedFileName += ".tar.gz";
-            } else {
-                randomizedFileName += "." + FilenameUtils.getExtension(resolvedFilePath);
-            }
+            if (!isUpload) {
+                // Rename the file to applicationName-versionName.ext
+                log.println(AddVersionBuilder_AddVersion_info_startUpload(FilenameUtils.getName(resolvedFilePath)));
 
-            // if it already exists, delete it (might be a remnant of a previous execution)
-            // move source file to another file name, to avoid conflicts when uploading the same zip file for multiple applications
-            try (InputStream workspaceFileStream = workspaceFile.read();
-                 InputStream bufferedStream = new BufferedInputStream(workspaceFileStream, BUFFER_SIZE)) {
-                log.println("Uploading file " + workspaceFile.getName());
-                if (!chunkedUploadService.uploadInputStream(applicationGuid, randomizedFileName, workspaceFile.length(), bufferedStream)) {
-                    throw new UploadException("Uploading was not completed successfully.");
+                //call api to check if the folder exists
+                try {
+                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath).build();
+                    apiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
+                } catch (ApiCallException e) {
+                    listener.error("Unable to find the file " + filePath + " in the source.folder.location");
+                    e.printStackTrace(log);
+                    run.setResult(defaultResult);
+                    return;
+                }
+                fileName = "sources:" + Paths.get(filePath).toString();
+            } else {
+                if (StringUtils.endsWithIgnoreCase(resolvedFilePath, ".tar.gz")) {
+                    // getExtension only returns the last extension, so specific case for .tar.gz
+                    fileName += ".tar.gz";
+                } else {
+                    fileName += "." + FilenameUtils.getExtension(resolvedFilePath);
+                }
+                // if it already exists, delete it (might be a remnant of a previous execution)
+                // move source file to another file name, to avoid conflicts when uploading the same zip file for multiple applications
+                try (InputStream workspaceFileStream = workspaceFile.read();
+                     InputStream bufferedStream = new BufferedInputStream(workspaceFileStream, BUFFER_SIZE)) {
+                    log.println("Uploading file " + workspaceFile.getName());
+                    if (!chunkedUploadService.uploadInputStream(applicationGuid, fileName, workspaceFile.length(), bufferedStream)) {
+                        throw new UploadException("Uploading was not completed successfully.");
+                    }
+                    fileName = "upload:" + applicationName + "/main_sources";
                 }
             }
-
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(applicationName));
             e.printStackTrace(listener.getLogger());
@@ -371,7 +398,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             String jobGuid = jobsService.startAddVersionJob(
                     applicationGuid,
                     applicationName,
-                    randomizedFileName,
+                    fileName,
                     resolvedVersionName,
                     new Date(),
                     applicationHasVersion,

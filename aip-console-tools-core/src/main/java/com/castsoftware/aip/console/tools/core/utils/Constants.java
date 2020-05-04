@@ -17,6 +17,7 @@ public class Constants {
     public static final int RETURN_JOB_FAILED = 5;
     public static final int RETURN_APPLICATION_INFO_MISSING = 6;
     public static final int RETURN_APPLICATION_NOT_FOUND = 7;
+    public static final int RETURN_SOURCE_FOLDER_NOT_FOUND = 8;
 
     public static final int UNKNOWN_ERROR = 1000;
 

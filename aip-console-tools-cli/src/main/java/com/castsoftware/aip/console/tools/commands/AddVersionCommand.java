@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
@@ -75,7 +76,7 @@ public class AddVersionCommand implements Callable<Integer> {
      * A File that will be uploaded to AIP Console for the given application
      */
     @CommandLine.Option(names = {"-f", "--file"}, paramLabel = "FILE", description = "The ZIP file containing the source to rescan", required = true)
-    private File archiveFilePath;
+    private File filePath;
     /**
      * The Name fo the version from the command line
      */
@@ -140,22 +141,37 @@ public class AddVersionCommand implements Callable<Integer> {
                 applicationName = applicationService.getApplicationNameFromGuid(applicationGuid);
             }
 
-            String randomizedFileName = UUID.randomUUID().toString() + "." + getFileExtension(archiveFilePath.getName());
-            try (InputStream stream = Files.newInputStream(archiveFilePath.toPath())) {
-                long fileSize = archiveFilePath.length();
-                if (!uploadService.uploadInputStream(applicationGuid, randomizedFileName, fileSize, stream)) {
-                    log.error("Local file fully uploaded, but AIP Console expects more content (fileSize on AIP Console not reached). Check the file you provided wasn't modified since the start of the CLI");
-                    return Constants.RETURN_UPLOAD_ERROR;
-                }
-            } catch (IOException e) {
-                log.error("Unable to read archive content to be uploaded.", e);
-                throw new UploadException(e);
-            }
 
+            String sourceFileName;
+            // means it is a subfolder inside the source.folder.location defined in Console
+            if (!StringUtils.equalsAnyIgnoreCase(FilenameUtils.getExtension(filePath.getName()), "zip", "tar.gz")) {
+                //call api to check if the folder exists
+                try {
+                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath.toPath().toString()).build();
+                    restApiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
+                    sourceFileName = "sources:" + filePath.toPath().toString();
+                } catch (ApiCallException e) {
+                    return Constants.RETURN_SOURCE_FOLDER_NOT_FOUND;
+                }
+            } else {
+                sourceFileName = UUID.randomUUID().toString() + "." + getFileExtension(filePath.getName());
+                try (InputStream stream = Files.newInputStream(filePath.toPath())) {
+                    long fileSize = filePath.length();
+                    if (!uploadService.uploadInputStream(applicationGuid, sourceFileName, fileSize, stream)) {
+                        log.error("Local file fully uploaded, but AIP Console expects more content (fileSize on AIP Console not reached). Check the file you provided wasn't modified since the start of the CLI");
+                        return Constants.RETURN_UPLOAD_ERROR;
+                    }
+                    sourceFileName = "upload:" + applicationName + "/main_sources";
+                } catch (IOException e) {
+                    log.error("Unable to read archive content to be uploaded.", e);
+                    throw new UploadException(e);
+                }
+
+            }
             // check that the application actually has versions, otherwise it's just an add version job
             cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
 
-            String jobGuid = jobsService.startAddVersionJob(applicationGuid, applicationName, randomizedFileName, versionName, new Date(), cloneVersion, enableSecurityDataflow);
+            String jobGuid = jobsService.startAddVersionJob(applicationGuid, applicationName, sourceFileName, versionName, new Date(), cloneVersion, enableSecurityDataflow);
             JobState jobState = jobsService.pollAndWaitForJobFinished(jobGuid);
             if (JobState.COMPLETED == jobState) {
                 log.info("Job completed successfully.");
