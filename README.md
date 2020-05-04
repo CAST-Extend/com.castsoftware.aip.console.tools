@@ -6,7 +6,7 @@ It offers 2 main methods of automation:
 * [AIP Console Jenkins Plugin](./aip-console-jenkins/README.md) with an example [Jenkinsfile](./aip-console-jenkins/examples/dynamic-pipeline-example/README.md) to automate retrieving and analysing multiple applications.  
 * [AIP Console Tool CLI](./aip-console-tools-cli/README.md) 
 
-The latest releases are available on the [Release page](https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools/releases).
+The latest releases are available on the [Release page](https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/releases).
 
 The latest changes are described in the [Release Notes](./RELEASE-NOTES.md)  
 

@@ -17,7 +17,7 @@ Here is an example of the content of the `projects.json` file :
   {
     "enabled": true,
     "name": "AIP Console tools",
-    "url": "https://github.com/CAST-Extend/com.castsoftware.uc.aip.console.tools.git",
+    "url": "https://github.com/CAST-Extend/com.castsoftware.aip.console.tools.git",
     "versions": [
       {
         "versionName": "tools-0.0.1-${BUILD_ID}",

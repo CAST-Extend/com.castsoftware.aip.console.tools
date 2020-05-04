@@ -99,20 +99,13 @@ public class JobParametersBuilder {
                 .snapshotDateStr(dateStr);
     }
 
-    public JobParametersBuilder sourcePath(String sourcePath) {
-        this.sourcePath = sourcePath;
-        return this;
-    }
-
     public JobParametersBuilder snapshotDateStr(String snapshotDateStr) {
         this.snapshotDateStr = snapshotDateStr;
         return this;
     }
 
-    public JobParametersBuilder sourceFolder(String applicationName) {
-        if (StringUtils.isNotBlank(applicationName)) {
-            this.sourceFolder = applicationName + "/main_sources";
-        }
+    public JobParametersBuilder sourcePath(String source) {
+        this.sourcePath = source;
         return this;
     }
 

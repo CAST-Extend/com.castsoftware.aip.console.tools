@@ -1,9 +1,12 @@
-name: Java CI
+name: Maven Build and Test
 
 on:
   push:
-    ignore-branches:
-      - master
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
 
 
 jobs:
