@@ -144,7 +144,7 @@ public class AddVersionCommand implements Callable<Integer> {
 
             String sourceFileName;
             // means it is a subfolder inside the source.folder.location defined in Console
-            if (!StringUtils.equalsAnyIgnoreCase(FilenameUtils.getExtension(filePath.getName()), "zip", "tar.gz")) {
+            if (!StringUtils.equalsAnyIgnoreCase(FilenameUtils.getExtension(filePath.getName()), "zip", "gz")) {
                 //call api to check if the folder exists
                 try {
                     FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath.toPath().toString()).build();

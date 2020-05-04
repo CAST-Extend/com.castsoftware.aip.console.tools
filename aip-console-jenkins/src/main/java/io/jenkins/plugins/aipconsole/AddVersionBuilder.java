@@ -260,7 +260,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         EnvVars vars = run.getEnvironment(listener);
         String resolvedFilePath = vars.expand(filePath);
         FilePath workspaceFile = null;
-        if (StringUtils.equalsAnyIgnoreCase(FilenameUtils.getExtension(filePath), "zip", "tar.gz")) {
+        if (StringUtils.equalsAnyIgnoreCase(FilenameUtils.getExtension(filePath), "zip", "gz")) {
             workspaceFile = workspace.child(resolvedFilePath);
             isUpload = true;
             if (!workspaceFile.exists()) {
@@ -332,7 +332,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
                 //call api to check if the folder exists
                 try {
-                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath).build();
+                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(filePath).toString()).build();
                     apiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
                 } catch (ApiCallException e) {
                     listener.error("Unable to find the file " + filePath + " in the source.folder.location");
