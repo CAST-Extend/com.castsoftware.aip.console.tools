@@ -82,12 +82,12 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startAddVersionJob(String appGuid, String applicationName, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow)
+    public String startAddVersionJob(String appGuid, String applicationName, String fileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow)
             throws JobServiceException {
         if (StringUtils.isBlank(appGuid)) {
             throw new JobServiceException("No application GUID provided");
         }
-        if (StringUtils.isBlank(zipFileName)) {
+        if (StringUtils.isBlank(fileName)) {
             throw new JobServiceException("No Archive File name provided to create the new version");
         }
         if (versionReleaseDate == null) {
@@ -100,18 +100,17 @@ public class JobsServiceImpl implements JobsService {
 
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
 
-        JobParametersBuilder builder = JobParametersBuilder.newInstance(appGuid, FilenameUtils.getName(zipFileName))
+        JobParametersBuilder builder = JobParametersBuilder.newInstance(appGuid, FilenameUtils.getName(fileName))
                 .versionName(versionName)
-                .securityObjective(enableSecurityDataflow);
+                .securityObjective(enableSecurityDataflow)
+                .sourcePath(fileName);
         if (apiInfoDto.isEnablePackagePathCheck()) {
-            builder.startStep(Constants.CODE_SCANNER_STEP_NAME)
-                    .sourceFolder(applicationName);
+            builder.startStep(Constants.CODE_SCANNER_STEP_NAME);
         } else {
             builder.startStep(Constants.EXTRACT_STEP_NAME);
         }
 
         CreateJobsRequest jobRequest = builder.releaseAndSnapshotDate(versionReleaseDate)
-                .sourcePath("upload:" + applicationName + "/main_sources")
                 .buildJobRequestWithParameters(cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
 
         try {
