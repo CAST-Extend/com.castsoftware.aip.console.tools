@@ -14,9 +14,11 @@ HotSpot (AdoptOpenJDK, Oracle) JVMs have been tested and work well; other JVMs (
 Before using this tool, you will have to :
 
 * Generate an API Token for your user. See below in the "Token" chapter to see different methods for passing the token to AIP Console CLI Tool.
-* Prepare your source code as a ZIP file that will be uploaded to AIP Console.
+* Prepare your source code as a ZIP file or a relative path to a subfolder inside the source folder location configured in AIP Console
 
-**NB:** The provided ZIP file structure will be better processed if you separate each technology into a specific root folder.
+    ![source_foler_location_config](./doc/images/source_folder_location_config.png)
+
+**NB:** The provided source code structure will be better processed if you separate each technology into a specific root folder.
 
 ### Basic Usage
 
@@ -141,7 +143,7 @@ Creates a new version for an application on AIP Console
   -a, --app-guid=APPLICATION_GUID
                             The GUID of the application to rescan
   -c, --clone, --rescan     Clones the latest version configuration instead of creating a new version
-  -f, --file=FILE           The ZIP file containing the source to rescan
+  -f, --file=FILE           The ZIP file containing the source or a relative path to a subfolder inside source folder location
   -h, --help                Show this help message and exit.
   -n, --app-name=APPLICATION_NAME
                             The Name of the application to rescan

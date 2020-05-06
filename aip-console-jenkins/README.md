@@ -51,6 +51,9 @@ You must give an Application Name and a path to a an Archive File, either `zip`,
 The application name will be checked on AIP Console, and the application GUID will be obtained this way (it'll be saved in the job configuration and displayed in the read only field Application GUID)
 
 This Archive file will be uploaded to AIP Console, extracted and then run through the whole analysis workflow, as if you had done so through the AIP Console UI.
+* From 1.15, you can provide a relative path to a subfolder inside the source folder location configured in AIP Console to skip the uploading zip process.
+    
+    ![source_foler_location_config](./doc/images/source_folder_location_config.png)
 
 ⚠ *When creating versions for very large applications (above 1Gb of source code), be careful of the timeout configuration, either globally or in your job. As the upload completes, there is a copy operation and depending on your machines specs, it might take more than the default timeout (30s).*
 
@@ -66,6 +69,7 @@ Under the **Advanced Settings** button are some more parameters for advanced usa
 
 * *Ignore Analysis Failure ?* : By default, failed analysis will mark the Jenkins Build as a Failure. Checking this will mark them as Unstable instead of failing the entire build.
 * *Node Name* : Enter the name of a node where the application will be created if it will be created. This parameter is ignored if the application already exists.
+  * From Console 1.14 the node name is no longer required, Console is able to determine the node automatically.
 * *Connection Timeout (in seconds)* : The time (in seconds) before a connection to AIP Console is considered timed out (i.e. that AIP console might be unavailable). For unlimited wait, you can set this to `0`
 
 Here is a sample output of the Add Version step : 
