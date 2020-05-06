@@ -1,5 +1,11 @@
 ## Release Notes :
 
+#### 1.15.0
+
+As of this release, we're aligning the version number with AIP Console.
+
+Added Source Folder support
+
 #### 1.1.3
 
 Added compatibility with version 1.15.x of AIP Console 
