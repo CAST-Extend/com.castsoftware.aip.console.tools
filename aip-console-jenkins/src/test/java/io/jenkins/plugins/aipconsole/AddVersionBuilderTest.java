@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -40,7 +41,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.concurrent.Future;
 
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_accessDenied;
@@ -121,7 +121,7 @@ public class AddVersionBuilderTest {
         doReturn(true)
                 .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
+                .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
                 .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
 
@@ -147,7 +147,7 @@ public class AddVersionBuilderTest {
         doReturn(true)
                 .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
+                .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
                 .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
 
@@ -229,7 +229,7 @@ public class AddVersionBuilderTest {
         doReturn(true)
                 .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doThrow(new JobServiceException("fake exception"))
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
+                .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
@@ -248,7 +248,7 @@ public class AddVersionBuilderTest {
         doReturn(true)
                 .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
+                .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.CANCELED)
                 .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
 
@@ -317,7 +317,7 @@ public class AddVersionBuilderTest {
         doReturn(true)
                 .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
-                .when(jobsService).startAddVersionJob(eq(TEST_APP_NAME), eq(TEST_APP_NAME), anyString(), anyString(), any(Date.class), eq(false), eq(false));
+                .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
                 .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
 
