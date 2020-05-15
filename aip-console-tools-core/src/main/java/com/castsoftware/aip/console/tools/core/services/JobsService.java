@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -54,6 +55,8 @@ public interface JobsService {
      * @throws JobServiceException IF any error occurs while starting the job
      */
     String startAddVersionJob(String appGuid, String applicationName, String fileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow) throws JobServiceException;
+
+    String startAddVersionJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException;
 
     /**
      * Polls AIP Console to get the status of the job with the given GUID.

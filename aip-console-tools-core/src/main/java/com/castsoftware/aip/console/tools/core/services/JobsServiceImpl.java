@@ -4,7 +4,7 @@ import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.SemVer;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobParametersBuilder;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -15,7 +15,6 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import lombok.extern.java.Log;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
@@ -82,12 +81,12 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startAddVersionJob(String appGuid, String applicationName, String fileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow)
+    public String startAddVersionJob(String appGuid, String applicationName, String sourcePath, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow)
             throws JobServiceException {
         if (StringUtils.isBlank(appGuid)) {
             throw new JobServiceException("No application GUID provided");
         }
-        if (StringUtils.isBlank(fileName)) {
+        if (StringUtils.isBlank(sourcePath)) {
             throw new JobServiceException("No Archive File name provided to create the new version");
         }
         if (versionReleaseDate == null) {
@@ -97,21 +96,24 @@ public class JobsServiceImpl implements JobsService {
             DateFormat formatVersionName = new SimpleDateFormat("yyMMdd.HHmmss");
             versionName = "v" + formatVersionName.format(versionReleaseDate);
         }
+        JobRequestBuilder builder = JobRequestBuilder.newInstance(appGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
+                .versionName(versionName)
+                .releaseAndSnapshotDate(versionReleaseDate)
+                .securityObjective(enableSecurityDataflow);
+
+        return startAddVersionJob(builder);
+    }
+
+    @Override
+    public String startAddVersionJob(JobRequestBuilder builder) throws JobServiceException {
 
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
-
-        JobParametersBuilder builder = JobParametersBuilder.newInstance(appGuid, FilenameUtils.getName(fileName))
-                .versionName(versionName)
-                .securityObjective(enableSecurityDataflow)
-                .sourcePath(fileName);
         if (apiInfoDto.isEnablePackagePathCheck()) {
             builder.startStep(Constants.CODE_SCANNER_STEP_NAME);
         } else {
             builder.startStep(Constants.EXTRACT_STEP_NAME);
         }
-
-        CreateJobsRequest jobRequest = builder.releaseAndSnapshotDate(versionReleaseDate)
-                .buildJobRequestWithParameters(cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
+        CreateJobsRequest jobRequest = builder.buildJobRequest();
 
         try {
             SuccessfulJobStartDto dto = restApiService.postForEntity(ApiEndpointHelper.getJobsEndpoint(), jobRequest, SuccessfulJobStartDto.class);

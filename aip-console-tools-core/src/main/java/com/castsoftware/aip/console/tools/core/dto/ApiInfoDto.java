@@ -32,8 +32,6 @@ public class ApiInfoDto {
 
     private boolean dashboardIntegrated = false;
 
-    private Map<FeatureEnum, Boolean> featureMatrix = new HashMap<>();
-
     private boolean enableSnapshotValidation = false;
 
     private boolean enableDownloadDmt = false;

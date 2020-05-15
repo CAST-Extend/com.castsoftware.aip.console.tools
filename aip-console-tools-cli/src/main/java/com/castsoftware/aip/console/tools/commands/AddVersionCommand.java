@@ -1,7 +1,10 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
@@ -32,6 +35,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Component
 @CommandLine.Command(
@@ -46,6 +50,7 @@ import java.util.concurrent.TimeUnit;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddVersionCommand implements Callable<Integer> {
+    private static final String[] ALLOWED_ARCHIVE_EXTENSIONS = new String[]{"zip", "tgz", "gz"};
 
     @Autowired
     private RestApiService restApiService;
@@ -75,7 +80,7 @@ public class AddVersionCommand implements Callable<Integer> {
     /**
      * A File that will be uploaded to AIP Console for the given application
      */
-    @CommandLine.Option(names = {"-f", "--file"}, paramLabel = "FILE", description = "The ZIP file containing the source to rescan", required = true)
+    @CommandLine.Option(names = {"-f", "--file"}, paramLabel = "FILE", description = "A local zip or tar.gz file OR a path to a folder on the node where the source if saved", required = true)
     private File filePath;
     /**
      * The Name fo the version from the command line
@@ -101,6 +106,18 @@ public class AddVersionCommand implements Callable<Integer> {
      */
     @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME", description = "The name of the node on which the application will be created. Ignored if no --auto-create or the application already exists.")
     private String nodeName;
+
+    /**
+     * Run a backup before delivering the new version
+     */
+    @CommandLine.Option(names = {"-b", "--backup"}, description = "Enable backup of application before delivering the new version")
+    private boolean backupEnabled = false;
+
+    /**
+     * Name of the backup
+     */
+    @CommandLine.Option(names = "--backup-name", paramLabel = "BACKUP_NAME", description = "The name of the backup to create before delivering the new version. Defaults to 'backup_date.time'")
+    private String backupName;
 
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
@@ -141,27 +158,28 @@ public class AddVersionCommand implements Callable<Integer> {
                 applicationName = applicationService.getApplicationNameFromGuid(applicationGuid);
             }
 
-
-            String sourceFileName;
+            // AIP Console source path, startign with either "sources:" or "upload:" if it is a folder on the server
+            // or a file that was uploaded
+            String sourcePath;
             // means it is a subfolder inside the source.folder.location defined in Console
-            if (!StringUtils.equalsAnyIgnoreCase(FilenameUtils.getExtension(filePath.getName()), "zip", "gz")) {
+            if (!StringUtils.equalsAnyIgnoreCase(FilenameUtils.getExtension(filePath.getName()), ALLOWED_ARCHIVE_EXTENSIONS)) {
                 //call api to check if the folder exists
                 try {
                     FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath.toPath().toString()).build();
                     restApiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
-                    sourceFileName = "sources:" + filePath.toPath().toString();
+                    sourcePath = "sources:" + filePath.toPath().toString();
                 } catch (ApiCallException e) {
                     return Constants.RETURN_SOURCE_FOLDER_NOT_FOUND;
                 }
             } else {
-                sourceFileName = UUID.randomUUID().toString() + "." + getFileExtension(filePath.getName());
+                sourcePath = UUID.randomUUID().toString() + "." + getFileExtension(filePath.getName());
                 try (InputStream stream = Files.newInputStream(filePath.toPath())) {
                     long fileSize = filePath.length();
-                    if (!uploadService.uploadInputStream(applicationGuid, sourceFileName, fileSize, stream)) {
+                    if (!uploadService.uploadInputStream(applicationGuid, sourcePath, fileSize, stream)) {
                         log.error("Local file fully uploaded, but AIP Console expects more content (fileSize on AIP Console not reached). Check the file you provided wasn't modified since the start of the CLI");
                         return Constants.RETURN_UPLOAD_ERROR;
                     }
-                    sourceFileName = "upload:" + applicationName + "/main_sources";
+                    sourcePath = "upload:" + applicationName + "/main_sources";
                 } catch (IOException e) {
                     log.error("Unable to read archive content to be uploaded.", e);
                     throw new UploadException(e);
@@ -171,14 +189,21 @@ public class AddVersionCommand implements Callable<Integer> {
             // check that the application actually has versions, otherwise it's just an add version job
             cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
 
-            String jobGuid = jobsService.startAddVersionJob(applicationGuid, applicationName, sourceFileName, versionName, new Date(), cloneVersion, enableSecurityDataflow);
-            JobState jobState = jobsService.pollAndWaitForJobFinished(jobGuid);
-            if (JobState.COMPLETED == jobState) {
+            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
+                    .versionName(versionName)
+                    .releaseAndSnapshotDate(new Date())
+                    .securityObjective(enableSecurityDataflow)
+                    .backupApplication(backupEnabled)
+                    .backupName(backupName);
+
+            String jobGuid = jobsService.startAddVersionJob(builder);
+            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Job completed successfully.");
                 return Constants.RETURN_OK;
             }
 
-            log.error("Job was not completed successfully. Finished with status '{}'", jobState.toString());
+            log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
             return Constants.RETURN_JOB_FAILED;
 
         } catch (ApplicationServiceException e) {

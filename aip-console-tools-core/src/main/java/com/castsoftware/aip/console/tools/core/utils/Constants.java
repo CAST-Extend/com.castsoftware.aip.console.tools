@@ -64,6 +64,8 @@ public class Constants {
     public static final String PARAM_FILENAME = "fileName";
     public static final String PARAM_VERSION_OBJECTIVES = "objectives";
     public static final String PARAM_SOURCE_PATH = "sourcePath";
+    public static final String PARAM_BACKUP_ENABLED = "backupApplication";
+    public static final String PARAM_BACKUP_NAME = "backupName";
 
     // Job Step Names
     public static final String EXTRACT_STEP_NAME = "unzip_source";
