@@ -2,8 +2,10 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -100,6 +102,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String nodeName = "";
     private boolean enableSecurityDataflow = false;
+    private boolean backupApplicationEnabled = false;
+    @Nullable
+    private String backupName = "";
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -195,6 +200,25 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setEnableSecurityDataflow(boolean enableSecurityDataflow) {
         this.enableSecurityDataflow = enableSecurityDataflow;
+    }
+
+    public boolean isBackupApplicationEnabled() {
+        return backupApplicationEnabled;
+    }
+
+    @Nullable
+    public String getBackupName() {
+        return backupName;
+    }
+
+    @DataBoundSetter
+    public void setBackupName(String backupName) {
+        this.backupName = backupName;
+    }
+
+    @DataBoundSetter
+    public void setBackupApplicationEnabled(boolean backupApplicationEnabled) {
+        this.backupApplicationEnabled = backupApplicationEnabled;
     }
 
     @Override
@@ -394,16 +418,14 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             } else {
                 log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(applicationName));
             }
+            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
+            requestBuilder.releaseAndSnapshotDate(new Date())
+                    .versionName(resolvedVersionName)
+                    .securityObjective(enableSecurityDataflow)
+                    .backupApplication(backupApplicationEnabled)
+                    .backupName(backupName);
 
-            String jobGuid = jobsService.startAddVersionJob(
-                    applicationGuid,
-                    applicationName,
-                    fileName,
-                    resolvedVersionName,
-                    new Date(),
-                    applicationHasVersion,
-                    enableSecurityDataflow
-            );
+            String jobGuid = jobsService.startAddVersionJob(requestBuilder);
 
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);

@@ -26,6 +26,9 @@ public class AddVersionAction implements RunAction2 {
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     @Nullable
     private String nodeName;
+    private boolean backupApplicationEnabled = false;
+    @Nullable
+    private String backupName = "";
 
     private transient Run run;
 
@@ -100,6 +103,32 @@ public class AddVersionAction implements RunAction2 {
 
     public void setTimeout(long timeout) {
         this.timeout = timeout;
+    }
+
+    @Nullable
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    public void setNodeName(@Nullable String nodeName) {
+        this.nodeName = nodeName;
+    }
+
+    public boolean isBackupApplicationEnabled() {
+        return backupApplicationEnabled;
+    }
+
+    public void setBackupApplicationEnabled(boolean backupApplicationEnabled) {
+        this.backupApplicationEnabled = backupApplicationEnabled;
+    }
+
+    @Nullable
+    public String getBackupName() {
+        return backupName;
+    }
+
+    public void setBackupName(@Nullable String backupName) {
+        this.backupName = backupName;
     }
 
     @Override
