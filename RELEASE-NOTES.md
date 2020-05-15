@@ -1,5 +1,11 @@
 ## Release Notes :
 
+#### 1.16.0
+
+Added support for AIP Console 1.16.0
+
+Added option to backup the application before adding a new version
+
 #### 1.15.0
 
 As of this release, we're aligning the version number with AIP Console.
