@@ -2,13 +2,10 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.ChunkedUploadService;
@@ -16,11 +13,6 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.FilenameUtils;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -31,94 +23,62 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
+/**
+ * Deliver an application version on AIP Console
+ */
 @Component
-@CommandLine.Command(
-        name = "AddVersion",
-        mixinStandardHelpOptions = true,
-        aliases = {"add"},
-        description = "Creates a new version, runs an analysis and creates a snapshot for an application on AIP Console"
-)
 @Slf4j
-@Getter
-@Setter
-@NoArgsConstructor
-@RequiredArgsConstructor
-public class AddVersionCommand implements Callable<Integer> {
-    @NonNull
-    private RestApiService restApiService;
-    @NonNull
-    private JobsService jobsService;
-    @NonNull
-    private ChunkedUploadService uploadService;
-    @NonNull
-    private ApplicationService applicationService;
+public class DeliverVersionCommand implements Callable<Integer> {
+    private final RestApiService restApiService;
+    private final JobsService jobsService;
+    private final ChunkedUploadService uploadService;
+    private final ApplicationService applicationService;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
-    /**
-     * The application name to look for on AIP Console
-     */
     @CommandLine.Option(names = {"-n", "--app-name"}, paramLabel = "APPLICATION_NAME", description = "The Name of the application to rescan")
     private String applicationName;
-    /**
-     * The application GUID  on AIP Console
-     */
-    @CommandLine.Option(names = {"-a", "--app-guid"}, paramLabel = "APPLICATION_GUID", description = "The GUID of the application to rescan")
-    private String applicationGuid;
-    /**
-     * A File that will be uploaded to AIP Console for the given application
-     */
     @CommandLine.Option(names = {"-f", "--file"}, paramLabel = "FILE", description = "A local zip or tar.gz file OR a path to a folder on the node where the source if saved", required = true)
     private File filePath;
-    /**
-     * The Name fo the version from the command line
-     */
     @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION_NAME", description = "The name of the version to create")
     private String versionName;
-    /**
-     * Whether or not to clone previous version
-     */
+    @CommandLine.Option(names = {"-d", "--auto-deploy"}, description = "Deploys the version after the delivery (marks the version as current)")
+    private boolean autoDeploy;
     @CommandLine.Option(names = {"-c", "--clone", "--rescan"}, description = "Clones the latest version configuration instead of creating a new application")
     private boolean cloneVersion = false;
-    /**
-     * Whether or not to automatically create the application before Adding a version (if the application could not be found)
-     */
     @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
     private boolean autoCreate = false;
-
     @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version")
     private boolean enableSecurityDataflow = false;
-
-    /**
-     * The name of the target node where application will be created. Only used if --auto-create is true and the application doesn't exists
-     */
     @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME", description = "The name of the node on which the application will be created. Ignored if no --auto-create or the application already exists.")
     private String nodeName;
-
-    /**
-     * Run a backup before delivering the new version
-     */
     @CommandLine.Option(names = {"-b", "--backup"}, description = "Enable backup of application before delivering the new version")
     private boolean backupEnabled = false;
-
-    /**
-     * Name of the backup
-     */
     @CommandLine.Option(names = "--backup-name", paramLabel = "BACKUP_NAME", description = "The name of the backup to create before delivering the new version. Defaults to 'backup_date.time'")
     private String backupName;
 
-    @CommandLine.Unmatched
-    private List<String> unmatchedOptions;
+    public DeliverVersionCommand(RestApiService restApiService, JobsService jobsService, ChunkedUploadService chunkedUploadService, ApplicationService applicationService) {
+        this.restApiService = restApiService;
+        this.jobsService = jobsService;
+        this.uploadService = chunkedUploadService;
+        this.applicationService = applicationService;
+    }
 
     @Override
-    public Integer call() {
+    public Integer call() throws Exception {
+        // Same as a part of the AddVersion command
+        // Upload a local file or register a remote path
+        // And then starts a job up to "Delivery"
+        // Should deploy/mark as current
+        if (StringUtils.isBlank(applicationName)) {
+            log.error("No application name provided. Exiting.");
+            return Constants.RETURN_APPLICATION_INFO_MISSING;
+        }
 
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
@@ -130,30 +90,20 @@ public class AddVersionCommand implements Callable<Integer> {
         } catch (ApiCallException e) {
             return Constants.RETURN_LOGIN_ERROR;
         }
-
-        if (StringUtils.isBlank(applicationName) && StringUtils.isBlank(applicationGuid)) {
-            log.error("No application name or application guid provided. Exiting.");
-            return Constants.RETURN_APPLICATION_INFO_MISSING;
-        }
+        String applicationGuid;
 
         try {
+            log.info("Searching for application '{}' on AIP Console", applicationName);
+            applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName);
             if (StringUtils.isBlank(applicationGuid)) {
-                log.info("Searching for application '{}' on AIP Console", applicationName);
-                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate);
-                if (StringUtils.isBlank(applicationGuid)) {
-                    String message = autoCreate ?
-                            "Creation of the application '{}' failed on AIP Console" :
-                            "Application '{}' was not found on AIP Console";
-                    log.error(message, applicationName);
-                    return Constants.RETURN_APPLICATION_NOT_FOUND;
-                }
+                String message = autoCreate ?
+                        "Creation of the application '{}' failed on AIP Console" :
+                        "Application '{}' was not found on AIP Console";
+                log.error(message, applicationName);
+                return Constants.RETURN_APPLICATION_NOT_FOUND;
             }
 
-            if (StringUtils.isEmpty(applicationName) && StringUtils.isNotEmpty(applicationGuid)) {
-                applicationName = applicationService.getApplicationNameFromGuid(applicationGuid);
-            }
-
-            // AIP Console source path, startign with either "sources:" or "upload:" if it is a folder on the server
+            // AIP Console source path, starting with either "sources:" or "upload:" if it is a folder on the server
             // or a file that was uploaded
             String sourcePath;
             // means it is a subfolder inside the source.folder.location defined in Console
@@ -185,29 +135,30 @@ public class AddVersionCommand implements Callable<Integer> {
             cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
+                    .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName);
 
-            String jobGuid = jobsService.startAddVersionJob(builder);
+            /*String jobGuid = jobsService.startAddVersionJob(builder);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
             if (JobState.COMPLETED == jobStatus.getState()) {
-                log.info("Job completed successfully.");
+                log.info("Delivery of application {} was completed successfully.", applicationName);
                 return Constants.RETURN_OK;
             }
 
-            log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
+            log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());*/
+            log.info("Would start a job with parameters : {}", builder.buildJobRequest().toString());
             return Constants.RETURN_JOB_FAILED;
-
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         } catch (UploadException e) {
             log.error("Error occurred while attempting to upload the given file.", e);
             return Constants.RETURN_UPLOAD_ERROR;
-        } catch (JobServiceException e) {
+        } /*catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
-        }
+        }*/
     }
 }

@@ -95,9 +95,10 @@ public class SharedOptions {
     public String toString() {
         return "SharedOptions{" +
                 "serverRootUrl='" + serverRootUrl + '\'' +
-                ", apiKey='omitted'" +
+                ", apiKey='" + StringUtils.repeat("*", apiKey != null ? apiKey.length() : 0) + "'" +
                 ", apiKeyEnvVariable='" + apiKeyEnvVariable + '\'' +
                 ", username='" + username + '\'' +
+                ", timeout='" + timeout + '\'' +
                 ", unmatchedOptions=" + unmatchedOptions +
                 '}';
     }

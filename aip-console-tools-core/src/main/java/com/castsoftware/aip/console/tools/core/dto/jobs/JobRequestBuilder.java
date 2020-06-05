@@ -121,7 +121,9 @@ public class JobRequestBuilder {
         Map<String, String> parameters = new HashMap<>();
         parameters.put(Constants.PARAM_APP_GUID, this.appGuid);
         parameters.put(Constants.PARAM_VERSION_NAME, this.versionName);
-        parameters.put(Constants.PARAM_SOURCE_PATH, sourcePath);
+        if (StringUtils.isNotBlank(sourcePath)) {
+            parameters.put(Constants.PARAM_SOURCE_PATH, sourcePath);
+        }
         if (StringUtils.isNotBlank(nodeGuid)) {
             parameters.put(Constants.PARAM_NODE_GUID, nodeGuid);
         }

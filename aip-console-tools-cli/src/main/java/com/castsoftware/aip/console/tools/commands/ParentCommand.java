@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.providers.VersionProvider;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -11,14 +12,15 @@ import java.util.concurrent.Callable;
 
 /**
  * This class represent a "main" command that will then delegate to subcommands
- * based on passed parameter
+ * based on passed COMMAND parameter
  */
 @Component
 @Command(
         name = "aip-integration-tool",
         mixinStandardHelpOptions = true,
-        subcommands = {CreateApplicationCommand.class, AddVersionCommand.class},
-        commandListHeading = "%nPossible values for COMMAND:%n%n"
+        subcommands = {CreateApplicationCommand.class, AddVersionCommand.class, AnalyseCommand.class},
+        commandListHeading = "%nPossible values for COMMAND:%n%n",
+        versionProvider = VersionProvider.class
 )
 @Getter
 @Setter
