@@ -2,6 +2,8 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
@@ -13,6 +15,8 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.FilenameUtils;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -26,12 +30,21 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * Deliver an application version on AIP Console
  */
 @Component
+@CommandLine.Command(
+        name = "Deliver",
+        mixinStandardHelpOptions = true,
+        aliases = {"deliver"},
+        description = "Delivers a new version to AIP Console"
+)
 @Slf4j
+@Getter
+@Setter
 public class DeliverVersionCommand implements Callable<Integer> {
     private final RestApiService restApiService;
     private final JobsService jobsService;
@@ -142,15 +155,14 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName);
 
-            /*String jobGuid = jobsService.startAddVersionJob(builder);
+            String jobGuid = jobsService.startAddVersionJob(builder);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Delivery of application {} was completed successfully.", applicationName);
                 return Constants.RETURN_OK;
             }
 
-            log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());*/
-            log.info("Would start a job with parameters : {}", builder.buildJobRequest().toString());
+            log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
             return Constants.RETURN_JOB_FAILED;
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

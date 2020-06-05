@@ -1,5 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -19,7 +21,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -50,7 +54,7 @@ public class AnalyseCommand implements Callable<Integer> {
     private String versionName;
     @CommandLine.Option(names = {"-d", "--deploy"}, description = "Whether the version should be deployed and used for the analysis")
     private boolean autoDeploy;
-    @CommandLine.Option(names = {"-s", "--snapshot"}, description = "Creates a snapshot after running the analysis.")
+    @CommandLine.Option(names = {"-S", "--snapshot"}, description = "Creates a snapshot after running the analysis.")
     private boolean withSnapshot;
 
     public AnalyseCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
@@ -85,14 +89,43 @@ public class AnalyseCommand implements Callable<Integer> {
                 log.error("Application '{}' was not found on AIP Console", applicationName);
                 return Constants.RETURN_APPLICATION_NOT_FOUND;
             }
-            // TODO : Get the latest version from aip console ?
+            Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
+            if (versions.isEmpty()) {
+                log.error("No version for the given application. Make sure at least one version has been delivered");
+                return Constants.RETURN_APPLICATION_NO_VERSION;
+            }
+
+            VersionDto versionToAnalyze;
+            // Version with name provided
+            if (StringUtils.isNotBlank(versionName)) {
+                versionToAnalyze = versions.stream().filter(v -> StringUtils.equalsAnyIgnoreCase(v.getName(), versionName)).findFirst().orElse(null);
+            } else {
+                int statusOrdinal = autoDeploy ? VersionStatus.DELIVERED.ordinal() : VersionStatus.ACCEPTED.ordinal();
+                versionToAnalyze = versions
+                        .stream()
+                        .filter(v -> v.getStatus().ordinal() >= statusOrdinal)
+                        .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
+            }
+            if (versionToAnalyze == null) {
+                String message = StringUtils.isBlank(versionName) ?
+                        "Couldn't find a version to analyze. Make sure you have an accepted version OR a delivered version and pass the '--auto-deploy' parameter" :
+                        "No version with name '" + versionName + "' could be found for application " + applicationName;
+                log.error(message);
+                return Constants.RETURN_APPLICATION_VERSION_NOT_FOUND;
+            }
+            log.info("Starting analysis job for version {}", versionToAnalyze.getName());
+            // Deploy if auto deploy is true AND version to analyze has status DELIVERED (otherwise just do analysis)
+            boolean deployFirst = autoDeploy && versionToAnalyze.getStatus() == VersionStatus.DELIVERED;
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
-                    .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.ANALYZE)
-                    .versionName(versionName)
+                    .startStep(deployFirst ? Constants.SET_CURRENT_STEP_NAME : Constants.ANALYZE)
+                    .endStep(withSnapshot ? Constants.UPLOAD_APP_SNAPSHOT : Constants.ANALYZE)
+                    .versionName(versionToAnalyze.getName())
+                    .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());
+            log.info("Starting job with parameters : \n{}", builder.buildJobRequest());
 
-            String jobGuid = jobsService.startAddVersionJob(builder);
+            String jobGuid = jobsService.startJob(builder);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Job completed successfully.");

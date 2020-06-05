@@ -23,6 +23,7 @@ public class JobRequestBuilder {
     private JobType jobType;
     private String nodeGuid;
     private String versionName;
+    private String versionGuid;
     private String startStep;
     private String endStep;
     private boolean ignoreCheck = true;
@@ -117,6 +118,11 @@ public class JobRequestBuilder {
         return this;
     }
 
+    public JobRequestBuilder versionGuid(String guid) {
+        this.versionGuid = guid;
+        return this;
+    }
+
     private Map<String, String> getJobParameters() {
         Map<String, String> parameters = new HashMap<>();
         parameters.put(Constants.PARAM_APP_GUID, this.appGuid);
@@ -126,6 +132,9 @@ public class JobRequestBuilder {
         }
         if (StringUtils.isNotBlank(nodeGuid)) {
             parameters.put(Constants.PARAM_NODE_GUID, nodeGuid);
+        }
+        if (StringUtils.isNotBlank(versionGuid)) {
+            parameters.put(Constants.PARAM_VERSION_GUID, versionGuid);
         }
         parameters.put(Constants.PARAM_START_STEP, startStep);
         parameters.put(Constants.PARAM_END_STEP, endStep);

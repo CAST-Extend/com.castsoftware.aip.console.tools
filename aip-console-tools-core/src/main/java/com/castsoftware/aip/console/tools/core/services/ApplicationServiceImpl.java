@@ -121,7 +121,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
     }
 
-    private Set<VersionDto> getApplicationVersion(String appGuid) throws ApplicationServiceException {
+    @Override
+    public Set<VersionDto> getApplicationVersion(String appGuid) throws ApplicationServiceException {
         try {
             return restApiService.getForEntity(ApiEndpointHelper.getApplicationVersionsPath(appGuid), new TypeReference<Set<VersionDto>>() {
             });

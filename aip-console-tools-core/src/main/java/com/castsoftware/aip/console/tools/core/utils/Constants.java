@@ -18,6 +18,8 @@ public class Constants {
     public static final int RETURN_APPLICATION_INFO_MISSING = 6;
     public static final int RETURN_APPLICATION_NOT_FOUND = 7;
     public static final int RETURN_SOURCE_FOLDER_NOT_FOUND = 8;
+    public static final int RETURN_APPLICATION_NO_VERSION = 9;
+    public static final int RETURN_APPLICATION_VERSION_NOT_FOUND = 10;
 
     public static final int UNKNOWN_ERROR = 1000;
 
@@ -37,6 +39,8 @@ public class Constants {
     public static final String DELETE_SNAPSHOT = "delete_snapshot";
     public static final String CONSOLIDATE_SNAPSHOT = "consolidate_snapshot";
     public static final String UPLOAD_SNAPSHOTS = "upload_snapshots";
+    // New name for the last step in analysis (this consolidate snapshots and upload to central db)
+    public static final String UPLOAD_APP_SNAPSHOT = "upload_application";
     public static final String DECLARE_APPLICATION = "declare_application";
     public static final String DELETE_APPLICATION = "delete_application";
     public static final String FUNCTION_POINTS = "function_points";
@@ -67,6 +71,7 @@ public class Constants {
     public static final String PARAM_SOURCE_PATH = "sourcePath";
     public static final String PARAM_BACKUP_ENABLED = "backupApplication";
     public static final String PARAM_BACKUP_NAME = "backupName";
+    public static final String PARAM_VERSION_GUID = "versionGuid";
 
     // Job Step Names
     public static final String EXTRACT_STEP_NAME = "unzip_source";

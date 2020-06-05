@@ -35,6 +35,8 @@ public class JobsServiceImpl implements JobsService {
 
     private final long pollingSleepDuration;
 
+    private ApiInfoDto apiInfoDto;
+
     public JobsServiceImpl(RestApiService restApiService) {
         this.restApiService = restApiService;
         this.pollingSleepDuration = POLL_SLEEP_DURATION;
@@ -107,13 +109,19 @@ public class JobsServiceImpl implements JobsService {
     @Override
     public String startAddVersionJob(JobRequestBuilder builder) throws JobServiceException {
 
-        ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
+        ApiInfoDto apiInfoDto = getApiInfoDto();
         if (apiInfoDto.isEnablePackagePathCheck()) {
             builder.startStep(Constants.CODE_SCANNER_STEP_NAME);
         } else {
             builder.startStep(Constants.EXTRACT_STEP_NAME);
         }
-        CreateJobsRequest jobRequest = builder.buildJobRequest();
+        return startJob(builder);
+    }
+
+    @Override
+    public String startJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException {
+        CreateJobsRequest jobRequest = jobRequestBuilder.buildJobRequest();
+        ApiInfoDto apiInfoDto = getApiInfoDto();
 
         try {
             SuccessfulJobStartDto dto = restApiService.postForEntity(ApiEndpointHelper.getJobsEndpoint(), jobRequest, SuccessfulJobStartDto.class);
@@ -138,7 +146,7 @@ public class JobsServiceImpl implements JobsService {
             log.info("Successfully started Job");
             return dto.getJobGuid();
         } catch (ApiCallException e) {
-            log.log(Level.SEVERE, "Error starting add version job.", e);
+            log.log(Level.SEVERE, "Error starting Job with type " + jobRequest.getJobType(), e);
             throw new JobServiceException(e);
         }
     }
@@ -188,5 +196,12 @@ public class JobsServiceImpl implements JobsService {
             log.log(Level.SEVERE, "Error occurred while polling the job status", e);
             throw new JobServiceException(e);
         }
+    }
+
+    private synchronized ApiInfoDto getApiInfoDto() {
+        if (apiInfoDto == null) {
+            apiInfoDto = restApiService.getAipConsoleApiInfo();
+        }
+        return apiInfoDto;
     }
 }

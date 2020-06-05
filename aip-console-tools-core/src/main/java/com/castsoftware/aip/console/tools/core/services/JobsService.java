@@ -59,6 +59,14 @@ public interface JobsService {
     String startAddVersionJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException;
 
     /**
+     * This starts any job based on the job request builder content
+     *
+     * @param jobRequestBuilder The instance containing the configuration of the job
+     * @return the job's GUID
+     */
+    String startJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException;
+
+    /**
      * Polls AIP Console to get the status of the job with the given GUID.
      *
      * @param jobGuid The job GUID to poll

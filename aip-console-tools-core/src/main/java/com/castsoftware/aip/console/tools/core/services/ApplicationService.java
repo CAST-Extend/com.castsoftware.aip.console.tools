@@ -1,6 +1,9 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+
+import java.util.Set;
 
 public interface ApplicationService {
     /**
@@ -49,4 +52,13 @@ public interface ApplicationService {
      * @throws ApplicationServiceException
      */
     String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName) throws ApplicationServiceException;
+
+    /**
+     * Retrieve an application's version
+     *
+     * @param appGuid The applicatino GUID
+     * @return A Set of VersionDtos
+     * @throws ApplicationServiceException
+     */
+    Set<VersionDto> getApplicationVersion(String appGuid) throws ApplicationServiceException;
 }
