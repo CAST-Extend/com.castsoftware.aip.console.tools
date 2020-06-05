@@ -1,5 +1,9 @@
 ## Release Notes :
 
+#### 1.16.1
+
+Fixed an issue with file upload when package path check is disabled in AIP Console
+
 #### 1.16.0
 
 Added support for AIP Console 1.16.0
