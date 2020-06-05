@@ -81,7 +81,7 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
         }
         ApiInfoDto aipConsoleInfo = restApiService.getAipConsoleApiInfo();
         try (InputStream is = new BufferedInputStream(Files.newInputStream(archivePath))) {
-            return uploadAndExtractInputStream(appGuid, FilenameUtils.getName(archivePath.toString()), fileSize, is, aipConsoleInfo.isEnablePackagePathCheck());
+            return uploadAndExtractInputStream(appGuid, FilenameUtils.getName(archivePath.toString()), fileSize, is, true);
         } catch (IOException e) {
             throw new UploadException("Unable to read file", e);
         }
@@ -90,8 +90,7 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
     @Override
     public boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content)
             throws UploadException {
-        ApiInfoDto aipConsoleInfo = restApiService.getAipConsoleApiInfo();
-        return uploadAndExtractInputStream(appGuid, fileName, fileSize, content, aipConsoleInfo.isEnablePackagePathCheck());
+        return uploadAndExtractInputStream(appGuid, fileName, fileSize, content, true);
     }
 
     @Override
