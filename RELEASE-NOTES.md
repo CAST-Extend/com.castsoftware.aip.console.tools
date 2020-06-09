@@ -8,13 +8,13 @@ Fixed an issue with file upload when package path check is disabled in AIP Conso
 
 Added support for AIP Console 1.16.0
 
-Added option to backup the application before adding a new version
+Added option to backup the application before adding a new version (requires AIP Console 1.16.0 or above)
 
 #### 1.15.0
 
 As of this release, we're aligning the version number with AIP Console.
 
-Added Source Folder support
+Added Source Folder support (requires AIP Console 1.15.0 or above)
 
 #### 1.1.3
 

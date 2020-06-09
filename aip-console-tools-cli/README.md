@@ -1,192 +1,171 @@
-## AIP Console CLI Tool
+## AIP Console tools CLI
 
-This project is aimed at facilitating automation of AIP Console with CI tools.
+### Objectives
 
-It can do the following :
-* Create a new application on a target AIP Console
-* Automate the delivery of your source code to an instance of AIP Console, by uploading a zip containing your source and starting the full workflow of application analysis (i.e. creating a version, analysis, snapshot creation and snapshot publishing).
+The purpose of the AIP Console Tools CLI is to provide methods to start Application analysis without needing to interact directly with the AIP Console UI, by leveraging its REST API.
 
-### Pre-requisite
+The CLI can create new applications, deliver source code and run application analysis.
 
-Java version from 8 to 12 are compatible with this CLI tool. 
-HotSpot (AdoptOpenJDK, Oracle) JVMs have been tested and work well; other JVMs (i.e. Eclipse OpenJ9, Azul Zulu, Amazon Corretto, etc.) have not been tested, but they should have no issues.  
+### Requirements
 
-Before using this tool, you will have to :
+Before using the CLI, you will need a JRE or JDK, version 8 or above. You can use either a JVM provided by Oracle, AdoptOpenJDK or other validated JVMs (like Amazon Corretto, Azul Zulu, Eclipse OpenJ9, etc.)
 
-* Generate an API Token for your user. See below in the "Token" chapter to see different methods for passing the token to AIP Console CLI Tool.
-* Prepare your source code as a ZIP file or a relative path to a subfolder inside the source folder location configured in AIP Console
+You will also need the following :
 
-    ![source_foler_location_config](./doc/images/source_folder_location_config.png)
+* An installation of AIP Console that is accessible and configured.
+* An API Token for the user that will run the CLI (check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
+* Prepare your source code as a zip or tar.gz archive
 
-**NB:** The provided source code structure will be better processed if you separate each technology into a specific root folder.
+### Quick Start
 
-### Basic Usage
-
-This tool accept 2 different actions :
-* `CreateApplication` (aliased `new`) : Create a new application on AIP Console
-* `AddVersion` (aliased `add`) : Creates a new version for a given application on AIP Console
-
-The following options are common to both actions  
-* `-s` or `--server-url` : URL to access AIP Console. Defaults to http://localhost:8081
-* `--user`: If using basic authentication, this will be used for the user name. Password will be taken from the below api key parameter.
-* `--apikey` : Option to prompt the user for an API Key to access AIP Console
-* `--apikey:env` :  Option to read the API key value from an environment variable.
-* `--timeout`: Option to define a connection timeout in seconds (default is 30 seconds)
-
-**NB**: If either `--apikey` or `--apikey:env` is missing, the tool will fail to access AIP Console.
-
-You can check below to see all parameters for each actions.   
-
-#### Create application
-
-Here is an example to create a new application with AIP Console CLI Tool :
+To **create a new application**, run the following :
 
 ```bash
-$ java -jar aip-console-tools-cli.jar CreateApplication -n "my_new_application_name" 
+java -jar .\aip-console-tools-cli.jar new -n "my app" --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q"
 ```
 
-This will output the following :
+This will create a new application "my app" on my AIP Console instance at `localhost:8081` using my API Key.
+
+![create app CLI](doc/images/create_app.png)
+
+To **add a new version and analyze its source code**, have ZIP file and use the following command :
 
 ```bash
-$ java -jar aip-console-tools-cli.jar CreateApplication --apikey:env=AIP_CONSOLE_KEY -n "my_new_application"
-2019-04-25 17:09:26.201 - INFO --- Started job to create new application.
-2019-04-25 17:09:26.210 - INFO --- Checking status of Job with GUID 17bcd793-a6eb-40b2-9250-5dd86dfbd6a6
-2019-04-25 17:09:26.453 - INFO --- Current job step is 'create_delivery_folder'
-2019-04-25 17:09:36.631 - INFO --- Current job step is 'restore_triplet'
-2019-04-25 17:10:07.221 - INFO --- Current job step is 'import_preferences'
-2019-04-25 17:10:27.705 - INFO --- Current job step is 'manage_application'
-2019-04-25 17:10:37.875 - INFO --- Creation of version successful for application 'my_new_application'. Application GUID is '500f089e-263d-4d09-8b6e-c5df5902cf12'
+java -jar .\aip-console-tools-cli.jar add --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app" -f ./source.zip
 ```
 
-The parameters for `CreateApplication` are the following :
+It will upload the source.zip file, create a new version for the application "my app" and run an analysis on this version.
+
+![image-20200609154849113](doc/images/add_version.png)
+
+To **deliver a new version**, without running the analysis, you can use the following command :
 
 ```bash
-Usage: aip-integration-tool CreateApplication [-hV] [--apikey[=<apiKey>]] [--apikey:env=ENV_VAR_NAME]
-                                              [--timeout=<timeout>] [--user=<username>] -n=APPLICATION_NAME
-                                              [-s=AIP_CONSOLE_URL]
-Creates a new application on AIP Console
-      --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt entry if no value is passed.
-      --apikey:env=ENV_VAR_NAME
-                            The name of the environment variable containing the AIP Key to access AIP Console
-      --timeout=<timeout>   The timeout in seconds for calls to AIP Console. Defaults to a 30 timeout
-      --user=<username>     User name. Use this if no API Key generation is available on AIP Console. Provide the user's
-                              password in the apikey parameter.
-  -h, --help                Show this help message and exit.
-  -n, --app-name=APPLICATION_NAME
-                            The name of the application to create
-  -s, --server-url=AIP_CONSOLE_URL
-                            The base URL for AIP Console (defaults to http://localhost:8081)
-  -V, --version             Print version information and exit.
+java -jar .\aip-console-tools-cli.jar deliver --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app" -f ./source.zip
 ```
 
-#### Add Version
+It will upload the source.zip file, and create a new version for the application "my app"
 
-Here is an example command to create a new version :
-```bash
-$ $JAVA_HOME/bin/java -jar aip-console-tools-cli.jar AddVersion --apikey:env=AIP_CONSOLE_KEY -a de7655a3-ecaa-4cd7-b860-5079a138db96 -f /tmp/jenkins-2.171.zip
-```
+![image-20200611113145335](doc/images/deliver.png)
 
-Here is the output for this command :
+To **run an analysis on the current version**, you can use the following command :
 
 ```bash
-$ $JAVA_HOME/bin/java -jar aip-console-tools-cli.jar AddVersion --apikey:env=AIP_CONSOLE_KEY -n "my cli application" -f /tmp/jenkins-2.171.zip
-2019-06-18 15:56:50.248 - INFO --- Search for application 'my cli application' or AIP Console
-2019-06-18 15:58:02.236 - INFO --- Creating a new upload for application
-2019-04-12 16:26:07.625 - INFO --- Uploading chunk 1 of 2
-2019-04-12 16:26:07.850 - INFO --- Uploading chunk 2 of 2
-2019-04-12 16:26:08.115 - INFO --- Upload completed.
-2019-04-12 16:26:08.117 - INFO --- Starting "Add Version" job for application with GUID de7655a3-ecaa-4cd7-b860-5079a138db96
-2019-04-12 16:26:08.413 - INFO --- Successfully started Job
-2019-04-12 16:26:08.415 - INFO --- Checking status of Job with GUID e9ca3e3e-ca5e-4c9e-9c4b-c49f56c1e682
-2019-04-12 16:26:08.455 - INFO --- Current job step is 'unzip_source'
-2019-04-12 16:26:58.533 - INFO --- Current job step is 'code_scanner'
-2019-04-12 16:30:59.114 - INFO --- Current job step is 'add_version'
-2019-04-12 16:31:09.144 - INFO --- Current job step is 'create_package'
-2019-04-12 16:31:29.179 - INFO --- Current job step is 'attach_package_to_version'
-2019-04-12 16:46:40.900 - INFO --- Current job step is 'deliver_version'
-2019-04-12 16:47:00.938 - INFO --- Current job step is 'accept'
-2019-04-12 16:47:31.005 - INFO --- Current job step is 'setcurrent'
-2019-04-12 16:50:01.271 - INFO --- Current job step is 'update_extensions'
-2019-04-12 16:50:11.299 - INFO --- Current job step is 'analyze'
-2019-04-12 17:34:51.004 - INFO --- Current job step is 'snapshot'
-2019-04-12 17:36:12.263 - INFO --- Current job step is 'consolidate_snapshot'
-2019-04-12 17:36:13.745 - INFO --- Job completed successfully.
+java -jar .\aip-console-tools-cli.jar analyze --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app"
 ```
 
-This command will first search for the application `my cli application` on AIP Console server located at `http://localhost:8081` and then upload the file `jenkins-2.171.zip`.
-Once the upload is complete, the CLI tool will ask AIP Console to start an "Add Version" job, with Snapshot Creation.
+It will retrieve the current version of the application "my app" and start an analysis job, without snapshot.
 
-It'll then wait until the job is complete on AIP Console before closing, continuously monitoring the status of the job on AIP Console.
-The AIP Console CLI Tool will output information in the standard output, including error messages.
+![image-20200611113145335](doc/images/analyze.png)
 
-Here is a detailed look at the options available for `AddVersion` : 
+### Advanced Usage
 
-```bash
-$ java -jar target/aip-console-tools-cli.jar AddVersion -h
-Usage: aip-integration-tool AddVersion [-chV] [--auto-create] [--enable-security-dataflow] [--apikey[=<apiKey>]]
-                                       [--apikey:env=ENV_VAR_NAME] [--node-name=NODE_NAME] [--timeout=<timeout>]
-                                       [--user=<username>] [-a=APPLICATION_GUID] -f=FILE [-n=APPLICATION_NAME]
-                                       [-s=AIP_CONSOLE_URL] [-v=VERSION_NAME]
-Creates a new version for an application on AIP Console
-      --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt entry if no value is passed.
-      --apikey:env=ENV_VAR_NAME
-                            The name of the environment variable containing the AIP Key to access AIP Console
-      --auto-create         If the given application name doesn't exist on the target server, it'll be automatically created
-                              before creating a new version
-      --enable-security-dataflow
-                            If defined, this will activate the security dataflow for this version
-      --node-name=NODE_NAME The name of the node on which the application will be created. Ignored if no --auto-create or
-                              the application already exists.
-      --timeout=<timeout>   The timeout in seconds for calls to AIP Console. Defaults to a 30 timeout
-      --user=<username>     User name. Use this if no API Key generation is available on AIP Console. Provide the user's
-                              password in the apikey parameter.
-  -a, --app-guid=APPLICATION_GUID
-                            The GUID of the application to rescan
-  -c, --clone, --rescan     Clones the latest version configuration instead of creating a new version
-  -f, --file=FILE           The ZIP file containing the source or a relative path to a subfolder inside source folder location
-  -h, --help                Show this help message and exit.
-  -n, --app-name=APPLICATION_NAME
-                            The Name of the application to rescan
-  -s, --server-url=AIP_CONSOLE_URL
-                            The base URL for AIP Console (defaults to http://localhost:8081)
-  -v, --version-name=VERSION-NAME
-                            The name of the version to create
-  -V, --version             Print version information and exit.
-```
+When running the CLI, you must specify a command to be run. The list of commands is :
 
-When starting the CLI, you can either provide an application name or an application GUID. If an application name is provided, it'll be looked up on AIP Console before continuing. If the CLI cannot find the application, it'll exit.
+* `CreateApplication` or `new` to create an application on AIP Console
+* `AddVersion` or `add` to create a new version and analyze it
+* `Deliver` to create a new version **without** running an analysis
+* `Analysis` or `analyze` to run an analysis on the current version
 
-Note that by default, the CLI will not create the application if it cannot be found. You have to provide the `--auto-create` flat. In which case, the application will be created before the version is added.
+Each commands has a `--help` parameter, providing a list of all parameters available.
 
-By default, `AddVersion` will create a new version. If you want to clone an existing version, you will have to provide the `-c` flag, which will copy the previous version configuration.
+Below, is a detail of all available parameters for each commands, and how it affects the CLI.
 
-To automate error handling, specific codes will be returned once the tool closes. 
-See below for details on which return code corresponds to which potential issue.
+#### CreateApplication
 
-### API Key
+*alias: new*
 
-To access AIP Console, you should provide an API key by generating one on AIP Console (1.10.0 and above).
+This command is used to create new applications directly from the CLI from an application name.
 
-You can provide the `--apikey` parameter to be prompted to enter your password without passing it as an argument.
+The available options are :
 
-You can also provide the `--apikey:env` parameter and specify an environment variable name where the API key will be obtained.
+- `-n` or `--name` (**required**) : specify the name of the application to create
 
-To create an API key for your account, log in to AIP Console, click on your user name (top right) and select "API Key".
+* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. *default* : Automatically selected by AIP Console
+* `--server-url` or `-s` : Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
+* `--user` (optional) (legacy) : Specify a username to log in. Requires passing the user's password in the `--apikey` parameter. *default* : none
 
-You will be able to generate an API key that will be shown to you. Copy it and save it to a secure location.
+#### AddVersion
 
-**NB**: For AIP Console below version 1.10.0, you can provide the `--user` parameter to specify a user name. In the `--apikey` or `--apikey:env`, you should specify the password (or the environment variable with the password) and we'll let you authenticate this way. This will not be supported in later versions of the CLI and should be used only if you are using AIP Console where API Key generation isn't available.
+*alias: add*
+
+This command is used to deliver a new version of an application to AIP Console, run an analysis on it and create a snapshot.
+
+The available options are :
+
+* `--app-name` or `-n` (**required**): The application name.
+* `--app-guid` or `-a` (optional): The application GUID. Can replace the application name parameter.
+* `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
+* `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
+* `--clone` or `--rescan` or `-c` (optional): Enables the clone version job. This will create a new version by cloning the previous version's configuration, similar to the "Same configuration as previous version" checkbox in AIP Console UI.
+* `--version` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
+* `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
+* `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:
+* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
+* `--server-url` or `-s` : Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
+* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+
+#### Deliver
+
+This command is used to deliver a new version of an application to AIP Console. It <u>doesn't</u> marks that version as current by default and won't run an analysis.
+
+The available options are :
+
+* `--app-name` or `-n` (**required**): The application name.
+* `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
+* `--auto-deploy` or `-d` (optional): Enables the "mark as current" step, making this version the current version of the application.
+* `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
+* `--clone` or `--rescan` or `-c` (optional): Enables the clone version job. This will create a new version by cloning the previous version's configuration, similar to the "Same configuration as previous version" checkbox in AIP Console UI.
+* `--version` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
+* `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
+* `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:
+* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
+* `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
+* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+
+#### Analysis
+
+*alias: analyze*
+
+This command is use to run an analysis on a version.
+
+The available options are :
+
+* --app-name` or `-n` (**required**): The application name.
+* `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
+* `--deploy` or `-d` (optional): Enables the "mark as current" step, which will deploy the version if it is not already deployed.
+* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
+* `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
+* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
 
 ### Return Codes
 
-Here is a list of returned error codes :
+When AIP Console finishes execution, it will return a specific return code, based on the execution.
+
+Here is a detailed list of all error codes that can be returned by the CLI :
 
 * 0 : No errors, processing was completed correctly. This is also the return code for`--help` and `--version` parameters.
 * 1 : API key missing. No API key was provided either in the prompt or in the environment variable.
-* 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper value. 
+* 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper value.
 * 3 : Upload Error. An error occurred during upload to AIP Console. Check the standard output to see more details.
 * 4 : Add Version Job Error. Creation of the Add Version job failed, or AIP CLI is unable to get the status of the running job. Please see the standard output for more details regarding this error.
 * 5 : Job terminated. The Add Version job did not finish in an expected state. Check the standard output or AIP Console for more details about the state of the job.
 * 6 : Application name or GUID missing. The AddVersion job cannot run due to a missing application name or missing application guid.
 * 7 : Application Not Found. The given Application Name or GUID could not be found.
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
+
+### Authentication
+
+As detailed in the AIP Console documentation, you can obtain the API Key from the profile in the AIP Console UI.
+
+If you cannot use an API Key, you can authenticate using username and password, by passing the `--user` flag to a command, and set the user's password in the `--apikey` or set it in an environment variable, which name you'll pass to  `--apikey:env`
