@@ -43,17 +43,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.Future;
 
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_accessDenied;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_missingRequiredParameters;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_noApiKey;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_nodeNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_uploadFailed;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDenied;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noApiKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -162,7 +162,7 @@ public class AddVersionBuilderTest {
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.NOT_BUILT, futureBuild.get());
-        jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_missingRequiredParameters(), build);
+        jenkins.assertLogContains(GenericError_error_missingRequiredParameters(), build);
     }
 
     @Test
@@ -172,7 +172,7 @@ public class AddVersionBuilderTest {
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.NOT_BUILT, futureBuild.get());
-        jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_noApiKey(), build);
+        jenkins.assertLogContains(GenericError_error_noApiKey(), build);
     }
 
     @Test
@@ -183,7 +183,7 @@ public class AddVersionBuilderTest {
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
-        jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_accessDenied(TEST_URL), build);
+        jenkins.assertLogContains(GenericError_error_accessDenied(TEST_URL), build);
     }
 
     @Test

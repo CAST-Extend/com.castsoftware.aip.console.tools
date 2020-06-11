@@ -67,13 +67,15 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startCloneVersionJob;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startUpload;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDenied;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noApiKey;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noServerUrl;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
-public class AddVersionBuilder extends Builder implements SimpleBuildStep {
-
+public class DeliverBuilder extends Builder implements SimpleBuildStep {
     public static final int BUFFER_SIZE = 10 * 1024 * 1024;
     @Inject
     private JobsService jobsService;
@@ -102,9 +104,10 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private boolean backupApplicationEnabled = false;
     @Nullable
     private String backupName = "";
+    private boolean deploy = false;
 
     @DataBoundConstructor
-    public AddVersionBuilder(String applicationName, String filePath) {
+    public DeliverBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
         this.filePath = filePath;
     }
@@ -203,6 +206,11 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         return backupApplicationEnabled;
     }
 
+    @DataBoundSetter
+    public void setBackupApplicationEnabled(boolean backupApplicationEnabled) {
+        this.backupApplicationEnabled = backupApplicationEnabled;
+    }
+
     @Nullable
     public String getBackupName() {
         return backupName;
@@ -213,14 +221,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         this.backupName = backupName;
     }
 
-    @DataBoundSetter
-    public void setBackupApplicationEnabled(boolean backupApplicationEnabled) {
-        this.backupApplicationEnabled = backupApplicationEnabled;
-    }
-
     @Override
-    public AddVersionDescriptorImpl getDescriptor() {
-        return (AddVersionDescriptorImpl) super.getDescriptor();
+    public DeliverDescriptorImpl getDescriptor() {
+        return (DeliverDescriptorImpl) super.getDescriptor();
     }
 
     @Override
@@ -281,6 +284,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         EnvVars vars = run.getEnvironment(listener);
         String resolvedFilePath = vars.expand(filePath);
         FilePath workspaceFile = null;
+        // Local file
         if (StringUtils.equalsAnyIgnoreCase(FilenameUtils.getExtension(filePath), "zip", "gz")) {
             workspaceFile = workspace.child(resolvedFilePath);
             isUpload = true;
@@ -417,6 +421,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             }
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
             requestBuilder.releaseAndSnapshotDate(new Date())
+                    // FIXME: auto deploy
+                    .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
@@ -447,16 +453,16 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
      */
     private String checkJobParameters() {
         if (StringUtils.isAnyBlank(applicationName, filePath)) {
-            return Messages.GenericError_error_missingRequiredParameters();
+            return GenericError_error_missingRequiredParameters();
         }
         String apiServerUrl = getDescriptor().getAipConsoleUrl();
         String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
 
         if (StringUtils.isBlank(apiServerUrl)) {
-            return Messages.GenericError_error_noServerUrl();
+            return GenericError_error_noServerUrl();
         }
         if (StringUtils.isBlank(apiKey)) {
-            return Messages.GenericError_error_noApiKey();
+            return GenericError_error_noApiKey();
         }
 
         return null;
@@ -471,9 +477,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 JobStatus::getState);
     }
 
-    @Symbol("aipAddVersion")
+    @Symbol("aipDeliver")
     @Extension
-    public static final class AddVersionDescriptorImpl extends BuildStepDescriptor<Builder> {
+    public static final class DeliverDescriptorImpl extends BuildStepDescriptor<Builder> {
 
         @Inject
         private AipConsoleGlobalConfiguration configuration;
@@ -486,7 +492,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return AddVersionBuilder_DescriptorImpl_displayName();
+            return DeliverBuilder_DescriptorImpl_displayName();
         }
 
         public String getAipConsoleUrl() {

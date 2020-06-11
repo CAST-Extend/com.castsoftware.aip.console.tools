@@ -3,15 +3,18 @@
     <f:entry title="${%appName}" field="applicationName" description="${%appName.descr}">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%nodeName}" field="nodeName" description="${%nodeName.descr}">
+    <f:entry title="${%versionName}" field="versionName" description="${%versionName.descr}">
         <f:textbox/>
     </f:entry>
+    <f:entry title="${%withSnapshot}" field="withSnapshot" description="${%withSnapshot.descr}">
+        <f:checkbox default="false"/>
+    </f:entry>
     <f:advanced title="${%advancedSettings}">
-        <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
-            <f:number default="30"/>
-        </f:entry>
         <f:entry title="${%failureIgnored}" field="failureIgnored" description="${%failureIgnored.descr}">
             <f:checkbox/>
+        </f:entry>
+        <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
+            <f:number default="90"/>
         </f:entry>
     </f:advanced>
 </j:jelly>
