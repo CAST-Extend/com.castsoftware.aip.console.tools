@@ -52,13 +52,13 @@ It will upload the source.zip file, and create a new version for the application
 
 ![image-20200611113145335](doc/images/deliver.png)
 
-To **run an analysis on the current version**, you can use the following command :
+To **run an analysis on the latest delivered version**, you can use the following command :
 
 ```bash
 java -jar .\aip-console-tools-cli.jar analyze --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app"
 ```
 
-It will retrieve the current version of the application "my app" and start an analysis job, without snapshot.
+It will retrieve the latest version of the application "my app", mark that version as current if it isn't, and start an analysis job, without snapshot.
 
 ![image-20200611113145335](doc/images/analyze.png)
 
@@ -151,10 +151,8 @@ This command is use to run an analysis on a version.
 
 The available options are :
 
-* --app-name` or `-n` (**required**): The application name.
-* `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
-* `--deploy` or `-d` (optional): Enables the "mark as current" step, which will deploy the version if it is not already deployed.
-* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
+* `--app-name` or `-n` (**required**): The application name.
+* `--snapshot` pr `-S` (optional): Also runs snapshot creation after analysis.
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
@@ -174,6 +172,9 @@ Here is a detailed list of all error codes that can be returned by the CLI :
 * 5 : Job terminated. The Add Version job did not finish in an expected state. Check the standard output or AIP Console for more details about the state of the job.
 * 6 : Application name or GUID missing. The AddVersion job cannot run due to a missing application name or missing application guid.
 * 7 : Application Not Found. The given Application Name or GUID could not be found.
+* 8 : Source Folder Not Found. THe given source folder could not be found on the AIP Node where the application version is delivered
+* 9 : No Version. Application has no version and the provided command cannot be run.
+* 10 : Version Not Found. The given version could not be found OR no version matches the requested command (i.e. No delivered version exists to be used for analysis)
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
 
 ### Authentication

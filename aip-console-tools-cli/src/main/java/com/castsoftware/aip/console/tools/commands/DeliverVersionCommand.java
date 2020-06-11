@@ -148,7 +148,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
             cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
-                    .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
+                    .endStep(autoDeploy ? Constants.ACCEPTANCE_STEP_NAME : Constants.DELIVER_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .securityObjective(enableSecurityDataflow)

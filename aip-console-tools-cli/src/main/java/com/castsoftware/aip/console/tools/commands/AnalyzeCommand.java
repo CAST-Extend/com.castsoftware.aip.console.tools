@@ -21,6 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
@@ -41,7 +43,8 @@ import java.util.function.Function;
 @Slf4j
 @Getter
 @Setter
-public class AnalyseCommand implements Callable<Integer> {
+public class AnalyzeCommand implements Callable<Integer> {
+    private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private final RestApiService restApiService;
     private final JobsService jobsService;
     private final ApplicationService applicationService;
@@ -52,12 +55,10 @@ public class AnalyseCommand implements Callable<Integer> {
     private String applicationName;
     @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION_NAME", description = "The name of the version to analyze. If omitted, the lastest version will be used.")
     private String versionName;
-    @CommandLine.Option(names = {"-d", "--deploy"}, description = "Whether the version should be deployed and used for the analysis")
-    private boolean autoDeploy;
     @CommandLine.Option(names = {"-S", "--snapshot"}, description = "Creates a snapshot after running the analysis.")
     private boolean withSnapshot;
 
-    public AnalyseCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
+    public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
         this.applicationService = applicationService;
@@ -100,10 +101,9 @@ public class AnalyseCommand implements Callable<Integer> {
             if (StringUtils.isNotBlank(versionName)) {
                 versionToAnalyze = versions.stream().filter(v -> StringUtils.equalsAnyIgnoreCase(v.getName(), versionName)).findFirst().orElse(null);
             } else {
-                int statusOrdinal = autoDeploy ? VersionStatus.DELIVERED.ordinal() : VersionStatus.ACCEPTED.ordinal();
                 versionToAnalyze = versions
                         .stream()
-                        .filter(v -> v.getStatus().ordinal() >= statusOrdinal)
+                        .filter(v -> v.getStatus().ordinal() >= VersionStatus.DELIVERED.ordinal())
                         .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
             }
             if (versionToAnalyze == null) {
@@ -113,26 +113,25 @@ public class AnalyseCommand implements Callable<Integer> {
                 log.error(message);
                 return Constants.RETURN_APPLICATION_VERSION_NOT_FOUND;
             }
-            log.info("Starting analysis job for version {}", versionToAnalyze.getName());
             // Deploy if auto deploy is true AND version to analyze has status DELIVERED (otherwise just do analysis)
-            boolean deployFirst = autoDeploy && versionToAnalyze.getStatus() == VersionStatus.DELIVERED;
+            boolean deployFirst = versionToAnalyze.getStatus() == VersionStatus.DELIVERED;
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
-                    .startStep(deployFirst ? Constants.SET_CURRENT_STEP_NAME : Constants.ANALYZE)
+                    .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE)
                     .endStep(withSnapshot ? Constants.UPLOAD_APP_SNAPSHOT : Constants.ANALYZE)
                     .versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());
-            log.info("Starting job with parameters : \n{}", builder.buildJobRequest());
 
+            log.info("Running analysis for application '{}' with version '{}'", applicationName, versionToAnalyze.getName());
             String jobGuid = jobsService.startJob(builder);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
             if (JobState.COMPLETED == jobStatus.getState()) {
-                log.info("Job completed successfully.");
+                log.info("Application Analysis completed successfully");
                 return Constants.RETURN_OK;
             }
 
-            log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
+            log.error("Analysis did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
             return Constants.RETURN_JOB_FAILED;
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

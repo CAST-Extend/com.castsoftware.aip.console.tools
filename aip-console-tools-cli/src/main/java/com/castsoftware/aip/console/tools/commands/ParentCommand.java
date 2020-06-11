@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
 @Command(
         name = "aip-integration-tool",
         mixinStandardHelpOptions = true,
-        subcommands = {CreateApplicationCommand.class, AddVersionCommand.class, AnalyseCommand.class, DeliverVersionCommand.class},
+        subcommands = {CreateApplicationCommand.class, AddVersionCommand.class, AnalyzeCommand.class, DeliverVersionCommand.class, SnapshotCommand.class},
         commandListHeading = "%nPossible values for COMMAND:%n%n",
         versionProvider = VersionProvider.class
 )

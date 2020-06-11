@@ -33,6 +33,7 @@ public class JobRequestBuilder {
     private String sourcePath;
     private boolean backupApplication = false;
     private String backupName;
+    private String snapshotName;
 
     private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType) {
         this.appGuid = appGuid;
@@ -123,6 +124,11 @@ public class JobRequestBuilder {
         return this;
     }
 
+    public JobRequestBuilder snapshotName(String snapshotName) {
+        this.snapshotName = snapshotName;
+        return this;
+    }
+
     private Map<String, String> getJobParameters() {
         Map<String, String> parameters = new HashMap<>();
         parameters.put(Constants.PARAM_APP_GUID, this.appGuid);
@@ -145,6 +151,9 @@ public class JobRequestBuilder {
             parameters.put(Constants.PARAM_SNAPSHOT_CAPTURE_DATE, releaseDateStr);
         } else {
             parameters.put(Constants.PARAM_SNAPSHOT_CAPTURE_DATE, snapshotDateStr);
+        }
+        if (StringUtils.isNotBlank(snapshotName)) {
+            parameters.put(Constants.PARAM_SNAPSHOT_NAME, snapshotName);
         }
 
         if (backupApplication) {
