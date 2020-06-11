@@ -14,7 +14,11 @@ You will also need the following :
 
 * An installation of AIP Console that is accessible and configured.
 * An API Token for the user that will run the CLI (check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
-* Prepare your source code as a zip or tar.gz archive
+* Prepare your source code in one of the two following ways :
+    * As a zip or tar.gz archive that will be uploaded to AIP Console
+    * As a relative path, pointing to content in the Source Folder location defined in AIP Console like below :
+
+![source folder location](doc/images/source_folder_location_config.png)
 
 ### Quick Start
 
@@ -57,6 +61,14 @@ java -jar .\aip-console-tools-cli.jar analyze --apikey="BYxRnywP.TNSS0gXt8GB2v7o
 It will retrieve the current version of the application "my app" and start an analysis job, without snapshot.
 
 ![image-20200611113145335](doc/images/analyze.png)
+
+To **deliver a new version** using a **relative folder path**, with source code already updated on the AIP Node server, you can use the following command :
+
+```bash
+java -jar .\aip-console-tools-cli.jar deliver --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app" -f "my_app_sources/"
+```
+
+It will not upload source code, but it will use the source on AIP Node inside the `SourceFolderLocation/my_app_sources` to create a new Version.
 
 ### Advanced Usage
 
