@@ -17,9 +17,6 @@ import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.FilenameUtils;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -47,20 +44,21 @@ import java.util.function.Function;
 @Slf4j
 @Getter
 @Setter
-@NoArgsConstructor
-@RequiredArgsConstructor
 public class AddVersionCommand implements Callable<Integer> {
-    @NonNull
-    private RestApiService restApiService;
-    @NonNull
-    private JobsService jobsService;
-    @NonNull
-    private ChunkedUploadService uploadService;
-    @NonNull
-    private ApplicationService applicationService;
+    private final RestApiService restApiService;
+    private final JobsService jobsService;
+    private final ChunkedUploadService uploadService;
+    private final ApplicationService applicationService;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
+
+    public AddVersionCommand(RestApiService restApiService, JobsService jobsService, ChunkedUploadService chunkedUploadService, ApplicationService applicationService) {
+        this.restApiService = restApiService;
+        this.jobsService = jobsService;
+        this.uploadService = chunkedUploadService;
+        this.applicationService = applicationService;
+    }
 
     /**
      * The application name to look for on AIP Console
@@ -119,7 +117,6 @@ public class AddVersionCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
