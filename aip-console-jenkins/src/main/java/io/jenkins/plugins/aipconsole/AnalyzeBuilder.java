@@ -45,11 +45,9 @@ import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appCreateError;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_pollJobMessage;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
+import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_Analyze_error_appGuid;
+import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_Analyze_error_noVersionFound;
+import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_Analyze_error_noVersionFoundWithName;
 import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
@@ -182,7 +180,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         try {
             applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
         } catch (ApplicationServiceException e) {
-            listener.error(AddVersionBuilder_AddVersion_error_appCreateError(applicationName));
+            listener.error(AnalyzeBuilder_Analyze_error_appGuid());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
             return;
@@ -203,8 +201,10 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
                         .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
             }
             if (versionToAnalyze == null) {
-                //FIXME change error message
-                listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+                String message = StringUtils.isNotBlank(versionName) ?
+                        AnalyzeBuilder_Analyze_error_noVersionFoundWithName(versionName, applicationName) :
+                        AnalyzeBuilder_Analyze_error_noVersionFound();
+                listener.error(message);
                 run.setResult(defaultResult);
                 return;
             }
@@ -218,21 +218,21 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
             String jobGuid = jobsService.startJob(requestBuilder);
 
-            log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
+            log.println(Messages.AnalyzeBuilder_Analyze_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
             if (state != JobState.COMPLETED) {
-                listener.error(AddVersionBuilder_AddVersion_error_jobFailure(state.toString()));
+                listener.error(Messages.AnalyzeBuilder_Analyze_error_jobFailure(state.toString()));
                 run.setResult(defaultResult);
             } else {
-                log.println(AddVersionBuilder_AddVersion_success_analysisComplete());
+                log.println(Messages.AnalyzeBuilder_Analyze_success_analysisComplete());
                 run.setResult(Result.SUCCESS);
             }
         } catch (ApplicationServiceException e) {
-            listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+            listener.error(Messages.AnalyzeBuilder_Analyze_error_jobServiceException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         } catch (JobServiceException e) {
-            listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+            listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         }

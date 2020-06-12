@@ -46,13 +46,7 @@ import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appCreateError;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_pollJobMessage;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
-import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
-import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_DescriptorImpl_displayName;
+import static io.jenkins.plugins.aipconsole.Messages.*;
 
 public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
@@ -174,7 +168,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
         try {
             applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
         } catch (ApplicationServiceException e) {
-            listener.error(AddVersionBuilder_AddVersion_error_appCreateError(applicationName));
+            listener.error(SnapshotBuilder_Snapshot_error_appGuid());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
             return;
@@ -189,12 +183,12 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     .orElse(null);
             if (versionToAnalyze == null) {
                 //FIXME change error message
-                listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+                listener.error(SnapshotBuilder_Snapshot_error_noAnalyzedVersion(applicationName));
                 run.setResult(defaultResult);
                 return;
             }
             if (versionToAnalyze.getStatus().ordinal() < VersionStatus.ANALYSIS_DONE.ordinal()) {
-                listener.error("Current version was not analyzed yet. Cannot create Snapshot");
+                listener.error(SnapshotBuilder_Snapshot_error_noAnalyzedVersion(applicationName));
                 run.setResult(defaultResult);
                 return;
             }
@@ -212,23 +206,21 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     .releaseAndSnapshotDate(new Date());
 
             String jobGuid = jobsService.startJob(requestBuilder);
-
-            log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
+            log.println(SnapshotBuilder_Snapshot_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
             if (state != JobState.COMPLETED) {
-                listener.error(AddVersionBuilder_AddVersion_error_jobFailure(state.toString()));
+                listener.error(SnapshotBuilder_Snapshot_error_jobFailure(state.toString()));
                 run.setResult(defaultResult);
             } else {
-                log.println(AddVersionBuilder_AddVersion_success_analysisComplete());
+                log.println(SnapshotBuilder_Snapshot_success_complete(applicationName));
                 run.setResult(Result.SUCCESS);
             }
         } catch (ApplicationServiceException e) {
-            // FIXME: change error messages
-            listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+            listener.error(SnapshotBuilder_Snapshot_error_version());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         } catch (JobServiceException e) {
-            listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+            listener.error(SnapshotBuilder_Snapshot_error_jobException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         }

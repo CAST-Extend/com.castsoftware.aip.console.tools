@@ -8,6 +8,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.ChunkedUploadService;
@@ -169,8 +170,8 @@ public class DeliverVersionCommand implements Callable<Integer> {
         } catch (UploadException e) {
             log.error("Error occurred while attempting to upload the given file.", e);
             return Constants.RETURN_UPLOAD_ERROR;
-        } /*catch (JobServiceException e) {
+        } catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
-        }*/
+        }
     }
 }

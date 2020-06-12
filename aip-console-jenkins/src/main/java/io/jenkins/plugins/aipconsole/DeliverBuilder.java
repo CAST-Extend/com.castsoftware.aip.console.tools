@@ -63,11 +63,10 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_noVersionAvailable;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_pollJobMessage;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startAddVersionJob;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startCloneVersionJob;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startUpload;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_Deliver_info_startDeliverCloneJob;
 import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDenied;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
@@ -411,16 +410,15 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
 
             if (this.cloneVersion) {
                 if (applicationHasVersion) {
-                    log.println(AddVersionBuilder_AddVersion_info_startCloneVersionJob(applicationName));
+                    log.println(DeliverBuilder_Deliver_info_startDeliverCloneJob(applicationName));
                 } else {
                     log.println(AddVersionBuilder_AddVersion_info_noVersionAvailable(applicationName));
                 }
             } else {
-                log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(applicationName));
+                log.println(DeliverBuilder_Deliver_info_startDeliverCloneJob(applicationName));
             }
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
             requestBuilder.releaseAndSnapshotDate(new Date())
-                    // FIXME: auto deploy
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
                     .securityObjective(enableSecurityDataflow)
