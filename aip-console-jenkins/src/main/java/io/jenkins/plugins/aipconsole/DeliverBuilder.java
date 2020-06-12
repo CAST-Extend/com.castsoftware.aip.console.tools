@@ -104,7 +104,6 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     private boolean backupApplicationEnabled = false;
     @Nullable
     private String backupName = "";
-    private boolean deploy = false;
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {

@@ -3,7 +3,7 @@
     <f:entry title="${%appName}" field="applicationName" description="${%appName.descr}">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%snapshotName}" field="snapshotName" description="${%versionName.descr}">
+    <f:entry title="${%snapshotName}" field="snapshotName" description="${%snapshotName.descr}">
         <f:textbox/>
     </f:entry>
     <f:advanced title="${%advancedSettings}">

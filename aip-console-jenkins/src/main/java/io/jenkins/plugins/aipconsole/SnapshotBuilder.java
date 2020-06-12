@@ -15,6 +15,7 @@ import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -31,6 +32,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -53,7 +55,7 @@ import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_DescriptorImpl_displayName;
 
 public class SnapshotBuilder extends Builder implements SimpleBuildStep {
-    private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     @Inject
     private JobsService jobsService;
 
@@ -100,6 +102,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
         return snapshotName;
     }
 
+    @DataBoundSetter
     public void setSnapshotName(@Nullable String snapshotName) {
         this.snapshotName = snapshotName;
     }
@@ -178,6 +181,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
         }
 
         try {
+            EnvVars vars = run.getEnvironment(listener);
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             // Get the current version's guid
             VersionDto versionToAnalyze = versions.stream().filter(VersionDto::isCurrentVersion)
@@ -194,14 +198,17 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(defaultResult);
                 return;
             }
-            if (StringUtils.isBlank(snapshotName)) {
-                snapshotName = RELEASE_DATE_FORMATTER.format(new Date());
+            // Resolve jenkins variables in snapshot name
+            String resolveSnapshotName = vars.expand(snapshotName);
+            if (StringUtils.isBlank(resolveSnapshotName)) {
+                resolveSnapshotName = RELEASE_DATE_FORMATTER.format(new Date());
             }
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
-                    .startStep(versionToAnalyze.getStatus() == VersionStatus.DELIVERED ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE)
+                    .startStep(Constants.SNAPSHOT_STEP_NAME)
+                    .endStep(Constants.UPLOAD_APP_SNAPSHOT)
                     .versionGuid(versionToAnalyze.getGuid())
                     .versionName(versionToAnalyze.getName())
-                    .snapshotName(snapshotName)
+                    .snapshotName(resolveSnapshotName)
                     .releaseAndSnapshotDate(new Date());
 
             String jobGuid = jobsService.startJob(requestBuilder);
