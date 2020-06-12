@@ -40,7 +40,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
@@ -57,7 +56,6 @@ import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_in
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_success_complete;
 
 public class SnapshotBuilder extends Builder implements SimpleBuildStep {
-    private final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     @Inject
     private JobsService jobsService;
 
@@ -203,7 +201,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
             // Resolve jenkins variables in snapshot name
             String resolveSnapshotName = vars.expand(snapshotName);
             if (StringUtils.isBlank(resolveSnapshotName)) {
-                resolveSnapshotName = RELEASE_DATE_FORMATTER.format(new Date());
+                resolveSnapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
