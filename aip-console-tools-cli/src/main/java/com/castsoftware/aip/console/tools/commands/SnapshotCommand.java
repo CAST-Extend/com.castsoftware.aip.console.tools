@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -85,6 +86,7 @@ public class SnapshotCommand implements Callable<Integer> {
         } catch (ApiCallException e) {
             return Constants.RETURN_LOGIN_ERROR;
         }
+        ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
@@ -127,10 +129,17 @@ public class SnapshotCommand implements Callable<Integer> {
                 snapshotName = RELEASE_DATE_FORMATTER.format(new Date());
             }
 
+
+            String endStep = Constants.UPLOAD_APP_SNAPSHOT;
+            if (apiInfoDto.getApiVersionSemVer().getMajor() <= 1 &&
+                    apiInfoDto.getApiVersionSemVer().getMinor() <= 15) {
+                endStep = Constants.CONSOLIDATE_SNAPSHOT;
+            }
+
             // Run snapshot
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
-                    .endStep(Constants.UPLOAD_APP_SNAPSHOT)
+                    .endStep(endStep)
                     .versionGuid(versionGuid)
                     .snapshotName(snapshotName)
                     .releaseAndSnapshotDate(new Date());

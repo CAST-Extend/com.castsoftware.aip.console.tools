@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -170,6 +171,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         }
+        ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
 
         try {
             applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
@@ -203,9 +205,15 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
             if (StringUtils.isBlank(resolveSnapshotName)) {
                 resolveSnapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
+            String endStep = Constants.UPLOAD_APP_SNAPSHOT;
+            if (apiInfoDto.getApiVersionSemVer().getMajor() <= 1 &&
+                    apiInfoDto.getApiVersionSemVer().getMinor() <= 15) {
+                endStep = Constants.CONSOLIDATE_SNAPSHOT;
+            }
+
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
-                    .endStep(Constants.UPLOAD_APP_SNAPSHOT)
+                    .endStep(endStep)
                     .versionGuid(versionToAnalyze.getGuid())
                     .versionName(versionToAnalyze.getName())
                     .snapshotName(resolveSnapshotName)

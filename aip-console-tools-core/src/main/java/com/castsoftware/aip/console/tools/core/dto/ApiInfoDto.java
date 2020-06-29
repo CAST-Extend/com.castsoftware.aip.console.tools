@@ -38,7 +38,11 @@ public class ApiInfoDto {
 
     private boolean enablePackagePathCheck = false;
 
-    private SemVer apiVersionSemver;
+    private SemVer apiVersionSemVer;
+
+    public SemVer getApiVersionSemVer() {
+        return getSemVer();
+    }
 
     public boolean isExtractionRequired() {
         SemVer consoleVersion = getSemVer();
@@ -53,11 +57,11 @@ public class ApiInfoDto {
     }
 
     private SemVer getSemVer() {
-        if (apiVersionSemver == null) {
+        if (apiVersionSemVer == null) {
             synchronized (this) {
-                this.apiVersionSemver = SemVer.parse(apiVersion);
+                this.apiVersionSemVer = SemVer.parse(apiVersion);
             }
         }
-        return apiVersionSemver;
+        return apiVersionSemVer;
     }
 }
