@@ -1,13 +1,16 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadDto;
 import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadMetadataRequest;
 import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadStatus;
 import com.castsoftware.aip.console.tools.core.dto.upload.CreateUploadRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.exceptions.UploadIncompleteException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
+import com.castsoftware.aip.console.tools.core.utils.Constants;
 import lombok.extern.java.Log;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -22,11 +25,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 @Log
-public class ChunkedUploadServiceImpl implements ChunkedUploadService {
+public class UploadServiceImpl implements UploadService {
 
     /**
      * Maximum chunk size allowed by AIP Console
@@ -45,21 +49,56 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
 
     private final long extractPollSleep;
 
-    public ChunkedUploadServiceImpl(RestApiService restApiService) {
+    public UploadServiceImpl(RestApiService restApiService) {
         this.restApiService = restApiService;
         this.extractPollSleep = EXTRACT_SLEEP_TIME;
     }
 
-    public ChunkedUploadServiceImpl(RestApiService restApiService, int maxChunkSize) {
+    public UploadServiceImpl(RestApiService restApiService, int maxChunkSize) {
         this.restApiService = restApiService;
         this.chunkSize = Math.min(maxChunkSize, MAX_CHUNK_SIZE);
         this.extractPollSleep = EXTRACT_SLEEP_TIME;
     }
 
-    public ChunkedUploadServiceImpl(RestApiService restApiService, int maxChunkSize, long extractPollSleep) {
+    public UploadServiceImpl(RestApiService restApiService, int maxChunkSize, long extractPollSleep) {
         this.restApiService = restApiService;
         this.chunkSize = Math.min(maxChunkSize, MAX_CHUNK_SIZE);
         this.extractPollSleep = extractPollSleep;
+    }
+
+    @Override
+    public String uploadFileAndGetSourcePath(String appName, String appGuid, File filePath) throws UploadException {
+        ApiInfoDto apiInfo = restApiService.getAipConsoleApiInfo();
+        String sourcePath;
+        String archiveExtension = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath.getName());
+        if (StringUtils.equalsAnyIgnoreCase(archiveExtension, Constants.ALLOWED_ARCHIVE_EXTENSIONS)) {
+            sourcePath = UUID.randomUUID().toString() + "." + archiveExtension;
+            try (InputStream stream = Files.newInputStream(filePath.toPath())) {
+                long fileSize = filePath.length();
+                if (!uploadInputStream(appGuid, sourcePath, fileSize, stream, apiInfo.isExtractionRequired())) {
+                    throw new UploadIncompleteException("Local file fully uploaded, but AIP Console expects more content (fileSize on AIP Console not reached). Check the file you provided wasn't modified since the start of the CLI");
+                }
+                if (apiInfo.isExtractionRequired()) {
+                    // If we have already extracted the content, the source path will be application main sources
+                    sourcePath = appName + "/main_sources";
+                    if (apiInfo.isSourcePathPrefixRequired()) {
+                        sourcePath = "upload:" + sourcePath;
+                    }
+                }
+                return sourcePath;
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "Unable to read archive content to be uploaded.", e);
+                throw new UploadException(e);
+            }
+        }
+        //call api to check if the folder exists
+        try {
+            FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath.toPath().toString()).build();
+            restApiService.postForEntity("/api/applications/" + appGuid + "/server-folders", fileCommandRequest, String.class);
+            return "sources:" + filePath.toPath().toString();
+        } catch (ApiCallException e) {
+            throw new UploadException("Unable to check remote location of provided folder.", e);
+        }
     }
 
     @Override
@@ -79,9 +118,8 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
         } catch (IOException e) {
             throw new UploadException("Unable to get archive size for given file " + archivePath, e);
         }
-        ApiInfoDto aipConsoleInfo = restApiService.getAipConsoleApiInfo();
         try (InputStream is = new BufferedInputStream(Files.newInputStream(archivePath))) {
-            return uploadAndExtractInputStream(appGuid, FilenameUtils.getName(archivePath.toString()), fileSize, is, true);
+            return uploadInputStream(appGuid, FilenameUtils.getName(archivePath.toString()), fileSize, is, true);
         } catch (IOException e) {
             throw new UploadException("Unable to read file", e);
         }
@@ -90,11 +128,12 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
     @Override
     public boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content)
             throws UploadException {
-        return uploadAndExtractInputStream(appGuid, fileName, fileSize, content, true);
+        ApiInfoDto dto = restApiService.getAipConsoleApiInfo();
+        return uploadInputStream(appGuid, fileName, fileSize, content, dto.isExtractionRequired());
     }
 
     @Override
-    public boolean uploadAndExtractInputStream(String appGuid, String fileName, long fileSize, InputStream content, boolean extract)
+    public boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content, boolean extract)
             throws UploadException {
         String createUploadEndpoint = ApiEndpointHelper.getApplicationCreateUploadPath(appGuid);
         CreateUploadRequest request = new CreateUploadRequest();
@@ -178,8 +217,6 @@ public class ChunkedUploadServiceImpl implements ChunkedUploadService {
             throw new UploadException("Error occurred while uploading chunk number " + currentChunk, e);
         }
 
-        // if enablePackagePath is true, we need to extract manually
-        log.info("Should extract content ? " + extract);
         boolean uploadComplete = StringUtils.equalsAnyIgnoreCase(dto.getStatus(), ChunkedUploadStatus.UPLOADED.name(), "completed");
         // return if enablePackagePath is false or the upload was not complete
         if (!uploadComplete || !extract) {

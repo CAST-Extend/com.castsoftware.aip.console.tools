@@ -37,4 +37,27 @@ public class ApiInfoDto {
     private boolean enableDownloadDmt = false;
 
     private boolean enablePackagePathCheck = false;
+
+    private SemVer apiVersionSemver;
+
+    public boolean isExtractionRequired() {
+        SemVer consoleVersion = getSemVer();
+        // Extract for versions above 1.12
+        return consoleVersion.getMajor() >= 1 && consoleVersion.getMinor() > 12;
+    }
+
+    public boolean isSourcePathPrefixRequired() {
+        SemVer consoleVersion = getSemVer();
+        // Prefix is required for versions above 1.12 (?)
+        return consoleVersion.getMajor() >= 1 && consoleVersion.getMinor() > 12;
+    }
+
+    private SemVer getSemVer() {
+        if (apiVersionSemver == null) {
+            synchronized (this) {
+                this.apiVersionSemver = SemVer.parse(apiVersion);
+            }
+        }
+        return apiVersionSemver;
+    }
 }

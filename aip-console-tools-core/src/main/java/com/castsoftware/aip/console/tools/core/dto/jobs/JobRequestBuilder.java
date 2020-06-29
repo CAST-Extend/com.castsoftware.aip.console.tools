@@ -135,6 +135,8 @@ public class JobRequestBuilder {
         parameters.put(Constants.PARAM_VERSION_NAME, this.versionName);
         if (StringUtils.isNotBlank(sourcePath)) {
             parameters.put(Constants.PARAM_SOURCE_PATH, sourcePath);
+            // for 1.12 compatibility
+            parameters.put(Constants.PARAM_SOURCE_ARCHIVE, sourcePath);
         }
         if (StringUtils.isNotBlank(nodeGuid)) {
             parameters.put(Constants.PARAM_NODE_GUID, nodeGuid);

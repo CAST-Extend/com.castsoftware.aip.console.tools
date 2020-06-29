@@ -1,6 +1,5 @@
 package com.castsoftware.aip.console.tools.commands;
 
-import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -11,11 +10,10 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.aip.console.tools.core.services.ChunkedUploadService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.core.utils.FilenameUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +22,8 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -47,16 +41,16 @@ import java.util.function.Function;
 public class AddVersionCommand implements Callable<Integer> {
     private final RestApiService restApiService;
     private final JobsService jobsService;
-    private final ChunkedUploadService uploadService;
+    private final UploadService uploadService;
     private final ApplicationService applicationService;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
-    public AddVersionCommand(RestApiService restApiService, JobsService jobsService, ChunkedUploadService chunkedUploadService, ApplicationService applicationService) {
+    public AddVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
-        this.uploadService = chunkedUploadService;
+        this.uploadService = uploadService;
         this.applicationService = applicationService;
     }
 
@@ -150,34 +144,8 @@ public class AddVersionCommand implements Callable<Integer> {
                 applicationName = applicationService.getApplicationNameFromGuid(applicationGuid);
             }
 
-            // AIP Console source path, startign with either "sources:" or "upload:" if it is a folder on the server
-            // or a file that was uploaded
-            String sourcePath;
-            // means it is a subfolder inside the source.folder.location defined in Console
-            if (!StringUtils.equalsAnyIgnoreCase(FilenameUtils.getFileExtension(filePath.getName()), Constants.ALLOWED_ARCHIVE_EXTENSIONS)) {
-                //call api to check if the folder exists
-                try {
-                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath.toPath().toString()).build();
-                    restApiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
-                    sourcePath = "sources:" + filePath.toPath().toString();
-                } catch (ApiCallException e) {
-                    return Constants.RETURN_SOURCE_FOLDER_NOT_FOUND;
-                }
-            } else {
-                sourcePath = UUID.randomUUID().toString() + "." + FilenameUtils.getFileExtension(filePath.getName());
-                try (InputStream stream = Files.newInputStream(filePath.toPath())) {
-                    long fileSize = filePath.length();
-                    if (!uploadService.uploadInputStream(applicationGuid, sourcePath, fileSize, stream)) {
-                        log.error("Local file fully uploaded, but AIP Console expects more content (fileSize on AIP Console not reached). Check the file you provided wasn't modified since the start of the CLI");
-                        return Constants.RETURN_UPLOAD_ERROR;
-                    }
-                    sourcePath = "upload:" + applicationName + "/main_sources";
-                } catch (IOException e) {
-                    log.error("Unable to read archive content to be uploaded.", e);
-                    throw new UploadException(e);
-                }
+            String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
 
-            }
             // check that the application actually has versions, otherwise it's just an add version job
             cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
 

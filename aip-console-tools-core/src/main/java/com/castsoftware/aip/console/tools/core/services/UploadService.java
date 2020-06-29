@@ -5,7 +5,18 @@ import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import java.io.File;
 import java.io.InputStream;
 
-public interface ChunkedUploadService {
+public interface UploadService {
+
+    /**
+     * Calls AIP Console API to check for remote files or upload a local file
+     *
+     * @param appName
+     * @param appGuid
+     * @param filePath
+     * @return
+     * @throws UploadException
+     */
+    String uploadFileAndGetSourcePath(String appName, String appGuid, File filePath) throws UploadException;
 
     /**
      * Calls AIP Console API to create an upload and upload the file.
@@ -20,10 +31,10 @@ public interface ChunkedUploadService {
     /**
      * Calls AIP Console API to create an upload and upload the provide InputStream content.
      * <p>
-     * Same as calling {@link #uploadAndExtractInputStream(String, String, long, InputStream, boolean)}
+     * Same as calling {@link #uploadInputStream(String, String, long, InputStream, boolean)}
      * but will check AIP Console API information to select whether it should be extracted or not.
      * <p>
-     * To control the extract parameter, please use {@link #uploadAndExtractInputStream(String, String, long, InputStream, boolean)}
+     * To control the extract parameter, please use {@link #uploadInputStream(String, String, long, InputStream, boolean)}
      *
      * @param appGuid  The application GUID
      * @param fileName The name of the file
@@ -47,6 +58,6 @@ public interface ChunkedUploadService {
      * @return True if the upload was successful, false otherwise
      * @throws UploadException If any issue occurs while communicating with AIP Console, or reading the file content
      */
-    boolean uploadAndExtractInputStream(String appGuid, String fileName, long fileSize, InputStream content, boolean extract)
+    boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content, boolean extract)
             throws UploadException;
 }

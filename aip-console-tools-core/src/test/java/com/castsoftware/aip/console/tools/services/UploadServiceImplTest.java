@@ -1,14 +1,13 @@
 package com.castsoftware.aip.console.tools.services;
 
-import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadDto;
 import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadStatus;
 import com.castsoftware.aip.console.tools.core.dto.upload.CreateUploadRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
-import com.castsoftware.aip.console.tools.core.services.ChunkedUploadService;
-import com.castsoftware.aip.console.tools.core.services.ChunkedUploadServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.services.UploadService;
+import com.castsoftware.aip.console.tools.core.services.UploadServiceImpl;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import lombok.extern.java.Log;
 import org.junit.Before;
@@ -38,7 +37,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 @Log
-public class ChunkedUploadServiceImplTest {
+public class UploadServiceImplTest {
     private static final String TEST_UPLOAD_GUID = "uploadGuid";
     private static final String TEST_APP_GUID = "appGuid";
     private static final String TEST_ZIP_FILENAME = "fake.zip";
@@ -51,20 +50,15 @@ public class ChunkedUploadServiceImplTest {
     @Mock
     private RestApiService restApiService;
 
-    private ChunkedUploadService uploadService;
+    private UploadService uploadService;
 
     private File fakeZip;
 
     @Before
     public void setUp() throws Exception {
-        uploadService = new ChunkedUploadServiceImpl(restApiService, TEST_CHUNK_SIZE, TEST_SLEEP_DURATION);
+        uploadService = new UploadServiceImpl(restApiService, TEST_CHUNK_SIZE, TEST_SLEEP_DURATION);
         fakeZip = temporaryFolder.newFile(TEST_ZIP_FILENAME);
         Files.write(fakeZip.toPath(), "Some random content".getBytes(StandardCharsets.UTF_8));
-        doReturn(ApiInfoDto.builder()
-                .apiVersion("1.13.0")
-                .enablePackagePathCheck(false)
-                .build()
-        ).when(restApiService).getAipConsoleApiInfo();
     }
 
     @Test(expected = UploadException.class)
@@ -158,12 +152,6 @@ public class ChunkedUploadServiceImplTest {
                 .build();
 
         String uploadEndpoint = ApiEndpointHelper.getApplicationUploadPath(TEST_APP_GUID, TEST_UPLOAD_GUID);
-
-        doReturn(ApiInfoDto.builder()
-                .apiVersion("1.13.0")
-                .enablePackagePathCheck(true)
-                .build()
-        ).when(restApiService).getAipConsoleApiInfo();
 
         doReturn(expectedDto)
                 .when(restApiService).postForEntity(anyString(), eq(expectedRequest), eq(ChunkedUploadDto.class));

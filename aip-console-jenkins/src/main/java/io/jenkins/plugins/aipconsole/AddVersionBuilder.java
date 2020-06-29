@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -11,9 +12,9 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.aip.console.tools.core.services.ChunkedUploadService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
@@ -79,7 +80,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private JobsService jobsService;
 
     @Inject
-    private ChunkedUploadService chunkedUploadService;
+    private UploadService uploadService;
 
     @Inject
     private RestApiService apiService;
@@ -238,14 +239,14 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         }
 
         // Check the services have been properly initialized
-        if (!ObjectUtils.allNotNull(apiService, chunkedUploadService, jobsService, applicationService)) {
+        if (!ObjectUtils.allNotNull(apiService, uploadService, jobsService, applicationService)) {
             // Manually setup Guice Injector using Module (Didn't find any way to make this automatically)
             Injector injector = Guice.createInjector(new AipConsoleModule());
             // Guice can automatically inject those, but then findbugs, not seeing the change,
             // will fail the build considering they will provoke an NPE
             // So, to avoid this, set them explicitly (if they were not set)
             apiService = injector.getInstance(RestApiService.class);
-            chunkedUploadService = injector.getInstance(ChunkedUploadService.class);
+            uploadService = injector.getInstance(UploadService.class);
             jobsService = injector.getInstance(JobsService.class);
             applicationService = injector.getInstance(ApplicationService.class);
         }
@@ -268,6 +269,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         }
+        ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
 
         try {
             applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
@@ -280,8 +282,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
         EnvVars vars = run.getEnvironment(listener);
         String resolvedFilePath = vars.expand(filePath);
+        String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath);
         FilePath workspaceFile = null;
-        if (StringUtils.equalsAnyIgnoreCase(FilenameUtils.getExtension(filePath), "zip", "gz")) {
+        if (StringUtils.equalsAnyIgnoreCase(fileExt, "zip", "tgz", "tar.gz")) {
             workspaceFile = workspace.child(resolvedFilePath);
             isUpload = true;
             if (!workspaceFile.exists()) {
@@ -356,28 +359,28 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(filePath).toString()).build();
                     apiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
                 } catch (ApiCallException e) {
-                    listener.error("Unable to find the file " + filePath + " in the source.folder.location");
+                    listener.error("Unable to find the file " + filePath + " in the source.folder.location on AIP Console.");
                     e.printStackTrace(log);
                     run.setResult(defaultResult);
                     return;
                 }
-                fileName = "sources:" + Paths.get(filePath).toString();
-            } else {
-                if (StringUtils.endsWithIgnoreCase(resolvedFilePath, ".tar.gz")) {
-                    // getExtension only returns the last extension, so specific case for .tar.gz
-                    fileName += ".tar.gz";
-                } else {
-                    fileName += "." + FilenameUtils.getExtension(resolvedFilePath);
+                fileName = Paths.get(filePath).toString();
+                if (apiInfoDto.isSourcePathPrefixRequired()) {
+                    fileName = "sources:" + fileName;
                 }
+            } else {
+                fileName = String.format("%s.%s", fileName, fileExt);
                 // if it already exists, delete it (might be a remnant of a previous execution)
                 // move source file to another file name, to avoid conflicts when uploading the same zip file for multiple applications
                 try (InputStream workspaceFileStream = workspaceFile.read();
                      InputStream bufferedStream = new BufferedInputStream(workspaceFileStream, BUFFER_SIZE)) {
                     log.println("Uploading file " + workspaceFile.getName());
-                    if (!chunkedUploadService.uploadInputStream(applicationGuid, fileName, workspaceFile.length(), bufferedStream)) {
+                    if (!uploadService.uploadInputStream(applicationGuid, fileName, workspaceFile.length(), bufferedStream)) {
                         throw new UploadException("Uploading was not completed successfully.");
                     }
-                    fileName = "upload:" + applicationName + "/main_sources";
+                    if (apiInfoDto.isSourcePathPrefixRequired()) {
+                        fileName = "upload:" + applicationName + "/main_sources";
+                    }
                 }
             }
         } catch (ApplicationServiceException e) {

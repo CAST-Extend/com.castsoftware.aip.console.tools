@@ -2,12 +2,12 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationServiceImpl;
-import com.castsoftware.aip.console.tools.core.services.ChunkedUploadService;
-import com.castsoftware.aip.console.tools.core.services.ChunkedUploadServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.JobsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.RestApiServiceImpl;
+import com.castsoftware.aip.console.tools.core.services.UploadService;
+import com.castsoftware.aip.console.tools.core.services.UploadServiceImpl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,8 +50,8 @@ public class ApiIntegrationConfig {
     }
 
     @Bean
-    public ChunkedUploadService chunkedUploadService(@Autowired RestApiService restApiService) {
-        return new ChunkedUploadServiceImpl(restApiService);
+    public UploadService chunkedUploadService(@Autowired RestApiService restApiService) {
+        return new UploadServiceImpl(restApiService);
     }
 
     @Bean

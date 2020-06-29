@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -7,9 +8,9 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.aip.console.tools.core.services.ChunkedUploadService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import hudson.model.FreeStyleBuild;
@@ -83,7 +84,7 @@ public class AddVersionBuilderTest {
     private RestApiService restApiService;
 
     @Mock
-    private ChunkedUploadService chunkedUploadService;
+    private UploadService uploadService;
 
     @Mock
     private JobsService jobsService;
@@ -101,6 +102,8 @@ public class AddVersionBuilderTest {
         config.setApiKey(Secret.fromString(TEST_KEY));
         addVersionBuilder = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
         MockitoAnnotations.initMocks(this);
+        doReturn(ApiInfoDto.builder().apiVersion("1.12.0-DEV").build())
+                .when(restApiService).getAipConsoleApiInfo();
     }
 
     @Test
@@ -119,7 +122,7 @@ public class AddVersionBuilderTest {
         doReturn(TEST_APP_NAME)
                 .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
         doReturn(true)
-                .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
@@ -145,7 +148,7 @@ public class AddVersionBuilderTest {
         doReturn(TEST_APP_NAME)
                 .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
         doReturn(true)
-                .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
@@ -211,7 +214,7 @@ public class AddVersionBuilderTest {
         doReturn(TEST_APP_NAME)
                 .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
         doThrow(new UploadException("Fake error"))
-                .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_uploadFailed(), build);
@@ -227,7 +230,7 @@ public class AddVersionBuilderTest {
         doReturn(TEST_APP_NAME)
                 .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
         doReturn(true)
-                .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doThrow(new JobServiceException("fake exception"))
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
 
@@ -246,7 +249,7 @@ public class AddVersionBuilderTest {
         doReturn(TEST_APP_NAME)
                 .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
         doReturn(true)
-                .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.CANCELED)
@@ -315,7 +318,7 @@ public class AddVersionBuilderTest {
         doReturn(TEST_APP_NAME)
                 .when(jobsService).pollAndWaitForJobFinished(eq("createAppGuid"), any(), any());
         doReturn(true)
-                .when(chunkedUploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
