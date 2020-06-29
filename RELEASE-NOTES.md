@@ -1,5 +1,26 @@
 ## Release Notes :
 
+#### 1.17.0-beta2
+
+Fixed a compatibility issue with AIP Console 1.12
+
+#### 1.17.0-beta
+
+Beta version of AIP Console Tools 1.17.0
+
+This version provides new commands in the CLI and new Steps in the Jenkins Plugin.
+
+CLI:
+
+* Added the Deliver, Analysis and Snapshot commands
+* Reviewed the documentation to add those commands and provide clearer information of each commands parametrs
+
+Jenkins Plugin
+
+* Added the Deliver, Analyze and Snapshot Job Steps
+* Reviewed the documentation as well
+
+
 #### 1.16.1
 
 Fixed an issue with file upload when package path check is disabled in AIP Console
