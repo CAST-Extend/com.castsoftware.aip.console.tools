@@ -112,6 +112,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
         return failureIgnored;
     }
 
+    @DataBoundSetter
     public void setFailureIgnored(boolean failureIgnored) {
         this.failureIgnored = failureIgnored;
     }
@@ -120,6 +121,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
         return timeout;
     }
 
+    @DataBoundSetter
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
