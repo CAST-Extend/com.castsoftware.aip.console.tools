@@ -4,19 +4,24 @@
 
 This version provides new commands in the CLI and new Steps in the Jenkins Plugin.
 
+Fixes (Global):
+
+* Fixed compatibility issue with AIP Console 1.12
+* Changed Snapshot Name to be coherent in both CLI and Jenkins Plugin
+
 CLI:
 
 * Added the Deliver, Analysis and Snapshot commands
 * Reviewed the documentation to add those commands and provide clearer information of each commands parameters.
+* Fixed an issue in Analyze Command where Snapshot Steps where not enabled even though the snapshot parameter was passed
+* Fixed an issue where the Version Name for snapshot was not properly send to AIP Console
 
 Jenkins Plugin
 
 * Added the Deliver, Analyze and Snapshot Build Steps
 * Reviewed the documentation for those Build Steps
-
-Fixes:
-
-Fixed compatibility issues with AIP Console 1.12
+* Fixed an issue in Analyze Build Step where snapshot steps were not enabled even though the "Snapshots?" checkbox was checked
+* Fixed an issue in Analyze Build Step where the Version Name was not properly saved
 
 #### 1.16.1
 
