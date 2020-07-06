@@ -16,6 +16,7 @@ import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -32,6 +33,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -102,6 +104,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         return versionName;
     }
 
+    @DataBoundSetter
     public void setVersionName(@Nullable String versionName) {
         this.versionName = versionName;
     }
@@ -110,6 +113,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         return failureIgnored;
     }
 
+    @DataBoundSetter
     public void setFailureIgnored(boolean failureIgnored) {
         this.failureIgnored = failureIgnored;
     }
@@ -118,6 +122,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         return withSnapshot;
     }
 
+    @DataBoundSetter
     public void setWithSnapshot(boolean withSnapshot) {
         this.withSnapshot = withSnapshot;
     }
@@ -126,6 +131,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         return timeout;
     }
 
+    @DataBoundSetter
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
@@ -188,13 +194,16 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         }
 
         try {
+            EnvVars vars = run.getEnvironment(listener);
+            String resolvedVersionName = vars.expand(versionName);
             ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             // Get the version name
             VersionDto versionToAnalyze;
             // Version with name provided
-            if (StringUtils.isNotBlank(versionName)) {
-                versionToAnalyze = versions.stream().filter(v -> StringUtils.equalsAnyIgnoreCase(v.getName(), versionName)).findFirst().orElse(null);
+            if (StringUtils.isNotBlank(resolvedVersionName)) {
+
+                versionToAnalyze = versions.stream().filter(v -> StringUtils.equalsAnyIgnoreCase(v.getName(), resolvedVersionName)).findFirst().orElse(null);
             } else {
                 // Latest Delivered Version
                 versionToAnalyze = versions
@@ -203,8 +212,8 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
                         .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
             }
             if (versionToAnalyze == null) {
-                String message = StringUtils.isNotBlank(versionName) ?
-                        AnalyzeBuilder_Analyze_error_noVersionFoundWithName(versionName, applicationName) :
+                String message = StringUtils.isNotBlank(resolvedVersionName) ?
+                        AnalyzeBuilder_Analyze_error_noVersionFoundWithName(resolvedVersionName, applicationName) :
                         AnalyzeBuilder_Analyze_error_noVersionFound();
                 listener.error(message);
                 run.setResult(defaultResult);
