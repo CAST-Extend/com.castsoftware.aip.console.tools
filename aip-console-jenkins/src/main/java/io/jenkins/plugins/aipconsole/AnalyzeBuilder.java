@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -187,6 +188,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         }
 
         try {
+            ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             // Get the version name
             VersionDto versionToAnalyze;
@@ -210,9 +212,21 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
             }
 
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
-                    .startStep(versionToAnalyze.getStatus() == VersionStatus.DELIVERED ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE)
-                    .endStep(withSnapshot ? Constants.UPLOAD_APP_SNAPSHOT : Constants.ANALYZE)
-                    .versionName(versionToAnalyze.getName())
+                    .startStep(versionToAnalyze.getStatus() == VersionStatus.DELIVERED ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
+
+            if (withSnapshot) {
+                if (apiInfoDto.getApiVersionSemVer().getMajor() <= 1 &&
+                        apiInfoDto.getApiVersionSemVer().getMinor() <= 15) {
+                    requestBuilder.endStep(Constants.CONSOLIDATE_SNAPSHOT);
+                } else {
+                    requestBuilder.endStep(Constants.UPLOAD_APP_SNAPSHOT);
+                }
+                requestBuilder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
+            } else {
+                requestBuilder.endStep(Constants.ANALYZE);
+            }
+
+            requestBuilder.versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());
 

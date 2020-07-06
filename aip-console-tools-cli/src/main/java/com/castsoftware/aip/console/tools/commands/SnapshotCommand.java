@@ -26,6 +26,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -52,13 +53,19 @@ public class SnapshotCommand implements Callable<Integer> {
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
-    @CommandLine.Option(names = {"-n", "--app-name"}, paramLabel = "APPLICATION_NAME", description = "The Name of the application to analyze")
+    @CommandLine.Option(names = {"-n", "--app-name"},
+            paramLabel = "APPLICATION_NAME",
+            description = "The Name of the application to analyze",
+            required = true)
     private String applicationName;
 
-    @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION_NAME", description = "The name of the version for which the snapshot will be run")
+    @CommandLine.Option(names = {"-v", "--version-name"},
+            paramLabel = "VERSION_NAME", description = "The name of the version for which the snapshot will be run")
     private String versionName;
 
-    @CommandLine.Option(names = {"-S", "--snapshot-name"}, paramLabel = "SNAPSHOT_NAME", description = "The name of the snapshot to create")
+    @CommandLine.Option(names = {"-S", "--snapshot-name"},
+            paramLabel = "SNAPSHOT_NAME",
+            description = "The name of the snapshot to create")
     private String snapshotName;
 
     public SnapshotCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
@@ -105,30 +112,31 @@ public class SnapshotCommand implements Callable<Integer> {
                 // FIXME: Constant for return code
                 return 9;
             }
-            String versionGuid;
+            VersionDto foundVersion;
             if (StringUtils.isNotBlank(versionName)) {
-                versionGuid = versions.stream()
+                Optional<VersionDto> optionalVersionDto = versions.stream()
                         .filter(v -> StringUtils.equalsIgnoreCase(v.getName(), versionName))
-                        .map(VersionDto::getGuid).findFirst().orElse(null);
+                        .findFirst();
+                if (!optionalVersionDto.isPresent()) {
+                    log.error("No version found with name " + versionName);
+                    return Constants.RETURN_APPLICATION_VERSION_NOT_FOUND;
+                }
+                foundVersion = optionalVersionDto.get();
             } else {
-                versionGuid = versions
+                Optional<VersionDto> optionalVersionDto = versions
                         .stream()
                         .filter(v -> v.getStatus().ordinal() >= VersionStatus.ANALYSIS_DONE.ordinal())
-                        .max(Comparator.comparing(VersionDto::getVersionDate))
-                        .map(VersionDto::getGuid)
-                        .orElse(null);
-            }
-            if (StringUtils.isBlank(versionGuid)) {
-                String message = StringUtils.isBlank(versionName) ?
-                        "No analyzed version found to create a snapshot for. Make sure you have at least one version that has been analyzed" :
-                        "No version found with name " + versionName;
-                log.error(message);
-                return Constants.RETURN_APPLICATION_VERSION_NOT_FOUND;
-            }
-            if (StringUtils.isBlank(snapshotName)) {
-                snapshotName = RELEASE_DATE_FORMATTER.format(new Date());
+                        .max(Comparator.comparing(VersionDto::getVersionDate));
+                if (!optionalVersionDto.isPresent()) {
+                    log.error("No analyzed version found to create a snapshot for. Make sure you have at least one version that has been analyzed");
+                    return Constants.RETURN_APPLICATION_VERSION_NOT_FOUND;
+                }
+                foundVersion = optionalVersionDto.get();
             }
 
+            if (StringUtils.isBlank(snapshotName)) {
+                snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
+            }
 
             String endStep = Constants.UPLOAD_APP_SNAPSHOT;
             if (apiInfoDto.getApiVersionSemVer().getMajor() <= 1 &&
@@ -140,11 +148,12 @@ public class SnapshotCommand implements Callable<Integer> {
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
                     .endStep(endStep)
-                    .versionGuid(versionGuid)
+                    .versionGuid(foundVersion.getGuid())
+                    .versionName(foundVersion.getName())
                     .snapshotName(snapshotName)
                     .releaseAndSnapshotDate(new Date());
 
-            log.info("Running Snapshot Job on application '{}'", applicationName);
+            log.info("Running Snapshot Job on application '{}' with Version '{}' (guid: '{}')", applicationName, foundVersion.getName(), foundVersion.getGuid());
             String jobGuid = jobsService.startJob(builder);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
             if (JobState.COMPLETED == jobStatus.getState()) {

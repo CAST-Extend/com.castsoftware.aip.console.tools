@@ -49,25 +49,54 @@ public class DeliverVersionCommand implements Callable<Integer> {
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
-    @CommandLine.Option(names = {"-n", "--app-name"}, paramLabel = "APPLICATION_NAME", description = "The Name of the application to rescan")
+    @CommandLine.Option(names = {"-n", "--app-name"},
+            paramLabel = "APPLICATION_NAME",
+            description = "The Name of the application to rescan",
+            required = true)
     private String applicationName;
-    @CommandLine.Option(names = {"-f", "--file"}, paramLabel = "FILE", description = "A local zip or tar.gz file OR a path to a folder on the node where the source if saved", required = true)
+
+    @CommandLine.Option(names = {"-f", "--file"},
+            paramLabel = "FILE",
+            description = "A local zip or tar.gz file OR a path to a folder on the node where the source if saved",
+            required = true)
     private File filePath;
-    @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION_NAME", description = "The name of the version to create")
+
+    @CommandLine.Option(names = {"-v", "--version-name"},
+            paramLabel = "VERSION_NAME",
+            description = "The name of the version to create")
     private String versionName;
-    @CommandLine.Option(names = {"-d", "--auto-deploy"}, description = "Deploys the version after the delivery (marks the version as current)")
-    private boolean autoDeploy;
-    @CommandLine.Option(names = {"-c", "--clone", "--rescan"}, description = "Clones the latest version configuration instead of creating a new application")
+
+    // Hiding this, to avoid breaking commands already using it
+    // Analyze command will automatically set as current when starting so it's unnecessary
+    @CommandLine.Option(names = {"-d", "--auto-deploy"},
+            description = "Sets the version as current after delivery (The Analyze command will set as current automatically if the version is in delivered state)",
+            hidden = true,
+            hideParamSyntax = true)
+    private boolean autoDeploy = false;
+
+    @CommandLine.Option(names = {"-c", "--clone", "--rescan"},
+            description = "Clones the latest version configuration instead of creating a new application")
     private boolean cloneVersion = false;
-    @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
+
+    @CommandLine.Option(names = "--auto-create",
+            description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
     private boolean autoCreate = false;
-    @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version")
+
+    @CommandLine.Option(names = "--enable-security-dataflow",
+            description = "If defined, this will activate the security dataflow for this version")
     private boolean enableSecurityDataflow = false;
-    @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME", description = "The name of the node on which the application will be created. Ignored if no --auto-create or the application already exists.")
+
+    @CommandLine.Option(names = "--node-name",
+            paramLabel = "NODE_NAME", description = "The name of the node on which the application will be created. Ignored if no --auto-create or the application already exists.")
     private String nodeName;
-    @CommandLine.Option(names = {"-b", "--backup"}, description = "Enable backup of application before delivering the new version")
+
+    @CommandLine.Option(names = {"-b", "--backup"},
+            description = "Enable backup of application before delivering the new version")
     private boolean backupEnabled = false;
-    @CommandLine.Option(names = "--backup-name", paramLabel = "BACKUP_NAME", description = "The name of the backup to create before delivering the new version. Defaults to 'backup_date.time'")
+
+    @CommandLine.Option(names = "--backup-name",
+            paramLabel = "BACKUP_NAME",
+            description = "The name of the backup to create before delivering the new version. Defaults to 'backup_date.time'")
     private String backupName;
 
     public DeliverVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
@@ -116,7 +145,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
             cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
-                    .endStep(autoDeploy ? Constants.ACCEPTANCE_STEP_NAME : Constants.DELIVER_VERSION)
+                    .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .securityObjective(enableSecurityDataflow)

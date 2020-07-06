@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -51,11 +52,19 @@ public class AnalyzeCommand implements Callable<Integer> {
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
-    @CommandLine.Option(names = {"-n", "--app-name"}, paramLabel = "APPLICATION_NAME", description = "The Name of the application to analyze")
+    @CommandLine.Option(names = {"-n", "--app-name"},
+            paramLabel = "APPLICATION_NAME",
+            description = "The Name of the application to analyze",
+            required = true)
     private String applicationName;
-    @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION_NAME", description = "The name of the version to analyze. If omitted, the lastest version will be used.")
+
+    @CommandLine.Option(names = {"-v", "--version-name"},
+            paramLabel = "VERSION_NAME",
+            description = "The name of the version to analyze. If omitted, the latest version will be used.")
     private String versionName;
-    @CommandLine.Option(names = {"-S", "--snapshot"}, description = "Creates a snapshot after running the analysis.")
+
+    @CommandLine.Option(names = {"-S", "--snapshot"},
+            description = "Creates a snapshot after running the analysis.")
     private boolean withSnapshot;
 
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
@@ -82,6 +91,7 @@ public class AnalyzeCommand implements Callable<Integer> {
             return Constants.RETURN_LOGIN_ERROR;
         }
         String applicationGuid;
+        ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
@@ -117,9 +127,21 @@ public class AnalyzeCommand implements Callable<Integer> {
             boolean deployFirst = versionToAnalyze.getStatus() == VersionStatus.DELIVERED;
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
-                    .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE)
-                    .endStep(withSnapshot ? Constants.UPLOAD_APP_SNAPSHOT : Constants.ANALYZE)
-                    .versionName(versionToAnalyze.getName())
+                    .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
+
+            if (withSnapshot) {
+                if (apiInfoDto.getApiVersionSemVer().getMajor() <= 1 &&
+                        apiInfoDto.getApiVersionSemVer().getMinor() <= 15) {
+                    builder.endStep(Constants.CONSOLIDATE_SNAPSHOT);
+                } else {
+                    builder.endStep(Constants.UPLOAD_APP_SNAPSHOT);
+                }
+                builder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
+            } else {
+                builder.endStep(Constants.ANALYZE);
+            }
+
+            builder.versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());
 
