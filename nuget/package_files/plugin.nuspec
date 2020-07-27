@@ -8,9 +8,7 @@
         <owners>CAST</owners>
         <licenseUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/LICENSE</licenseUrl>
         <projectUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/wiki/1.1</projectUrl>
-        <iconUrl>
-            https://raw.githubusercontent.com/CAST-Extend/com.castsoftware.aip.console.tools/master/nuget/logo_console.png
-        </iconUrl>
+        <iconUrl>https://raw.githubusercontent.com/CAST-Extend/com.castsoftware.aip.console.tools/master/nuget/logo_console.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Package containing the AIP Console Jenkins Plugin and AIP Console Tools CLI.
 
@@ -22,9 +20,7 @@
             If you need details about the AIP Console Tools CLI, you can find them here :
             https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/develop/aip-console-tools-cli/README.md
         </description>
-        <releaseNotes>
-            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/RELEASE-NOTES.md
-        </releaseNotes>
+        <releaseNotes>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/RELEASE-NOTES.md</releaseNotes>
 		<tags>aipconsole</tags>
 		<dependencies>
 			<dependency id="CAIP" version="8.3.0" />
