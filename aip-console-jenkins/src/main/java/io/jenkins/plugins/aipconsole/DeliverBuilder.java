@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -38,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.springframework.http.HttpStatus;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -46,9 +48,12 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -372,6 +377,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 }
             } else {
                 fileName = String.format("%s.%s", fileName, fileExt);
+
                 // if it already exists, delete it (might be a remnant of a previous execution)
                 // move source file to another file name, to avoid conflicts when uploading the same zip file for multiple applications
                 try (InputStream workspaceFileStream = workspaceFile.read();
@@ -437,12 +443,40 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(defaultResult);
             } else {
                 log.println(AddVersionBuilder_AddVersion_success_analysisComplete());
+                downloadDeliveryReport(workspace, applicationGuid, versionName, listener);
                 run.setResult(Result.SUCCESS);
             }
         } catch (JobServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
+        } catch (ApiCallException e) {
+            e.printStackTrace();
+        } catch (ApplicationServiceException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Download the DMT report to the jenkins workspace
+     *
+     * @param workspace
+     * @param versionName
+     */
+    private void downloadDeliveryReport(FilePath workspace, String appGuid, String versionName, TaskListener taskListener) throws ApplicationServiceException, ApiCallException {
+        PrintStream log = taskListener.getLogger();
+        log.println("Downloading delivery report...");
+        String versionGuid = applicationService.getApplicationVersion(appGuid).stream().filter(v -> v.getName().equalsIgnoreCase(versionName))
+                .map(VersionDto::getGuid).findFirst().orElseThrow(() -> new ApiCallException(HttpStatus.NOT_FOUND.value(), "version not found"));
+        log.println("Version guid " + versionGuid);
+
+        String reportFile = versionName + "-report-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm")) + ".xml";
+        try {
+            String content = apiService.getForEntity("/api/applications/" + appGuid + "/versions/" + versionGuid + "/dmt-report/download", String.class);
+            workspace.child(reportFile).write(content, StandardCharsets.UTF_8.toString());
+            log.println("Version delivery report saved in workspace " + reportFile);
+        } catch (IOException | InterruptedException e) {
+            taskListener.error("Failed to download the delivery report", e.getMessage());
         }
     }
 

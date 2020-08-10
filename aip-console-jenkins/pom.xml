@@ -148,6 +148,30 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>delivery_manager</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>io/jenkins/plugins/aipconsole/AddVersion*.java</exclude>
+                                <exclude>io/jenkins/plugins/aipconsole/Analyze*.java</exclude>
+                                <exclude>io/jenkins/plugins/aipconsole/CreateApplication*.java</exclude>
+                                <exclude>io/jenkins/plugins/aipconsole/Snapshot*.java</exclude>
+                            </excludes>
+                            <testExcludes>
+                                <testExclude>io/jenkins/plugins/aipconsole/AddVersionBuilderTest.java</testExclude>
+                            </testExcludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <!-- If you want this to appear on the wiki page:
     <developers>
