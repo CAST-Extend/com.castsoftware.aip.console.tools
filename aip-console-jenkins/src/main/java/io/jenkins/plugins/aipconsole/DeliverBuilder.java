@@ -110,6 +110,9 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String backupName = "";
 
+    @Nullable
+    private String exclusionPatterns = "";
+
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
@@ -157,6 +160,16 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setCloneVersion(boolean cloneVersion) {
         this.cloneVersion = cloneVersion;
+    }
+
+    @Nullable
+    public String getExclusionPatterns() {
+        return exclusionPatterns;
+    }
+
+    @DataBoundSetter
+    public void setExclusionPatterns(@Nullable String exclusionPatterns) {
+        this.exclusionPatterns = exclusionPatterns;
     }
 
     @Nullable
@@ -434,6 +447,12 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName);
 
+            if (StringUtils.isNotEmpty(exclusionPatterns)) {
+                log.println("Exclusion patterns : " + exclusionPatterns);
+                requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, exclusionPatterns));
+            }
+
+            log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             String jobGuid = jobsService.startAddVersionJob(requestBuilder);
 
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
@@ -446,14 +465,10 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 downloadDeliveryReport(workspace, applicationGuid, versionName, listener);
                 run.setResult(Result.SUCCESS);
             }
-        } catch (JobServiceException e) {
+        } catch (JobServiceException | ApiCallException | ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
-        } catch (ApiCallException e) {
-            e.printStackTrace();
-        } catch (ApplicationServiceException e) {
-            e.printStackTrace();
         }
     }
 
