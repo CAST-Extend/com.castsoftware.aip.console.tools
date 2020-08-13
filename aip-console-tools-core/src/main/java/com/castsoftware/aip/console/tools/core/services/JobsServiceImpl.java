@@ -9,11 +9,14 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -160,11 +164,12 @@ public class JobsServiceImpl implements JobsService {
     public <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobStatusWithSteps, R> callback) throws JobServiceException {
         return pollAndWaitForJobFinished(jobGuid,
                 jobStep -> log.info("Current step is : " + jobStep.getProgressStep()),
+                jobContentDto -> printLog(jobContentDto),
                 callback);
     }
 
     @Override
-    public <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobStatusWithSteps> stepChangedCallback, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException {
+    public <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobStatusWithSteps> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException {
         assert StringUtils.isNotBlank(jobGuid);
 
         String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(jobGuid);
@@ -172,6 +177,8 @@ public class JobsServiceImpl implements JobsService {
         log.fine("Checking status of Job with GUID " + jobGuid);
         try {
             JobStatusWithSteps jobStatus;
+            String logName = null;
+            int startOffset = 0;
             while (true) {
                 // Force login to keep session alive (jobs endpoint doesn't refresh session status)
                 restApiService.login();
@@ -183,6 +190,14 @@ public class JobsServiceImpl implements JobsService {
                     if (stepChangedCallback != null) {
                         stepChangedCallback.accept(jobStatus);
                     }
+                    logName = getLogName(jobGuid, currentStep);
+                    startOffset = 0;
+                }
+
+                if (!StringUtils.isAnyBlank(logName, currentStep)) {
+                    LogContentDto logContent = restApiService.getForEntity("/api/jobs/" + jobGuid + "/steps/" + currentStep + "/logs/" + logName + "?nbLines=3000&startOffset=" + startOffset, LogContentDto.class);
+                    pollingCallback.accept(logContent);
+                    startOffset = startOffset + logContent.getNbLines();
                 }
 
                 if (jobStatus.getState() != JobState.STARTED && jobStatus.getState() != JobState.STARTING) {
@@ -196,6 +211,16 @@ public class JobsServiceImpl implements JobsService {
             log.log(Level.SEVERE, "Error occurred while polling the job status", e);
             throw new JobServiceException(e);
         }
+    }
+
+    private String getLogName(String jobGuid, String step) throws ApiCallException {
+        Set<LogsDto> logs = restApiService.getForEntity("/api/jobs/" + jobGuid + "/steps/" + step + "/logs", new TypeReference<Set<LogsDto>>() {
+        });
+        return logs.stream().filter(l -> l.getLogType().equalsIgnoreCase("MAIN_LOG")).findFirst().map(LogsDto::getLogName).orElse(null);
+    }
+
+    private void printLog(LogContentDto logContent) {
+        logContent.getLines().forEach(logLine -> log.info(logLine.getContent()));
     }
 
     private synchronized ApiInfoDto getApiInfoDto() {

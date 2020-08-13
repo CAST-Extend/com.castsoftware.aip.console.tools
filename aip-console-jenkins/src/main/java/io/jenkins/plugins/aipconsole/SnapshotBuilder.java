@@ -248,6 +248,9 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                         jobStatusWithSteps.getAppName() + " - " +
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
                 ),
+                logContentDto -> {
+                    logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
+                },
                 JobStatus::getState);
     }
 
