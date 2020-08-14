@@ -156,6 +156,9 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
             JobState endState = jobsService.pollAndWaitForJobFinished(createJobGuid,
                     jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                    logContentDto -> {
+                        logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
+                    },
                     jobStatusWithSteps -> {
                         applicationGuid = jobStatusWithSteps.getAppGuid();
                         return jobStatusWithSteps.getState();

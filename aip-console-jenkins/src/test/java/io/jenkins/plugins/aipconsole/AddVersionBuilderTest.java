@@ -126,7 +126,7 @@ public class AddVersionBuilderTest {
         doReturn(TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any(), any());
 
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_success_analysisComplete(), build);
@@ -152,7 +152,7 @@ public class AddVersionBuilderTest {
         doReturn(TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any(), any());
 
         WorkflowRun workflowRun = jenkins.buildAndAssertSuccess(job);
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_success_analysisComplete(), workflowRun);
@@ -253,7 +253,7 @@ public class AddVersionBuilderTest {
         doReturn(TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.CANCELED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any(), any());
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
@@ -316,13 +316,13 @@ public class AddVersionBuilderTest {
         doReturn("createAppGuid")
                 .when(jobsService).startCreateApplication(TEST_APP_NAME, TEST_NODE_NAME);
         doReturn(TEST_APP_NAME)
-                .when(jobsService).pollAndWaitForJobFinished(eq("createAppGuid"), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq("createAppGuid"), any(), any(), any());
         doReturn(true)
                 .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any(), any());
 
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(TEST_APP_NAME), build);

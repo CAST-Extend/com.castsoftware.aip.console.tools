@@ -34,6 +34,7 @@ public class JobRequestBuilder {
     private boolean backupApplication = false;
     private String backupName;
     private String snapshotName;
+    private String deliveryConfigGuid;
 
     private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType) {
         this.appGuid = appGuid;
@@ -65,6 +66,11 @@ public class JobRequestBuilder {
 
     public JobRequestBuilder startStep(String startStep) {
         this.startStep = startStep;
+        return this;
+    }
+
+    public JobRequestBuilder deliveryConfigGuid(String deliveryConfigGuid) {
+        this.deliveryConfigGuid = deliveryConfigGuid;
         return this;
     }
 
@@ -156,6 +162,10 @@ public class JobRequestBuilder {
         }
         if (StringUtils.isNotBlank(snapshotName)) {
             parameters.put(Constants.PARAM_SNAPSHOT_NAME, snapshotName);
+        }
+
+        if (StringUtils.isNotBlank(deliveryConfigGuid)) {
+            parameters.put(Constants.PARAM_DELIVERY_CONFIG_GUID, deliveryConfigGuid);
         }
 
         if (backupApplication) {

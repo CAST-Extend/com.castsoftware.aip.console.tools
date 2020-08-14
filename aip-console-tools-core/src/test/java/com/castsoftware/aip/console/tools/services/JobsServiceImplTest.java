@@ -15,6 +15,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,12 +30,14 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -216,6 +219,10 @@ public class JobsServiceImplTest {
         when(restApiService
                 .getForEntity("/api/jobs/" + TEST_JOB_GUID, JobStatusWithSteps.class)
         ).thenReturn(initialStatus, errorStatus);
+
+        when(restApiService
+                .getForEntity(
+                        anyString(), any(TypeReference.class))).thenReturn(new HashSet<>());
 
         JobState resultState = service.pollAndWaitForJobFinished(TEST_JOB_GUID);
         assertEquals("Expected state should be 'CANCELED'", JobState.CANCELED, resultState);
