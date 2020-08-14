@@ -77,8 +77,8 @@ public class AddVersionCommand implements Callable<Integer> {
     /**
      * Whether or not to clone previous version
      */
-    @CommandLine.Option(names = {"-c", "--clone", "--rescan"}, description = "Clones the latest version configuration instead of creating a new application")
-    private boolean cloneVersion = false;
+    @CommandLine.Option(names = {"-c", "--clone", "--rescan", "--copy-previous-config"}, description = "Clones the latest version configuration instead of creating a new application")
+    private boolean cloneVersion = true;
     /**
      * Whether or not to automatically create the application before Adding a version (if the application could not be found)
      */

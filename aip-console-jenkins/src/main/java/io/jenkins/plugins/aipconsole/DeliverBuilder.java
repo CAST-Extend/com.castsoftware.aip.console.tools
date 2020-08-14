@@ -113,6 +113,8 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String exclusionPatterns = "";
 
+    private boolean autoDiscover = true;
+
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
@@ -160,6 +162,19 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setCloneVersion(boolean cloneVersion) {
         this.cloneVersion = cloneVersion;
+    }
+
+    public boolean isAutoDiscover() {
+        return autoDiscover;
+    }
+
+    public boolean getAutoDiscover() {
+        return isAutoDiscover();
+    }
+
+    @DataBoundSetter
+    public void setAutoDiscover(boolean autoDiscover) {
+        this.autoDiscover = autoDiscover;
     }
 
     @Nullable
@@ -448,7 +463,8 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .versionName(resolvedVersionName)
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
-                    .backupName(backupName);
+                    .backupName(backupName)
+                    .autoDiscover(autoDiscover);
 
             if (StringUtils.isNotEmpty(exclusionPatterns)) {
                 log.println("Exclusion patterns : " + exclusionPatterns);

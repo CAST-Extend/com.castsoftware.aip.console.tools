@@ -92,7 +92,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private String applicationGuid;
     private String filePath;
     private boolean autoCreate = false;
-    private boolean cloneVersion = false;
+    private boolean cloneVersion = true;
     @Nullable
     private String versionName = "";
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;

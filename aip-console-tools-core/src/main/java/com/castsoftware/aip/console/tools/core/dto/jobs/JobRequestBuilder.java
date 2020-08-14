@@ -35,6 +35,7 @@ public class JobRequestBuilder {
     private String backupName;
     private String snapshotName;
     private String deliveryConfigGuid;
+    private boolean autoDiscover = true;
 
     private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType) {
         this.appGuid = appGuid;
@@ -71,6 +72,11 @@ public class JobRequestBuilder {
 
     public JobRequestBuilder deliveryConfigGuid(String deliveryConfigGuid) {
         this.deliveryConfigGuid = deliveryConfigGuid;
+        return this;
+    }
+
+    public JobRequestBuilder autoDiscover(boolean autoDiscover) {
+        this.autoDiscover = autoDiscover;
         return this;
     }
 
@@ -155,6 +161,7 @@ public class JobRequestBuilder {
         parameters.put(Constants.PARAM_IGNORE_CHECK, Boolean.toString(ignoreCheck));
         parameters.put(Constants.PARAM_VERSION_OBJECTIVES, String.join(",", objectives));
         parameters.put(Constants.PARAM_RELEASE_DATE, releaseDateStr);
+        parameters.put(Constants.PARAM_ENABLE_AUTO_DISCOVER, Boolean.toString(autoDiscover));
         if (StringUtils.isBlank(snapshotDateStr)) {
             parameters.put(Constants.PARAM_SNAPSHOT_CAPTURE_DATE, releaseDateStr);
         } else {

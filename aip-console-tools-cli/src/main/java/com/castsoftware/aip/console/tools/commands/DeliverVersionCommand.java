@@ -74,9 +74,9 @@ public class DeliverVersionCommand implements Callable<Integer> {
             hideParamSyntax = true)
     private boolean autoDeploy = false;
 
-    @CommandLine.Option(names = {"-c", "--clone", "--rescan"},
+    @CommandLine.Option(names = {"-c", "--clone", "--rescan", "--copy-previous-config"},
             description = "Clones the latest version configuration instead of creating a new application")
-    private boolean cloneVersion = false;
+    private boolean cloneVersion = true;
 
     @CommandLine.Option(names = "--auto-create",
             description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
@@ -98,6 +98,11 @@ public class DeliverVersionCommand implements Callable<Integer> {
             paramLabel = "BACKUP_NAME",
             description = "The name of the backup to create before delivering the new version. Defaults to 'backup_date.time'")
     private String backupName;
+
+
+    @CommandLine.Option(names = "--auto-discover",
+            description = "AIP Console will discover new technologies and install new extensions, to disable if run consistency check")
+    private boolean autoDiscover = true;
 
     public DeliverVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         this.restApiService = restApiService;
@@ -150,7 +155,8 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .releaseAndSnapshotDate(new Date())
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupEnabled)
-                    .backupName(backupName);
+                    .backupName(backupName)
+                    .autoDiscover(autoDiscover);
 
             String jobGuid = jobsService.startAddVersionJob(builder);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());

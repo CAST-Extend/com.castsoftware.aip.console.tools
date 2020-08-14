@@ -15,13 +15,16 @@
     <f:entry title="${%versionName}" field="versionName" description="${%versionName.descr}">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%cloneVersion}" field="cloneVersion" description="${%cloneVersion.descr}">
-        <f:checkbox default="false"/>
-    </f:entry>
+    <f:entry title="${%autoDiscover}" field="autoDiscover" description="${%autoDiscover.descr}">
+        <f:checkbox field="autoDiscover" default="true" value="${autoDiscover}"/>
+     </f:entry>
     <f:entry title="${%enableSecurity}" field="enableSecurityDataflow" description="${%enableSecurity.descr}">
         <f:checkbox/>
     </f:entry>
     <f:advanced title="${%advancedSettings}">
+        <f:entry title="${%cloneVersion}" field="cloneVersion" description="${%cloneVersion.descr}">
+              <f:checkbox field="cloneVersion" value="${cloneVersion}" default="true"/>
+         </f:entry>
         <f:entry title="${%backup}" field="backupApplicationEnabled" description="${%backup.descr}">
             <f:checkbox/>
         </f:entry>
