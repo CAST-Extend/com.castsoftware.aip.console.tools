@@ -1,5 +1,17 @@
 ## Release Notes :
 
+#### 1.18.0
+
+Build
+* Add profile delivery_manager to build the jenkins plugin with only deliver source code option
+
+Global
+* Print detailed logs for each step in realtime both in jenkins and CLI console
+* Deliver step, download the delivery report to workspace when delivery done in jenkins
+* Deliver step, add Exclusion patterns configuration
+* Deliver step, add Automatic discovery configuration, enabled by default
+* Deliver step, rename the "Rescan" option to "Copy configuration from previous version", put to advanced settings, and set enabled by default
+
 #### 1.17.0
 
 This version provides new commands in the CLI and new Steps in the Jenkins Plugin.
