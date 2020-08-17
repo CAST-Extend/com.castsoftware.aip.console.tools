@@ -171,9 +171,12 @@ The Deliver step provides similar parameters to the Add Version step :
   * A File path on the current Jenkins Node to a ZIP, TGZ or TAR.GZ file
   * A Folder Path on the AIP Node relative to the Source Folder Path defined inside AIP Console. For more information, [please see here under Source Folder Location](https://doc.castsoftware.com/display/AIPCONSOLE/Administration+Center+-+Settings) **Requires AIP Console 1.15.0 or above**
 * *Create Application if missing*: If checked and the application cannot be found on AIP Console, it will be created. Otherwise, the step will fail.
+* *Automatic discovery* : will discover new technologies and install new extensions during rescan
+  * **NOTE**: Uncheck this option if run consistency check
+* *Exclusion patterns* : File patterns to exclude in the delivery, the pattern needs to follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
 * *Version Name* (optional): The name of the version that will be created. If left blank, the version will be named with the following pattern : `vYYMMDD.hhmmss` based on date and time.
   * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
-* *Rescan*: Clone the previous version of the application (similar to the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no version exists, it will run an Add version job instead.
+* *Copy configration from previous version*: Clone the previous version of the application (similar to the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no version exists, it will run an Add version job instead.
 * *Enable Security Dataflow*: Enabled the Security Objective for this version. Has no effect if `Rescan` is checked.
 
 Under `Advanced Settings` you will find the following parameters :

@@ -104,6 +104,10 @@ public class DeliverVersionCommand implements Callable<Integer> {
             description = "AIP Console will discover new technologies and install new extensions, to disable if run consistency check")
     private boolean autoDiscover = true;
 
+    @CommandLine.Option(names = {"-exclude", "--exclude-patterns"},
+            description = "File patterns(glob pattern) to exclude in the delivery, separated with comma")
+    private String exclusionPatterns;
+
     public DeliverVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
@@ -157,6 +161,15 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
+
+            // set exclusions
+            if (StringUtils.isNotBlank(exclusionPatterns)) {
+                String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, exclusionPatterns);
+                log.info("delivery configuration guid " + deliveryConfigGuid);
+                if (StringUtils.isNotBlank(deliveryConfigGuid)) {
+                    builder.deliveryConfigGuid(deliveryConfigGuid);
+                }
+            }
 
             String jobGuid = jobsService.startAddVersionJob(builder);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
