@@ -39,7 +39,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-import org.springframework.http.HttpStatus;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -113,6 +112,8 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String exclusionPatterns = "";
 
+    private boolean autoDiscover = true;
+
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
@@ -160,6 +161,19 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setCloneVersion(boolean cloneVersion) {
         this.cloneVersion = cloneVersion;
+    }
+
+    public boolean isAutoDiscover() {
+        return autoDiscover;
+    }
+
+    public boolean getAutoDiscover() {
+        return isAutoDiscover();
+    }
+
+    @DataBoundSetter
+    public void setAutoDiscover(boolean autoDiscover) {
+        this.autoDiscover = autoDiscover;
     }
 
     @Nullable
@@ -448,7 +462,8 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .versionName(resolvedVersionName)
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
-                    .backupName(backupName);
+                    .backupName(backupName)
+                    .autoDiscover(autoDiscover);
 
             if (StringUtils.isNotEmpty(exclusionPatterns)) {
                 log.println("Exclusion patterns : " + exclusionPatterns);
@@ -485,7 +500,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         PrintStream log = taskListener.getLogger();
         log.println("Downloading delivery report...");
         String versionGuid = applicationService.getApplicationVersion(appGuid).stream().filter(v -> v.getName().equalsIgnoreCase(versionName))
-                .map(VersionDto::getGuid).findFirst().orElseThrow(() -> new ApiCallException(HttpStatus.NOT_FOUND.value(), "version not found"));
+                .map(VersionDto::getGuid).findFirst().orElseThrow(() -> new ApiCallException(404, "version not found"));
         log.println("Version guid " + versionGuid);
 
         String reportFile = versionName + "-report-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm")) + ".xml";
