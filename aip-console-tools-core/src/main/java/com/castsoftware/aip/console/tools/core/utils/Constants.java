@@ -73,6 +73,8 @@ public class Constants {
     public static final String PARAM_BACKUP_NAME = "backupName";
     public static final String PARAM_VERSION_GUID = "versionGuid";
     public static final String PARAM_SNAPSHOT_NAME = "snapshotName";
+    public static final String PARAM_DELIVERY_CONFIG_GUID = "deliveryConfigGuid";
+    public static final String PARAM_ENABLE_AUTO_DISCOVER = "extensionAutoConfigEnabled";
 
     // Job Step Names
     public static final String EXTRACT_STEP_NAME = "unzip_source";

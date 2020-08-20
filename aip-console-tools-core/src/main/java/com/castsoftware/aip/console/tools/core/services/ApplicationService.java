@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 
 import java.util.Set;
@@ -61,4 +62,12 @@ public interface ApplicationService {
      * @throws ApplicationServiceException
      */
     Set<VersionDto> getApplicationVersion(String appGuid) throws ApplicationServiceException;
+
+    /**
+     * Create delivery configuration add exclusion patterns
+     *
+     * @param exclusionPatterns
+     * @return
+     */
+    String createDeliveryConfiguration(String appGuid, String exclusionPatterns) throws ApiCallException;
 }

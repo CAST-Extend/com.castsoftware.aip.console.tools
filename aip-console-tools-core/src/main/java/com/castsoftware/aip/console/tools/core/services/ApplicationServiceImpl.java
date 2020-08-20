@@ -2,6 +2,8 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
+import com.castsoftware.aip.console.tools.core.dto.BaseDto;
+import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -13,11 +15,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
+
+import static java.util.stream.Collectors.toSet;
 
 @Log
 public class ApplicationServiceImpl implements ApplicationService {
@@ -129,5 +135,18 @@ public class ApplicationServiceImpl implements ApplicationService {
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to retrieve the applications' versions", e);
         }
+    }
+
+    @Override
+    public String createDeliveryConfiguration(String appGuid, String exclusionPatterns) throws ApiCallException {
+        Set<String> patterns = Arrays.stream(exclusionPatterns.split(",")).collect(toSet());
+        DeliveryConfigurationDto deliveryConfigurationDto = DeliveryConfigurationDto.builder()
+                .ignorePatterns(patterns)
+                .packages(new HashSet())
+                .build();
+
+        BaseDto response = restApiService.postForEntity("/api/applications/" + appGuid + "/delivery-configuration", deliveryConfigurationDto, BaseDto.class);
+        log.fine("Delivery configuration response " + response);
+        return response != null ? response.getGuid() : null;
     }
 }

@@ -30,6 +30,9 @@ public class DeliverAction implements RunAction2 {
     @Nullable
     private String backupName = "";
     private boolean deploy = false;
+    @Nullable
+    private String exclusionPatterns = "";
+    private boolean autoDiscover = true;
 
     private transient Run run;
 
@@ -115,6 +118,14 @@ public class DeliverAction implements RunAction2 {
         this.nodeName = nodeName;
     }
 
+    public boolean isAutoDiscover() {
+        return autoDiscover;
+    }
+
+    public void setAutoDiscover(boolean autoDiscover) {
+        this.autoDiscover = autoDiscover;
+    }
+
     public boolean isBackupApplicationEnabled() {
         return backupApplicationEnabled;
     }
@@ -166,5 +177,14 @@ public class DeliverAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
+    }
+
+    @Nullable
+    public String getExclusionPatterns() {
+        return exclusionPatterns;
+    }
+
+    public void setExclusionPatterns(@Nullable String exclusionPatterns) {
+        this.exclusionPatterns = exclusionPatterns;
     }
 }

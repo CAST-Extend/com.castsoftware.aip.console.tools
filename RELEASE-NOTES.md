@@ -1,22 +1,39 @@
 ## Release Notes :
 
+#### 1.18.0
+
+Build
+* Add profile delivery_manager to build the jenkins plugin with only deliver source code option
+
+Global
+* Print detailed logs for each step in realtime both in jenkins and CLI console
+* Deliver step, download the delivery report to workspace when delivery done in jenkins
+* Deliver step, add Exclusion patterns configuration
+* Deliver step, add Automatic discovery configuration, enabled by default
+* Deliver step, rename the "Rescan" option to "Copy configuration from previous version", put to advanced settings, and set enabled by default
+
 #### 1.17.0
 
 This version provides new commands in the CLI and new Steps in the Jenkins Plugin.
+
+Fixes (Global):
+
+* Fixed compatibility issue with AIP Console 1.12
+* Changed Snapshot Name to be coherent in both CLI and Jenkins Plugin
 
 CLI:
 
 * Added the Deliver, Analysis and Snapshot commands
 * Reviewed the documentation to add those commands and provide clearer information of each commands parameters.
+* Fixed an issue in Analyze Command where Snapshot Steps where not enabled even though the snapshot parameter was passed
+* Fixed an issue where the Version Name for snapshot was not properly send to AIP Console
 
 Jenkins Plugin
 
 * Added the Deliver, Analyze and Snapshot Build Steps
 * Reviewed the documentation for those Build Steps
-
-Fixes:
-
-Fixed compatibility issues with AIP Console 1.12
+* Fixed an issue in Analyze Build Step where snapshot steps were not enabled even though the "Snapshots?" checkbox was checked
+* Fixed an issue in Analyze Build Step where the Version Name was not properly saved
 
 #### 1.16.1
 

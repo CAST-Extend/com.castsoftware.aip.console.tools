@@ -92,7 +92,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private String applicationGuid;
     private String filePath;
     private boolean autoCreate = false;
-    private boolean cloneVersion = false;
+    private boolean cloneVersion = true;
     @Nullable
     private String versionName = "";
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -334,6 +334,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                        logContentDto -> {
+                            logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
+                        },
                         s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
                 if (StringUtils.isBlank(applicationGuid)) {
                     listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(applicationName, apiServerUrl));
@@ -471,6 +474,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                         jobStatusWithSteps.getAppName() + " - " +
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
                 ),
+                logContentDto -> {
+                    logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
+                },
                 JobStatus::getState);
     }
 
