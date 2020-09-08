@@ -1,5 +1,10 @@
 ## Release Notes :
 
+#### 1.18.1
+
+Fix
+* Use sysdate as version name when name is empty in jenkins plugin
+
 #### 1.18.0
 
 Build
