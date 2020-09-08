@@ -480,7 +480,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(defaultResult);
             } else {
                 log.println(AddVersionBuilder_AddVersion_success_analysisComplete());
-                downloadDeliveryReport(workspace, applicationGuid, versionName, listener);
+                downloadDeliveryReport(workspace, applicationGuid, resolvedVersionName, listener);
                 run.setResult(Result.SUCCESS);
             }
         } catch (JobServiceException | ApiCallException | ApplicationServiceException e) {
