@@ -26,7 +26,7 @@ public class Constants {
     // Utils
     public static final Pattern AIP_VERSION_PATTERN = Pattern.compile("^(1\\.9\\.1-SNAPSHOT)|(1\\.[6-9]\\.\\d)");
     public static final String API_KEY_HEADER = "X-API-KEY";
-    public static final String[] ALLOWED_ARCHIVE_EXTENSIONS = new String[]{"zip", "tgz", "gz"};
+    public static final String[] ALLOWED_ARCHIVE_EXTENSIONS = new String[]{"zip", "tgz", "gz", "tar.gz"};
 
     // Job names
     public static final String ANALYZE = "analyze";
