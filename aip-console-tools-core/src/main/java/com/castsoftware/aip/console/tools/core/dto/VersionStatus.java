@@ -13,6 +13,7 @@ public enum VersionStatus {
     ANALYSIS_DONE,
     ANALYSIS_FAILED,
     SNAPSHOT_TAKEN,
+    SNAPSHOT_DONE,
     VALIDATED;
 
     @JsonCreator
@@ -21,7 +22,7 @@ public enum VersionStatus {
     }
 
     public static VersionStatus[] analysedStatuses() {
-        return new VersionStatus[]{ANALYSIS_DONE, SNAPSHOT_TAKEN, VALIDATED};
+        return new VersionStatus[]{ANALYSIS_DONE, SNAPSHOT_TAKEN, SNAPSHOT_DONE, VALIDATED};
     }
 
     @Override
