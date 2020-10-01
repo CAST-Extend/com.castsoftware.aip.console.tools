@@ -110,7 +110,9 @@ public class AddVersionBuilderTest {
     public void testAddVersionStepToJob() throws Exception {
         FreeStyleProject project = getProjectWithDefaultAddVersion();
         project = jenkins.configRoundtrip(project);
-        jenkins.assertEqualDataBoundBeans(new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME), project.getBuildersList().get(0));
+        AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
+        job.setDomainName("");
+        jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
 
     @Test
@@ -305,6 +307,7 @@ public class AddVersionBuilderTest {
         addVersionBuilder.setFilePath(createTempFileAndGetPath(TEST_ARCHIVE_NAME));
         addVersionBuilder.setAutoCreate(true);
         addVersionBuilder.setNodeName(TEST_NODE_NAME);
+        addVersionBuilder.setDomainName(null);
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
@@ -314,7 +317,7 @@ public class AddVersionBuilderTest {
         doReturn(Collections.singletonList(new NodeDto(TEST_NODE_NAME, TEST_NODE_NAME, "http", "localhost", 8082)))
                 .when(restApiService).getForEntity(eq("/api/nodes"), isA(TypeReference.class));
         doReturn("createAppGuid")
-                .when(jobsService).startCreateApplication(TEST_APP_NAME, TEST_NODE_NAME);
+                .when(jobsService).startCreateApplication(TEST_APP_NAME, TEST_NODE_NAME, null);
         doReturn(TEST_APP_NAME)
                 .when(jobsService).pollAndWaitForJobFinished(eq("createAppGuid"), any(), any(), any());
         doReturn(true)
