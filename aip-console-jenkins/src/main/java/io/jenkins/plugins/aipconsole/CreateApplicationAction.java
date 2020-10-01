@@ -18,6 +18,8 @@ public class CreateApplicationAction implements RunAction2 {
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     @Nullable
     private String nodeName;
+    @Nullable
+    private String domainName;
 
     public Run getRun() {
         return run;

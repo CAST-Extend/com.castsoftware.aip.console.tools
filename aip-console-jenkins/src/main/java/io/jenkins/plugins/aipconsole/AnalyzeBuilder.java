@@ -14,6 +14,7 @@ import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import hudson.EnvVars;
@@ -183,9 +184,11 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         }
+        EnvVars vars = run.getEnvironment(listener);
+        String expandedAppName = vars.expand(applicationName);
 
         try {
-            applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
+            applicationGuid = applicationService.getApplicationGuidFromName(expandedAppName);
         } catch (ApplicationServiceException e) {
             listener.error(AnalyzeBuilder_Analyze_error_appGuid());
             e.printStackTrace(listener.getLogger());
@@ -194,7 +197,6 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         }
 
         try {
-            EnvVars vars = run.getEnvironment(listener);
             String resolvedVersionName = vars.expand(versionName);
             ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
@@ -202,7 +204,6 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
             VersionDto versionToAnalyze;
             // Version with name provided
             if (StringUtils.isNotBlank(resolvedVersionName)) {
-
                 versionToAnalyze = versions.stream().filter(v -> StringUtils.equalsAnyIgnoreCase(v.getName(), resolvedVersionName)).findFirst().orElse(null);
             } else {
                 // Latest Delivered Version
@@ -213,7 +214,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
             }
             if (versionToAnalyze == null) {
                 String message = StringUtils.isNotBlank(resolvedVersionName) ?
-                        AnalyzeBuilder_Analyze_error_noVersionFoundWithName(resolvedVersionName, applicationName) :
+                        AnalyzeBuilder_Analyze_error_noVersionFoundWithName(resolvedVersionName, expandedAppName) :
                         AnalyzeBuilder_Analyze_error_noVersionFound();
                 listener.error(message);
                 run.setResult(defaultResult);
@@ -223,13 +224,12 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
                     .startStep(versionToAnalyze.getStatus() == VersionStatus.DELIVERED ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
+
             if (withSnapshot) {
-                if (apiInfoDto.getApiVersionSemVer().getMajor() <= 1 &&
-                        apiInfoDto.getApiVersionSemVer().getMinor() <= 15) {
-                    requestBuilder.endStep(Constants.CONSOLIDATE_SNAPSHOT);
-                } else {
-                    requestBuilder.endStep(Constants.UPLOAD_APP_SNAPSHOT);
-                }
+                requestBuilder.endStep(
+                        SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                                Constants.CONSOLIDATE_SNAPSHOT :
+                                Constants.UPLOAD_APP_SNAPSHOT);
                 requestBuilder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
             } else {
                 requestBuilder.endStep(Constants.ANALYZE);

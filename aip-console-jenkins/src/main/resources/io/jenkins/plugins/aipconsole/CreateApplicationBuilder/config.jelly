@@ -6,6 +6,9 @@
     <f:entry title="${%nodeName}" field="nodeName" description="${%nodeName.descr}">
         <f:textbox/>
     </f:entry>
+    <f:entry title="${%domainName}" field="domainName" description="${%domainName.descr}">
+        <f:textbox/>
+    </f:entry>
     <f:advanced title="${%advancedSettings}">
         <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
             <f:number default="30"/>

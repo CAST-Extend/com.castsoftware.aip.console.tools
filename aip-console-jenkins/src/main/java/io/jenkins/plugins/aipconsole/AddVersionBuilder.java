@@ -103,6 +103,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private boolean backupApplicationEnabled = false;
     @Nullable
     private String backupName = "";
+    @Nullable
+    private String domainName;
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -219,6 +221,16 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         this.backupApplicationEnabled = backupApplicationEnabled;
     }
 
+    @Nullable
+    public String getDomainName() {
+        return domainName;
+    }
+
+    @DataBoundSetter
+    public void setDomainName(@Nullable String domainName) {
+        this.domainName = domainName;
+    }
+
     @Override
     public AddVersionDescriptorImpl getDescriptor() {
         return (AddVersionDescriptorImpl) super.getDescriptor();
@@ -270,17 +282,19 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             return;
         }
         ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
+        EnvVars vars = run.getEnvironment(listener);
+        // Parse variables in application name
+        String variableAppName = vars.expand(applicationName);
 
         try {
-            applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
+            applicationGuid = applicationService.getApplicationGuidFromName(variableAppName);
         } catch (ApplicationServiceException e) {
-            listener.error(AddVersionBuilder_AddVersion_error_appCreateError(applicationName));
+            listener.error(AddVersionBuilder_AddVersion_error_appCreateError(variableAppName));
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
             return;
         }
 
-        EnvVars vars = run.getEnvironment(listener);
         String resolvedFilePath = vars.expand(filePath);
         String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath);
         FilePath workspaceFile = null;
@@ -301,7 +315,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             // Get the GUID from AIP Console
             if (StringUtils.isBlank(applicationGuid)) {
                 if (!autoCreate) {
-                    listener.error(AddVersionBuilder_AddVersion_error_appNotFound(applicationName));
+                    listener.error(AddVersionBuilder_AddVersion_error_appNotFound(variableAppName));
                     run.setResult(defaultResult);
                     return;
                 }
@@ -330,8 +344,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     }
                 }
 
-                log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(applicationName));
-                String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid);
+                String expandedDomainName = vars.expand(domainName);
+                log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(variableAppName));
+                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
                         logContentDto -> {
@@ -339,7 +354,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                         },
                         s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
                 if (StringUtils.isBlank(applicationGuid)) {
-                    listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(applicationName, apiServerUrl));
+                    listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(variableAppName, apiServerUrl));
                     run.setResult(defaultResult);
                     return;
                 }
@@ -382,12 +397,12 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                         throw new UploadException("Uploading was not completed successfully.");
                     }
                     if (apiInfoDto.isSourcePathPrefixRequired()) {
-                        fileName = "upload:" + applicationName + "/main_sources";
+                        fileName = "upload:" + variableAppName + "/main_sources";
                     }
                 }
             }
         } catch (ApplicationServiceException e) {
-            listener.error(AddVersionBuilder_AddVersion_error_appCreateError(applicationName));
+            listener.error(AddVersionBuilder_AddVersion_error_appCreateError(variableAppName));
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
             return;
@@ -397,7 +412,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         } catch (JobServiceException e) {
-            listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(applicationName, apiServerUrl));
+            listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(variableAppName, apiServerUrl));
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
             return;
@@ -414,12 +429,12 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
             if (this.cloneVersion) {
                 if (applicationHasVersion) {
-                    log.println(AddVersionBuilder_AddVersion_info_startCloneVersionJob(applicationName));
+                    log.println(AddVersionBuilder_AddVersion_info_startCloneVersionJob(variableAppName));
                 } else {
-                    log.println(AddVersionBuilder_AddVersion_info_noVersionAvailable(applicationName));
+                    log.println(AddVersionBuilder_AddVersion_info_noVersionAvailable(variableAppName));
                 }
             } else {
-                log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(applicationName));
+                log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(variableAppName));
             }
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
             requestBuilder.releaseAndSnapshotDate(new Date())

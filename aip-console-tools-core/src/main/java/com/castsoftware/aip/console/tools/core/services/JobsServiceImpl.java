@@ -61,10 +61,18 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public String startCreateApplication(String applicationName, String nodeGuid) throws JobServiceException {
+        return startCreateApplication(applicationName, nodeGuid, null);
+    }
+
+    @Override
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName) throws JobServiceException {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
         if (StringUtils.isNotBlank(nodeGuid)) {
             jobParams.put(Constants.PARAM_NODE_GUID, nodeGuid);
+        }
+        if (StringUtils.isNotBlank(domainName)) {
+            jobParams.put("domainName", domainName);
         }
 
         try {

@@ -74,6 +74,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName) throws ApplicationServiceException {
+        return getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, null);
+    }
+
+    @Override
+    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName) throws ApplicationServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new ApplicationServiceException("No application name provided.");
         }
@@ -108,7 +113,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 }
                 log.info(infoMessage);
 
-                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid);
+                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName);
                 return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
             } catch (JobServiceException | ApiCallException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);

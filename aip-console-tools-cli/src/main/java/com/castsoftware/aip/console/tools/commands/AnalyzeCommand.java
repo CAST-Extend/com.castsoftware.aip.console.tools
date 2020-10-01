@@ -15,6 +15,7 @@ import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -130,12 +131,10 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
-                if (apiInfoDto.getApiVersionSemVer().getMajor() <= 1 &&
-                        apiInfoDto.getApiVersionSemVer().getMinor() <= 15) {
-                    builder.endStep(Constants.CONSOLIDATE_SNAPSHOT);
-                } else {
-                    builder.endStep(Constants.UPLOAD_APP_SNAPSHOT);
-                }
+                builder.endStep(
+                        SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                                Constants.CONSOLIDATE_SNAPSHOT :
+                                Constants.UPLOAD_APP_SNAPSHOT);
                 builder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
             } else {
                 builder.endStep(Constants.ANALYZE);

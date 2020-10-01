@@ -29,6 +29,8 @@ public class AddVersionAction implements RunAction2 {
     private boolean backupApplicationEnabled = false;
     @Nullable
     private String backupName = "";
+    @Nullable
+    private String domainName;
 
     private transient Run run;
 
@@ -129,6 +131,15 @@ public class AddVersionAction implements RunAction2 {
 
     public void setBackupName(@Nullable String backupName) {
         this.backupName = backupName;
+    }
+
+    @Nullable
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(@Nullable String domainName) {
+        this.domainName = domainName;
     }
 
     @Override

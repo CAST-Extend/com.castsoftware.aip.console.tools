@@ -15,6 +15,7 @@ import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -138,11 +139,8 @@ public class SnapshotCommand implements Callable<Integer> {
                 snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
-            String endStep = Constants.UPLOAD_APP_SNAPSHOT;
-            if (apiInfoDto.getApiVersionSemVer().getMajor() <= 1 &&
-                    apiInfoDto.getApiVersionSemVer().getMinor() <= 15) {
-                endStep = Constants.CONSOLIDATE_SNAPSHOT;
-            }
+            String endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                    Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT;
 
             // Run snapshot
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)

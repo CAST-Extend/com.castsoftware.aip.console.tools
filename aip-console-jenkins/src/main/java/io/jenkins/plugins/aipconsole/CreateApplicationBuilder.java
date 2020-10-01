@@ -69,6 +69,9 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
     @Nullable
     private String nodeName;
 
+    @Nullable
+    private String domainName;
+
     @DataBoundConstructor
     public CreateApplicationBuilder(String applicationName) {
         this.applicationName = applicationName;
@@ -104,6 +107,16 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
     @DataBoundSetter
     public void setNodeName(@Nullable String nodeName) {
         this.nodeName = nodeName;
+    }
+
+    @Nullable
+    public String getDomainName() {
+        return domainName;
+    }
+
+    @DataBoundSetter
+    public void setDomainName(@Nullable String domainName) {
+        this.domainName = domainName;
     }
 
     @Override

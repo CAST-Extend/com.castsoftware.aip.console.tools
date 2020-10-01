@@ -14,6 +14,7 @@ import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import hudson.EnvVars;
@@ -174,9 +175,11 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
             return;
         }
         ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
+        EnvVars vars = run.getEnvironment(listener);
 
+        String expandedAppName = vars.expand(applicationName);
         try {
-            applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
+            applicationGuid = applicationService.getApplicationGuidFromName(expandedAppName);
         } catch (ApplicationServiceException e) {
             listener.error(SnapshotBuilder_Snapshot_error_appGuid());
             e.printStackTrace(listener.getLogger());
@@ -185,7 +188,6 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
         }
 
         try {
-            EnvVars vars = run.getEnvironment(listener);
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             // Get the current version's guid
             VersionDto versionToAnalyze = versions.stream().filter(VersionDto::isCurrentVersion)
@@ -193,12 +195,12 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     .orElse(null);
             if (versionToAnalyze == null) {
                 //FIXME change error message
-                listener.error(SnapshotBuilder_Snapshot_error_noAnalyzedVersion(applicationName));
+                listener.error(SnapshotBuilder_Snapshot_error_noAnalyzedVersion(expandedAppName));
                 run.setResult(defaultResult);
                 return;
             }
             if (versionToAnalyze.getStatus().ordinal() < VersionStatus.ANALYSIS_DONE.ordinal()) {
-                listener.error(SnapshotBuilder_Snapshot_error_noAnalyzedVersion(applicationName));
+                listener.error(SnapshotBuilder_Snapshot_error_noAnalyzedVersion(expandedAppName));
                 run.setResult(defaultResult);
                 return;
             }
@@ -207,11 +209,9 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
             if (StringUtils.isBlank(resolveSnapshotName)) {
                 resolveSnapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
-            String endStep = Constants.UPLOAD_APP_SNAPSHOT;
-            if (apiInfoDto.getApiVersionSemVer().getMajor() <= 1 &&
-                    apiInfoDto.getApiVersionSemVer().getMinor() <= 15) {
-                endStep = Constants.CONSOLIDATE_SNAPSHOT;
-            }
+
+            String endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                    Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT;
 
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
@@ -228,7 +228,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                 listener.error(SnapshotBuilder_Snapshot_error_jobFailure(state.toString()));
                 run.setResult(defaultResult);
             } else {
-                log.println(SnapshotBuilder_Snapshot_success_complete(applicationName));
+                log.println(SnapshotBuilder_Snapshot_success_complete(expandedAppName));
                 run.setResult(Result.SUCCESS);
             }
         } catch (ApplicationServiceException e) {

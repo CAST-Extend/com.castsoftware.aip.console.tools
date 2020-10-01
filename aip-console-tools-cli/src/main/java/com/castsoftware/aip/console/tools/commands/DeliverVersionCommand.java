@@ -99,7 +99,6 @@ public class DeliverVersionCommand implements Callable<Integer> {
             description = "The name of the backup to create before delivering the new version. Defaults to 'backup_date.time'")
     private String backupName;
 
-
     @CommandLine.Option(names = "--auto-discover",
             description = "AIP Console will discover new technologies and install new extensions, to disable if run consistency check")
     private boolean autoDiscover = true;
@@ -107,6 +106,12 @@ public class DeliverVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-exclude", "--exclude-patterns"},
             description = "File patterns(glob pattern) to exclude in the delivery, separated with comma")
     private String exclusionPatterns;
+
+    /**
+     * Domain name
+     */
+    @CommandLine.Option(names = "--domain-name", paramLabel = "DOMAIN_NAME", description = "The name of the domain to assign to the application. Will be created if it doesn't exists. No domain will be assigned if left empty. Will only be used when creating the application.")
+    private String domainName;
 
     public DeliverVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         this.restApiService = restApiService;
@@ -140,7 +145,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
-            applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName);
+            applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName);
             if (StringUtils.isBlank(applicationGuid)) {
                 String message = autoCreate ?
                         "Creation of the application '{}' failed on AIP Console" :

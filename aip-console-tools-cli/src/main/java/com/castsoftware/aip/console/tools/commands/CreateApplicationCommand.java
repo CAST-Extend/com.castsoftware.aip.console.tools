@@ -55,6 +55,12 @@ public class CreateApplicationCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME", description = "The name of the node on which the application will be created.")
     private String nodeName;
 
+    /**
+     * Domain name
+     */
+    @CommandLine.Option(names = "--domain-name", paramLabel = "DOMAIN_NAME", description = "The name of the domain to assign to the application. Will be created if it doesn't exists. No domain will be assigned if left empty.")
+    private String domainName;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -85,7 +91,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
                     return Constants.RETURN_APPLICATION_NOT_FOUND;
                 }
             }
-            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid);
+            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName);
             log.info("Started job to create new application.");
             return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {

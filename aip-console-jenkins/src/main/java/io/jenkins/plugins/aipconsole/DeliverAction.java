@@ -33,6 +33,8 @@ public class DeliverAction implements RunAction2 {
     @Nullable
     private String exclusionPatterns = "";
     private boolean autoDiscover = true;
+    @Nullable
+    private String domainName;
 
     private transient Run run;
 
@@ -186,5 +188,14 @@ public class DeliverAction implements RunAction2 {
 
     public void setExclusionPatterns(@Nullable String exclusionPatterns) {
         this.exclusionPatterns = exclusionPatterns;
+    }
+
+    @Nullable
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(@Nullable String domainName) {
+        this.domainName = domainName;
     }
 }

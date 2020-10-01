@@ -106,6 +106,12 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--backup-name", paramLabel = "BACKUP_NAME", description = "The name of the backup to create before delivering the new version. Defaults to 'backup_date.time'")
     private String backupName;
 
+    /**
+     * Domain name
+     */
+    @CommandLine.Option(names = "--domain-name", paramLabel = "DOMAIN_NAME", description = "The name of the domain to assign to the application. Will be created if it doesn't exists. No domain will be assigned if left empty.")
+    private String domainName;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -130,7 +136,7 @@ public class AddVersionCommand implements Callable<Integer> {
         try {
             if (StringUtils.isBlank(applicationGuid)) {
                 log.info("Searching for application '{}' on AIP Console", applicationName);
-                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate);
+                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName);
                 if (StringUtils.isBlank(applicationGuid)) {
                     String message = autoCreate ?
                             "Creation of the application '{}' failed on AIP Console" :

@@ -55,6 +55,21 @@ public interface ApplicationService {
     String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName) throws ApplicationServiceException;
 
     /**
+     * Retrieve an application's GUID from the given application name.
+     * <p/>
+     * If the "autoCreate" parameter is true and the application doesn't exist on AIP Console, it'll automatically create it
+     * before returning the GUID.
+     *
+     * @param applicationName The name of the application to look up
+     * @param autoCreate      Whether the application should be created if it couldn't be found
+     * @param nodeName        The name of the node on which the application
+     * @param domainName      The name of the domain to assign to the application
+     * @return An application GUID or null if non was found
+     * @throws ApplicationServiceException
+     */
+    String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName) throws ApplicationServiceException;
+
+    /**
      * Retrieve an application's version
      *
      * @param appGuid The applicatino GUID

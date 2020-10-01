@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.core.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -7,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Data
+@Builder
 public class SemVer implements Comparable<SemVer> {
     private static final Pattern AIPCONSOLE_VERSION_PATTERN = Pattern.compile("(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-?(?<add>.*)");
 
@@ -16,15 +18,15 @@ public class SemVer implements Comparable<SemVer> {
     private String additional;
 
     public static SemVer parse(String semverInput) {
-        SemVer semVer = new SemVer();
+        SemVerBuilder semVer = SemVer.builder();
         Matcher matcher = AIPCONSOLE_VERSION_PATTERN.matcher(semverInput);
         if (matcher.matches()) {
-            semVer.major = Integer.parseInt(matcher.group("major"), 10);
-            semVer.minor = Integer.parseInt(matcher.group("minor"), 10);
-            semVer.patch = Integer.parseInt(matcher.group("patch"), 10);
-            semVer.additional = matcher.group("add");
+            semVer.major(Integer.parseInt(matcher.group("major"), 10));
+            semVer.minor(Integer.parseInt(matcher.group("minor"), 10));
+            semVer.patch(Integer.parseInt(matcher.group("patch"), 10));
+            semVer.additional(matcher.group("add"));
         }
-        return semVer;
+        return semVer.build();
     }
 
     @Override
