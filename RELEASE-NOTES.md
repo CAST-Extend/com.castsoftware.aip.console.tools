@@ -1,5 +1,13 @@
 ## Release Notes :
 
+#### 1.19.0
+
+This version contains compatibility fixes for AIP Console 1.19.0
+
+Feature:
+
+* Added domain parameter when creating an application (and with auto create for Add and Deliver)
+
 #### 1.18.1
 
 Fix
