@@ -94,6 +94,7 @@ The available options are :
 - `-n` or `--name` (**required**) : specify the name of the application to create
 
 * `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. *default* : Automatically selected by AIP Console
+* `--domain-name` (optional) : specify a domain name to associate with the application to create. *default*: No domain is set for the application.
 * `--server-url` or `-s` : Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
@@ -117,6 +118,7 @@ The available options are :
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:
 * `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
+* `--domain-name` (optional) : specify a domain name to associate with the application to create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default*: No domain is set for the application.
 * `--server-url` or `-s` : Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
@@ -139,6 +141,7 @@ The available options are :
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:
 * `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
+* `--domain-name` (optional) : specify a domain name to associate with the application to create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default*: No domain is set for the application.
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
@@ -196,4 +199,4 @@ Here is a detailed list of all error codes that can be returned by the CLI :
 
 As detailed in the AIP Console documentation, you can obtain the API Key from the profile in the AIP Console UI.
 
-If you cannot use an API Key, you can authenticate using username and password, by passing the `--user` flag to a command, and set the user's password in the `--apikey` or set it in an environment variable, which name you'll pass to  `--apikey:env`
+If you cannot use an API Key, you can authenticate using username and password, by passing the `--user` flag to a command, and set the user's password in the `--apikey` or set it in an environment variable, which name you'll pass to `--apikey:env`
