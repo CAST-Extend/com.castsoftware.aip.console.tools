@@ -23,7 +23,7 @@ public final class LogUtils {
     }
 
     public static String replaceAllSensitiveInformation(String toMath) {
-        Optional<Matcher> m = SENSITIVE_INFO_PATTERNS.stream().parallel().map(pat -> pat.matcher(toMath)).filter(match -> match.find()).findFirst();
+        Optional<Matcher> m = SENSITIVE_INFO_PATTERNS.stream().parallel().map(pat -> pat.matcher(toMath)).filter(Matcher::find).findFirst();
         if (m.isPresent()) {
             String what = m.get().group("sensitiveInfo");
             return toMath.replace(what, REPLACEMENT_STR);
