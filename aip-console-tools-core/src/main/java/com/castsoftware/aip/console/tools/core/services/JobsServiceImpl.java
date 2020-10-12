@@ -16,6 +16,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.LogUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -228,7 +229,7 @@ public class JobsServiceImpl implements JobsService {
     }
 
     private void printLog(LogContentDto logContent) {
-        logContent.getLines().forEach(logLine -> log.info(logLine.getContent()));
+        logContent.getLines().forEach(logLine -> log.info(LogUtils.replaceAllSensitiveInformation(logLine.getContent())));
     }
 
     private synchronized ApiInfoDto getApiInfoDto() {
