@@ -153,7 +153,12 @@ public class SnapshotCommand implements Callable<Integer> {
 
             log.info("Running Snapshot Job on application '{}' with Version '{}' (guid: '{}')", applicationName, foundVersion.getName(), foundVersion.getGuid());
             String jobGuid = jobsService.startJob(builder);
+
+            Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
+
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Snapshot Creation completed successfully.");
                 return Constants.RETURN_OK;
@@ -165,5 +170,16 @@ public class SnapshotCommand implements Callable<Integer> {
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
         }
+    }
+
+    private Thread getShutdownHookForJobGuid(String jobGuid) {
+        return new Thread(() -> {
+            log.info("Received termination signal. Cancelling currently running job on AIP Console and exiting.");
+            try {
+                jobsService.cancelJob(jobGuid);
+            } catch (JobServiceException e) {
+                log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
+            }
+        });
     }
 }

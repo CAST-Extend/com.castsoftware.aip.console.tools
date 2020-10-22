@@ -118,4 +118,6 @@ public interface JobsService {
     //<R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobStatusWithSteps> stepChangedCallback, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException;
 
     <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobStatusWithSteps> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException;
+
+    void cancelJob(String jobGuid) throws JobServiceException;
 }

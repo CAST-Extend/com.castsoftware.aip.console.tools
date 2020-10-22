@@ -1,7 +1,6 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
-import com.castsoftware.aip.console.tools.core.dto.SemVer;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -143,10 +142,9 @@ public class JobsServiceImpl implements JobsService {
                 throw new JobServiceException("No response from AIP Console when start the job");
             }
 
-            // State was suspended after uploading for versions <= 1.9
-            // After that, suspended jobs mean that no job executor is available for now (so don't do the update)
-            SemVer aipConsoleVersion = SemVer.parse(apiInfoDto.getApiVersion());
-            if (aipConsoleVersion.getMajor() <= 1 && aipConsoleVersion.getMinor() <= 9) {
+            // BACKWARDS COMPATIBILITY with 1.9
+            // Job is started in suspended state, and must be resumed
+            if (apiInfoDto.isJobToBeResumed()) {
                 String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(dto.getJobGuid());
                 JobStatusWithSteps jobStatusWithSteps = restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
                 if (jobStatusWithSteps.getState() == JobState.STARTING) {
@@ -218,6 +216,17 @@ public class JobsServiceImpl implements JobsService {
             return completionCallback.apply(jobStatus);
         } catch (InterruptedException | ApiCallException e) {
             log.log(Level.SEVERE, "Error occurred while polling the job status", e);
+            throw new JobServiceException(e);
+        }
+    }
+
+    @Override
+    public void cancelJob(String jobGuid) throws JobServiceException {
+        try {
+            ChangeJobStateRequest cancel = new ChangeJobStateRequest();
+            cancel.setState(JobState.CANCELED);
+            restApiService.putForEntity(ApiEndpointHelper.getJobDetailsEndpoint(jobGuid), cancel, Void.class);
+        } catch (ApiCallException e) {
             throw new JobServiceException(e);
         }
     }

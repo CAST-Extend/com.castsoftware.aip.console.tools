@@ -177,7 +177,11 @@ public class DeliverVersionCommand implements Callable<Integer> {
             }
 
             String jobGuid = jobsService.startAddVersionJob(builder);
+            Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
+
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Delivery of application {} was completed successfully.", applicationName);
                 return Constants.RETURN_OK;
@@ -193,5 +197,16 @@ public class DeliverVersionCommand implements Callable<Integer> {
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
         }
+    }
+
+    private Thread getShutdownHookForJobGuid(String jobGuid) {
+        return new Thread(() -> {
+            log.info("Received termination signal. Cancelling currently running job on AIP Console and exiting.");
+            try {
+                jobsService.cancelJob(jobGuid);
+            } catch (JobServiceException e) {
+                log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
+            }
+        });
     }
 }

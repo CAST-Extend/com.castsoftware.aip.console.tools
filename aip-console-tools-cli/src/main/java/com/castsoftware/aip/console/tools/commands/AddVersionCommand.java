@@ -163,11 +163,18 @@ public class AddVersionCommand implements Callable<Integer> {
                     .backupName(backupName);
 
             String jobGuid = jobsService.startAddVersionJob(builder);
+            // add a shutdown hook, to cancel the job
+            Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
+            // Register shutdown hook to cancel the job
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            // Deregister the shutdown hook since the job is finished and we won't need to cancel it
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Job completed successfully.");
                 return Constants.RETURN_OK;
             }
+
 
             log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
             return Constants.RETURN_JOB_FAILED;
@@ -180,5 +187,16 @@ public class AddVersionCommand implements Callable<Integer> {
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
         }
+    }
+
+    private Thread getShutdownHookForJobGuid(String jobGuid) {
+        return new Thread(() -> {
+            log.info("Received termination signal. Cancelling currently running job on AIP Console and exiting.");
+            try {
+                jobsService.cancelJob(jobGuid);
+            } catch (JobServiceException e) {
+                log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
+            }
+        });
     }
 }

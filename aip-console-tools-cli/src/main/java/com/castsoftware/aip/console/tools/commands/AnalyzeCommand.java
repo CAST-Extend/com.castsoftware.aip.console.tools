@@ -146,7 +146,11 @@ public class AnalyzeCommand implements Callable<Integer> {
 
             log.info("Running analysis for application '{}' with version '{}'", applicationName, versionToAnalyze.getName());
             String jobGuid = jobsService.startJob(builder);
+            Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
+
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Application Analysis completed successfully");
                 return Constants.RETURN_OK;
@@ -161,4 +165,14 @@ public class AnalyzeCommand implements Callable<Integer> {
         }
     }
 
+    private Thread getShutdownHookForJobGuid(String jobGuid) {
+        return new Thread(() -> {
+            log.info("Received termination signal. Cancelling currently running job on AIP Console and exiting.");
+            try {
+                jobsService.cancelJob(jobGuid);
+            } catch (JobServiceException e) {
+                log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
+            }
+        });
+    }
 }

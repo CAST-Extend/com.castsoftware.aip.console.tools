@@ -1,8 +1,10 @@
 package com.castsoftware.aip.console.tools.core.dto.jobs;
 
 
+import com.castsoftware.aip.console.tools.core.dto.deserializers.FullStepsDeserializer;
 import com.castsoftware.aip.console.tools.core.dto.serializers.StatusStringMapSerializer;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.Date;
@@ -25,6 +27,7 @@ public class JobStatus {
 
     private String appName;
 
+    @JsonDeserialize(using = FullStepsDeserializer.class)
     private List<String> fullSteps;
 
     private Map<String, String> logUrls;

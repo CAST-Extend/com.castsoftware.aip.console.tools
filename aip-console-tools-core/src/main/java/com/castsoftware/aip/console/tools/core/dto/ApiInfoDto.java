@@ -56,6 +56,16 @@ public class ApiInfoDto {
         return consoleVersion.getMajor() >= 1 && consoleVersion.getMinor() > 12;
     }
 
+    public boolean isJobStatusWithDuration() {
+        SemVer version = getSemVer();
+        return version.getMajor() >= 1 && version.getMinor() >= 20;
+    }
+
+    public boolean isJobToBeResumed() {
+        SemVer version = getSemVer();
+        return version.getMajor() >= 1 && version.getMinor() <= 9;
+    }
+
     private SemVer getSemVer() {
         if (apiVersionSemVer == null) {
             synchronized (this) {
