@@ -66,6 +66,11 @@ public class ApiInfoDto {
         return version.getMajor() >= 1 && version.getMinor() <= 9;
     }
 
+    public boolean isLastStepConsolidateSnapshot() {
+        SemVer version = getSemVer();
+        return version.getMajor() >= 1 && version.getMinor() <= 15;
+    }
+
     private SemVer getSemVer() {
         if (apiVersionSemVer == null) {
             synchronized (this) {

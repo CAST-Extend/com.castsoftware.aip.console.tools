@@ -47,13 +47,12 @@ import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_appGuid;
-import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_jobException;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_jobFailure;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_noAnalyzedVersion;
-import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_version;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_info_pollJobMessage;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_success_complete;
 
@@ -186,7 +185,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         }
-
+        String jobGuid = null;
         try {
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             // Get the current version's guid
@@ -221,7 +220,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     .snapshotName(resolveSnapshotName)
                     .releaseAndSnapshotDate(new Date());
 
-            String jobGuid = jobsService.startJob(requestBuilder);
+            jobGuid = jobsService.startJob(requestBuilder);
             log.println(SnapshotBuilder_Snapshot_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
             if (state != JobState.COMPLETED) {
@@ -231,12 +230,26 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                 log.println(SnapshotBuilder_Snapshot_success_complete(expandedAppName));
                 run.setResult(Result.SUCCESS);
             }
-        } catch (ApplicationServiceException e) {
-            listener.error(SnapshotBuilder_Snapshot_error_version());
-            e.printStackTrace(listener.getLogger());
-            run.setResult(defaultResult);
         } catch (JobServiceException e) {
-            listener.error(SnapshotBuilder_Snapshot_error_jobException());
+            // Should we check if the original cause is an InterruptedException and attempt to cancel the job ?
+            if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                if (jobGuid != null) {
+                    run.setResult(Result.ABORTED);
+                    log.println("Attempting to cancel Analysis job on AIP Console, following cancellation of the build.");
+                    try {
+                        jobsService.cancelJob(jobGuid);
+                        log.println("Job was successfully cancelled on AIP Console.");
+                    } catch (JobServiceException jse) {
+                        log.println("Could not cancel the job on AIP Console, please cancel it manually. Error was : " + e.getMessage());
+                    }
+                }
+            } else {
+                listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
+                e.printStackTrace(listener.getLogger());
+                run.setResult(defaultResult);
+            }
+        } catch (ApplicationServiceException e) {
+            listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         }

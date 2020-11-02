@@ -58,7 +58,6 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_fileNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_nodeNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_uploadFailed;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate;
@@ -417,7 +416,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         }
-
+        String jobGuid = null;
         try {
             // Create a value for versionName
             String resolvedVersionName = vars.expand(versionName);
@@ -443,7 +442,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName);
 
-            String jobGuid = jobsService.startAddVersionJob(requestBuilder);
+            jobGuid = jobsService.startAddVersionJob(requestBuilder);
 
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
@@ -455,9 +454,23 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(Result.SUCCESS);
             }
         } catch (JobServiceException e) {
-            listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
-            e.printStackTrace(listener.getLogger());
-            run.setResult(defaultResult);
+            // Should we check if the original cause is an InterruptedException and attempt to cancel the job ?
+            if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                if (jobGuid != null) {
+                    log.println("Attempting to cancel Analysis job on AIP Console, following cancellation of the build.");
+                    run.setResult(Result.ABORTED);
+                    try {
+                        jobsService.cancelJob(jobGuid);
+                        log.println("Job was successfully cancelled on AIP Console.");
+                    } catch (JobServiceException jse) {
+                        log.println("Could not cancel the job on AIP Console, please cancel it manually. Error was : " + e.getMessage());
+                    }
+                }
+            } else {
+                listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
+                e.printStackTrace(listener.getLogger());
+                run.setResult(defaultResult);
+            }
         }
     }
 

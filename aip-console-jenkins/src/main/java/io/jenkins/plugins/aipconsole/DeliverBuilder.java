@@ -453,7 +453,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         }
-
+        String jobGuid = null;
         try {
             // Create a value for versionName
             String resolvedVersionName = vars.expand(versionName);
@@ -487,7 +487,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
             }
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
-            String jobGuid = jobsService.startAddVersionJob(requestBuilder);
+            jobGuid = jobsService.startAddVersionJob(requestBuilder);
 
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
@@ -499,7 +499,25 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 downloadDeliveryReport(workspace, applicationGuid, resolvedVersionName, listener);
                 run.setResult(Result.SUCCESS);
             }
-        } catch (JobServiceException | ApiCallException | ApplicationServiceException e) {
+        } catch (JobServiceException e) {
+            // Should we check if the original cause is an InterruptedException and attempt to cancel the job ?
+            if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                if (jobGuid != null) {
+                    run.setResult(Result.ABORTED);
+                    log.println("Attempting to cancel Analysis job on AIP Console, following cancellation of the build.");
+                    try {
+                        jobsService.cancelJob(jobGuid);
+                        log.println("Job was successfully cancelled on AIP Console.");
+                    } catch (JobServiceException jse) {
+                        log.println("Could not cancel the job on AIP Console, please cancel it manually. Error was : " + e.getMessage());
+                    }
+                }
+            } else {
+                listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
+                e.printStackTrace(listener.getLogger());
+                run.setResult(defaultResult);
+            }
+        } catch (ApiCallException | ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);

@@ -14,7 +14,6 @@ import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import hudson.EnvVars;
@@ -195,6 +194,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         }
+        String jobGuid = null;
 
         try {
             String resolvedVersionName = vars.expand(versionName);
@@ -227,7 +227,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
             if (withSnapshot) {
                 requestBuilder.endStep(
-                        SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                        apiInfoDto.isLastStepConsolidateSnapshot() ?
                                 Constants.CONSOLIDATE_SNAPSHOT :
                                 Constants.UPLOAD_APP_SNAPSHOT);
                 requestBuilder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
@@ -239,7 +239,8 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());
 
-            String jobGuid = jobsService.startJob(requestBuilder);
+
+            jobGuid = jobsService.startJob(requestBuilder);
 
             log.println(Messages.AnalyzeBuilder_Analyze_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
@@ -255,9 +256,23 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         } catch (JobServiceException e) {
-            listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
-            e.printStackTrace(listener.getLogger());
-            run.setResult(defaultResult);
+            // Should we check if the original cause is an InterruptedException and attempt to cancel the job ?
+            if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                if (jobGuid != null) {
+                    run.setResult(Result.ABORTED);
+                    log.println("Attempting to cancel Analysis job on AIP Console, following cancellation of the build.");
+                    try {
+                        jobsService.cancelJob(jobGuid);
+                        log.println("Job was successfully cancelled on AIP Console.");
+                    } catch (JobServiceException jse) {
+                        log.println("Could not cancel the job on AIP Console, please cancel it manually. Error was : " + e.getMessage());
+                    }
+                }
+            } else {
+                listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
+                e.printStackTrace(listener.getLogger());
+                run.setResult(defaultResult);
+            }
         }
     }
 
