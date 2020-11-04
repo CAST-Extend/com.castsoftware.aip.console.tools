@@ -58,6 +58,7 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_fileNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_nodeNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_uploadFailed;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate;
@@ -467,7 +468,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     }
                 }
             } else {
-                listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
+                listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
                 e.printStackTrace(listener.getLogger());
                 run.setResult(defaultResult);
             }

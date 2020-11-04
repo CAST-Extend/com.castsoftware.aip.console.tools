@@ -252,7 +252,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(Result.SUCCESS);
             }
         } catch (ApplicationServiceException e) {
-            listener.error(Messages.AnalyzeBuilder_Analyze_error_jobServiceException());
+            listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         } catch (JobServiceException e) {
@@ -269,7 +269,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
                     }
                 }
             } else {
-                listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
+                listener.error(Messages.AnalyzeBuilder_Analyze_error_jobServiceException());
                 e.printStackTrace(listener.getLogger());
                 run.setResult(defaultResult);
             }

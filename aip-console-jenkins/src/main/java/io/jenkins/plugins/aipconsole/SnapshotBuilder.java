@@ -47,12 +47,13 @@ import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_appGuid;
+import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_jobException;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_jobFailure;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_noAnalyzedVersion;
+import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_version;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_info_pollJobMessage;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_success_complete;
 
@@ -244,12 +245,12 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     }
                 }
             } else {
-                listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
+                listener.error(SnapshotBuilder_Snapshot_error_jobException());
                 e.printStackTrace(listener.getLogger());
                 run.setResult(defaultResult);
             }
         } catch (ApplicationServiceException e) {
-            listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+            listener.error(SnapshotBuilder_Snapshot_error_version());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         }

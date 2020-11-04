@@ -513,7 +513,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     }
                 }
             } else {
-                listener.error(Messages.AnalyzeBuilder_Analyze_error_appServiceException());
+                listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
                 e.printStackTrace(listener.getLogger());
                 run.setResult(defaultResult);
             }
