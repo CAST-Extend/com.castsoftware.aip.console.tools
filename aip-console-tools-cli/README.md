@@ -113,7 +113,7 @@ The available options are :
 * `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
 * `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
 * `--clone` or `--rescan` or `-c` (optional): Enables the clone version job. This will create a new version by cloning the previous version's configuration, similar to the "Same configuration as previous version" checkbox in AIP Console UI.
-* `--version` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
+* `--version-name` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:
@@ -134,7 +134,7 @@ The available options are :
 * `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
 * `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
 * `--clone` or `--rescan` or `--copy-previous-config` or `-c` (optional): Enables the clone version job. This will create a new version by cloning the previous version's configuration, similar to the "Same configuration as previous version" checkbox in AIP Console UI.
-* `--version` or `-v` (optional): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
+* `--version-name` or `-v` (optional): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
 * `--exclude-patterns` or `-exclude`: File patterns to exclude in the delivery, the pattern needs to follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
 * `--auto-discover`: will discover new technologies and install new extensions during rescan, to disable when run consistency check
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
@@ -169,7 +169,7 @@ This command is used to run a snapshot on an already analyzed version.
 The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
-* `--version` or `-v` (optional): The name of the version to create. *default*: The current version (version marked as current).
+* `--version-name` or `-v` (optional): The name of the version to create. *default*: The current version (version marked as current).
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name. *default*: Defaults to `Snapshot-YYYY-MM-DDThh-mm-ss` (based on the current date and time)
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key

@@ -3,12 +3,12 @@
 The AIP Integration tools are a couple of components to ease the automation of application analysis on AIP Console.
 
 It offers 2 main methods of automation:
-* [AIP Console Jenkins Plugin](./aip-console-jenkins/README.md) with an example [Jenkinsfile](./aip-console-jenkins/examples/dynamic-pipeline-example/README.md) to automate retrieving and analysing multiple applications.  
-* [AIP Console Tool CLI](./aip-console-tools-cli/README.md) 
+* [AIP Console Jenkins Plugin](./aip-console-jenkins/README.md) with an example [Jenkinsfile](./aip-console-jenkins/examples/dynamic-pipeline-example/README.md) to automate retrieving and analysing multiple applications.
+* [AIP Console Tool CLI](./aip-console-tools-cli/README.md)
 
 The latest releases are available on the [Release page](https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/releases).
 
-The latest changes are described in the [Release Notes](./RELEASE-NOTES.md)  
+The latest changes are described in the [Release Notes](./RELEASE-NOTES.md)
 
 ### Modules
 
@@ -22,7 +22,7 @@ This project contains 3 modules :
 
 ### Java Version
 
-AIP Console Tools Core and AIP Console Tools CLI will compile fine on Java versions 8 through 12. The source will be compiled to be used with Java 8. 
+AIP Console Tools Core and AIP Console Tools CLI will compile fine on Java versions 8 through 12. The source will be compiled to be used with Java 8.
 
 AIP Console Jenkins Plugin will only compile for Java 8. This is due to the baseline version we target (2.60.3) which, while not particularly recent, covers a wider range of users.
 
