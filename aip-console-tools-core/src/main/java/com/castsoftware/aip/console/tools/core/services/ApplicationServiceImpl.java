@@ -5,23 +5,32 @@ import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
+import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverPackageRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -143,15 +152,65 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String createDeliveryConfiguration(String appGuid, String exclusionPatterns) throws ApiCallException {
-        Set<String> patterns = Arrays.stream(exclusionPatterns.split(",")).collect(toSet());
-        DeliveryConfigurationDto deliveryConfigurationDto = DeliveryConfigurationDto.builder()
-                .ignorePatterns(patterns)
-                .packages(new HashSet())
-                .build();
+    public String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns) throws JobServiceException, PackagePathInvalidException {
+        try {
+            Set<DeliveryPackageDto> packages = new HashSet<>();
+            VersionDto previousVersion = getApplicationVersion(appGuid)
+                    .stream()
+                    .filter(v -> v.getStatus().ordinal() >= VersionStatus.DELIVERED.ordinal())
+                    .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
+            Set<String> ignorePatterns = StringUtils.isEmpty(exclusionPatterns) ? Collections.emptySet() : Arrays.stream(exclusionPatterns.split(",")).collect(Collectors.toSet());
+            if (previousVersion != null) {
+                packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
+                if (StringUtils.isEmpty(exclusionPatterns)) {
+                    ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
+                }
+            }
+            DeliveryConfigurationDto deliveryConfigurationDto = DeliveryConfigurationDto.builder()
+                    .ignorePatterns(ignorePatterns)
+                    .packages(packages)
+                    .build();
 
-        BaseDto response = restApiService.postForEntity("/api/applications/" + appGuid + "/delivery-configuration", deliveryConfigurationDto, BaseDto.class);
-        log.fine("Delivery configuration response " + response);
-        return response != null ? response.getGuid() : null;
+            BaseDto response = restApiService.postForEntity("/api/applications/" + appGuid + "/delivery-configuration", deliveryConfigurationDto, BaseDto.class);
+            log.fine("Delivery configuration response " + response);
+            return response != null ? response.getGuid() : null;
+        } catch (ApplicationServiceException | ApiCallException e) {
+            throw new JobServiceException("Error creating delivery config");
+        }
+    }
+
+    private Set<DeliveryPackageDto> discoverPackages(String appGuid, String sourcePath, String previousVersionGuid) throws PackagePathInvalidException, JobServiceException {
+        try {
+            Response resp = restApiService.exchangeForResponse("POST", "/api/applications/" + appGuid + "/delivery-configuration/discover-packages", DiscoverPackageRequest.builder().previousVersionGuid(previousVersionGuid).sourcePath(sourcePath).build());
+            int status = resp.code();
+            Response packageReponse = null;
+            if (status == 200) {
+                packageReponse = resp;
+            } else if (status == 202) {
+                PendingResultDto resultDto = restApiService.mapResponse(resp, PendingResultDto.class);
+                while (status != 200) {
+                    log.fine("Polling server to get discovered packages...");
+                    Response response = restApiService.exchangeForResponse("GET", "/api/applications/" + appGuid + "/pending-results/" + resultDto.getGuid(), null);
+                    status = response.code();
+
+                    if (status == 200) {
+                        packageReponse = response;
+                        break;
+                    }
+                    Thread.sleep(5000);
+                }
+            }
+            if (packageReponse != null) {
+                Set<DeliveryPackageDto> packages = restApiService.mapResponse(packageReponse, new TypeReference<Set<DeliveryPackageDto>>() {
+                });
+                if (packages.stream().anyMatch(p -> p.getPath() == null)) {
+                    throw new PackagePathInvalidException(packages.stream().filter(p -> p.getPath() == null).collect(Collectors.toSet()));
+                }
+                return packages;
+            }
+            return Collections.emptySet();
+        } catch (ApiCallException | InterruptedException e) {
+            throw new JobServiceException("Error discovering packages", e);
+        }
     }
 }
