@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -10,6 +11,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -51,6 +53,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -443,6 +446,11 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName);
 
+            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null);
+            if (StringUtils.isNotBlank(deliveryConfig)) {
+                requestBuilder.deliveryConfigGuid(deliveryConfig);
+            }
+
             jobGuid = jobsService.startAddVersionJob(requestBuilder);
 
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
@@ -472,6 +480,11 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 e.printStackTrace(listener.getLogger());
                 run.setResult(defaultResult);
             }
+        } catch (PackagePathInvalidException e) {
+            log.println("Failed to match the package path(s) with the previous version, job will stop");
+            listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+            e.printStackTrace(listener.getLogger());
+            run.setResult(defaultResult);
         }
     }
 

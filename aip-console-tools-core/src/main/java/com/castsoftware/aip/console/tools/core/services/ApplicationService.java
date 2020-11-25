@@ -1,8 +1,11 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 
 import java.util.Set;
 
@@ -84,5 +87,5 @@ public interface ApplicationService {
      * @param exclusionPatterns
      * @return
      */
-    String createDeliveryConfiguration(String appGuid, String exclusionPatterns) throws ApiCallException;
+    String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns) throws JobServiceException, PackagePathInvalidException;
 }

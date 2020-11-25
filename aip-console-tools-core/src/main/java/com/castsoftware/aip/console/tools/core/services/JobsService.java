@@ -1,12 +1,15 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -68,7 +71,7 @@ public interface JobsService {
      * @throws JobServiceException IF any error occurs while starting the job
      */
     String startAddVersionJob(String appGuid, String applicationName, String fileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow) throws JobServiceException;
-
+    
     String startAddVersionJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException;
 
     /**
