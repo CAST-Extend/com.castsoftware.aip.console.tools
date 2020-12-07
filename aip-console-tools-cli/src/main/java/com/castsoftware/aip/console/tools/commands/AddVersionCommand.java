@@ -8,6 +8,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -162,6 +163,11 @@ public class AddVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName);
 
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null);
+            if (StringUtils.isNotBlank(deliveryConfigGuid)) {
+                builder.deliveryConfigGuid(deliveryConfigGuid);
+            }
+
             String jobGuid = jobsService.startAddVersionJob(builder);
             // add a shutdown hook, to cancel the job
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
@@ -186,6 +192,9 @@ public class AddVersionCommand implements Callable<Integer> {
             return Constants.RETURN_UPLOAD_ERROR;
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
+        } catch (PackagePathInvalidException e) {
+            log.error(e.getMessage());
+            return Constants.RETURN_JOB_FAILED;
         }
     }
 

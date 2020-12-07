@@ -244,6 +244,16 @@ public class RestApiServiceImpl implements RestApiService {
         return exchangeForEntity(method, endpoint, entity, TypeFactory.defaultInstance().constructType(typeReference));
     }
 
+    @Override
+    public Response exchangeForResponse(String method, String endPoints, Object entity) throws ApiCallException {
+        Request request = getRequestBuilder(endPoints).method(method, HttpMethod.requiresRequestBody(method) ? getRequestBodyForEntity(entity) : null).build();
+        try {
+            return client.newCall(request).execute();
+        } catch (IOException e) {
+            throw new ApiCallException(500, e);
+        }
+    }
+
     private <T> T exchangeForEntity(String method, String endpoint, Object entity, JavaType javaType) throws ApiCallException {
         RequestBody body = HttpMethod.requiresRequestBody(method) ? getRequestBodyForEntity(entity) : null;
         Request request = getRequestBuilder(endpoint)
@@ -254,22 +264,7 @@ public class RestApiServiceImpl implements RestApiService {
 
         try (Response response = client.newCall(request).execute()) {
             if (ACCEPTED_HTTP_CODES.contains(response.code())) {
-                ResponseBody responseBody = response.body();
-                if (responseBody != null) {
-                    try (InputStream bodyStream = responseBody.byteStream()) {
-                        if (String.class.isAssignableFrom(javaType.getRawClass())) {
-                            // may be used for debug purposes
-                            return (T) IOUtils.toString(bodyStream, StandardCharsets.UTF_8);
-                        } else {
-                            return mapper.readValue(bodyStream, javaType);
-                        }
-                    } catch (MismatchedInputException e) {
-                        log.log(Level.WARNING, "Unable to parse object as " + javaType.getRawClass().getName() + "(expected ?). Returning null instead.", e);
-                        return null;
-                    }
-                }
-                log.fine("No body in response to parse");
-                return null;
+                return mapResponse(response, javaType);
             }
             String message = "Response code from API was unexpected : " + response.code();
             message += "\nContent was " + (response.body() == null ? "EMPTY" : response.body().string());
@@ -278,6 +273,37 @@ public class RestApiServiceImpl implements RestApiService {
             log.log(Level.SEVERE, "Unable to send request", e);
             throw new ApiCallException(500, e);
         }
+    }
+
+    @Override
+    public <T> T mapResponse(Response response, Class<T> responseClass) {
+        JavaType javaType = TypeFactory.defaultInstance().constructType(responseClass);
+        return mapResponse(response, javaType);
+    }
+
+    @Override
+    public <T> T mapResponse(Response response, TypeReference<T> typeReference) {
+        JavaType javaType = TypeFactory.defaultInstance().constructType(typeReference);
+        return mapResponse(response, javaType);
+    }
+
+    private <T> T mapResponse(Response response, JavaType javaType) {
+        ResponseBody responseBody = response.body();
+        if (responseBody != null) {
+            try (InputStream bodyStream = responseBody.byteStream()) {
+                if (String.class.isAssignableFrom(javaType.getRawClass())) {
+                    // may be used for debug purposes
+                    return (T) IOUtils.toString(bodyStream, StandardCharsets.UTF_8);
+                } else {
+                    return mapper.readValue(bodyStream, javaType);
+                }
+            } catch (IOException e) {
+                log.log(Level.WARNING, "Unable to parse object as " + javaType.getRawClass().getName() + "(expected ?). Returning null instead.", e);
+                return null;
+            }
+        }
+        log.fine("No body in response to parse");
+        return null;
     }
 
     @Override

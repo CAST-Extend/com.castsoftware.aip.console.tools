@@ -3,6 +3,8 @@ package com.castsoftware.aip.console.tools.core.services;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import okhttp3.Response;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +32,12 @@ public interface RestApiService {
      * @throws ApiCallException
      */
     void validateUrlAndKey(String serverUrl, String username, String password) throws ApiCallException;
+
+    Response exchangeForResponse(String method, String endPoints, Object entity) throws ApiCallException;
+
+    <T> T mapResponse(Response response, Class<T> responseClass);
+
+    <T> T mapResponse(Response response, TypeReference<T> typeReference);
 
     /**
      * This method authenticates the user with provided credentials in validate Url and Key

@@ -29,8 +29,10 @@ public class VersionDto {
     private boolean currentVersion;
     private boolean configurationChanged;
     private String previousVersion;
+    private DeliveryConfigurationDto deliveryConfiguration;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+
     public String getPreviousVersion() {
         return previousVersion;
     }
