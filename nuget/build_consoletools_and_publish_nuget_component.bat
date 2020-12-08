@@ -114,6 +114,7 @@ if not defined VERSION (
     @echo ERROR: Cannot retrieve version from pom file: %ACTOOLSDIR%\pom.xml
     goto endclean
 )
+@echo Version is:%VERSION%
 set ID=com.castsoftware.aip.console.tools
 
 set MVNOPT=-f %ACTOOLSDIR%\pom.xml -Dmaven.repo.local=%WKSP%\.repository -U -B
