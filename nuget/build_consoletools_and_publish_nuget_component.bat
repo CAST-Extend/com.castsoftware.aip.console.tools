@@ -10,8 +10,6 @@ for /f "delims=/" %%a in ('cd') do set WORKSPACE=%%a
 for %%a in (%0) do set CMDDIR=%%~dpa
 set CMDPATH=%0
 
-set VERSION=1.20.1
-set ID=com.castsoftware.aip.console.tools
 
 :: Checking arguments
 set WKSP=
@@ -104,6 +102,19 @@ if errorlevel 1 (
     @echo ERROR: bad maven version, it should be %REQUIRED_MAVEN%
     goto endclean
 )
+
+@echo.
+@echo ===============================================
+@echo Retrieving version from main pom file
+@echo ===============================================
+set VERSION=
+for /f "delims=<> tokens=1-4" %%a in ('grep -A1 "<artifactId>aip-console-tools</artifactId>" %ACTOOLSDIR%\pom.xml ^| grep "<version>"') do set VERSION=%%c
+if not defined VERSION (
+    @echo.
+    @echo ERROR: Cannot retrieve version from pom file: %ACTOOLSDIR%\pom.xml
+    goto endclean
+)
+set ID=com.castsoftware.aip.console.tools
 
 set MVNOPT=-f %ACTOOLSDIR%\pom.xml -Dmaven.repo.local=%WKSP%\.repository -U -B
 if exist %ENGTOOLS%\certificates\settings_maven.xml set MVNOPT=%MVNOPT% -s %ENGTOOLS%\certificates\settings_maven.xml
