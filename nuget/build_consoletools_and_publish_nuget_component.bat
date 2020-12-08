@@ -10,7 +10,7 @@ for /f "delims=/" %%a in ('cd') do set WORKSPACE=%%a
 for %%a in (%0) do set CMDDIR=%%~dpa
 set CMDPATH=%0
 
-set VERSION=1.21.0
+set VERSION=1.20.1
 set ID=com.castsoftware.aip.console.tools
 
 :: Checking arguments
