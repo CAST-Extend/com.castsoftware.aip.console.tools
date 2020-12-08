@@ -162,7 +162,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             Set<String> ignorePatterns = StringUtils.isEmpty(exclusionPatterns) ? Collections.emptySet() : Arrays.stream(exclusionPatterns.split(",")).collect(Collectors.toSet());
             if (previousVersion != null) {
                 packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
-                if (StringUtils.isEmpty(exclusionPatterns)) {
+                if (StringUtils.isEmpty(exclusionPatterns) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
                 }
             }
