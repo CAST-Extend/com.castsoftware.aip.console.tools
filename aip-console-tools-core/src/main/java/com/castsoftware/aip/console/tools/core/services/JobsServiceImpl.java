@@ -198,6 +198,7 @@ public class JobsServiceImpl implements JobsService {
             String logName = null;
             int startOffset = 0;
             while (true) {
+                Thread.sleep(pollingSleepDuration);
                 // Force login to keep session alive (jobs endpoint doesn't refresh session status)
                 restApiService.login();
                 jobStatus = restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
@@ -213,16 +214,16 @@ public class JobsServiceImpl implements JobsService {
                 }
 
                 if (!StringUtils.isAnyBlank(logName, currentStep)) {
-                    LogContentDto logContent = restApiService.getForEntity("/api/jobs/" + jobGuid + "/steps/" + currentStep + "/logs/" + logName + "?nbLines=3000&startOffset=" + startOffset, LogContentDto.class);
-                    pollingCallback.accept(logContent);
-                    startOffset = startOffset + logContent.getNbLines();
+                    LogContentDto logContent = getLogContent(jobGuid, currentStep, logName, startOffset);
+                    if (logContent != null && !logContent.getLines().isEmpty()) {
+                        pollingCallback.accept(logContent);
+                        startOffset = startOffset + logContent.getNbLines();
+                    }
                 }
 
                 if (jobStatus.getState() != JobState.STARTED && jobStatus.getState() != JobState.STARTING) {
                     break;
                 }
-
-                Thread.sleep(pollingSleepDuration);
             }
             return completionCallback.apply(jobStatus);
         } catch (InterruptedException | ApiCallException e) {
@@ -242,10 +243,24 @@ public class JobsServiceImpl implements JobsService {
         }
     }
 
+    private LogContentDto getLogContent(String jobGuid, String currentStep, String logName, int startOffset) {
+        try {
+            return restApiService.getForEntity("/api/jobs/" + jobGuid + "/steps/" + currentStep + "/logs/" + logName + "?nbLines=3000&startOffset=" + startOffset, LogContentDto.class);
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Error to get the log content", e);
+            return null;
+        }
+    }
+
     private String getLogName(String jobGuid, String step) throws ApiCallException {
-        Set<LogsDto> logs = restApiService.getForEntity("/api/jobs/" + jobGuid + "/steps/" + step + "/logs", new TypeReference<Set<LogsDto>>() {
-        });
-        return logs.stream().filter(l -> l.getLogType().equalsIgnoreCase("MAIN_LOG")).findFirst().map(LogsDto::getLogName).orElse(null);
+        try {
+            Set<LogsDto> logs = restApiService.getForEntity("/api/jobs/" + jobGuid + "/steps/" + step + "/logs", new TypeReference<Set<LogsDto>>() {
+            });
+            return logs.stream().filter(l -> l.getLogType().equalsIgnoreCase("MAIN_LOG")).findFirst().map(LogsDto::getLogName).orElse(null);
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Error to get the log name");
+            return null;
+        }
     }
 
     private void printLog(LogContentDto logContent) {
