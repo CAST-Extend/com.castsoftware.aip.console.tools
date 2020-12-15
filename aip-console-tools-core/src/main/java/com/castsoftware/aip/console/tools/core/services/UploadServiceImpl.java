@@ -85,7 +85,7 @@ public class UploadServiceImpl implements UploadService {
                         sourcePath = "upload:" + sourcePath;
                     }
                 }
-                return sourcePath;
+                return "upload:" + appName + "/" + sourcePath;
             } catch (IOException e) {
                 log.log(Level.SEVERE, "Unable to read archive content to be uploaded.", e);
                 throw new UploadException(e);

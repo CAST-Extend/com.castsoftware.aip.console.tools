@@ -133,7 +133,7 @@ public class JobsServiceImpl implements JobsService {
     public String startAddVersionJob(JobRequestBuilder builder) throws JobServiceException {
 
         ApiInfoDto apiInfoDto = getApiInfoDto();
-        if (apiInfoDto.isEnablePackagePathCheck()) {
+        if (apiInfoDto.isExtractionRequired()) {
             builder.startStep(Constants.CODE_SCANNER_STEP_NAME);
         } else {
             builder.startStep(Constants.EXTRACT_STEP_NAME);
