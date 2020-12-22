@@ -16,6 +16,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
+import jdk.nashorn.internal.objects.NativeUint8Array;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -136,6 +137,7 @@ public class AnalyzeCommand implements Callable<Integer> {
                                 Constants.CONSOLIDATE_SNAPSHOT :
                                 Constants.UPLOAD_APP_SNAPSHOT);
                 builder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
+                builder.uploadApplication(true);
             } else {
                 builder.endStep(Constants.ANALYZE);
             }

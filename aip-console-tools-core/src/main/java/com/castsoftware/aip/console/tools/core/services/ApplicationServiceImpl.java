@@ -181,7 +181,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     private Set<DeliveryPackageDto> discoverPackages(String appGuid, String sourcePath, String previousVersionGuid) throws PackagePathInvalidException, JobServiceException {
         try {
-            Response resp = restApiService.exchangeForResponse("POST", "/api/applications/" + appGuid + "/delivery-configuration/discover-packages", DiscoverPackageRequest.builder().previousVersionGuid(previousVersionGuid).sourcePath(sourcePath).build());
+            Response resp = restApiService.exchangeForResponse("POST", "/api/applications/" + appGuid + "/delivery-configuration/discover-packages",
+                    DiscoverPackageRequest.builder().previousVersionGuid(previousVersionGuid).sourcePath(sourcePath).build());
             int status = resp.code();
             Response packageReponse = null;
             if (status == 200) {

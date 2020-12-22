@@ -149,6 +149,7 @@ public class SnapshotCommand implements Callable<Integer> {
                     .versionGuid(foundVersion.getGuid())
                     .versionName(foundVersion.getName())
                     .snapshotName(snapshotName)
+                    .uploadApplication(true)
                     .releaseAndSnapshotDate(new Date());
 
             log.info("Running Snapshot Job on application '{}' with Version '{}' (guid: '{}')", applicationName, foundVersion.getName(), foundVersion.getGuid());

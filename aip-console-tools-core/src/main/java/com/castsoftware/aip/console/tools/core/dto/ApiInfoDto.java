@@ -47,7 +47,7 @@ public class ApiInfoDto {
     public boolean isExtractionRequired() {
         SemVer consoleVersion = getSemVer();
         // Extract for versions above 1.12
-        return consoleVersion.getMajor() >= 1 && consoleVersion.getMinor() > 12;
+        return consoleVersion.getMajor() >= 1 && consoleVersion.getMinor() > 12 && consoleVersion.getMinor() < 19;
     }
 
     public boolean isSourcePathPrefixRequired() {
