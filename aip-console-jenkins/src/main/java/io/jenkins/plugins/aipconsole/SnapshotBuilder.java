@@ -219,6 +219,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     .versionGuid(versionToAnalyze.getGuid())
                     .versionName(versionToAnalyze.getName())
                     .snapshotName(resolveSnapshotName)
+                    .uploadApplication(true)
                     .releaseAndSnapshotDate(new Date());
 
             jobGuid = jobsService.startJob(requestBuilder);

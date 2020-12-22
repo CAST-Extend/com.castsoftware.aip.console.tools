@@ -36,6 +36,7 @@ public class JobRequestBuilder {
     private String snapshotName;
     private String deliveryConfigGuid;
     private boolean autoDiscover = true;
+    private boolean uploadApplication = false;
 
     private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType) {
         this.appGuid = appGuid;
@@ -77,6 +78,11 @@ public class JobRequestBuilder {
 
     public JobRequestBuilder autoDiscover(boolean autoDiscover) {
         this.autoDiscover = autoDiscover;
+        return this;
+    }
+
+    public JobRequestBuilder uploadApplication(boolean uploadApplication) {
+        this.uploadApplication = uploadApplication;
         return this;
     }
 
@@ -173,6 +179,10 @@ public class JobRequestBuilder {
 
         if (StringUtils.isNotBlank(deliveryConfigGuid)) {
             parameters.put(Constants.PARAM_DELIVERY_CONFIG_GUID, deliveryConfigGuid);
+        }
+
+        if (uploadApplication) {
+            parameters.put(Constants.PARAM_UPLOAD_APPLICATION, Boolean.toString(uploadApplication));
         }
 
         if (backupApplication) {
