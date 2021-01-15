@@ -7,11 +7,10 @@ import picocli.CommandLine;
 @Component
 public class VersionProvider implements CommandLine.IVersionProvider {
 
+    @Value("${application.version}")
     private String appVersion;
 
-    public VersionProvider(@Value("${application.version}") String appVersion) {
-        this.appVersion = appVersion;
-    }
+    public VersionProvider(){}
 
     @Override
     public String[] getVersion() throws Exception {
