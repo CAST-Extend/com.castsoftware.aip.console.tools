@@ -16,6 +16,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
+import jdk.nashorn.internal.objects.NativeUint8Array;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -136,6 +137,7 @@ public class AnalyzeCommand implements Callable<Integer> {
                                 Constants.CONSOLIDATE_SNAPSHOT :
                                 Constants.UPLOAD_APP_SNAPSHOT);
                 builder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
+                builder.uploadApplication(true);
             } else {
                 builder.endStep(Constants.ANALYZE);
             }
@@ -146,7 +148,11 @@ public class AnalyzeCommand implements Callable<Integer> {
 
             log.info("Running analysis for application '{}' with version '{}'", applicationName, versionToAnalyze.getName());
             String jobGuid = jobsService.startJob(builder);
+            Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
+
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Application Analysis completed successfully");
                 return Constants.RETURN_OK;
@@ -161,4 +167,14 @@ public class AnalyzeCommand implements Callable<Integer> {
         }
     }
 
+    private Thread getShutdownHookForJobGuid(String jobGuid) {
+        return new Thread(() -> {
+            log.info("Received termination signal. Cancelling currently running job on AIP Console and exiting.");
+            try {
+                jobsService.cancelJob(jobGuid);
+            } catch (JobServiceException e) {
+                log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
+            }
+        });
+    }
 }

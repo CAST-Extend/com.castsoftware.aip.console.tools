@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -8,6 +9,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -23,6 +25,7 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -167,17 +170,18 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
 
-            // set exclusions
-            if (StringUtils.isNotBlank(exclusionPatterns)) {
-                String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, exclusionPatterns);
-                log.info("delivery configuration guid " + deliveryConfigGuid);
-                if (StringUtils.isNotBlank(deliveryConfigGuid)) {
-                    builder.deliveryConfigGuid(deliveryConfigGuid);
-                }
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns);
+            log.info("delivery configuration guid " + deliveryConfigGuid);
+            if (StringUtils.isNotBlank(deliveryConfigGuid)) {
+                builder.deliveryConfigGuid(deliveryConfigGuid);
             }
 
             String jobGuid = jobsService.startAddVersionJob(builder);
+            Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
+
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Delivery of application {} was completed successfully.", applicationName);
                 return Constants.RETURN_OK;
@@ -192,6 +196,20 @@ public class DeliverVersionCommand implements Callable<Integer> {
             return Constants.RETURN_UPLOAD_ERROR;
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
+        } catch (PackagePathInvalidException e) {
+            log.error(e.getMessage());
+            return Constants.RETURN_JOB_FAILED;
         }
+    }
+
+    private Thread getShutdownHookForJobGuid(String jobGuid) {
+        return new Thread(() -> {
+            log.info("Received termination signal. Cancelling currently running job on AIP Console and exiting.");
+            try {
+                jobsService.cancelJob(jobGuid);
+            } catch (JobServiceException e) {
+                log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
+            }
+        });
     }
 }

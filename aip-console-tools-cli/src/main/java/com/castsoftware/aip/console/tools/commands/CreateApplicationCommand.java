@@ -108,6 +108,4 @@ public class CreateApplicationCommand implements Callable<Integer> {
             return Constants.UNKNOWN_ERROR;
         }
     }
-
-
 }

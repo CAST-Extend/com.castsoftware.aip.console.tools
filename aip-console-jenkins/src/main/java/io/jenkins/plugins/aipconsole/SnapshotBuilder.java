@@ -186,7 +186,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         }
-
+        String jobGuid = null;
         try {
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             // Get the current version's guid
@@ -219,9 +219,10 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     .versionGuid(versionToAnalyze.getGuid())
                     .versionName(versionToAnalyze.getName())
                     .snapshotName(resolveSnapshotName)
+                    .uploadApplication(true)
                     .releaseAndSnapshotDate(new Date());
 
-            String jobGuid = jobsService.startJob(requestBuilder);
+            jobGuid = jobsService.startJob(requestBuilder);
             log.println(SnapshotBuilder_Snapshot_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
             if (state != JobState.COMPLETED) {
@@ -231,12 +232,26 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                 log.println(SnapshotBuilder_Snapshot_success_complete(expandedAppName));
                 run.setResult(Result.SUCCESS);
             }
+        } catch (JobServiceException e) {
+            // Should we check if the original cause is an InterruptedException and attempt to cancel the job ?
+            if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                if (jobGuid != null) {
+                    run.setResult(Result.ABORTED);
+                    log.println("Attempting to cancel Analysis job on AIP Console, following cancellation of the build.");
+                    try {
+                        jobsService.cancelJob(jobGuid);
+                        log.println("Job was successfully cancelled on AIP Console.");
+                    } catch (JobServiceException jse) {
+                        log.println("Could not cancel the job on AIP Console, please cancel it manually. Error was : " + e.getMessage());
+                    }
+                }
+            } else {
+                listener.error(SnapshotBuilder_Snapshot_error_jobException());
+                e.printStackTrace(listener.getLogger());
+                run.setResult(defaultResult);
+            }
         } catch (ApplicationServiceException e) {
             listener.error(SnapshotBuilder_Snapshot_error_version());
-            e.printStackTrace(listener.getLogger());
-            run.setResult(defaultResult);
-        } catch (JobServiceException e) {
-            listener.error(SnapshotBuilder_Snapshot_error_jobException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         }

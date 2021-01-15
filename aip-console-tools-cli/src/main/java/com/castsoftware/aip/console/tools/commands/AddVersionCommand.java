@@ -8,6 +8,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -162,12 +163,24 @@ public class AddVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName);
 
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null);
+            if (StringUtils.isNotBlank(deliveryConfigGuid)) {
+                builder.deliveryConfigGuid(deliveryConfigGuid);
+            }
+
             String jobGuid = jobsService.startAddVersionJob(builder);
+            // add a shutdown hook, to cancel the job
+            Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
+            // Register shutdown hook to cancel the job
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            // Deregister the shutdown hook since the job is finished and we won't need to cancel it
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Job completed successfully.");
                 return Constants.RETURN_OK;
             }
+
 
             log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
             return Constants.RETURN_JOB_FAILED;
@@ -179,6 +192,20 @@ public class AddVersionCommand implements Callable<Integer> {
             return Constants.RETURN_UPLOAD_ERROR;
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
+        } catch (PackagePathInvalidException e) {
+            log.error(e.getMessage());
+            return Constants.RETURN_JOB_FAILED;
         }
+    }
+
+    private Thread getShutdownHookForJobGuid(String jobGuid) {
+        return new Thread(() -> {
+            log.info("Received termination signal. Cancelling currently running job on AIP Console and exiting.");
+            try {
+                jobsService.cancelJob(jobGuid);
+            } catch (JobServiceException e) {
+                log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
+            }
+        });
     }
 }

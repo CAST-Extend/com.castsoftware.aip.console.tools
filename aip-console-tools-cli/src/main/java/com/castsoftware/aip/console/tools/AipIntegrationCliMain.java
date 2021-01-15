@@ -50,7 +50,7 @@ public class AipIntegrationCliMain implements CommandLineRunner {
                         .orElse(Constants.RETURN_OK);
             } else {
                 // Help message was shown
-                result = cli.getUnmatchedArguments().isEmpty() ? 0:1;
+                result = result = cli.getUnmatchedArguments().isEmpty() ? 0:1;
             }
         } catch (Throwable t) {
             log.error("Could not run AIP integration tool", t);

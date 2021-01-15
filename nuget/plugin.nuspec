@@ -15,10 +15,10 @@
             These components aims to help automating application on-boarding and/or analysis in AIP Console.
 
             If you need more details about the AIP Console Jenkins Plugin, you can check the following page :
-            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/develop/aip-console-jenkins/README.md
+            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/aip-console-jenkins/README.md
 
             If you need details about the AIP Console Tools CLI, you can find them here :
-            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/develop/aip-console-tools-cli/README.md
+            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/aip-console-tools-cli/README.md
         </description>
         <releaseNotes>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/RELEASE-NOTES.md</releaseNotes>
 		<tags>aipconsole</tags>
