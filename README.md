@@ -1,6 +1,6 @@
-# AIP Integration Tools
+# AIP Automation Tools
 
-The AIP Integration tools are a couple of components to ease the automation of application analysis on AIP Console.
+The AIP Automation tools are a couple of components to ease the automation of application analysis on AIP Console.
 
 It offers 2 main methods of automation:
 * [AIP Console Jenkins Plugin](./aip-console-jenkins/README.md) with an example [Jenkinsfile](./aip-console-jenkins/examples/dynamic-pipeline-example/README.md) to automate retrieving and analysing multiple applications.
@@ -18,7 +18,7 @@ This project contains 3 modules :
 
 * *AIP Console Jenkins Plugin* : Module containing the code to our Jenkins plugin to create an application or add a version
 * *AIP Console Tools CLI* : Module containing the CLI to create an application or add a version
-* *AIP Console Tools Core* : library containing shared code between the Jenkins Plugin and the AIP Integration CLI
+* *AIP Console Tools Core* : library containing shared code between the Jenkins Plugin and the AIP Automation CLI
 
 ### Java Version
 

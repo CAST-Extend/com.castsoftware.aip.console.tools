@@ -3,7 +3,7 @@
     <metadata>
         <id>_THE_ID_</id>
         <version>_THE_VERSION_-build_BUILDNO_</version>
-        <title>AIP Console integration tools</title>
+        <title>AIP Console automation tools</title>
         <authors>CAST Product</authors>
         <owners>CAST</owners>
         <licenseUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/LICENSE</licenseUrl>

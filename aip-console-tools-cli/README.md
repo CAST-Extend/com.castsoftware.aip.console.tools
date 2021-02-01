@@ -114,6 +114,7 @@ The available options are :
 * `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
 * `--clone` or `--rescan` or `-c` (optional): Enables the clone version job. This will create a new version by cloning the previous version's configuration, similar to the "Same configuration as previous version" checkbox in AIP Console UI.
 * `--version-name` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
+* `--snapshot-name` (option) The name of the snapshot to generate, default will be based on the date and time
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:

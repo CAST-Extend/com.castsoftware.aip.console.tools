@@ -109,6 +109,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String domainName;
 
+    @Nullable
+    private String snapshotName = "";
+
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
@@ -217,6 +220,16 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setBackupName(String backupName) {
         this.backupName = backupName;
+    }
+
+    @Nullable
+    public String getSnapshotName() {
+        return snapshotName;
+    }
+
+    @DataBoundSetter
+    public void setSnapshotName(@Nullable String snapshotName) {
+        this.snapshotName = snapshotName;
     }
 
     @DataBoundSetter
@@ -424,6 +437,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         try {
             // Create a value for versionName
             String resolvedVersionName = vars.expand(versionName);
+            String resolvedSnapshotName = vars.expand(snapshotName);
 
             if (StringUtils.isBlank(resolvedVersionName)) {
                 DateFormat formatVersionName = new SimpleDateFormat("yyMMdd.HHmmss");
@@ -449,6 +463,10 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null);
             if (StringUtils.isNotBlank(deliveryConfig)) {
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
+            }
+
+            if (StringUtils.isNotBlank(resolvedSnapshotName)) {
+                requestBuilder.snapshotName(resolvedSnapshotName);
             }
 
             jobGuid = jobsService.startAddVersionJob(requestBuilder);

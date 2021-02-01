@@ -75,6 +75,9 @@ public class AddVersionCommand implements Callable<Integer> {
      */
     @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION_NAME", description = "The name of the version to create")
     private String versionName;
+
+    @CommandLine.Option(names = "--snapshot-name", paramLabel = "SNAPSHOT_NAME", description = "The name of the snapshot to generate")
+    private String snapshotName;
     /**
      * Whether or not to clone previous version
      */
@@ -166,6 +169,10 @@ public class AddVersionCommand implements Callable<Integer> {
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
+            }
+
+            if (StringUtils.isNotBlank(snapshotName)) {
+                builder.snapshotName(snapshotName);
             }
 
             String jobGuid = jobsService.startAddVersionJob(builder);

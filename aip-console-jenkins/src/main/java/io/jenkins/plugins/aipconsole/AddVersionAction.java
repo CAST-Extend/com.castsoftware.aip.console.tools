@@ -32,6 +32,9 @@ public class AddVersionAction implements RunAction2 {
     @Nullable
     private String domainName;
 
+    @Nullable
+    private String snapshotName;
+
     private transient Run run;
 
     public AddVersionAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
@@ -55,6 +58,15 @@ public class AddVersionAction implements RunAction2 {
 
     public void setApplicationGuid(@Nullable String applicationGuid) {
         this.applicationGuid = applicationGuid;
+    }
+
+    @Nullable
+    public String getSnapshotName() {
+        return snapshotName;
+    }
+
+    public void setSnapshotName(@Nullable String snapshotName) {
+        this.snapshotName = snapshotName;
     }
 
     @CheckForNull
