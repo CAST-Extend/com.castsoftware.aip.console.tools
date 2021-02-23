@@ -1,10 +1,12 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
+import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
@@ -56,6 +58,7 @@ import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDe
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noApiKey;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -73,6 +76,7 @@ public class AddVersionBuilderTest {
     private static final String TEST_ARCHIVE_NAME = "archive.zip";
     private static final String TEST_JOB_GUID = "jobGuid";
     private static final String TEST_NODE_NAME = "nodeName";
+    private static final ApplicationDto TEST_APP = ApplicationDto.builder().name(TEST_APP_NAME).guid(TEST_APP_NAME).inplaceMode(false).build();
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
@@ -96,7 +100,7 @@ public class AddVersionBuilderTest {
     private AddVersionBuilder addVersionBuilder;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         AipConsoleGlobalConfiguration config = AipConsoleGlobalConfiguration.get();
         config.setAipConsoleUrl(TEST_URL);
         config.setApiKey(Secret.fromString(TEST_KEY));
@@ -123,6 +127,8 @@ public class AddVersionBuilderTest {
                 when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
         doReturn(TEST_APP_NAME)
                 .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
+        doReturn(TEST_APP)
+                .when(applicationService).getApplicationFromName(TEST_APP_NAME);
         doReturn(true)
                 .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
@@ -200,7 +206,8 @@ public class AddVersionBuilderTest {
         doNothing().
                 when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
         doReturn(null)
-                .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
+                .when(applicationService).getApplicationFromGuid(TEST_APP_NAME);
+
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_appNotFound(TEST_APP_NAME), build);
@@ -213,8 +220,8 @@ public class AddVersionBuilderTest {
 
         doNothing().
                 when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
-        doReturn(TEST_APP_NAME)
-                .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
+        doReturn(TEST_APP)
+                .when(applicationService).getApplicationFromName(TEST_APP_NAME);
         doThrow(new UploadException("Fake error"))
                 .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
@@ -231,6 +238,8 @@ public class AddVersionBuilderTest {
                 when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
         doReturn(TEST_APP_NAME)
                 .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
+        doReturn(TEST_APP)
+                .when(applicationService).getApplicationFromName(TEST_APP_NAME);
         doReturn(true)
                 .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doThrow(new JobServiceException("fake exception"))
@@ -248,8 +257,8 @@ public class AddVersionBuilderTest {
 
         doNothing().
                 when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
-        doReturn(TEST_APP_NAME)
-                .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
+        doReturn(TEST_APP)
+                .when(applicationService).getApplicationFromName(TEST_APP_NAME);
         doReturn(true)
                 .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doReturn(TEST_JOB_GUID)
@@ -274,8 +283,10 @@ public class AddVersionBuilderTest {
                 when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
         doReturn(null)
                 .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
+        doReturn(null)
+                .when(applicationService).getApplicationFromName(TEST_APP_NAME);
         doThrow(new JobServiceException("cannot create application"))
-                .when(jobsService).startCreateApplication(eq(TEST_APP_NAME), anyString());
+                .when(jobsService).startCreateApplication(eq(TEST_APP_NAME), anyString(), anyBoolean());
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
@@ -317,7 +328,7 @@ public class AddVersionBuilderTest {
         doReturn(Collections.singletonList(new NodeDto(TEST_NODE_NAME, TEST_NODE_NAME, "http", "localhost", 8082)))
                 .when(restApiService).getForEntity(eq("/api/nodes"), isA(TypeReference.class));
         doReturn("createAppGuid")
-                .when(jobsService).startCreateApplication(TEST_APP_NAME, TEST_NODE_NAME, null);
+                .when(jobsService).startCreateApplication(TEST_APP_NAME, TEST_NODE_NAME, null, false);
         doReturn(TEST_APP_NAME)
                 .when(jobsService).pollAndWaitForJobFinished(eq("createAppGuid"), any(), any(), any());
         doReturn(true)

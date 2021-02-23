@@ -20,6 +20,7 @@ public class Constants {
     public static final int RETURN_SOURCE_FOLDER_NOT_FOUND = 8;
     public static final int RETURN_APPLICATION_NO_VERSION = 9;
     public static final int RETURN_APPLICATION_VERSION_NOT_FOUND = 10;
+    public static final int RETURN_INPLACE_MODE_ERROR = 11;
 
     public static final int UNKNOWN_ERROR = 1000;
 
@@ -55,6 +56,7 @@ public class Constants {
 
     // Job params
     public static final String PARAM_APP_NAME = "appName";
+    public static final String PARAM_INPLACE_MODE = "inplaceMode";
     public static final String PARAM_NODE_GUID = "nodeGuid";
     public static final String PARAM_VERSION_NAME = "versionName";
     public static final String PARAM_SNAPSHOT_CAPTURE_DATE = "snapshotCaptureDate";

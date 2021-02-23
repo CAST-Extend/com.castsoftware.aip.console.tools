@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
@@ -48,6 +49,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -301,9 +303,12 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         EnvVars vars = run.getEnvironment(listener);
         // Parse variables in application name
         String variableAppName = vars.expand(applicationName);
+        boolean inplaceMode = false;
 
         try {
-            applicationGuid = applicationService.getApplicationGuidFromName(variableAppName);
+            ApplicationDto app = applicationService.getApplicationFromName(variableAppName);
+            inplaceMode = app == null ? false : app.isInplaceMode();
+            applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(variableAppName));
             e.printStackTrace(listener.getLogger());
@@ -312,6 +317,13 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         }
 
         String resolvedFilePath = vars.expand(filePath);
+        // inplace mode only allows the folders
+        if (inplaceMode && !Files.isDirectory(Paths.get(resolvedFilePath))) {
+            listener.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
+            run.setResult(Result.NOT_BUILT);
+            return;
+        }
+
         String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath);
         FilePath workspaceFile = null;
         if (StringUtils.equalsAnyIgnoreCase(fileExt, "zip", "tgz", "tar.gz")) {
@@ -362,7 +374,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(variableAppName));
-                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName);
+                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, false);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
                         logContentDto -> {

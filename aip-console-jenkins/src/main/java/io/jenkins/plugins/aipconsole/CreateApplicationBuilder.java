@@ -72,6 +72,8 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
     @Nullable
     private String domainName;
 
+    private boolean inplaceMode;
+
     @DataBoundConstructor
     public CreateApplicationBuilder(String applicationName) {
         this.applicationName = applicationName;
@@ -83,6 +85,11 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
 
     public boolean isFailureIgnored() {
         return failureIgnored;
+    }
+
+    @DataBoundSetter
+    public void setInplaceMode(boolean inplaceMode) {
+        this.inplaceMode = inplaceMode;
     }
 
     @DataBoundSetter
@@ -165,7 +172,7 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
             }
 
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
-            String createJobGuid = jobsService.startCreateApplication(expandedAppName);
+            String createJobGuid = jobsService.startCreateApplication(expandedAppName, false);
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
             JobState endState = jobsService.pollAndWaitForJobFinished(createJobGuid,
                     jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),

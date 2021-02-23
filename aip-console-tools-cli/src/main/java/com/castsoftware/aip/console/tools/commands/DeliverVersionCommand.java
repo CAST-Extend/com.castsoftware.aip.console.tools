@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -155,6 +157,12 @@ public class DeliverVersionCommand implements Callable<Integer> {
                         "Application '{}' was not found on AIP Console";
                 log.error(message, applicationName);
                 return Constants.RETURN_APPLICATION_NOT_FOUND;
+            }
+            
+            ApplicationDto app = applicationService.getApplicationFromName(applicationName);
+            if (app.isInplaceMode() && !Files.isDirectory(filePath.toPath())) {
+                log.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
+                return Constants.RETURN_INPLACE_MODE_ERROR;
             }
 
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);

@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
@@ -50,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -321,8 +323,11 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         EnvVars vars = run.getEnvironment(listener);
         String expandedAppName = vars.expand(applicationName);
         ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
+        boolean inplaceMode = false;
         try {
-            applicationGuid = applicationService.getApplicationGuidFromName(expandedAppName);
+            ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
+            inplaceMode = app == null ? false : app.isInplaceMode();
+            applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(expandedAppName));
             e.printStackTrace(listener.getLogger());
@@ -331,6 +336,14 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         }
 
         String resolvedFilePath = vars.expand(filePath);
+
+        // inplace mode only allows the folders
+        if (inplaceMode && !Files.isDirectory(Paths.get(resolvedFilePath))) {
+            listener.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
+            run.setResult(Result.NOT_BUILT);
+            return;
+        }
+        
         String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath);
         FilePath workspaceFile = null;
         // Local file
@@ -384,7 +397,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName);
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, false);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
                         logContentDto -> {

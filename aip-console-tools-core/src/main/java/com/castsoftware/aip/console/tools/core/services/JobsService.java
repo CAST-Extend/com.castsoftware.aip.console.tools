@@ -18,20 +18,22 @@ public interface JobsService {
      * Start the "Create application" job, which will create a new application on the target AIP Console instance
      *
      * @param applicationName The name of the application
+     * @param inplaceMode     indicate if the app will be in "inplace" mode
      * @return The job GUID on AIP Console
      * @throws JobServiceException If an error occurs while starting the job
      */
-    String startCreateApplication(String applicationName) throws JobServiceException;
+    String startCreateApplication(String applicationName, boolean inplaceMode) throws JobServiceException;
 
     /**
      * Start the "Create application" job, which will create a new application on the target AIP Console instance
      *
      * @param applicationName The name of the application
      * @param nodeGuid        The Node GUID on which the application should be created. Can be null.
+     * @param inplaceMode     indicate if the app will be in "inplace" mode
      * @return The job GUID on AIP Console
      * @throws JobServiceException If an error occurs while starting the job
      */
-    String startCreateApplication(String applicationName, String nodeGuid) throws JobServiceException;
+    String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode) throws JobServiceException;
 
     /**
      * Start the "Create application" job, which will create a new application on the target AIP Console instance
@@ -40,10 +42,11 @@ public interface JobsService {
      * @param applicationName The name of the application
      * @param nodeGuid        The Node GUID on which the application should be created. Can be null.
      * @param domainName      The name of the domain to assign to this application
+     * @param inplaceMode     indicate if the app will be in "inplace" mode
      * @return The job GUID on AIP Console
      * @throws JobServiceException If an error occurs while starting the job
      */
-    String startCreateApplication(String applicationName, String nodeGuid, String domainName) throws JobServiceException;
+    String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode) throws JobServiceException;
 
     /**
      * Start the "Create Version" job, which will create a new version for an application on AIP Console

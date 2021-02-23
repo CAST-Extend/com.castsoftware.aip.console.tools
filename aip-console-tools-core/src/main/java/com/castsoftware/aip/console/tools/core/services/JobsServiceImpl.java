@@ -63,22 +63,23 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startCreateApplication(String applicationName) throws JobServiceException {
+    public String startCreateApplication(String applicationName, boolean inplaceMode) throws JobServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new JobServiceException("Application name is empty. Unable to create application");
         }
-        return startCreateApplication(applicationName, null);
+        return startCreateApplication(applicationName, null, inplaceMode);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid) throws JobServiceException {
-        return startCreateApplication(applicationName, nodeGuid, null);
+    public String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode) throws JobServiceException {
+        return startCreateApplication(applicationName, nodeGuid, null, inplaceMode);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, String domainName) throws JobServiceException {
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode) throws JobServiceException {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
+        jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(inplaceMode));
         if (StringUtils.isNotBlank(nodeGuid)) {
             jobParams.put(Constants.PARAM_NODE_GUID, nodeGuid);
         }

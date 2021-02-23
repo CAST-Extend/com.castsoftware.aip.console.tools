@@ -47,25 +47,35 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String getApplicationGuidFromName(String applicationName) throws ApplicationServiceException {
-        return getApplications()
-                .getApplications()
-                .stream()
-                .filter(Objects::nonNull)
-                .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationName, a.getName()))
-                .findFirst()
-                .map(ApplicationDto::getGuid)
-                .orElse(null);
+        ApplicationDto app = getApplicationFromName(applicationName);
+        return app == null ? null : app.getGuid();
     }
 
     @Override
     public String getApplicationNameFromGuid(String applicationGuid) throws ApplicationServiceException {
+        ApplicationDto app = getApplicationFromGuid(applicationGuid);
+        return app == null ? null : app.getName();
+    }
+
+    @Override
+    public ApplicationDto getApplicationFromGuid(String applicationGuid) throws ApplicationServiceException {
         return getApplications()
                 .getApplications()
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationGuid, a.getGuid()))
                 .findFirst()
-                .map(ApplicationDto::getName)
+                .orElse(null);
+    }
+
+    @Override
+    public ApplicationDto getApplicationFromName(String applicationName) throws ApplicationServiceException {
+        return getApplications()
+                .getApplications()
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationName, a.getName()))
+                .findFirst()
                 .orElse(null);
     }
 
@@ -122,7 +132,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 }
                 log.info(infoMessage);
 
-                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName);
+                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false);
                 return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
             } catch (JobServiceException | ApiCallException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);

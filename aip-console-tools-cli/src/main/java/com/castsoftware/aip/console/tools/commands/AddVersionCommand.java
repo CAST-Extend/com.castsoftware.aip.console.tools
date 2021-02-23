@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -152,6 +154,12 @@ public class AddVersionCommand implements Callable<Integer> {
 
             if (StringUtils.isEmpty(applicationName) && StringUtils.isNotEmpty(applicationGuid)) {
                 applicationName = applicationService.getApplicationNameFromGuid(applicationGuid);
+            }
+
+            ApplicationDto app = applicationService.getApplicationFromName(applicationName);
+            if (app.isInplaceMode() && !Files.isDirectory(filePath.toPath())) {
+                log.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
+                return Constants.RETURN_INPLACE_MODE_ERROR;
             }
 
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
