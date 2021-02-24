@@ -61,11 +61,15 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public String startCreateApplication(String applicationName, String nodeGuid) throws JobServiceException {
-        return startCreateApplication(applicationName, nodeGuid, null);
+        return startCreateApplication(applicationName, nodeGuid, null,false);
+    }
+    @Override
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName) throws JobServiceException {
+        return startCreateApplication(applicationName, nodeGuid, domainName,false);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, String domainName) throws JobServiceException {
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName,Boolean inPlaceMode) throws JobServiceException {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
         if (StringUtils.isNotBlank(nodeGuid)) {
@@ -74,6 +78,7 @@ public class JobsServiceImpl implements JobsService {
         if (StringUtils.isNotBlank(domainName)) {
             jobParams.put("domainName", domainName);
         }
+        jobParams.put(Constants.PARAM_IN_PLACE_MODE, inPlaceMode==null ? String.valueOf(false):String.valueOf(inPlaceMode.booleanValue()));
 
         try {
             String jobsEndpoint = ApiEndpointHelper.getJobsEndpoint();

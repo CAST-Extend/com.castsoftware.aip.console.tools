@@ -55,6 +55,9 @@ public class CreateApplicationCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME", description = "The name of the node on which the application will be created.")
     private String nodeName;
 
+    @CommandLine.Option(names = "--in-place-mode", paramLabel = "IN_PLACE_MODE", description = "The history of the delivered source code will not be kept for multiple scans when the option is true.")
+    private Boolean inPlaceMode;
+
     /**
      * Domain name
      */

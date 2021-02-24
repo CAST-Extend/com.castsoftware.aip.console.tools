@@ -77,6 +77,7 @@ public class JobsServiceImplTest {
     public void testCreateApplicationCreateJobFailed() throws Exception {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
+        jobParams.put(Constants.PARAM_IN_PLACE_MODE, "false");
         CreateJobsRequest expectedRequest = new CreateJobsRequest();
         expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
         expectedRequest.setJobParameters(jobParams);
@@ -93,6 +94,7 @@ public class JobsServiceImplTest {
     public void testCreateApplicationOkWithUnzipStep() throws Exception {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
+        jobParams.put(Constants.PARAM_IN_PLACE_MODE, "false");
         CreateJobsRequest expectedRequest = new CreateJobsRequest();
         expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
         expectedRequest.setJobParameters(jobParams);
@@ -105,6 +107,26 @@ public class JobsServiceImplTest {
         ).thenReturn(expectedResult);
 
         String jobGuid = service.startCreateApplication(TEST_APP_NAME);
+        assertEquals("Job guid should be the same as mocked guid returned", TEST_JOB_GUID, jobGuid);
+    }
+
+    @Test
+    public void testCreateInPlaceModeApplicationOkWithUnzipStep() throws Exception {
+        Map<String, String> jobParams = new HashMap<>();
+        jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
+        jobParams.put(Constants.PARAM_IN_PLACE_MODE, "true");
+         CreateJobsRequest expectedRequest = new CreateJobsRequest();
+        expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
+        expectedRequest.setJobParameters(jobParams);
+        SuccessfulJobStartDto expectedResult = new SuccessfulJobStartDto();
+        expectedResult.setJobGuid(TEST_JOB_GUID);
+        expectedResult.setAppGuid(TEST_APP_GUID);
+
+        when(restApiService
+                .postForEntity(eq("/api/jobs"), eq(expectedRequest), eq(SuccessfulJobStartDto.class))
+        ).thenReturn(expectedResult);
+
+        String jobGuid = service.startCreateApplication(TEST_APP_NAME,null,null,true);
         assertEquals("Job guid should be the same as mocked guid returned", TEST_JOB_GUID, jobGuid);
     }
 

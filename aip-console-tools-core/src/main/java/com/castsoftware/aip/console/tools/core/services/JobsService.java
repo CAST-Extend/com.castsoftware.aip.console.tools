@@ -43,6 +43,17 @@ public interface JobsService {
     String startCreateApplication(String applicationName, String nodeGuid, String domainName) throws JobServiceException;
 
     /**
+     * Same as {@link #startCreateApplication(String, String, String)}
+     * @param applicationName
+     * @param nodeGuid
+     * @param domainName
+     * @param inPlaceMode Whether the application should not manage delivery history or not
+     * @return The job GUID on AIP Console
+     * @throws JobServiceException
+     */
+    String startCreateApplication(String applicationName, String nodeGuid, String domainName, Boolean inPlaceMode) throws JobServiceException;
+
+    /**
      * Start the "Create Version" job, which will create a new version for an application on AIP Console
      *
      * @param appGuid            The application GUID for which the version should be created
