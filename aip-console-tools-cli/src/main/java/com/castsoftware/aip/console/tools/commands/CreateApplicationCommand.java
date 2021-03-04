@@ -62,7 +62,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
     private String domainName;
 
     @CommandLine.Option(names = "--inplace-mode",
-            description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
+            description = "If true then no history will be kept for delivered sources.")
     private boolean inplaceMode = false;
 
     @CommandLine.Unmatched
