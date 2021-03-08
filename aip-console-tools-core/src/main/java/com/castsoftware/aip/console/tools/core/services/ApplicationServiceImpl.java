@@ -214,13 +214,15 @@ public class ApplicationServiceImpl implements ApplicationService {
             if (packageReponse != null) {
                 Set<DeliveryPackageDto> packages = restApiService.mapResponse(packageReponse, new TypeReference<Set<DeliveryPackageDto>>() {
                 });
-                if (packages.stream().anyMatch(p -> p.getPath() == null)) {
+
+                ApplicationDto app = getApplicationFromGuid(appGuid);
+                if (!app.isInPlaceMode() && packages.stream().anyMatch(p -> p.getPath() == null)) {
                     throw new PackagePathInvalidException(packages.stream().filter(p -> p.getPath() == null).collect(Collectors.toSet()));
                 }
                 return packages;
             }
             return Collections.emptySet();
-        } catch (ApiCallException | InterruptedException e) {
+        } catch (ApiCallException | InterruptedException | ApplicationServiceException e) {
             throw new JobServiceException("Error discovering packages", e);
         }
     }

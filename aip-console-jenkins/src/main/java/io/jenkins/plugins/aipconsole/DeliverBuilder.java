@@ -326,7 +326,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         boolean inplaceMode = false;
         try {
             ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
-            inplaceMode = app == null ? false : app.isInplaceMode();
+            inplaceMode = app == null ? false : app.isInPlaceMode();
             applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(expandedAppName));
@@ -397,7 +397,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, false);
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
                         logContentDto -> {

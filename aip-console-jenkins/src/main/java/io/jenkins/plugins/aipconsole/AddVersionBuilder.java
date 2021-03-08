@@ -307,7 +307,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
         try {
             ApplicationDto app = applicationService.getApplicationFromName(variableAppName);
-            inplaceMode = app == null ? false : app.isInplaceMode();
+            inplaceMode = app == null ? false : app.isInPlaceMode();
             applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(variableAppName));
@@ -374,7 +374,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(variableAppName));
-                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, false);
+                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
                         logContentDto -> {

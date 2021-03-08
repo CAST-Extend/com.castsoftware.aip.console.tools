@@ -26,6 +26,8 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -160,14 +162,14 @@ public class DeliverVersionCommand implements Callable<Integer> {
             }
             
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
-            if (app.isInplaceMode() && !Files.isDirectory(filePath.toPath())) {
-                log.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
-                return Constants.RETURN_INPLACE_MODE_ERROR;
+            if (app.isInPlaceMode() && Files.isRegularFile(filePath.toPath())){
+                    log.error("The application is created in \"in-place\" mode, only folder path is allowed to deliver in this mode.");
+                    return Constants.RETURN_INPLACE_MODE_ERROR;
             }
 
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
             // check that the application actually has versions, otherwise it's just an add version job
-            cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
+            cloneVersion = (app.isInPlaceMode() || cloneVersion) && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)

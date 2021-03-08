@@ -157,8 +157,8 @@ public class AddVersionCommand implements Callable<Integer> {
             }
 
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
-            if (app.isInplaceMode() && !Files.isDirectory(filePath.toPath())) {
-                log.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
+            if (app.isInPlaceMode() && Files.isRegularFile(filePath.toPath())) {
+                log.error("The application is created in \"in-place\" mode, only folder path is allowed to deliver in this mode.");
                 return Constants.RETURN_INPLACE_MODE_ERROR;
             }
 

@@ -50,6 +50,14 @@ public class CreateApplicationAction implements RunAction2 {
         this.timeout = timeout;
     }
 
+    public boolean isInPlaceMode() {
+        return inPlaceMode;
+    }
+
+    public void setInPlaceMode(boolean inPlaceMode) {
+        this.inPlaceMode = inPlaceMode;
+    }
+
     @Override
     public void onAttached(Run<?, ?> run) {
         this.run = run;

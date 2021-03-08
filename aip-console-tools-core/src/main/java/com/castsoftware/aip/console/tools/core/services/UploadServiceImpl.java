@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.AbsolutePathDto;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.upload.ChunkedUploadDto;
@@ -64,6 +65,15 @@ public class UploadServiceImpl implements UploadService {
         this.restApiService = restApiService;
         this.chunkSize = Math.min(maxChunkSize, MAX_CHUNK_SIZE);
         this.extractPollSleep = extractPollSleep;
+    }
+
+    public String getSourcesFolder(){
+        try {
+            return restApiService.getForEntity("/api/settings/sources-folder",  AbsolutePathDto.class).getData();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE,"Unable to check remote location of provided folder.", e);
+        }
+        return null;
     }
 
     @Override

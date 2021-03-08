@@ -76,7 +76,7 @@ public class AddVersionBuilderTest {
     private static final String TEST_ARCHIVE_NAME = "archive.zip";
     private static final String TEST_JOB_GUID = "jobGuid";
     private static final String TEST_NODE_NAME = "nodeName";
-    private static final ApplicationDto TEST_APP = ApplicationDto.builder().name(TEST_APP_NAME).guid(TEST_APP_NAME).inplaceMode(false).build();
+    private static final ApplicationDto TEST_APP = ApplicationDto.builder().name(TEST_APP_NAME).guid(TEST_APP_NAME).inPlaceMode(false).build();
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
