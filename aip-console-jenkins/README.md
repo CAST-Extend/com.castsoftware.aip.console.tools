@@ -150,7 +150,8 @@ The Add Version step provides the following parameters :
 * *Create Application if missing*: If checked and the application cannot be found on AIP Console, it will be created. Otherwise, the step will fail.
 * *Version Name* (optional): The name of the version that will be created. If left blank, the version will be named with the following pattern : `vYYMMDD.hhmmss` based on date and time.
   * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
-
+* *Snapshot Name* (optional): The name of the snapshot that will be created, if left blank, the snapshot will be named with date and time
+  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
 * *Rescan*: Clone the previous version of the application (similar to the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no version exists, it will run an Add version job instead.
 * *Enable Security Dataflow*: Enabled the Security Objective for this version. Has no effect if `Rescan` is checked.
 

@@ -10,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.JobsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -58,6 +59,8 @@ public class JobsServiceImplTest {
     @Mock
     private RestApiService restApiService;
 
+    @Mock
+    private ApplicationService applicationService;
     private JobsService service;
 
     @Before
@@ -69,7 +72,7 @@ public class JobsServiceImplTest {
 
     @Test(expected = JobServiceException.class)
     public void testCreateApplicationMissingAppName() throws Exception {
-        service.startCreateApplication(null);
+        service.startCreateApplication(null, false);
         fail("Creating application null name should throw an exception");
     }
 
@@ -77,6 +80,7 @@ public class JobsServiceImplTest {
     public void testCreateApplicationCreateJobFailed() throws Exception {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
+        jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(false));
         CreateJobsRequest expectedRequest = new CreateJobsRequest();
         expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
         expectedRequest.setJobParameters(jobParams);
@@ -85,7 +89,7 @@ public class JobsServiceImplTest {
                 .postForEntity(eq("/api/jobs"), eq(expectedRequest), eq(SuccessfulJobStartDto.class))
         ).thenThrow(new ApiCallException(500));
 
-        service.startCreateApplication(TEST_APP_NAME);
+        service.startCreateApplication(TEST_APP_NAME, false);
         fail("Create application should have failed due to api call exception");
     }
 
@@ -93,6 +97,7 @@ public class JobsServiceImplTest {
     public void testCreateApplicationOkWithUnzipStep() throws Exception {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
+        jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(false));
         CreateJobsRequest expectedRequest = new CreateJobsRequest();
         expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
         expectedRequest.setJobParameters(jobParams);
@@ -104,7 +109,7 @@ public class JobsServiceImplTest {
                 .postForEntity(eq("/api/jobs"), eq(expectedRequest), eq(SuccessfulJobStartDto.class))
         ).thenReturn(expectedResult);
 
-        String jobGuid = service.startCreateApplication(TEST_APP_NAME);
+        String jobGuid = service.startCreateApplication(TEST_APP_NAME, false);
         assertEquals("Job guid should be the same as mocked guid returned", TEST_JOB_GUID, jobGuid);
     }
 

@@ -19,4 +19,5 @@ public class ApplicationDto {
     private String guid;
     private String name;
     private String state;
+    private boolean inPlaceMode;
 }

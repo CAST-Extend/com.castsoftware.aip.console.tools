@@ -1,22 +1,24 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 
 import java.util.Set;
 
 public interface ApplicationService {
-    /**
-     * Retrieve an application's GUID from the given application name
-     *
-     * @param applicationName The name of the application
-     * @return The application GUID if it found the application, null otherwise
-     * @throws ApplicationServiceException If any error occurs while retrieving the application list from AIP Console
-     */
+
     String getApplicationGuidFromName(String applicationName) throws ApplicationServiceException;
 
     String getApplicationNameFromGuid(String applicationGuid) throws ApplicationServiceException;
+
+    ApplicationDto getApplicationFromGuid(String applicationGuid) throws ApplicationServiceException;
+
+    ApplicationDto getApplicationFromName(String applicationName) throws ApplicationServiceException;
 
     /**
      * Checks whether the application has any versions
@@ -84,5 +86,5 @@ public interface ApplicationService {
      * @param exclusionPatterns
      * @return
      */
-    String createDeliveryConfiguration(String appGuid, String exclusionPatterns) throws ApiCallException;
+    String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns) throws JobServiceException, PackagePathInvalidException;
 }

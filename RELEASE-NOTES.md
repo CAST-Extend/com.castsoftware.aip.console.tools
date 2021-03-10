@@ -1,5 +1,16 @@
 ## Release Notes :
 
+#### 1.20.0
+
+This version contains compatibility fixes for AIP Console 1.20.0
+
+Fix:
+* Fixed response parsing due to changes from Jobs endpoint response
+
+Feature:
+* Some information will no longer be shown in the logs
+* When interrupting the CLI (with CTRL+C) or aborting a Jenkins Build during a job (**except** during application creation), the job will be cancelled in AIP Console as well.
+
 #### 1.19.0
 
 This version contains compatibility fixes for AIP Console 1.19.0

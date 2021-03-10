@@ -1,5 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -8,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -22,7 +25,11 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -153,10 +160,16 @@ public class DeliverVersionCommand implements Callable<Integer> {
                 log.error(message, applicationName);
                 return Constants.RETURN_APPLICATION_NOT_FOUND;
             }
+            
+            ApplicationDto app = applicationService.getApplicationFromName(applicationName);
+            if (app.isInPlaceMode() && Files.isRegularFile(filePath.toPath())){
+                    log.error("The application is created in \"in-place\" mode, only folder path is allowed to deliver in this mode.");
+                    return Constants.RETURN_INPLACE_MODE_ERROR;
+            }
 
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
             // check that the application actually has versions, otherwise it's just an add version job
-            cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
+            cloneVersion = (app.isInPlaceMode() || cloneVersion) && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
@@ -166,18 +179,23 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
+            if (app.isInPlaceMode()){
+                //should got up to "set as current" when in-place mode is operating
+                builder.endStep(Constants.SET_CURRENT_STEP_NAME);
+            }
 
-            // set exclusions
-            if (StringUtils.isNotBlank(exclusionPatterns)) {
-                String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, exclusionPatterns);
-                log.info("delivery configuration guid " + deliveryConfigGuid);
-                if (StringUtils.isNotBlank(deliveryConfigGuid)) {
-                    builder.deliveryConfigGuid(deliveryConfigGuid);
-                }
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns);
+            log.info("delivery configuration guid " + deliveryConfigGuid);
+            if (StringUtils.isNotBlank(deliveryConfigGuid)) {
+                builder.deliveryConfigGuid(deliveryConfigGuid);
             }
 
             String jobGuid = jobsService.startAddVersionJob(builder);
+            Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
+
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Delivery of application {} was completed successfully.", applicationName);
                 return Constants.RETURN_OK;
@@ -192,6 +210,20 @@ public class DeliverVersionCommand implements Callable<Integer> {
             return Constants.RETURN_UPLOAD_ERROR;
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
+        } catch (PackagePathInvalidException e) {
+            log.error(e.getMessage());
+            return Constants.RETURN_JOB_FAILED;
         }
+    }
+
+    private Thread getShutdownHookForJobGuid(String jobGuid) {
+        return new Thread(() -> {
+            log.info("Received termination signal. Cancelling currently running job on AIP Console and exiting.");
+            try {
+                jobsService.cancelJob(jobGuid);
+            } catch (JobServiceException e) {
+                log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
+            }
+        });
     }
 }

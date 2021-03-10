@@ -1,8 +1,10 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -11,6 +13,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -48,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -55,6 +59,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -318,8 +323,11 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         EnvVars vars = run.getEnvironment(listener);
         String expandedAppName = vars.expand(applicationName);
         ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
+        boolean inplaceMode = false;
         try {
-            applicationGuid = applicationService.getApplicationGuidFromName(expandedAppName);
+            ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
+            inplaceMode = app == null ? false : app.isInPlaceMode();
+            applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(expandedAppName));
             e.printStackTrace(listener.getLogger());
@@ -328,6 +336,14 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         }
 
         String resolvedFilePath = vars.expand(filePath);
+
+        // inplace mode only allows the folders
+        if (inplaceMode && Files.isRegularFile(Paths.get(resolvedFilePath))) {
+            listener.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
+            run.setResult(Result.NOT_BUILT);
+            return;
+        }
+        
         String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath);
         FilePath workspaceFile = null;
         // Local file
@@ -381,7 +397,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName);
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
                         logContentDto -> {
@@ -453,7 +469,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         }
-
+        String jobGuid = null;
         try {
             // Create a value for versionName
             String resolvedVersionName = vars.expand(versionName);
@@ -480,14 +496,15 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
-
-            if (StringUtils.isNotEmpty(exclusionPatterns)) {
-                log.println("Exclusion patterns : " + exclusionPatterns);
-                requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, exclusionPatterns));
+            if (inplaceMode){
+                requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
 
+            log.println("Exclusion patterns : " + exclusionPatterns);
+            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns));
+
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
-            String jobGuid = jobsService.startAddVersionJob(requestBuilder);
+            jobGuid = jobsService.startAddVersionJob(requestBuilder);
 
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
@@ -499,7 +516,29 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 downloadDeliveryReport(workspace, applicationGuid, resolvedVersionName, listener);
                 run.setResult(Result.SUCCESS);
             }
-        } catch (JobServiceException | ApiCallException | ApplicationServiceException e) {
+        } catch (JobServiceException e) {
+            // Should we check if the original cause is an InterruptedException and attempt to cancel the job ?
+            if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                if (jobGuid != null) {
+                    run.setResult(Result.ABORTED);
+                    log.println("Attempting to cancel Analysis job on AIP Console, following cancellation of the build.");
+                    try {
+                        jobsService.cancelJob(jobGuid);
+                        log.println("Job was successfully cancelled on AIP Console.");
+                    } catch (JobServiceException jse) {
+                        log.println("Could not cancel the job on AIP Console, please cancel it manually. Error was : " + e.getMessage());
+                    }
+                }
+            } else {
+                listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+                e.printStackTrace(listener.getLogger());
+                run.setResult(defaultResult);
+            }
+        } catch (ApiCallException | ApplicationServiceException e) {
+            listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+            e.printStackTrace(listener.getLogger());
+            run.setResult(defaultResult);
+        } catch (PackagePathInvalidException e) {
             listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);

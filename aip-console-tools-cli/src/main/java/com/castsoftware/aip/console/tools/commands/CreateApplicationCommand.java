@@ -61,6 +61,10 @@ public class CreateApplicationCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--domain-name", paramLabel = "DOMAIN_NAME", description = "The name of the domain to assign to the application. Will be created if it doesn't exists. No domain will be assigned if left empty.")
     private String domainName;
 
+    @CommandLine.Option(names = "--inplace-mode",
+            description = "If true then no history will be kept for delivered sources.")
+    private boolean inPlaceMode = false;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -91,7 +95,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
                     return Constants.RETURN_APPLICATION_NOT_FOUND;
                 }
             }
-            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName);
+            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName, inPlaceMode);
             log.info("Started job to create new application.");
             return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {
@@ -108,6 +112,4 @@ public class CreateApplicationCommand implements Callable<Integer> {
             return Constants.UNKNOWN_ERROR;
         }
     }
-
-
 }

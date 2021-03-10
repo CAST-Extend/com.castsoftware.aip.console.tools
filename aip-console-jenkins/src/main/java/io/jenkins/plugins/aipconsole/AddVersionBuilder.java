@@ -1,7 +1,9 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -10,6 +12,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -46,11 +49,13 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -105,6 +110,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private String backupName = "";
     @Nullable
     private String domainName;
+
+    @Nullable
+    private String snapshotName = "";
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -216,6 +224,16 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         this.backupName = backupName;
     }
 
+    @Nullable
+    public String getSnapshotName() {
+        return snapshotName;
+    }
+
+    @DataBoundSetter
+    public void setSnapshotName(@Nullable String snapshotName) {
+        this.snapshotName = snapshotName;
+    }
+
     @DataBoundSetter
     public void setBackupApplicationEnabled(boolean backupApplicationEnabled) {
         this.backupApplicationEnabled = backupApplicationEnabled;
@@ -285,9 +303,12 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         EnvVars vars = run.getEnvironment(listener);
         // Parse variables in application name
         String variableAppName = vars.expand(applicationName);
+        boolean inplaceMode = false;
 
         try {
-            applicationGuid = applicationService.getApplicationGuidFromName(variableAppName);
+            ApplicationDto app = applicationService.getApplicationFromName(variableAppName);
+            inplaceMode = app == null ? false : app.isInPlaceMode();
+            applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(variableAppName));
             e.printStackTrace(listener.getLogger());
@@ -296,6 +317,13 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         }
 
         String resolvedFilePath = vars.expand(filePath);
+        // inplace mode only allows the folders
+        if (inplaceMode && Files.isRegularFile(Paths.get(resolvedFilePath))) {
+            listener.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
+            run.setResult(Result.NOT_BUILT);
+            return;
+        }
+
         String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath);
         FilePath workspaceFile = null;
         if (StringUtils.equalsAnyIgnoreCase(fileExt, "zip", "tgz", "tar.gz")) {
@@ -346,7 +374,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(variableAppName));
-                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName);
+                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
                         logContentDto -> {
@@ -417,10 +445,11 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             run.setResult(defaultResult);
             return;
         }
-
+        String jobGuid = null;
         try {
             // Create a value for versionName
             String resolvedVersionName = vars.expand(versionName);
+            String resolvedSnapshotName = vars.expand(snapshotName);
 
             if (StringUtils.isBlank(resolvedVersionName)) {
                 DateFormat formatVersionName = new SimpleDateFormat("yyMMdd.HHmmss");
@@ -442,8 +471,20 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName);
+            if (inplaceMode){
+                requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
+            }
 
-            String jobGuid = jobsService.startAddVersionJob(requestBuilder);
+            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null);
+            if (StringUtils.isNotBlank(deliveryConfig)) {
+                requestBuilder.deliveryConfigGuid(deliveryConfig);
+            }
+
+            if (StringUtils.isNotBlank(resolvedSnapshotName)) {
+                requestBuilder.snapshotName(resolvedSnapshotName);
+            }
+
+            jobGuid = jobsService.startAddVersionJob(requestBuilder);
 
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
@@ -455,6 +496,25 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(Result.SUCCESS);
             }
         } catch (JobServiceException e) {
+            // Should we check if the original cause is an InterruptedException and attempt to cancel the job ?
+            if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                if (jobGuid != null) {
+                    log.println("Attempting to cancel Analysis job on AIP Console, following cancellation of the build.");
+                    run.setResult(Result.ABORTED);
+                    try {
+                        jobsService.cancelJob(jobGuid);
+                        log.println("Job was successfully cancelled on AIP Console.");
+                    } catch (JobServiceException jse) {
+                        log.println("Could not cancel the job on AIP Console, please cancel it manually. Error was : " + e.getMessage());
+                    }
+                }
+            } else {
+                listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
+                e.printStackTrace(listener.getLogger());
+                run.setResult(defaultResult);
+            }
+        } catch (PackagePathInvalidException e) {
+            log.println("Failed to match the package path(s) with the previous version, job will stop");
             listener.error(AddVersionBuilder_AddVersion_error_jobServiceException());
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);

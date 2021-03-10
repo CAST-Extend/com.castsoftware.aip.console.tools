@@ -10,8 +10,14 @@ public enum VersionStatus {
     DELIVERED,
     ACCEPTED,
     ANALYSING,
+    ANALYSIS_ONGOING,
     ANALYSIS_DONE,
     ANALYSIS_FAILED,
+    PREPARING_ANALYSIS_DATA,
+    ANALYSIS_DATA_PREPARED,
+    PROCESSING_IMAGING,
+    IMAGING_PROCESSED,
+    SNAPSHOT_ONGOING,
     SNAPSHOT_TAKEN,
     SNAPSHOT_DONE,
     VALIDATED;
@@ -22,7 +28,7 @@ public enum VersionStatus {
     }
 
     public static VersionStatus[] analysedStatuses() {
-        return new VersionStatus[]{ANALYSIS_DONE, SNAPSHOT_TAKEN, SNAPSHOT_DONE, VALIDATED};
+        return new VersionStatus[]{ANALYSIS_DONE, SNAPSHOT_DONE, SNAPSHOT_TAKEN, VALIDATED, ANALYSIS_DATA_PREPARED, IMAGING_PROCESSED};
     }
 
     @Override

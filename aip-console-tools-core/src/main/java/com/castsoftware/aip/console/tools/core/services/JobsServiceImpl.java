@@ -1,9 +1,13 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
-import com.castsoftware.aip.console.tools.core.dto.SemVer;
+import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverPackageRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
@@ -13,15 +17,21 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
+import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.LogUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 @Log
 public class JobsServiceImpl implements JobsService {
@@ -52,22 +63,23 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startCreateApplication(String applicationName) throws JobServiceException {
+    public String startCreateApplication(String applicationName, boolean inplaceMode) throws JobServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new JobServiceException("Application name is empty. Unable to create application");
         }
-        return startCreateApplication(applicationName, null);
+        return startCreateApplication(applicationName, null, inplaceMode);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid) throws JobServiceException {
-        return startCreateApplication(applicationName, nodeGuid, null);
+    public String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode) throws JobServiceException {
+        return startCreateApplication(applicationName, nodeGuid, null, inplaceMode);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, String domainName) throws JobServiceException {
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode) throws JobServiceException {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
+        jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(inplaceMode));
         if (StringUtils.isNotBlank(nodeGuid)) {
             jobParams.put(Constants.PARAM_NODE_GUID, nodeGuid);
         }
@@ -122,7 +134,7 @@ public class JobsServiceImpl implements JobsService {
     public String startAddVersionJob(JobRequestBuilder builder) throws JobServiceException {
 
         ApiInfoDto apiInfoDto = getApiInfoDto();
-        if (apiInfoDto.isEnablePackagePathCheck()) {
+        if (apiInfoDto.isExtractionRequired()) {
             builder.startStep(Constants.CODE_SCANNER_STEP_NAME);
         } else {
             builder.startStep(Constants.EXTRACT_STEP_NAME);
@@ -142,10 +154,9 @@ public class JobsServiceImpl implements JobsService {
                 throw new JobServiceException("No response from AIP Console when start the job");
             }
 
-            // State was suspended after uploading for versions <= 1.9
-            // After that, suspended jobs mean that no job executor is available for now (so don't do the update)
-            SemVer aipConsoleVersion = SemVer.parse(apiInfoDto.getApiVersion());
-            if (aipConsoleVersion.getMajor() <= 1 && aipConsoleVersion.getMinor() <= 9) {
+            // BACKWARDS COMPATIBILITY with 1.9
+            // Job is started in suspended state, and must be resumed
+            if (apiInfoDto.isJobToBeResumed()) {
                 String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(dto.getJobGuid());
                 JobStatusWithSteps jobStatusWithSteps = restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
                 if (jobStatusWithSteps.getState() == JobState.STARTING) {
@@ -188,6 +199,7 @@ public class JobsServiceImpl implements JobsService {
             String logName = null;
             int startOffset = 0;
             while (true) {
+                Thread.sleep(pollingSleepDuration);
                 // Force login to keep session alive (jobs endpoint doesn't refresh session status)
                 restApiService.login();
                 jobStatus = restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
@@ -203,16 +215,16 @@ public class JobsServiceImpl implements JobsService {
                 }
 
                 if (!StringUtils.isAnyBlank(logName, currentStep)) {
-                    LogContentDto logContent = restApiService.getForEntity("/api/jobs/" + jobGuid + "/steps/" + currentStep + "/logs/" + logName + "?nbLines=3000&startOffset=" + startOffset, LogContentDto.class);
-                    pollingCallback.accept(logContent);
-                    startOffset = startOffset + logContent.getNbLines();
+                    LogContentDto logContent = getLogContent(jobGuid, currentStep, logName, startOffset);
+                    if (logContent != null && !logContent.getLines().isEmpty()) {
+                        pollingCallback.accept(logContent);
+                        startOffset = startOffset + logContent.getNbLines();
+                    }
                 }
 
                 if (jobStatus.getState() != JobState.STARTED && jobStatus.getState() != JobState.STARTING) {
                     break;
                 }
-
-                Thread.sleep(pollingSleepDuration);
             }
             return completionCallback.apply(jobStatus);
         } catch (InterruptedException | ApiCallException e) {
@@ -221,14 +233,39 @@ public class JobsServiceImpl implements JobsService {
         }
     }
 
+    @Override
+    public void cancelJob(String jobGuid) throws JobServiceException {
+        try {
+            ChangeJobStateRequest cancel = new ChangeJobStateRequest();
+            cancel.setState(JobState.CANCELED);
+            restApiService.putForEntity(ApiEndpointHelper.getJobDetailsEndpoint(jobGuid), cancel, Void.class);
+        } catch (ApiCallException e) {
+            throw new JobServiceException(e);
+        }
+    }
+
+    private LogContentDto getLogContent(String jobGuid, String currentStep, String logName, int startOffset) {
+        try {
+            return restApiService.getForEntity("/api/jobs/" + jobGuid + "/steps/" + currentStep + "/logs/" + logName + "?nbLines=3000&startOffset=" + startOffset, LogContentDto.class);
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Error to get the log content", e);
+            return null;
+        }
+    }
+
     private String getLogName(String jobGuid, String step) throws ApiCallException {
-        Set<LogsDto> logs = restApiService.getForEntity("/api/jobs/" + jobGuid + "/steps/" + step + "/logs", new TypeReference<Set<LogsDto>>() {
-        });
-        return logs.stream().filter(l -> l.getLogType().equalsIgnoreCase("MAIN_LOG")).findFirst().map(LogsDto::getLogName).orElse(null);
+        try {
+            Set<LogsDto> logs = restApiService.getForEntity("/api/jobs/" + jobGuid + "/steps/" + step + "/logs", new TypeReference<Set<LogsDto>>() {
+            });
+            return logs.stream().filter(l -> l.getLogType().equalsIgnoreCase("MAIN_LOG")).findFirst().map(LogsDto::getLogName).orElse(null);
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Error to get the log name");
+            return null;
+        }
     }
 
     private void printLog(LogContentDto logContent) {
-        logContent.getLines().forEach(logLine -> log.info(logLine.getContent()));
+        logContent.getLines().forEach(logLine -> log.info(LogUtils.replaceAllSensitiveInformation(logLine.getContent())));
     }
 
     private synchronized ApiInfoDto getApiInfoDto() {
