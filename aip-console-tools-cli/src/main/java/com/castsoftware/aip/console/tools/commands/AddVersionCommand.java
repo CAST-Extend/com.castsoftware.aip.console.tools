@@ -165,7 +165,7 @@ public class AddVersionCommand implements Callable<Integer> {
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
 
             // check that the application actually has versions, otherwise it's just an add version job
-            cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
+            cloneVersion = (app.isInPlaceMode() || cloneVersion) && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .versionName(versionName)
@@ -173,6 +173,9 @@ public class AddVersionCommand implements Callable<Integer> {
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName);
+            if (app.isInPlaceMode()){
+                builder.endStep(Constants.SET_CURRENT_STEP_NAME);
+            }
 
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {

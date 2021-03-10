@@ -338,7 +338,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         String resolvedFilePath = vars.expand(filePath);
 
         // inplace mode only allows the folders
-        if (inplaceMode && !Files.isDirectory(Paths.get(resolvedFilePath))) {
+        if (inplaceMode && Files.isRegularFile(Paths.get(resolvedFilePath))) {
             listener.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
             run.setResult(Result.NOT_BUILT);
             return;
@@ -496,6 +496,9 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
+            if (inplaceMode){
+                requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
+            }
 
             log.println("Exclusion patterns : " + exclusionPatterns);
             requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns));

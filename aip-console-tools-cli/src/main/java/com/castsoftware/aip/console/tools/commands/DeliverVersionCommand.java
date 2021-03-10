@@ -179,6 +179,9 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
+            if (app.isInPlaceMode()){
+                builder.endStep(Constants.SET_CURRENT_STEP_NAME);
+            }
 
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns);
             log.info("delivery configuration guid " + deliveryConfigGuid);
