@@ -173,9 +173,6 @@ public class AddVersionCommand implements Callable<Integer> {
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName);
-            if (app.isInPlaceMode()){
-                builder.endStep(Constants.SET_CURRENT_STEP_NAME);
-            }
 
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
