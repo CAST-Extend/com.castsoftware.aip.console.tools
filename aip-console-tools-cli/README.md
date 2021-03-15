@@ -32,13 +32,13 @@ This will create a new application "my app" on my AIP Console instance at `local
 
 ![create app CLI](doc/images/create_app.png)
 
-To **add a new version and analyze its source code**, have ZIP file and use the following command :
+To **add a new version and analyze its source code**, have a ZIP archive file and use the following command :
 
 ```bash
 java -jar .\aip-console-tools-cli.jar add --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app" -f ./source.zip
 ```
 
-It will upload the source.zip file, create a new version for the application "my app" and run an analysis on this version.
+It will upload the source.zip file, create a new version for the application "my app" and run an analysis on this version. **NOTE** If your application already has versions, this command will *clone* the previous version configuration to run the analysis on the new source code.
 
 ![image-20200609154849113](doc/images/add_version.png)
 
@@ -112,10 +112,11 @@ The available options are :
 * `--app-guid` or `-a` (optional): The application GUID. Can replace the application name parameter.
 * `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
 * `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
-* `--clone` or `--rescan` or `-c` (optional): Enables the clone version job. This will create a new version by cloning the previous version's configuration, similar to the "Same configuration as previous version" checkbox in AIP Console UI.
+* `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this new version. This is the default behaviour when no version exists for the given application.
 * `--version-name` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
 * `--snapshot-name` (option) The name of the snapshot to generate, default will be based on the date and time
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
+* `--disable-imaging` (optional): Disables sharing data with the configured Imaging instance linked to AIP Console. Note that this parameter has no effect if Imaging is not configured on AIP Console.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:
 * `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
@@ -124,6 +125,8 @@ The available options are :
 * `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
 * `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+
+*NOTE*: When creating a version, if a previous version exists, it's configuration will be cloned to the new version, but the new source will be used for analysis.
 
 #### Deliver
 
@@ -134,7 +137,7 @@ The available options are :
 * `--app-name` or `-n` (**required**): The application name.
 * `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
 * `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
-* `--clone` or `--rescan` or `--copy-previous-config` or `-c` (optional): Enables the clone version job. This will create a new version by cloning the previous version's configuration, similar to the "Same configuration as previous version" checkbox in AIP Console UI.
+* `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this new version. This is the default behaviour when no version exists for the given application.
 * `--version-name` or `-v` (optional): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
 * `--exclude-patterns` or `-exclude`: File patterns to exclude in the delivery, the pattern needs to follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
 * `--auto-discover`: will discover new technologies and install new extensions during rescan, to disable when run consistency check
@@ -158,6 +161,7 @@ The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot` or `-S` (optional): Also runs snapshot creation after analysis.
+* `--disable-imaging` (optional): If snapshot option is provided, disables sharing data with the configured Imaging instance linked to AIP Console. Note that this parameter has no effect if Imaging is not configured on AIP Console.
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
@@ -172,6 +176,7 @@ The available options are :
 * `--app-name` or `-n` (**required**): The application name.
 * `--version-name` or `-v` (optional): The name of the version to create. *default*: The current version (version marked as current).
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name. *default*: Defaults to `Snapshot-YYYY-MM-DDThh-mm-ss` (based on the current date and time)
+* `--disable-imaging` (optional): Disables sharing data with the configured Imaging instance linked to AIP Console. Note that this parameter has no effect if Imaging is not configured on AIP Console.
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90

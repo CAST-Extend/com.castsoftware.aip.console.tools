@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -81,10 +82,12 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--snapshot-name", paramLabel = "SNAPSHOT_NAME", description = "The name of the snapshot to generate")
     private String snapshotName;
     /**
-     * Whether or not to clone previous version
+     * Disable cloning previous version automatically.
      */
-    @CommandLine.Option(names = {"-c", "--clone", "--rescan", "--copy-previous-config"}, description = "Clones the latest version configuration instead of creating a new application")
-    private boolean cloneVersion = true;
+    @CommandLine.Option(names = {"--no-clone", "--no-rescan", "--new-configuration"},
+            description = "Enable this flag to create a new version without cloning the latest version configuration.",
+            defaultValue = "false")
+    private boolean disableClone = false;
     /**
      * Whether or not to automatically create the application before Adding a version (if the application could not be found)
      */
@@ -93,6 +96,9 @@ public class AddVersionCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version")
     private boolean enableSecurityDataflow = false;
+
+    @CommandLine.Option(names = "--disable-imaging", description = "If provided, uploading data to Imaging will be disabled. Note: If Imaging is not set up, data will not be pushed.")
+    private boolean disableImaging = false;
 
     /**
      * The name of the target node where application will be created. Only used if --auto-create is true and the application doesn't exists
@@ -123,11 +129,13 @@ public class AddVersionCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
+        ApiInfoDto apiInfo = null;
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
             }
             restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
+            apiInfo = restApiService.getAipConsoleApiInfo();
         } catch (ApiKeyMissingException e) {
             return Constants.RETURN_NO_PASSWORD;
         } catch (ApiCallException e) {
@@ -165,7 +173,8 @@ public class AddVersionCommand implements Callable<Integer> {
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
 
             // check that the application actually has versions, otherwise it's just an add version job
-            cloneVersion = (app.isInPlaceMode() || cloneVersion) && applicationService.applicationHasVersion(applicationGuid);
+            boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
+            // CHECK LFO CHANGES : cloneVersion = (app.isInPlaceMode() || cloneVersion) && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .versionName(versionName)
@@ -173,8 +182,10 @@ public class AddVersionCommand implements Callable<Integer> {
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName);
-            if (app.isInPlaceMode()){
-                builder.endStep(Constants.SET_CURRENT_STEP_NAME);
+
+            if (apiInfo.isImagingFlat() && !disableImaging) {
+                // Add the imaging step if it is configured
+                builder.endStep(Constants.PROCESS_IMAGING);
             }
 
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null);

@@ -21,6 +21,7 @@ public class AnalyzeAction implements RunAction2 {
     private boolean withSnapshot = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+    private boolean disableImaging = false;
 
     private transient Run run;
 
@@ -69,6 +70,14 @@ public class AnalyzeAction implements RunAction2 {
 
     public void setWithSnapshot(boolean withSnapshot) {
         this.withSnapshot = withSnapshot;
+    }
+
+    public boolean isDisableImaging() {
+        return disableImaging;
+    }
+
+    public void setDisableImaging(boolean disableImaging) {
+        this.disableImaging = disableImaging;
     }
 
     public long getTimeout() {
