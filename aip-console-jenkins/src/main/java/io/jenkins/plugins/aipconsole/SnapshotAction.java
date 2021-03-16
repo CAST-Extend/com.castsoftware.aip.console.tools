@@ -21,6 +21,7 @@ public class SnapshotAction implements RunAction2 {
     private String versionName;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+    private boolean logOutput = true;
 
     @CheckForNull
     public String getApplicationName() {
@@ -102,5 +103,13 @@ public class SnapshotAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
+    }
+
+    public boolean isLogOutput() {
+        return logOutput;
+    }
+
+    public void setLogOutput(boolean logOutput) {
+        this.logOutput = logOutput;
     }
 }

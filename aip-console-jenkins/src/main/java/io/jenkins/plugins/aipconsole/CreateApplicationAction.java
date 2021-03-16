@@ -16,6 +16,7 @@ public class CreateApplicationAction implements RunAction2 {
     private String applicationName;
     private boolean failureIgnored = false;
     private boolean inPlaceMode = false;
+    private boolean logOutput = true;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     @Nullable
     private String nodeName;
@@ -56,6 +57,14 @@ public class CreateApplicationAction implements RunAction2 {
 
     public void setInPlaceMode(boolean inPlaceMode) {
         this.inPlaceMode = inPlaceMode;
+    }
+
+    public boolean isLogOutput() {
+        return logOutput;
+    }
+
+    public void setLogOutput(boolean logOutput) {
+        this.logOutput = logOutput;
     }
 
     @Override

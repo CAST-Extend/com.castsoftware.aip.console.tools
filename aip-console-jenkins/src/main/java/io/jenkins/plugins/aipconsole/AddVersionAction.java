@@ -20,6 +20,8 @@ public class AddVersionAction implements RunAction2 {
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
+    private boolean logOutput = true;
+
     @Nullable
     private String versionName;
     private boolean failureIgnored = false;
@@ -180,5 +182,13 @@ public class AddVersionAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
+    }
+
+    public boolean isLogOutput() {
+        return logOutput;
+    }
+
+    public void setLogOutput(boolean logOutput) {
+        this.logOutput = logOutput;
     }
 }

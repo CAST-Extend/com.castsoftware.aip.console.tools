@@ -21,6 +21,7 @@ public class AnalyzeAction implements RunAction2 {
     private boolean withSnapshot = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+    private boolean logOutput = true;
 
     private transient Run run;
 
@@ -105,5 +106,13 @@ public class AnalyzeAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
+    }
+
+    public boolean isLogOutput() {
+        return logOutput;
+    }
+
+    public void setLogOutput(boolean logOutput) {
+        this.logOutput = logOutput;
     }
 }

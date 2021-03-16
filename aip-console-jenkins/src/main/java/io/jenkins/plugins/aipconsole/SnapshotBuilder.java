@@ -7,6 +7,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -46,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_DescriptorImpl_displayName;
@@ -75,6 +77,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     private String snapshotName;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+    private boolean logOutput = true;
 
     @DataBoundConstructor
     public SnapshotBuilder(String applicationName) {
@@ -125,6 +128,15 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setTimeout(long timeout) {
         this.timeout = timeout;
+    }
+
+    public boolean isLogOutput() {
+        return logOutput;
+    }
+
+    @DataBoundSetter
+    public void setLogOutput(boolean logOutput) {
+        this.logOutput = logOutput;
     }
 
     @Override
@@ -263,10 +275,15 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                         jobStatusWithSteps.getAppName() + " - " +
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
                 ),
+                getPollingCallback(log),
+                JobStatus::getState);
+    }
+
+    private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
+        return !isLogOutput() ? null :
                 logContentDto -> {
                     logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                },
-                JobStatus::getState);
+                };
     }
 
     /**
