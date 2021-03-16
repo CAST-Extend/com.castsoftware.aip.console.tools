@@ -1,7 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -26,10 +25,7 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -114,6 +110,10 @@ public class DeliverVersionCommand implements Callable<Integer> {
             description = "File patterns(glob pattern) to exclude in the delivery, separated with comma")
     private String exclusionPatterns;
 
+    @CommandLine.Option(names = {"-current", "--set-as-current"},
+            description = "true or false depending on whether the version should be set as the current one or not.")
+    private boolean asCurrentVersion = false;
+
     /**
      * Domain name
      */
@@ -179,7 +179,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
-            if (app.isInPlaceMode()){
+            if (app.isInPlaceMode() || asCurrentVersion) {
                 //should got up to "set as current" when in-place mode is operating
                 builder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
