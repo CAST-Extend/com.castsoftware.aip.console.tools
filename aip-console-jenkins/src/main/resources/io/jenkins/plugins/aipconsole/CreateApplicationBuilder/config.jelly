@@ -9,7 +9,7 @@
     <f:entry title="${%domainName}" field="domainName" description="${%domainName.descr}">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%inplaceMode}" field="inplaceMode" description="${%inplaceMode.descr}">
+    <f:entry title="${%inPlaceMode}" field="inPlaceMode" description="${%inPlaceMode.descr}">
          <f:checkbox/>
     </f:entry>
     <f:advanced title="${%advancedSettings}">
