@@ -68,6 +68,9 @@ public class AnalyzeCommand implements Callable<Integer> {
             description = "Creates a snapshot after running the analysis.")
     private boolean withSnapshot;
 
+    @CommandLine.Option(names = "--disable-imaging", description = "If provided, uploading data to Imaging will be disabled. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console")
+    private boolean disableImaging = false;
+
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
@@ -131,12 +134,18 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
-                builder.endStep(
-                        SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                                Constants.CONSOLIDATE_SNAPSHOT :
-                                Constants.UPLOAD_APP_SNAPSHOT);
-                builder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
-                builder.uploadApplication(true);
+                String endStep;
+                if (apiInfoDto.isImagingFlat()) {
+                    endStep = Constants.PROCESS_IMAGING;
+                } else {
+                    endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                            Constants.CONSOLIDATE_SNAPSHOT :
+                            Constants.UPLOAD_APP_SNAPSHOT;
+                }
+
+                builder.endStep(endStep)
+                        .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
+                        .uploadApplication(true);
             } else {
                 builder.endStep(Constants.ANALYZE);
             }

@@ -1,7 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -26,10 +25,7 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -81,9 +77,10 @@ public class DeliverVersionCommand implements Callable<Integer> {
             hideParamSyntax = true)
     private boolean autoDeploy = false;
 
-    @CommandLine.Option(names = {"-c", "--clone", "--rescan", "--copy-previous-config"},
-            description = "Clones the latest version configuration instead of creating a new application")
-    private boolean cloneVersion = true;
+    @CommandLine.Option(names = {"--no-clone", "--no-rescan", "--create-new-version"},
+            description = "Enable this flag to create a new version without cloning the latest version configuration. Note that when using \"in-place\" more, this parameter will be ignore and versions will always be cloned.",
+            defaultValue = "false")
+    private boolean disableClone = false;
 
     @CommandLine.Option(names = "--auto-create",
             description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
@@ -152,6 +149,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
         log.info("Deliver version command has triggered with log output = '{}'", sharedOptions.isLogOutput());
 
         String applicationGuid;
+        Thread shutdownHook = null;
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
@@ -163,18 +161,21 @@ public class DeliverVersionCommand implements Callable<Integer> {
                 log.error(message, applicationName);
                 return Constants.RETURN_APPLICATION_NOT_FOUND;
             }
-            
+
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
-            if (app.isInPlaceMode() && Files.isRegularFile(filePath.toPath())){
-                    log.error("The application is created in \"in-place\" mode, only folder path is allowed to deliver in this mode.");
-                    return Constants.RETURN_INPLACE_MODE_ERROR;
+            if (app.isInPlaceMode() && Files.isRegularFile(filePath.toPath())) {
+                log.error("The application is created in \"in-place\" mode, only folder path is allowed to deliver in this mode.");
+                return Constants.RETURN_INPLACE_MODE_ERROR;
             }
 
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
             // check that the application actually has versions, otherwise it's just an add version job
-            cloneVersion = (app.isInPlaceMode() || cloneVersion) && applicationService.applicationHasVersion(applicationGuid);
 
-            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
+            // Clone the version if we're in "in-place" mode or the user wants to clone the version and the application has versions
+            boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
+
+            JobRequestBuilder builder = JobRequestBuilder
+                    .newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
@@ -194,18 +195,17 @@ public class DeliverVersionCommand implements Callable<Integer> {
             }
 
             String jobGuid = jobsService.startAddVersionJob(builder);
-            Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
+            shutdownHook = getShutdownHookForJobGuid(jobGuid);
 
             Runtime.getRuntime().addShutdownHook(shutdownHook);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isLogOutput());
-            Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Delivery of application {} was completed successfully.", applicationName);
                 return Constants.RETURN_OK;
+            } else {
+                log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
+                return Constants.RETURN_JOB_FAILED;
             }
-
-            log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
-            return Constants.RETURN_JOB_FAILED;
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         } catch (UploadException e) {
@@ -214,9 +214,16 @@ public class DeliverVersionCommand implements Callable<Integer> {
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_POLL_ERROR;
         } catch (PackagePathInvalidException e) {
-            log.error(e.getMessage());
+            log.error("Provided Path is invalid", e);
             return Constants.RETURN_JOB_FAILED;
+        } finally {
+            // Remove shutdown hook after execution
+            // This is to avoid exceptions during job execution to
+            if (shutdownHook != null) {
+                Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            }
         }
+
     }
 
     private Thread getShutdownHookForJobGuid(String jobGuid) {

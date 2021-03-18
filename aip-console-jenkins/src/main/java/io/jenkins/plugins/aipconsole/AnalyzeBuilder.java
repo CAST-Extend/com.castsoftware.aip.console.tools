@@ -77,6 +77,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean withSnapshot = false;
+    private boolean disableImaging = false;
 
     private boolean logOutput = true;
 
@@ -129,6 +130,14 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setWithSnapshot(boolean withSnapshot) {
         this.withSnapshot = withSnapshot;
+    }
+
+    public boolean isDisableImaging() {
+        return disableImaging;
+    }
+
+    public void setDisableImaging(boolean disableImaging) {
+        this.disableImaging = disableImaging;
     }
 
     public long getTimeout() {
@@ -239,12 +248,17 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
 
             if (withSnapshot) {
-                requestBuilder.endStep(
-                        apiInfoDto.isLastStepConsolidateSnapshot() ?
-                                Constants.CONSOLIDATE_SNAPSHOT :
-                                Constants.UPLOAD_APP_SNAPSHOT);
-                requestBuilder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
-                requestBuilder.uploadApplication(true);
+                String endStep;
+                if (apiInfoDto.isImagingFlat()) {
+                    endStep = Constants.PROCESS_IMAGING;
+                } else {
+                    endStep = apiInfoDto.isLastStepConsolidateSnapshot() ?
+                            Constants.CONSOLIDATE_SNAPSHOT :
+                            Constants.UPLOAD_APP_SNAPSHOT;
+                }
+                requestBuilder.endStep(endStep)
+                        .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
+                        .uploadApplication(true);
             } else {
                 requestBuilder.endStep(Constants.ANALYZE);
             }
