@@ -508,6 +508,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
+
             if (inplaceMode || isAsCurrentVersion()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }

@@ -469,6 +469,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName);
+            if (inplaceMode){
+                requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
+            }
 
             String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null);
             if (StringUtils.isNotBlank(deliveryConfig)) {
