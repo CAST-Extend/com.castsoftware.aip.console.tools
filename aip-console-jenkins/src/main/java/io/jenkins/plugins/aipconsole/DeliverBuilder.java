@@ -186,7 +186,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         return setAsCurrent;
     }
 
-    public boolean getAsCurrentVersion() {
+    public boolean getSetAsCurrent() {
         return isSetAsCurrent();
     }
 

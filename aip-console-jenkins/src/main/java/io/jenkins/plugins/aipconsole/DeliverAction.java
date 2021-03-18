@@ -35,7 +35,7 @@ public class DeliverAction implements RunAction2 {
     private boolean autoDiscover = true;
     @Nullable
     private String domainName;
-    private boolean asCurrentVersion = false;
+    private boolean setAsCurrent = false;
 
     private transient Run run;
 
@@ -79,12 +79,12 @@ public class DeliverAction implements RunAction2 {
         this.autoCreate = autoCreate;
     }
 
-    public boolean isAsCurrentVersion() {
-        return asCurrentVersion;
+    public boolean isSetAsCurrent() {
+        return setAsCurrent;
     }
 
-    public void setAsCurrentVersion(boolean asCurrentVersion) {
-        this.asCurrentVersion = asCurrentVersion;
+    public void setSetAsCurrent(boolean setAsCurrent) {
+        this.setAsCurrent = setAsCurrent;
     }
 
     public boolean isCloneVersion() {
