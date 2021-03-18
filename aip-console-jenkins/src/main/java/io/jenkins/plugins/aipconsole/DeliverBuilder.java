@@ -514,7 +514,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
             }
 
             log.println("Exclusion patterns : " + exclusionPatterns);
-            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns));
+            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns, applicationHasVersion));
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);

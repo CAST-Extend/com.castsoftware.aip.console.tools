@@ -190,7 +190,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
                 builder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
 
-            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns);
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns, cloneVersion);
             log.info("delivery configuration guid " + deliveryConfigGuid);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
