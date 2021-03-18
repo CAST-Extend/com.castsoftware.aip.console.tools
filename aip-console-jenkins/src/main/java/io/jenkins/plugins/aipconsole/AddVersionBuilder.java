@@ -486,7 +486,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 requestBuilder.endStep(Constants.PROCESS_IMAGING);
             }
 
-            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null);
+            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null, applicationHasVersion);
             if (StringUtils.isNotBlank(deliveryConfig)) {
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
             }

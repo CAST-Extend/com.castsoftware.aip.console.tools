@@ -118,6 +118,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     private String exclusionPatterns = "";
 
     private boolean autoDiscover = true;
+    private boolean setAsCurrent = false;
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
@@ -179,6 +180,19 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setAutoDiscover(boolean autoDiscover) {
         this.autoDiscover = autoDiscover;
+    }
+
+    public boolean isSetAsCurrent() {
+        return setAsCurrent;
+    }
+
+    public boolean getSetAsCurrent() {
+        return isSetAsCurrent();
+    }
+
+    @DataBoundSetter
+    public void setSetAsCurrent(boolean setAsCurrent) {
+        this.setAsCurrent = setAsCurrent;
     }
 
     @Nullable
@@ -494,12 +508,13 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
-            if (inplaceMode){
+
+            if (inplaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
 
             log.println("Exclusion patterns : " + exclusionPatterns);
-            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns));
+            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns, applicationHasVersion));
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);

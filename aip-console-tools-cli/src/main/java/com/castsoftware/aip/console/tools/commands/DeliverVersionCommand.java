@@ -111,6 +111,10 @@ public class DeliverVersionCommand implements Callable<Integer> {
             description = "File patterns(glob pattern) to exclude in the delivery, separated with comma")
     private String exclusionPatterns;
 
+    @CommandLine.Option(names = {"-current", "--set-as-current"},
+            description = "true or false depending on whether the version should be set as the current one or not.")
+    private boolean setAsCurrent = false;
+
     /**
      * Domain name
      */
@@ -180,12 +184,12 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
-            if (app.isInPlaceMode()){
+            if (app.isInPlaceMode() || setAsCurrent) {
                 //should got up to "set as current" when in-place mode is operating
                 builder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
 
-            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns);
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns, cloneVersion);
             log.info("delivery configuration guid " + deliveryConfigGuid);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);

@@ -187,7 +187,7 @@ public class AddVersionCommand implements Callable<Integer> {
                 builder.endStep(Constants.PROCESS_IMAGING);
             }
 
-            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null);
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null, cloneVersion);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
             }
