@@ -69,6 +69,9 @@ public class SnapshotCommand implements Callable<Integer> {
             description = "The name of the snapshot to create")
     private String snapshotName;
 
+    @CommandLine.Option(names = "--disable-imaging", description = "If provided, uploading data to Imaging will be disabled. Note: Nothing will be pushed to Imaging if no instance is set up.")
+    private boolean disableImaging = false;
+
     public SnapshotCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
@@ -139,8 +142,13 @@ public class SnapshotCommand implements Callable<Integer> {
                 snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
-            String endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                    Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT;
+            String endStep;
+            if (apiInfoDto.isImagingFlat()) {
+                endStep = Constants.PROCESS_IMAGING;
+            } else {
+                endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                        Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT;
+            }
 
             // Run snapshot
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)

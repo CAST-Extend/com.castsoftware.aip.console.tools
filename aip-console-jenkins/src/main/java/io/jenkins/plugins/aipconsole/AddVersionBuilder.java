@@ -3,7 +3,6 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -55,7 +54,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -110,6 +108,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private String backupName = "";
     @Nullable
     private String domainName;
+    private boolean disableImaging = false;
 
     @Nullable
     private String snapshotName = "";
@@ -247,6 +246,14 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setDomainName(@Nullable String domainName) {
         this.domainName = domainName;
+    }
+
+    public boolean isDisableImaging() {
+        return disableImaging;
+    }
+
+    public void setDisableImaging(boolean disableImaging) {
+        this.disableImaging = disableImaging;
     }
 
     @Override
@@ -473,6 +480,10 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .backupName(backupName);
             if (inplaceMode){
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
+            }
+
+            if (apiInfoDto.isImagingFlat() && !disableImaging) {
+                requestBuilder.endStep(Constants.PROCESS_IMAGING);
             }
 
             String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null);
