@@ -120,6 +120,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     private String exclusionPatterns = "";
 
     private boolean autoDiscover = true;
+    private boolean setAsCurrent = false;
 
     private boolean logOutput = true;
 
@@ -183,6 +184,19 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setAutoDiscover(boolean autoDiscover) {
         this.autoDiscover = autoDiscover;
+    }
+
+    public boolean isSetAsCurrent() {
+        return setAsCurrent;
+    }
+
+    public boolean getSetAsCurrent() {
+        return isSetAsCurrent();
+    }
+
+    @DataBoundSetter
+    public void setSetAsCurrent(boolean setAsCurrent) {
+        this.setAsCurrent = setAsCurrent;
     }
 
     @Nullable
@@ -505,7 +519,8 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
-            if (inplaceMode){
+
+            if (inplaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
 
