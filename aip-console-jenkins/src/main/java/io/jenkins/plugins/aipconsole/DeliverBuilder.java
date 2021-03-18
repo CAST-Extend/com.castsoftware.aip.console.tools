@@ -4,7 +4,6 @@ import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -59,7 +58,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -120,6 +118,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     private String exclusionPatterns = "";
 
     private boolean autoDiscover = true;
+    private boolean setAsCurrent = false;
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
@@ -181,6 +180,19 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setAutoDiscover(boolean autoDiscover) {
         this.autoDiscover = autoDiscover;
+    }
+
+    public boolean isSetAsCurrent() {
+        return setAsCurrent;
+    }
+
+    public boolean getSetAsCurrent() {
+        return isSetAsCurrent();
+    }
+
+    @DataBoundSetter
+    public void setSetAsCurrent(boolean setAsCurrent) {
+        this.setAsCurrent = setAsCurrent;
     }
 
     @Nullable
@@ -496,7 +508,8 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
-            if (inplaceMode){
+
+            if (inplaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
 
