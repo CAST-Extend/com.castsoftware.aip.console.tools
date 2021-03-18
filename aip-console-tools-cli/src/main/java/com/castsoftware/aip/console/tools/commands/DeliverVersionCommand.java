@@ -112,7 +112,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = {"-current", "--set-as-current"},
             description = "true or false depending on whether the version should be set as the current one or not.")
-    private boolean asCurrentVersion = false;
+    private boolean setAsCurrent = false;
 
     /**
      * Domain name
@@ -180,7 +180,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
 
-            if (app.isInPlaceMode() || asCurrentVersion) {
+            if (app.isInPlaceMode() || setAsCurrent) {
                 //should got up to "set as current" when in-place mode is operating
                 builder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }

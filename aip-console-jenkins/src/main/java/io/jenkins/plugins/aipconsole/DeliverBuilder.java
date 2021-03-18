@@ -118,7 +118,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     private String exclusionPatterns = "";
 
     private boolean autoDiscover = true;
-    private boolean asCurrentVersion = false;
+    private boolean setAsCurrent = false;
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
@@ -182,17 +182,17 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         this.autoDiscover = autoDiscover;
     }
 
-    public boolean isAsCurrentVersion() {
-        return asCurrentVersion;
+    public boolean isSetAsCurrent() {
+        return setAsCurrent;
     }
 
     public boolean getAsCurrentVersion() {
-        return isAsCurrentVersion();
+        return isSetAsCurrent();
     }
 
     @DataBoundSetter
-    public void setAsCurrentVersion(boolean asCurrentVersion) {
-        this.asCurrentVersion = asCurrentVersion;
+    public void setSetAsCurrent(boolean setAsCurrent) {
+        this.setAsCurrent = setAsCurrent;
     }
 
     @Nullable
@@ -509,7 +509,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
 
-            if (inplaceMode || isAsCurrentVersion()) {
+            if (inplaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
 
