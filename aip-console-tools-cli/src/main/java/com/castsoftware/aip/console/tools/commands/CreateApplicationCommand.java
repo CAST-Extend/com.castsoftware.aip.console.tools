@@ -62,7 +62,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
     private String domainName;
 
     @CommandLine.Option(names = "--inplace-mode",
-            description = "If true then no history will be kept for delivered sources.")
+            description = "If checked then no history will be kept for delivered sources. In this case, only sources from a unique folder location will be processed.")
     private boolean inPlaceMode = false;
 
     @CommandLine.Unmatched

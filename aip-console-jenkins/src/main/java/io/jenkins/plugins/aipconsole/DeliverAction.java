@@ -35,6 +35,7 @@ public class DeliverAction implements RunAction2 {
     private boolean autoDiscover = true;
     @Nullable
     private String domainName;
+    private boolean inPlaceMode = false;
 
     private transient Run run;
 
@@ -197,5 +198,13 @@ public class DeliverAction implements RunAction2 {
 
     public void setDomainName(@Nullable String domainName) {
         this.domainName = domainName;
+    }
+
+    public boolean isInPlaceMode() {
+        return inPlaceMode;
+    }
+
+    public void setInPlaceMode(boolean inPlaceMode) {
+        this.inPlaceMode = inPlaceMode;
     }
 }

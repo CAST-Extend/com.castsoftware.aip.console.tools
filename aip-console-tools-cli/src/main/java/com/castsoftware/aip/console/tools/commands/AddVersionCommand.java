@@ -91,6 +91,10 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
     private boolean autoCreate = false;
 
+    @CommandLine.Option(names = "--inplace-mode",
+            description = "If true then no history will be kept for delivered sources. In this case, only sources from a unique folder location will be processed.")
+    private boolean inPlaceMode = false;
+
     @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version")
     private boolean enableSecurityDataflow = false;
 
@@ -142,7 +146,7 @@ public class AddVersionCommand implements Callable<Integer> {
         try {
             if (StringUtils.isBlank(applicationGuid)) {
                 log.info("Searching for application '{}' on AIP Console", applicationName);
-                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName);
+                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, inPlaceMode);
                 if (StringUtils.isBlank(applicationGuid)) {
                     String message = autoCreate ?
                             "Creation of the application '{}' failed on AIP Console" :

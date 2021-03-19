@@ -3,7 +3,6 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -55,7 +54,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -113,6 +111,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
     @Nullable
     private String snapshotName = "";
+    private boolean inPlaceMode = false;
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -249,6 +248,15 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         this.domainName = domainName;
     }
 
+    public boolean isInPlaceMode() {
+        return inPlaceMode;
+    }
+
+    @DataBoundSetter
+    public void setInPlaceMode(boolean inPlaceMode) {
+        this.inPlaceMode = inPlaceMode;
+    }
+
     @Override
     public AddVersionDescriptorImpl getDescriptor() {
         return (AddVersionDescriptorImpl) super.getDescriptor();
@@ -303,11 +311,11 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         EnvVars vars = run.getEnvironment(listener);
         // Parse variables in application name
         String variableAppName = vars.expand(applicationName);
-        boolean inplaceMode = false;
+        boolean inplaceMode;
 
         try {
             ApplicationDto app = applicationService.getApplicationFromName(variableAppName);
-            inplaceMode = app == null ? false : app.isInPlaceMode();
+            inplaceMode = app == null ? isInPlaceMode() : app.isInPlaceMode();
             applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(variableAppName));

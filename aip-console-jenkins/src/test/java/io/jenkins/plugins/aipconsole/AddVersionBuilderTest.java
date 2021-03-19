@@ -6,7 +6,6 @@ import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
@@ -116,6 +115,7 @@ public class AddVersionBuilderTest {
         project = jenkins.configRoundtrip(project);
         AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
         job.setDomainName("");
+        job.setInPlaceMode(false);
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
 

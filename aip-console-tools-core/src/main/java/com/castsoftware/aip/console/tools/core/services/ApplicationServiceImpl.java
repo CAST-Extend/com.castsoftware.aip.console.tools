@@ -32,8 +32,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toSet;
-
 @Log
 public class ApplicationServiceImpl implements ApplicationService {
 
@@ -93,11 +91,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName) throws ApplicationServiceException {
-        return getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, null);
+        return getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, null, false);
     }
 
     @Override
-    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName) throws ApplicationServiceException {
+    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName, boolean inPlaceMode) throws ApplicationServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new ApplicationServiceException("No application name provided.");
         }
@@ -132,7 +130,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 }
                 log.info(infoMessage);
 
-                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false);
+                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, inPlaceMode);
                 return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
             } catch (JobServiceException | ApiCallException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);

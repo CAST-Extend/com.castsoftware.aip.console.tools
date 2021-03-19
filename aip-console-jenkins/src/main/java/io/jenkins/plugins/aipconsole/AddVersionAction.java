@@ -35,6 +35,8 @@ public class AddVersionAction implements RunAction2 {
     @Nullable
     private String snapshotName;
 
+    private boolean inPlaceMode = false;
+
     private transient Run run;
 
     public AddVersionAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
@@ -180,5 +182,13 @@ public class AddVersionAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
+    }
+
+    public boolean isInPlaceMode() {
+        return inPlaceMode;
+    }
+
+    public void setInPlaceMode(boolean inPlaceMode) {
+        this.inPlaceMode = inPlaceMode;
     }
 }

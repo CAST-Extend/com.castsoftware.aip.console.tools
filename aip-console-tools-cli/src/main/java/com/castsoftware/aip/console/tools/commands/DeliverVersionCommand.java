@@ -1,7 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -26,10 +25,7 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -88,6 +84,10 @@ public class DeliverVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--auto-create",
             description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
     private boolean autoCreate = false;
+
+    @CommandLine.Option(names = "--inplace-mode",
+            description = "If true then no history will be kept for delivered sources. In this case, only sources from a unique folder location will be processed.")
+    private boolean inPlaceMode = false;
 
     @CommandLine.Option(names = "--enable-security-dataflow",
             description = "If defined, this will activate the security dataflow for this version")
@@ -152,7 +152,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
-            applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName);
+            applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, inPlaceMode);
             if (StringUtils.isBlank(applicationGuid)) {
                 String message = autoCreate ?
                         "Creation of the application '{}' failed on AIP Console" :
