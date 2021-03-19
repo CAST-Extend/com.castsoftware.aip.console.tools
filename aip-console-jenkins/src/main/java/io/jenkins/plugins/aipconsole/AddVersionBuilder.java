@@ -108,6 +108,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private String backupName = "";
     @Nullable
     private String domainName;
+    private boolean disableImaging = false;
 
     @Nullable
     private String snapshotName = "";
@@ -255,6 +256,13 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setInPlaceMode(boolean inPlaceMode) {
         this.inPlaceMode = inPlaceMode;
+
+    public boolean isDisableImaging() {
+        return disableImaging;
+    }
+
+    public void setDisableImaging(boolean disableImaging) {
+        this.disableImaging = disableImaging;
     }
 
     @Override
@@ -479,11 +487,12 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName);
-            if (inplaceMode){
-                requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
+
+            if (apiInfoDto.isImagingFlat() && !disableImaging) {
+                requestBuilder.endStep(Constants.PROCESS_IMAGING);
             }
 
-            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null);
+            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null, applicationHasVersion);
             if (StringUtils.isNotBlank(deliveryConfig)) {
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
             }
