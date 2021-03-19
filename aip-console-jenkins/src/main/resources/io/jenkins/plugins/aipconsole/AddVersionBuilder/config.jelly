@@ -18,10 +18,10 @@
     <f:entry title="${%enableSecurity}" field="enableSecurityDataflow" description="${%enableSecurity.descr}">
         <f:checkbox/>
     </f:entry>
-    <f:entry title="${%logOutput}" field="logOutput" description="${%logOutput.descr}">
-         <f:checkbox/>
-    </f:entry>
     <f:advanced title="${%advancedSettings}">
+        <f:entry title="${%verbose}" field="verbose" description="${%verbose.descr}">
+             <f:checkbox field="verbose" value="${verbose}" default="true"/>
+        </f:entry>
         <f:entry title="${%cloneVersion}" field="cloneVersion" description="${%cloneVersion.descr}">
             <f:checkbox field="cloneVersion" value="${cloneVersion}" default="true"/>
         </f:entry>

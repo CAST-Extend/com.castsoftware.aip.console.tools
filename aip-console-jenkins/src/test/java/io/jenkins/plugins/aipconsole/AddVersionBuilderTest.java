@@ -123,7 +123,7 @@ public class AddVersionBuilderTest {
         FreeStyleProject project = getProjectWithDefaultAddVersion();
         project = jenkins.configRoundtrip(project);
         AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
-        job.setLogOutput(true);
+        job.setVerbose(true);
         job.setDomainName("");
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }

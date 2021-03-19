@@ -26,8 +26,8 @@ public class SharedOptions {
     @CommandLine.Option(names = {"--timeout"}, description = "The timeout in seconds for calls to AIP Console. Defaults to a 90s timeout", defaultValue = "90")
     private long timeout;
 
-    @CommandLine.Option(names = {"-o", "--logOutput"}, description = "Whether the command log should be output to the console or not, defaulted to true")
-    private boolean logOutput = true;
+    @CommandLine.Option(names = {"--verbose"}, description = "Whether the command log should be output to the console or not, defaulted to true")
+    private boolean verbose = true;
 
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
@@ -80,12 +80,12 @@ public class SharedOptions {
         this.timeout = timeout;
     }
 
-    public boolean isLogOutput() {
-        return logOutput;
+    public boolean isVerbose() {
+        return verbose;
     }
 
-    public void setLogOutput(boolean logOutput) {
-        this.logOutput = logOutput;
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 
     public String getApiKeyValue() {
@@ -111,7 +111,7 @@ public class SharedOptions {
                 ", username='" + username + '\'' +
                 ", timeout='" + timeout + '\'' +
                 ", unmatchedOptions=" + unmatchedOptions +
-                ", log output= " + logOutput +
+                ", log output= " + verbose +
                 '}';
     }
 }

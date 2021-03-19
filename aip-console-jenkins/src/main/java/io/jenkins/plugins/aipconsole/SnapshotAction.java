@@ -22,7 +22,7 @@ public class SnapshotAction implements RunAction2 {
     private boolean disableImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
-    private boolean logOutput = true;
+    private boolean verbose = true;
 
     @CheckForNull
     public String getApplicationName() {
@@ -114,11 +114,11 @@ public class SnapshotAction implements RunAction2 {
         return null;
     }
 
-    public boolean isLogOutput() {
-        return logOutput;
+    public boolean isVerbose() {
+        return verbose;
     }
 
-    public void setLogOutput(boolean logOutput) {
-        this.logOutput = logOutput;
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 }

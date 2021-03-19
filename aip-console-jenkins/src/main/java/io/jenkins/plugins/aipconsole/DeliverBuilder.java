@@ -122,7 +122,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     private boolean autoDiscover = true;
     private boolean setAsCurrent = false;
 
-    private boolean logOutput = true;
+    private boolean verbose = true;
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
@@ -290,13 +290,13 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         return (DeliverDescriptorImpl) super.getDescriptor();
     }
 
-    public boolean isLogOutput() {
-        return logOutput;
+    public boolean isVerbose() {
+        return verbose;
     }
 
     @DataBoundSetter
-    public void setLogOutput(boolean logOutput) {
-        this.logOutput = logOutput;
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 
     @Override
@@ -625,7 +625,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     }
 
     private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
-        return !isLogOutput() ? null :
+        return !isVerbose() ? null :
                 logContentDto -> {
                     logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
                 };

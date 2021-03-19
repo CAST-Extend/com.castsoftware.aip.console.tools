@@ -150,14 +150,14 @@ public class DeliverVersionCommand implements Callable<Integer> {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
-        log.info("Deliver version command has triggered with log output = '{}'", sharedOptions.isLogOutput());
+        log.info("Deliver version command has triggered with log output = '{}'", sharedOptions.isVerbose());
 
         String applicationGuid;
         Thread shutdownHook = null;
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
-            applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, sharedOptions.isLogOutput());
+            applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, sharedOptions.isVerbose());
             if (StringUtils.isBlank(applicationGuid)) {
                 String message = autoCreate ?
                         "Creation of the application '{}' failed on AIP Console" :
@@ -203,7 +203,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
             shutdownHook = getShutdownHookForJobGuid(jobGuid);
 
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isLogOutput());
+            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Delivery of application {} was completed successfully.", applicationName);
                 return Constants.RETURN_OK;

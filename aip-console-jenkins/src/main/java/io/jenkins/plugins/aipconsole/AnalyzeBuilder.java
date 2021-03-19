@@ -79,7 +79,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     private boolean withSnapshot = false;
     private boolean disableImaging = false;
 
-    private boolean logOutput = true;
+    private boolean verbose = true;
 
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
@@ -149,13 +149,13 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         this.timeout = timeout;
     }
 
-    public boolean isLogOutput() {
-        return logOutput;
+    public boolean isVerbose() {
+        return verbose;
     }
 
     @DataBoundSetter
-    public void setLogOutput(boolean logOutput) {
-        this.logOutput = logOutput;
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 
     @Override
@@ -315,7 +315,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     }
 
     private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
-        return !isLogOutput() ? null :
+        return !isVerbose() ? null :
                 logContentDto -> {
                     logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
                 };

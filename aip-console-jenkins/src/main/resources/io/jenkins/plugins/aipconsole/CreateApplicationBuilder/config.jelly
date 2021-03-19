@@ -12,11 +12,11 @@
     <f:entry title="${%inPlaceMode}" field="inPlaceMode" description="${%inPlaceMode.descr}">
          <f:checkbox/>
     </f:entry>
-    <f:entry title="${%logOutput}" field="logOutput" description="${%logOutput.descr}">
-         <f:checkbox/>
-    </f:entry>
     <f:advanced title="${%advancedSettings}">
-        <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
+         <f:entry title="${%verbose}" field="verbose" description="${%verbose.descr}">
+              <f:checkbox field="verbose" value="${verbose}" default="true"/>
+         </f:entry>
+       <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
             <f:number default="30"/>
         </f:entry>
         <f:entry title="${%failureIgnored}" field="failureIgnored" description="${%failureIgnored.descr}">

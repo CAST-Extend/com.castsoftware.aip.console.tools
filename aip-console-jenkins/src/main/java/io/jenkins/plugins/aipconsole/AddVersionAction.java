@@ -20,7 +20,7 @@ public class AddVersionAction implements RunAction2 {
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
-    private boolean logOutput = true;
+    private boolean verbose = true;
 
     @Nullable
     private String versionName;
@@ -193,11 +193,11 @@ public class AddVersionAction implements RunAction2 {
         return null;
     }
 
-    public boolean isLogOutput() {
-        return logOutput;
+    public boolean isVerbose() {
+        return verbose;
     }
 
-    public void setLogOutput(boolean logOutput) {
-        this.logOutput = logOutput;
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 }

@@ -142,7 +142,7 @@ public class AddVersionCommand implements Callable<Integer> {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
-        log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isLogOutput());
+        log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
 
         if (StringUtils.isBlank(applicationName) && StringUtils.isBlank(applicationGuid)) {
             log.error("No application name or application guid provided. Exiting.");
@@ -152,7 +152,7 @@ public class AddVersionCommand implements Callable<Integer> {
         try {
             if (StringUtils.isBlank(applicationGuid)) {
                 log.info("Searching for application '{}' on AIP Console", applicationName);
-                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, sharedOptions.isLogOutput());
+                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, sharedOptions.isVerbose());
                 if (StringUtils.isBlank(applicationGuid)) {
                     String message = autoCreate ?
                             "Creation of the application '{}' failed on AIP Console" :
@@ -203,7 +203,7 @@ public class AddVersionCommand implements Callable<Integer> {
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
             // Register shutdown hook to cancel the job
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isLogOutput());
+            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             // Deregister the shutdown hook since the job is finished and we won't need to cancel it
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {

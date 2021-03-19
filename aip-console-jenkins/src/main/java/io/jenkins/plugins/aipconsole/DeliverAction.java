@@ -35,7 +35,7 @@ public class DeliverAction implements RunAction2 {
     private boolean autoDiscover = true;
     @Nullable
     private String domainName;
-    private boolean logOutput = true;
+    private boolean verbose = true;
     private boolean setAsCurrent = false;
 
     private transient Run run;
@@ -209,11 +209,11 @@ public class DeliverAction implements RunAction2 {
         this.domainName = domainName;
     }
 
-    public boolean isLogOutput() {
-        return logOutput;
+    public boolean isVerbose() {
+        return verbose;
     }
 
-    public void setLogOutput(boolean logOutput) {
-        this.logOutput = logOutput;
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 }

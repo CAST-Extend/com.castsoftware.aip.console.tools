@@ -81,7 +81,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
-        log.info("Create application command has triggered with log output = '{}'", sharedOptions.isLogOutput());
+        log.info("Create application command has triggered with log output = '{}'", sharedOptions.isVerbose());
 
         try {
             String nodeGuid = null;
@@ -106,7 +106,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
                 }
                 log.info("Application '{}' created successfully:  GUID is '{}'", jobDetails.getAppName(), jobDetails.getAppGuid());
                 return Constants.RETURN_OK;
-            }, sharedOptions.isLogOutput());
+            }, sharedOptions.isVerbose());
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_FAILED;
         } catch (ApiCallException e) {
