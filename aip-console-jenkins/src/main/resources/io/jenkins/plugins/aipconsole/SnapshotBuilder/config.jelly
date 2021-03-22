@@ -10,9 +10,6 @@
         <f:checkbox default="false"/>
     </f:entry>
     <f:advanced title="${%advancedSettings}">
-         <f:entry title="${%verbose}" field="verbose" description="${%verbose.descr}">
-              <f:checkbox field="verbose" value="${verbose}" default="true"/>
-         </f:entry>
         <f:entry title="${%failureIgnored}" field="failureIgnored" description="${%failureIgnored.descr}">
             <f:checkbox/>
         </f:entry>

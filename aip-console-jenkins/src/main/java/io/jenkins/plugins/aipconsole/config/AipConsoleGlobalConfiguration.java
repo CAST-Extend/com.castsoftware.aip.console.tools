@@ -15,6 +15,7 @@ public class AipConsoleGlobalConfiguration extends GlobalConfiguration {
     private Secret apiKey;
     private String username;
     private int timeout = 90;
+    private boolean verbose = true;
 
     public static AipConsoleGlobalConfiguration get() {
         return GlobalConfiguration.all().get(AipConsoleGlobalConfiguration.class);
@@ -61,6 +62,15 @@ public class AipConsoleGlobalConfiguration extends GlobalConfiguration {
     @DataBoundSetter
     public void setTimeout(int timeout) {
         this.timeout = timeout;
+    }
+
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    @DataBoundSetter
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 
     public FormValidation doCheckAipConsoleUrl(@QueryParameter String value) {

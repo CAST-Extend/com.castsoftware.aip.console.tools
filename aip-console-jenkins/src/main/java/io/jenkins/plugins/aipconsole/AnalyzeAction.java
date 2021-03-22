@@ -21,7 +21,6 @@ public class AnalyzeAction implements RunAction2 {
     private boolean withSnapshot = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
-    private boolean verbose = true;
     private boolean disableImaging = false;
 
     private transient Run run;
@@ -115,13 +114,5 @@ public class AnalyzeAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
-    }
-
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
     }
 }

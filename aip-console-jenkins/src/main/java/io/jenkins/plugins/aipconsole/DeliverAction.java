@@ -35,7 +35,6 @@ public class DeliverAction implements RunAction2 {
     private boolean autoDiscover = true;
     @Nullable
     private String domainName;
-    private boolean verbose = true;
     private boolean setAsCurrent = false;
 
     private transient Run run;
@@ -207,13 +206,5 @@ public class DeliverAction implements RunAction2 {
 
     public void setDomainName(@Nullable String domainName) {
         this.domainName = domainName;
-    }
-
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
     }
 }

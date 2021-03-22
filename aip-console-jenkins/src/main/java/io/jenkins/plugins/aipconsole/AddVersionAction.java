@@ -20,7 +20,6 @@ public class AddVersionAction implements RunAction2 {
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
-    private boolean verbose = true;
 
     @Nullable
     private String versionName;
@@ -191,13 +190,5 @@ public class AddVersionAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
-    }
-
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
     }
 }

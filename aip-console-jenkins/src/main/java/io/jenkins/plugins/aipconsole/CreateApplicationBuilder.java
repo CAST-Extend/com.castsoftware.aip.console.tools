@@ -76,8 +76,6 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
 
     private boolean inPlaceMode;
 
-    private boolean verbose = true;
-
     @DataBoundConstructor
     public CreateApplicationBuilder(String applicationName) {
         this.applicationName = applicationName;
@@ -93,15 +91,6 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
 
     public boolean isInPlaceMode() {
         return inPlaceMode;
-    }
-
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    @DataBoundSetter
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
     }
 
     @DataBoundSetter
@@ -191,7 +180,7 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
             String createJobGuid = jobsService.startCreateApplication(expandedAppName, inPlaceMode);
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
-            Consumer<LogContentDto> pollingCallback = (!isVerbose()) ? null :
+            Consumer<LogContentDto> pollingCallback = (!getDescriptor().isVerbose()) ? null :
                     logContentDto -> {
                         logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
                     };
@@ -252,6 +241,10 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
 
         public int getTimeout() {
             return configuration.getTimeout();
+        }
+
+        public boolean isVerbose() {
+            return configuration.isVerbose();
         }
     }
 }

@@ -78,7 +78,6 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     private boolean disableImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
-    private boolean verbose = true;
 
     @DataBoundConstructor
     public SnapshotBuilder(String applicationName) {
@@ -137,15 +136,6 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setTimeout(long timeout) {
         this.timeout = timeout;
-    }
-
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    @DataBoundSetter
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
     }
 
     @Override
@@ -295,7 +285,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     }
 
     private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
-        return !isVerbose() ? null :
+        return !getDescriptor().isVerbose() ? null :
                 logContentDto -> {
                     logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
                 };
@@ -355,6 +345,10 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
 
         public int getTimeout() {
             return configuration.getTimeout();
+        }
+
+        public boolean isVerbose() {
+            return configuration.isVerbose();
         }
     }
 }

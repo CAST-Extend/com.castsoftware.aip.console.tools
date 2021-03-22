@@ -117,17 +117,7 @@ public class AddVersionBuilderTest {
         job.setDomainName("");
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
-
-    @Test
-    public void testAddVersionStepToJob_withDefaultLogOutputSettings() throws Exception {
-        FreeStyleProject project = getProjectWithDefaultAddVersion();
-        project = jenkins.configRoundtrip(project);
-        AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
-        job.setVerbose(true);
-        job.setDomainName("");
-        jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
-    }
-
+    
     @Test
     public void testBuildFreestyleDefaultOk() throws Exception {
         FreeStyleProject project = getProjectWithDefaultAddVersionAndFile(TEST_ARCHIVE_NAME);

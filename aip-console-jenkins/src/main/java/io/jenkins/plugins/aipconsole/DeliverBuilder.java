@@ -122,8 +122,6 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     private boolean autoDiscover = true;
     private boolean setAsCurrent = false;
 
-    private boolean verbose = true;
-
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
@@ -290,14 +288,6 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         return (DeliverDescriptorImpl) super.getDescriptor();
     }
 
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    @DataBoundSetter
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
-    }
 
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
@@ -625,7 +615,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     }
 
     private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
-        return !isVerbose() ? null :
+        return !getDescriptor().isVerbose() ? null :
                 logContentDto -> {
                     logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
                 };
@@ -663,6 +653,10 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
 
         public int getTimeout() {
             return configuration.getTimeout();
+        }
+
+        public boolean isVerbose() {
+            return configuration.isVerbose();
         }
     }
 }

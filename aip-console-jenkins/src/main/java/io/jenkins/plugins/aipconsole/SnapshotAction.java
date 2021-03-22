@@ -22,7 +22,6 @@ public class SnapshotAction implements RunAction2 {
     private boolean disableImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
-    private boolean verbose = true;
 
     @CheckForNull
     public String getApplicationName() {
@@ -112,13 +111,5 @@ public class SnapshotAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
-    }
-
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
     }
 }

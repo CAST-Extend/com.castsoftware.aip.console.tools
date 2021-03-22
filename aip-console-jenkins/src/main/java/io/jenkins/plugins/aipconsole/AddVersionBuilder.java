@@ -98,7 +98,6 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
-    private boolean verbose = true;
 
     @Nullable
     private String versionName = "";
@@ -250,16 +249,6 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setDomainName(@Nullable String domainName) {
         this.domainName = domainName;
-    }
-
-
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    @DataBoundSetter
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
     }
 
     public boolean isDisableImaging() {
@@ -564,7 +553,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     }
 
     private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
-        return !isVerbose() ? null :
+        return !getDescriptor().isVerbose() ? null :
                 logContentDto -> {
                     logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
                 };
@@ -612,6 +601,10 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
         public int getTimeout() {
             return configuration.getTimeout();
+        }
+
+        public boolean isVerbose() {
+            return configuration.isVerbose();
         }
     }
 }

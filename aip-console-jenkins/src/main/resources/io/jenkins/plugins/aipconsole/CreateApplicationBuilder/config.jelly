@@ -13,9 +13,6 @@
          <f:checkbox/>
     </f:entry>
     <f:advanced title="${%advancedSettings}">
-         <f:entry title="${%verbose}" field="verbose" description="${%verbose.descr}">
-              <f:checkbox field="verbose" value="${verbose}" default="true"/>
-         </f:entry>
        <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
             <f:number default="30"/>
         </f:entry>

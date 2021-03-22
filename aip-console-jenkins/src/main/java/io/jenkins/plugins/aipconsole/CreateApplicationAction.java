@@ -16,7 +16,6 @@ public class CreateApplicationAction implements RunAction2 {
     private String applicationName;
     private boolean failureIgnored = false;
     private boolean inPlaceMode = false;
-    private boolean verbose = true;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     @Nullable
     private String nodeName;
@@ -58,15 +57,7 @@ public class CreateApplicationAction implements RunAction2 {
     public void setInPlaceMode(boolean inPlaceMode) {
         this.inPlaceMode = inPlaceMode;
     }
-
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
-    }
-
+    
     @Override
     public void onAttached(Run<?, ?> run) {
         this.run = run;
