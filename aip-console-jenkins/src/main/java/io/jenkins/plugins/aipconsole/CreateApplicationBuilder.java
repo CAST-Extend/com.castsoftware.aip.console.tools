@@ -180,7 +180,7 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
             String createJobGuid = jobsService.startCreateApplication(expandedAppName, inPlaceMode);
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
-            Consumer<LogContentDto> pollingCallback = (!getDescriptor().isVerbose()) ? null :
+            Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
                     logContentDto -> {
                         logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
                     };
@@ -241,10 +241,6 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
 
         public int getTimeout() {
             return configuration.getTimeout();
-        }
-
-        public boolean isVerbose() {
-            return configuration.isVerbose();
         }
     }
 }

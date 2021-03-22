@@ -285,7 +285,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     }
 
     private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
-        return !getDescriptor().isVerbose() ? null :
+        return !getDescriptor().configuration.isVerbose() ? null :
                 logContentDto -> {
                     logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
                 };
@@ -345,10 +345,6 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
 
         public int getTimeout() {
             return configuration.getTimeout();
-        }
-
-        public boolean isVerbose() {
-            return configuration.isVerbose();
         }
     }
 }
