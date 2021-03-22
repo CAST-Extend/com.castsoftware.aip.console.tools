@@ -20,6 +20,7 @@ public class AddVersionAction implements RunAction2 {
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
+
     @Nullable
     private String versionName;
     private boolean failureIgnored = false;

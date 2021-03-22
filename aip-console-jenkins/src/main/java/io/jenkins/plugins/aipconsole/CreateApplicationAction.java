@@ -57,7 +57,7 @@ public class CreateApplicationAction implements RunAction2 {
     public void setInPlaceMode(boolean inPlaceMode) {
         this.inPlaceMode = inPlaceMode;
     }
-
+    
     @Override
     public void onAttached(Run<?, ?> run) {
         this.run = run;
