@@ -20,6 +20,7 @@ public class AddVersionAction implements RunAction2 {
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
+
     @Nullable
     private String versionName;
     private boolean failureIgnored = false;
@@ -31,6 +32,7 @@ public class AddVersionAction implements RunAction2 {
     private String backupName = "";
     @Nullable
     private String domainName;
+    private boolean disableImaging = false;
 
     @Nullable
     private String snapshotName;
@@ -145,6 +147,14 @@ public class AddVersionAction implements RunAction2 {
 
     public void setBackupName(@Nullable String backupName) {
         this.backupName = backupName;
+    }
+
+    public boolean isDisableImaging() {
+        return disableImaging;
+    }
+
+    public void setDisableImaging(boolean disableImaging) {
+        this.disableImaging = disableImaging;
     }
 
     @Nullable

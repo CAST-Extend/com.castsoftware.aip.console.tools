@@ -2,6 +2,8 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
@@ -65,10 +67,11 @@ public interface ApplicationService {
      * @param nodeName        The name of the node on which the application
      * @param domainName      The name of the domain to assign to the application
      * @param inPlaceMode     whether the created application should be using the in-place mode or not
+     * @param logOutput whether the log is displa
      * @return An application GUID or null if non was found
      * @throws ApplicationServiceException
      */
-    String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName, boolean inPlaceMode) throws ApplicationServiceException;
+    String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName, boolean inPlaceMode, boolean logOutput) throws ApplicationServiceException;
 
     /**
      * Retrieve an application's version

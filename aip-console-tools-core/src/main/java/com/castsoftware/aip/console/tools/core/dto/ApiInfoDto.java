@@ -40,6 +40,10 @@ public class ApiInfoDto {
 
     private SemVer apiVersionSemVer;
 
+    private boolean imagingFlat = false;
+
+    private boolean acStudioAudienceCastsoftware = false;
+
     public SemVer getApiVersionSemVer() {
         return getSemVer();
     }

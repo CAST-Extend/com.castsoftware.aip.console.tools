@@ -118,7 +118,7 @@ public class AddVersionBuilderTest {
         job.setInPlaceMode(false);
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
-
+    
     @Test
     public void testBuildFreestyleDefaultOk() throws Exception {
         FreeStyleProject project = getProjectWithDefaultAddVersionAndFile(TEST_ARCHIVE_NAME);

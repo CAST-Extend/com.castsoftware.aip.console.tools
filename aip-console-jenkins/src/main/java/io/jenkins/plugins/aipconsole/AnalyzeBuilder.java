@@ -7,6 +7,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -47,6 +48,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_Analyze_error_appGuid;
 import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_Analyze_error_noVersionFound;
@@ -75,6 +77,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean withSnapshot = false;
+    private boolean disableImaging = false;
 
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
@@ -125,6 +128,14 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setWithSnapshot(boolean withSnapshot) {
         this.withSnapshot = withSnapshot;
+    }
+
+    public boolean isDisableImaging() {
+        return disableImaging;
+    }
+
+    public void setDisableImaging(boolean disableImaging) {
+        this.disableImaging = disableImaging;
     }
 
     public long getTimeout() {
@@ -226,12 +237,17 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
 
             if (withSnapshot) {
-                requestBuilder.endStep(
-                        apiInfoDto.isLastStepConsolidateSnapshot() ?
-                                Constants.CONSOLIDATE_SNAPSHOT :
-                                Constants.UPLOAD_APP_SNAPSHOT);
-                requestBuilder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
-                requestBuilder.uploadApplication(true);
+                String endStep;
+                if (apiInfoDto.isImagingFlat()) {
+                    endStep = Constants.PROCESS_IMAGING;
+                } else {
+                    endStep = apiInfoDto.isLastStepConsolidateSnapshot() ?
+                            Constants.CONSOLIDATE_SNAPSHOT :
+                            Constants.UPLOAD_APP_SNAPSHOT;
+                }
+                requestBuilder.endStep(endStep)
+                        .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
+                        .uploadApplication(true);
             } else {
                 requestBuilder.endStep(Constants.ANALYZE);
             }
@@ -283,11 +299,17 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
                         jobStatusWithSteps.getAppName() + " - " +
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
                 ),
-                logContentDto -> {
-                    logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                },
+                getPollingCallback(log),
                 JobStatus::getState);
     }
+
+    private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
+        return !getDescriptor().configuration.isVerbose() ? null :
+                logContentDto -> {
+                    logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
+                };
+    }
+
 
     /**
      * Check some initial elements before running the Job

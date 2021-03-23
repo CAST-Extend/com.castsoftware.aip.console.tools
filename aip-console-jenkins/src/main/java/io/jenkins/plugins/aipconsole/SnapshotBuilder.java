@@ -7,6 +7,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -46,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_DescriptorImpl_displayName;
@@ -73,6 +75,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     private String applicationGuid;
     @Nullable
     private String snapshotName;
+    private boolean disableImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
@@ -116,6 +119,14 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setFailureIgnored(boolean failureIgnored) {
         this.failureIgnored = failureIgnored;
+    }
+
+    public boolean isDisableImaging() {
+        return disableImaging;
+    }
+
+    public void setDisableImaging(boolean disableImaging) {
+        this.disableImaging = disableImaging;
     }
 
     public long getTimeout() {
@@ -210,8 +221,14 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                 resolveSnapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
-            String endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                    Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT;
+            String endStep;
+
+            if (!disableImaging) {
+                endStep = Constants.PROCESS_IMAGING;
+            } else {
+                endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                        Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT;
+            }
 
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
@@ -263,10 +280,15 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                         jobStatusWithSteps.getAppName() + " - " +
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
                 ),
+                getPollingCallback(log),
+                JobStatus::getState);
+    }
+
+    private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
+        return !getDescriptor().configuration.isVerbose() ? null :
                 logContentDto -> {
                     logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                },
-                JobStatus::getState);
+                };
     }
 
     /**

@@ -1,15 +1,12 @@
 package com.castsoftware.aip.console.tools.core.services;
 
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 
 import java.util.Date;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -97,13 +94,14 @@ public interface JobsService {
     /**
      * Polls AIP Console and executes the given callback once the job is completed
      *
-     * @param jobGuid            The job guid to poll
-     * @param completionCallback A {@link Function} that takes in entry the {@link JobStatusWithSteps}
-     * @param <R>                The type or return for the callback
+     * @param jobGuid   The job guid to poll
+     * @param callback  A {@link Function} that takes in entry the {@link JobStatusWithSteps}
+     * @param logOutput whether to output the log or not
+     * @param <R>       The type or return for the callback
      * @return The result from the completionCallback
      * @throws JobServiceException If any error occurs while polling AIP Console
      */
-    <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException;
+    <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobStatusWithSteps, R> callback, boolean logOutput) throws JobServiceException;
 
     /**
      * Polls AIP Console, then for each changes to the current step of the job, runs the provided stepChangedCallback.

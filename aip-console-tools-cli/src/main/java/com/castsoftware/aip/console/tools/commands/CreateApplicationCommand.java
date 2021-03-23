@@ -81,6 +81,8 @@ public class CreateApplicationCommand implements Callable<Integer> {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
+        log.info("Create application command has triggered with log output = '{}'", sharedOptions.isVerbose());
+
         try {
             String nodeGuid = null;
             if (StringUtils.isNotBlank(nodeName)) {
@@ -99,12 +101,12 @@ public class CreateApplicationCommand implements Callable<Integer> {
             log.info("Started job to create new application.");
             return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {
-                    log.error("Creation of version failed with status '{}'", jobDetails.getState());
+                    log.error("Creation of the application failed with status '{}'", jobDetails.getState());
                     return Constants.RETURN_JOB_FAILED;
                 }
-                log.info("Creation of version successful for application '{}'. Application GUID is '{}'", jobDetails.getAppName(), jobDetails.getAppGuid());
+                log.info("Application '{}' created successfully:  GUID is '{}'", jobDetails.getAppName(), jobDetails.getAppGuid());
                 return Constants.RETURN_OK;
-            });
+            }, sharedOptions.isVerbose());
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_FAILED;
         } catch (ApiCallException e) {
