@@ -32,6 +32,8 @@ import okhttp3.internal.http.HttpMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -228,7 +230,12 @@ public class RestApiServiceImpl implements RestApiService {
                 }
             }
             log.log(Level.SEVERE, "Response code from API was unexpected : " + response.code());
-            log.log(Level.SEVERE, "Content was " + (response.body() == null ? "EMPTY" : response.body().string()));
+            String message = "EMPTY";
+            if (response.body() != null) {
+                org.json.JSONObject coderollsJSONObject = new JSONObject(response.body().string());
+                message = coderollsJSONObject.getString("defaultMessage");
+            }
+            log.log(Level.SEVERE, "Content was " + message);
             throw new ApiCallException(response.code(), "Unable to execute multipart form data with provided content");
         } catch (IOException e) {
             log.log(Level.SEVERE, "IOException when calling endpoint " + endpoint, e);
@@ -267,7 +274,11 @@ public class RestApiServiceImpl implements RestApiService {
                 return mapResponse(response, javaType);
             }
             String message = "Response code from API was unexpected : " + response.code();
-            message += "\nContent was " + (response.body() == null ? "EMPTY" : response.body().string());
+            String messageBody = "EMPTY";
+            if (response.body() != null) {
+                messageBody = new JSONArray(response.body().string()).getJSONObject(0).getString("defaultMessage");
+            }
+            message += "\nContent was: " + messageBody;
             throw new ApiCallException(response.code(), message);
         } catch (IOException e) {
             log.log(Level.SEVERE, "Unable to send request", e);
@@ -321,7 +332,11 @@ public class RestApiServiceImpl implements RestApiService {
                 return;
             }
             log.severe("Login to AIP Console failed (http status is " + response.code() + ")");
-            log.severe("Content was " + (response.body() == null ? "EMPTY" : response.body().string()));
+            String message = "EMPTY";
+            if (response.body() != null) {
+                message = new JSONObject(response.body().string()).getString("defaultMessage");
+            }
+            log.severe("Content was " + message);
             throw new ApiCallException(response.code(), "Unable to login to AIP Console");
         } catch (IOException e) {
             log.log(Level.SEVERE, "Unable to send request", e);
@@ -409,10 +424,10 @@ public class RestApiServiceImpl implements RestApiService {
 
             // get xsrf cookie
             if (xsrfCookie != null) {
-                log.finest("Setting XSRF-TOKEN header to " + xsrfCookie.value());
+                RestApiServiceImpl.log.finest("Setting XSRF-TOKEN header to " + xsrfCookie.value());
                 reqBuilder.header("X-XSRF-TOKEN", xsrfCookie.value());
             } else {
-                log.finest("No xsrf cookie, next request should set it");
+                RestApiServiceImpl.log.finest("No xsrf cookie, next request should set it");
             }
 
             if (request.header("Authorization") != null ||
