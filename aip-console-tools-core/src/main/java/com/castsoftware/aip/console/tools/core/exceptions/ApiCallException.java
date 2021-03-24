@@ -1,6 +1,6 @@
 package com.castsoftware.aip.console.tools.core.exceptions;
 
-public class ApiCallException extends Exception {
+public class ApiCallException extends HiddenStackTraceException {
     private int httpStatus = 500;
 
     public ApiCallException(int httpStatus) {
