@@ -88,5 +88,5 @@ public interface ApplicationService {
      * @param exclusionPatterns
      * @return
      */
-    String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns) throws JobServiceException, PackagePathInvalidException;
+    String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns, boolean rescan) throws JobServiceException, PackagePathInvalidException;
 }
