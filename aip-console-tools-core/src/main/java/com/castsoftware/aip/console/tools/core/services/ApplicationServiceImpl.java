@@ -130,8 +130,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                 }
                 log.info(infoMessage);
 
-                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, inPlaceMode,false);
-                return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
+                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, inPlaceMode);
+                return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null, logOutput);
             } catch (JobServiceException | ApiCallException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);
                 throw new ApplicationServiceException("Unable to create application automatically.", e);

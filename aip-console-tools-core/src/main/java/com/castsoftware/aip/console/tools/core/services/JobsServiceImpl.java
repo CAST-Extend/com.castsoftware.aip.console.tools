@@ -65,10 +65,10 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode) throws JobServiceException {
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inPlaceMode) throws JobServiceException {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
-        jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(inplaceMode));
+        jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(inPlaceMode));
         if (StringUtils.isNotBlank(nodeGuid)) {
             jobParams.put(Constants.PARAM_NODE_GUID, nodeGuid);
         }
