@@ -41,8 +41,10 @@ On this page, go to the **AIP Console global configuration** section and enter t
 * *AIP Console URL* : The URL to access the AIP Console server. Make sure that this address is accessible from the Jenkins Server and the Jenkins Node that might run the plugin as well.
 * *API Key* : The API key that will be used to authenticate to AIP Console.
 * *Timeout* : A global timeout setting in seconds before calls to AIP Console will be considered in error.
+* *Log output* : If it's checked then AIP Console log output will be display on screen. To hide major information keep
+  this unchecked.
 
-![image-20200612154641236](./doc/images/image-20200612154641236.png)
+![log-output](./doc/images/log-output.png)
 
 ### Quick Start
 
@@ -52,20 +54,30 @@ To create an application, add the `Create application on AIP Console` Step to a 
 
 ![image-20200612161540146](./doc/images/image-20200612161540146.png)
 
-In that build step, you *must* provide the application name.
+In that build step,
 
-![image-20200612161648670](./doc/images/image-20200612161648670.png)
+* you *must* provide the application name.
+* You also optionally have the possibility to decide whether the application should keep the deliveries history or not.
+
+![Deliveries-history](./doc/images/Deliveries-history.png)
 
 The application will be created on AIP Console after you've run the Jenkins Job.
 
+**Important note**
+
+* When an application is created without the deliveries history then the source code should be located the Source Folder
+  Path sub-folders. This meant no file will not be accepted.
+
 #### Add Version
 
-The `Add Application Version to AIP Console` will create a new version of an application, run an analysis and create a snapshot of that analysis.
+The `Add Application Version to AIP Console` will create a new version of an application, run an analysis and create a
+snapshot of that analysis.
 
 This step requires the following :
 
 * An application name for which a new version will be created. <u>This application must exist in AIP Console</u>.
-* A path to a zip or tgz archive file to upload (**NOTE**: you can also provide a folder path; more details in the Advanced Usage Section below).
+* A path to a zip or tgz archive file to upload (**NOTE**: you can also provide a folder path; more details in the
+  Advanced Usage Section below).
 
 ![image-20200612163542175](./doc/images/image-20200612163542175.png)
 
@@ -85,14 +97,16 @@ The `Deliver Source Code to AIP Console` step is similar to the Add version step
 It requires the following :
 
 * An application name for which a new version will be created. <u>This application must exist in AIP Console</u>.
-* A path to a zip or tgz archive file to upload (**NOTE**: you can also provide a folder path; more details in the Advanced Usage Section below).
+* A path to a zip or tgz archive file to upload (**NOTE**: you can also provide a folder path; more details in the
+  Advanced Usage Section below).
+* Whether the version should be current or not
 
 This step will perform the following actions :
 
 * Upload the file `source.zip` to application `my app`
 * Create a new version with an automatically generated name
 
-The version will be created and visible inside the `Versions` tabof the application in AIP Console.
+The version will be created and visible inside the `Versions` tab of the application in AIP Console.
 
 #### Analyze
 
@@ -175,9 +189,16 @@ The Deliver step provides similar parameters to the Add Version step :
 * *Automatic discovery* : will discover new technologies and install new extensions during rescan
   * **NOTE**: Uncheck this option if run consistency check
 * *Exclusion patterns* : File patterns to exclude in the delivery, the pattern needs to follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
-* *Version Name* (optional): The name of the version that will be created. If left blank, the version will be named with the following pattern : `vYYMMDD.hhmmss` based on date and time.
-  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
-* *Copy configration from previous version*: Clone the previous version of the application (similar to the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no version exists, it will run an Add version job instead.
+* *Version Name* (optional): The name of the version that will be created. If left blank, the version will be named with
+  the following pattern : `vYYMMDD.hhmmss` based on date and time.
+  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be
+    replaced by the current jobs' build number.
+* *Make version current* (optional): When checked then the version is used as being the current, and it is made ready to
+  analyze.  
+  ![set-as-current](./doc/images/set-as-current.png)
+* *Copy configration from previous version*: Clone the previous version of the application (similar to
+  the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no
+  version exists, it will run an Add version job instead.
 * *Enable Security Dataflow*: Enabled the Security Objective for this version. Has no effect if `Rescan` is checked.
 
 Under `Advanced Settings` you will find the following parameters :
