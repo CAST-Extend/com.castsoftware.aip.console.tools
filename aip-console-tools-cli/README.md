@@ -16,49 +16,61 @@ You will also need the following :
 * An API Token for the user that will run the CLI (check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
 * Prepare your source code in one of the two following ways :
     * As a zip or tar.gz archive that will be uploaded to AIP Console
-    * As a relative path, pointing to content in the Source Folder location defined in AIP Console like below :
+    * As a relative path, pointing to content in the Source Folder location **(SFL)** defined in AIP Console like below :
 
 ![source folder location](doc/images/source_folder_location_config.png)
 
 ### Quick Start
+For any of the command line listed bellow, you can use *--verbose* argument to decide whether to display API log information or not.
 
-To **create a new application**, run the following :
+To **create a new application**, 
+* You also optionally have the possibility to decide whether the application should keep the deliveries history or not: set *--inplace-mode* argument to match your requirement.
+* Whether or not to display log information on screen by setting *--verbose* argument to either true or false.
+
+**Important note**
+* When an application is created without the deliveries history then the source code should be located the SFL sub-folders. This meant no file will not be accepted, and the path provided for versions must be SFL relative path.
+
+run the following :
 
 ```bash
-java -jar .\aip-console-tools-cli.jar new -n "my app" --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q"
+java -jar .\aip-console-tools-cli.jar new -n "my app" --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" --verbose=false --inplace-mode=false
 ```
 
-This will create a new application "my app" on my AIP Console instance at `localhost:8081` using my API Key.
+This will create a new application "my app" on my AIP Console instance at `localhost:8081` using my API Key. The complete deliveries history will be kept and the API log information will not be displayed.
 
 ![create app CLI](doc/images/create_app.png)
 
 To **add a new version and analyze its source code**, have a ZIP archive file and use the following command :
 
 ```bash
-java -jar .\aip-console-tools-cli.jar add --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app" -f ./source.zip
+java -jar .\aip-console-tools-cli.jar add --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app" -f ./source.zip --verbose=false
 ```
 
 It will upload the source.zip file, create a new version for the application "my app" and run an analysis on this version. **NOTE** If your application already has versions, this command will *clone* the previous version configuration to run the analysis on the new source code.
+* The API log information will not be displayed
 
 ![image-20200609154849113](doc/images/add_version.png)
 
 To **deliver a new version**, without running the analysis, you can use the following command :
 
 ```bash
-java -jar .\aip-console-tools-cli.jar deliver --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app" -f ./source.zip
+java -jar .\aip-console-tools-cli.jar deliver --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app" -f ./source.zip --verbose=false --set-as-current=true
 ```
 
 It will upload the source.zip file, and create a new version for the application "my app"
+* The API log information will not be displayed
+* The version will be used as current and ready to analyze
 
 ![image-20200611113145335](doc/images/deliver.png)
 
 To **run an analysis on the latest delivered version**, you can use the following command :
 
 ```bash
-java -jar .\aip-console-tools-cli.jar analyze --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app"
+java -jar .\aip-console-tools-cli.jar analyze --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app" --verbose=false
 ```
 
 It will retrieve the latest version of the application "my app", mark that version as current if it isn't, and start an analysis job, without snapshot.
+* The API log information will not be displayed
 
 ![image-20200611113145335](doc/images/analyze.png)
 
@@ -95,6 +107,8 @@ The available options are :
 
 * `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. *default* : Automatically selected by AIP Console
 * `--domain-name` (optional) : specify a domain name to associate with the application to create. *default*: No domain is set for the application.
+* `--inplace-mode` (optional):  If true then no history will be kept for delivered sources.
+* `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--server-url` or `-s` : Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
@@ -114,6 +128,7 @@ The available options are :
 * `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
 * `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this new version. This is the default behaviour when no version exists for the given application.
 * `--version-name` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
+* `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--snapshot-name` (option) The name of the snapshot to generate, default will be based on the date and time
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
 * `--disable-imaging` (optional): Disables sharing data with the configured Imaging instance linked to AIP Console. Note that this parameter has no effect if Imaging is not configured on AIP Console.
@@ -139,6 +154,7 @@ The available options are :
 * `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
 * `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this new version. This is the default behaviour when no version exists for the given application.
 * `--version-name` or `-v` (optional): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
+* `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--exclude-patterns` or `-exclude`: File patterns to exclude in the delivery, the pattern needs to follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
 * `--auto-discover`: will discover new technologies and install new extensions during rescan, to disable when run consistency check
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
@@ -162,6 +178,7 @@ The available options are :
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot` or `-S` (optional): Also runs snapshot creation after analysis.
 * `--disable-imaging` (optional): If snapshot option is provided, disables sharing data with the configured Imaging instance linked to AIP Console. Note that this parameter has no effect if Imaging is not configured on AIP Console.
+* `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
@@ -176,6 +193,7 @@ The available options are :
 * `--app-name` or `-n` (**required**): The application name.
 * `--version-name` or `-v` (optional): The name of the version to create. *default*: The current version (version marked as current).
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name. *default*: Defaults to `Snapshot-YYYY-MM-DDThh-mm-ss` (based on the current date and time)
+* `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--disable-imaging` (optional): Disables sharing data with the configured Imaging instance linked to AIP Console. Note that this parameter has no effect if Imaging is not configured on AIP Console.
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
