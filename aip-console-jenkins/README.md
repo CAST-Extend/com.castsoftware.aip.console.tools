@@ -41,7 +41,7 @@ On this page, go to the **AIP Console global configuration** section and enter t
 * *AIP Console URL* : The URL to access the AIP Console server. Make sure that this address is accessible from the Jenkins Server and the Jenkins Node that might run the plugin as well.
 * *API Key* : The API key that will be used to authenticate to AIP Console.
 * *Timeout* : A global timeout setting in seconds before calls to AIP Console will be considered in error.
-* *Log output* : If it's checked then AIP Console log output will be display on screen. To hide major information keep
+* *verbose* : If it's checked then AIP Console log output will be display on screen. To hide major information keep
   this unchecked.
 
 ![log-output](./doc/images/log-output.png)
@@ -64,8 +64,7 @@ In that build step,
 The application will be created on AIP Console after you've run the Jenkins Job.
 
 **Important note**
-
-* When an application is created without the deliveries history then the source code should be located the Source Folder
+* When an application is created without the deliveries history then the source code should be located in the Source Folder
   Path sub-folders. This meant no file will not be accepted.
 
 #### Add Version
