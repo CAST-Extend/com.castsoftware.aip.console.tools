@@ -221,23 +221,22 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                 resolveSnapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
-            String endStep;
-
-            if (!disableImaging) {
-                endStep = Constants.PROCESS_IMAGING;
-            } else {
-                endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                        Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT;
-            }
-
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
-                    .endStep(endStep)
                     .versionGuid(versionToAnalyze.getGuid())
                     .versionName(versionToAnalyze.getName())
                     .snapshotName(resolveSnapshotName)
                     .uploadApplication(true)
                     .releaseAndSnapshotDate(new Date());
+
+            if (apiInfoDto.isImagingFlat() && !disableImaging) {
+                requestBuilder.endStep(Constants.PROCESS_IMAGING)
+                        .processImaging(true);
+            } else {
+                requestBuilder.endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                        Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT)
+                        .uploadApplication(true);
+            }
 
             jobGuid = jobsService.startJob(requestBuilder);
             log.println(SnapshotBuilder_Snapshot_info_pollJobMessage());

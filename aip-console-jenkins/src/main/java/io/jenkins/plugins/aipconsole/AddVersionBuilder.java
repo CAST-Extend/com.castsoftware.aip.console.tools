@@ -481,7 +481,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .backupName(backupName);
 
             if (apiInfoDto.isImagingFlat() && !disableImaging) {
-                requestBuilder.endStep(Constants.PROCESS_IMAGING);
+                requestBuilder.processImaging(true)
+                        .endStep(Constants.PROCESS_IMAGING);
             }
 
             String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null, applicationHasVersion);

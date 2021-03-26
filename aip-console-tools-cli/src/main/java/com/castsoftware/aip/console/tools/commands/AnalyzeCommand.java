@@ -15,7 +15,6 @@ import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -134,18 +133,14 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
-                String endStep;
-                if (apiInfoDto.isImagingFlat()) {
-                    endStep = Constants.PROCESS_IMAGING;
+                if (apiInfoDto.isImagingFlat() && !disableImaging) {
+                    builder.endStep(Constants.PROCESS_IMAGING)
+                            .processImaging(true);
                 } else {
-                    endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                            Constants.CONSOLIDATE_SNAPSHOT :
-                            Constants.UPLOAD_APP_SNAPSHOT;
+                    builder.endStep(apiInfoDto.isLastStepConsolidateSnapshot() ? Constants.CONSOLIDATE_SNAPSHOT : Constants.UPLOAD_APP_SNAPSHOT)
+                            .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
+                            .uploadApplication(true);
                 }
-
-                builder.endStep(endStep)
-                        .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
-                        .uploadApplication(true);
             } else {
                 builder.endStep(Constants.ANALYZE);
             }

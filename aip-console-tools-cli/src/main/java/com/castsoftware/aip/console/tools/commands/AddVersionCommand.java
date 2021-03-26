@@ -186,7 +186,8 @@ public class AddVersionCommand implements Callable<Integer> {
 
             if (apiInfo.isImagingFlat() && !disableImaging) {
                 // Add the imaging step if it is configured
-                builder.endStep(Constants.PROCESS_IMAGING);
+                builder.processImaging(true)
+                        .endStep(Constants.PROCESS_IMAGING);
             }
 
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null, cloneVersion);
