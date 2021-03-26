@@ -149,16 +149,12 @@ public class SnapshotCommand implements Callable<Integer> {
                     .versionName(foundVersion.getName())
                     .snapshotName(snapshotName)
                     .uploadApplication(true)
-                    .releaseAndSnapshotDate(new Date());
-
-            if (apiInfoDto.isImagingFlat() && !disableImaging) {
-                builder.endStep(Constants.PROCESS_IMAGING)
-                        .processImaging(true);
-            } else {
-                builder.endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                        Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT)
-                        .uploadApplication(true);
-            }
+                    .releaseAndSnapshotDate(new Date())
+                    .processImaging(!disableImaging)
+                    .endStep(
+                            SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                                    Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT)
+                    .uploadApplication(true);
 
             log.info("Running Snapshot Job on application '{}' with Version '{}' (guid: '{}')", applicationName, foundVersion.getName(), foundVersion.getGuid());
             String jobGuid = jobsService.startJob(builder);

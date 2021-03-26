@@ -198,9 +198,7 @@ public class JobRequestBuilder {
             }
             parameters.put(Constants.PARAM_BACKUP_NAME, backupName);
         }
-        if (processImaging) {
-            parameters.put(Constants.PROCESS_IMAGING, "true");
-        }
+        parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
 
         return parameters;
     }

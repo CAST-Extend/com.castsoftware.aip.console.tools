@@ -78,6 +78,7 @@ public class Constants {
     public static final String PARAM_DELIVERY_CONFIG_GUID = "deliveryConfigGuid";
     public static final String PARAM_ENABLE_AUTO_DISCOVER = "extensionAutoConfigEnabled";
     public static final String PARAM_UPLOAD_APPLICATION = "uploadApplication";
+    public static final String PARAM_PROCESS_IMAGING = "processImaging";
 
     // Job Step Names
     public static final String EXTRACT_STEP_NAME = "unzip_source";
@@ -87,7 +88,7 @@ public class Constants {
     public static final String ANALYSIS_STEP_NAME = "analyze";
     public static final String SNAPSHOT_STEP_NAME = "snapshot";
     public static final String CONSOLIDATE_STEP_NAME = "consolidate_snapshot";
-    public static final String PROCESS_IMAGING = "process_imaging";
+
 
     // Other constants
     public static final long DEFAULT_HTTP_TIMEOUT = 90L;

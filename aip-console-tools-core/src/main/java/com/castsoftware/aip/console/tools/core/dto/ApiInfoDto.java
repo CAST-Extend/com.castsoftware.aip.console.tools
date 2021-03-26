@@ -40,6 +40,7 @@ public class ApiInfoDto {
 
     private SemVer apiVersionSemVer;
 
+    // Whether Imaging is installed with the Flat
     private boolean imagingFlat = false;
 
     private boolean acStudioAudienceCastsoftware = false;

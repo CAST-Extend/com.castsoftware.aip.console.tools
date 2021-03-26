@@ -133,14 +133,10 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
-                if (apiInfoDto.isImagingFlat() && !disableImaging) {
-                    builder.endStep(Constants.PROCESS_IMAGING)
-                            .processImaging(true);
-                } else {
-                    builder.endStep(apiInfoDto.isLastStepConsolidateSnapshot() ? Constants.CONSOLIDATE_SNAPSHOT : Constants.UPLOAD_APP_SNAPSHOT)
-                            .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
-                            .uploadApplication(true);
-                }
+                builder.processImaging(true)
+                        .endStep(apiInfoDto.isLastStepConsolidateSnapshot() ? Constants.CONSOLIDATE_SNAPSHOT : Constants.UPLOAD_APP_SNAPSHOT)
+                        .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
+                        .uploadApplication(true);
             } else {
                 builder.endStep(Constants.ANALYZE);
             }

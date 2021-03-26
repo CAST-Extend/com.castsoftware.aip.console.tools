@@ -237,16 +237,12 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
 
             if (withSnapshot) {
-                if (apiInfoDto.isImagingFlat()) {
-                    requestBuilder.endStep(Constants.PROCESS_IMAGING)
-                            .processImaging(true);
-                } else {
-                    requestBuilder.endStep(apiInfoDto.isLastStepConsolidateSnapshot() ?
-                            Constants.CONSOLIDATE_SNAPSHOT :
-                            Constants.UPLOAD_APP_SNAPSHOT)
-                            .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
-                            .uploadApplication(true);
-                }
+                requestBuilder.processImaging(!disableImaging)
+                        .endStep(apiInfoDto.isLastStepConsolidateSnapshot() ?
+                                Constants.CONSOLIDATE_SNAPSHOT :
+                                Constants.UPLOAD_APP_SNAPSHOT)
+                        .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
+                        .uploadApplication(true);
             } else {
                 requestBuilder.endStep(Constants.ANALYZE);
             }
