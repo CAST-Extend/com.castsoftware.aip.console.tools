@@ -1,8 +1,12 @@
 package com.castsoftware.aip.console.tools.core.utils;
 
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallNoStackTraceException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.lang.reflect.InvocationTargetException;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -50,5 +54,18 @@ public class LogUtilsTests {
         line0 = "--apiKey=\"BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q\"";
         replaced0 = LogUtils.replaceAllSensitiveInformation(line0);
         assertThat(replaced0.contains("--apiKey=" + LogUtils.REPLACEMENT_STR), is(true));
+    }
+
+
+    private ApiCallException getThrowableApiCallException(boolean verbose, int httpStatus, String message) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<? extends Exception> callException = verbose ? ApiCallException.class :
+                ApiCallNoStackTraceException.class;
+        return (ApiCallException) callException.getConstructor(int.class, String.class).newInstance(httpStatus, message);
+    }
+
+    @Test
+    public void fake() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        ApiCallException thisException = getThrowableApiCallException(false, 201, "Unable to login to AIP Console");
+        assertThat(thisException instanceof ApiCallNoStackTraceException, is(true));
     }
 }

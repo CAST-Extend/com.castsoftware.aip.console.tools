@@ -581,7 +581,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
             taskListener.error("Failed to download the delivery report", e.getMessage());
         }
     }
-
+    
     /**
      * Check some initial elements before running the Job
      *
