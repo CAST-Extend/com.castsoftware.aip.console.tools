@@ -68,8 +68,8 @@ public class AnalyzeCommand implements Callable<Integer> {
             description = "Creates a snapshot after running the analysis.")
     private boolean withSnapshot;
 
-    @CommandLine.Option(names = "--disable-imaging", description = "If provided, uploading data to Imaging will be disabled. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console")
-    private boolean disableImaging = false;
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console")
+    private boolean processImaging = false;
 
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
@@ -135,7 +135,8 @@ public class AnalyzeCommand implements Callable<Integer> {
 
             if (withSnapshot) {
                 String endStep;
-                if (apiInfoDto.isImagingFlat()) {
+                if (processImaging) {
+                    builder.processImaging(true);
                     endStep = Constants.PROCESS_IMAGING;
                 } else {
                     endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?

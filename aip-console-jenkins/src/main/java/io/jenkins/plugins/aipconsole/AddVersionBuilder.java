@@ -111,7 +111,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private String backupName = "";
     @Nullable
     private String domainName;
-    private boolean disableImaging = false;
+    private boolean processImaging = false;
 
     @Nullable
     private String snapshotName = "";
@@ -251,12 +251,12 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         this.domainName = domainName;
     }
 
-    public boolean isDisableImaging() {
-        return disableImaging;
+    public boolean isProcessImaging() {
+        return processImaging;
     }
 
-    public void setDisableImaging(boolean disableImaging) {
-        this.disableImaging = disableImaging;
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
     }
 
     @Override
@@ -480,7 +480,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName);
 
-            if (apiInfoDto.isImagingFlat() && !disableImaging) {
+            if (processImaging) {
+                requestBuilder.processImaging(true);
                 requestBuilder.endStep(Constants.PROCESS_IMAGING);
             }
 

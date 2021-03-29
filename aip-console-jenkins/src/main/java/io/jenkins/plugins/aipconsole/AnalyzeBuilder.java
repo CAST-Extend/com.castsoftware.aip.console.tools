@@ -77,7 +77,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean withSnapshot = false;
-    private boolean disableImaging = false;
+    private boolean processImaging = false;
 
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
@@ -130,12 +130,12 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         this.withSnapshot = withSnapshot;
     }
 
-    public boolean isDisableImaging() {
-        return disableImaging;
+    public boolean isProcessImaging() {
+        return processImaging;
     }
 
-    public void setDisableImaging(boolean disableImaging) {
-        this.disableImaging = disableImaging;
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
     }
 
     public long getTimeout() {
@@ -238,7 +238,8 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
             if (withSnapshot) {
                 String endStep;
-                if (apiInfoDto.isImagingFlat()) {
+                if (processImaging) {
+                    requestBuilder.processImaging(true);
                     endStep = Constants.PROCESS_IMAGING;
                 } else {
                     endStep = apiInfoDto.isLastStepConsolidateSnapshot() ?

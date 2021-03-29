@@ -97,8 +97,8 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version")
     private boolean enableSecurityDataflow = false;
 
-    @CommandLine.Option(names = "--disable-imaging", description = "If provided, uploading data to Imaging will be disabled. Note: If Imaging is not set up, data will not be pushed.")
-    private boolean disableImaging = false;
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging. Note: If Imaging is not set up, data will not be pushed.")
+    private boolean processImaging = false;
 
     /**
      * The name of the target node where application will be created. Only used if --auto-create is true and the application doesn't exists
@@ -184,8 +184,9 @@ public class AddVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName);
 
-            if (apiInfo.isImagingFlat() && !disableImaging) {
+            if (processImaging) {
                 // Add the imaging step if it is configured
+                builder.processImaging(true);
                 builder.endStep(Constants.PROCESS_IMAGING);
             }
 

@@ -37,6 +37,7 @@ public class JobRequestBuilder {
     private String deliveryConfigGuid;
     private boolean autoDiscover = true;
     private boolean uploadApplication = false;
+    private boolean processImaging = false;
 
     private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType) {
         this.appGuid = appGuid;
@@ -83,6 +84,14 @@ public class JobRequestBuilder {
 
     public JobRequestBuilder uploadApplication(boolean uploadApplication) {
         this.uploadApplication = uploadApplication;
+        return this;
+    }
+
+    public JobRequestBuilder processImaging(boolean processImaging) {
+        if (processImaging) {
+            uploadApplication(true);
+        }
+        this.processImaging = processImaging;
         return this;
     }
 
@@ -168,6 +177,7 @@ public class JobRequestBuilder {
         parameters.put(Constants.PARAM_VERSION_OBJECTIVES, String.join(",", objectives));
         parameters.put(Constants.PARAM_RELEASE_DATE, releaseDateStr);
         parameters.put(Constants.PARAM_ENABLE_AUTO_DISCOVER, Boolean.toString(autoDiscover));
+        parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
         if (StringUtils.isBlank(snapshotDateStr)) {
             parameters.put(Constants.PARAM_SNAPSHOT_CAPTURE_DATE, releaseDateStr);
         } else {
