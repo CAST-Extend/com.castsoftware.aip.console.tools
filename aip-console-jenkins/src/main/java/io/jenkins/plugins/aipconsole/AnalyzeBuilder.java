@@ -237,15 +237,10 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
 
             if (withSnapshot) {
-                String endStep;
-                if (apiInfoDto.isImagingFlat()) {
-                    endStep = Constants.PROCESS_IMAGING;
-                } else {
-                    endStep = apiInfoDto.isLastStepConsolidateSnapshot() ?
-                            Constants.CONSOLIDATE_SNAPSHOT :
-                            Constants.UPLOAD_APP_SNAPSHOT;
-                }
-                requestBuilder.endStep(endStep)
+                requestBuilder.processImaging(!disableImaging)
+                        .endStep(apiInfoDto.isLastStepConsolidateSnapshot() ?
+                                Constants.CONSOLIDATE_SNAPSHOT :
+                                Constants.UPLOAD_APP_SNAPSHOT)
                         .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
                         .uploadApplication(true);
             } else {

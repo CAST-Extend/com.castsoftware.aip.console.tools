@@ -163,6 +163,7 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
         }
 
         String expandedAppName = run.getEnvironment(listener).expand(applicationName);
+        String expandedDomainName = run.getEnvironment(listener).expand(domainName);
 
         try {
             // update timeout of HTTP Client if different from default
@@ -178,7 +179,7 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
             }
 
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
-            String createJobGuid = jobsService.startCreateApplication(expandedAppName, inPlaceMode);
+            String createJobGuid = jobsService.startCreateApplication(expandedAppName, null, expandedDomainName, inPlaceMode);
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
             Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
                     logContentDto -> {

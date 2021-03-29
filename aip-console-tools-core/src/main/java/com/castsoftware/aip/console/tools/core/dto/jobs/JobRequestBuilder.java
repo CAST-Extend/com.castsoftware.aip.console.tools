@@ -37,6 +37,7 @@ public class JobRequestBuilder {
     private String deliveryConfigGuid;
     private boolean autoDiscover = true;
     private boolean uploadApplication = false;
+    private boolean processImaging = false;
 
     private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType) {
         this.appGuid = appGuid;
@@ -147,6 +148,11 @@ public class JobRequestBuilder {
         return this;
     }
 
+    public JobRequestBuilder processImaging(boolean processImaging) {
+        this.processImaging = true;
+        return this;
+    }
+
     private Map<String, String> getJobParameters() {
         Map<String, String> parameters = new HashMap<>();
         parameters.put(Constants.PARAM_APP_GUID, this.appGuid);
@@ -192,6 +198,7 @@ public class JobRequestBuilder {
             }
             parameters.put(Constants.PARAM_BACKUP_NAME, backupName);
         }
+        parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
 
         return parameters;
     }
