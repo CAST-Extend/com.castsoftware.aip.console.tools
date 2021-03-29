@@ -255,6 +255,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         return processImaging;
     }
 
+    @DataBoundSetter
     public void setProcessImaging(boolean processImaging) {
         this.processImaging = processImaging;
     }

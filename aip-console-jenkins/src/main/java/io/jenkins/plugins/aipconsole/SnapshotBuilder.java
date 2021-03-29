@@ -125,6 +125,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
         return processImaging;
     }
 
+    @DataBoundSetter
     public void setProcessImaging(boolean processImaging) {
         this.processImaging = processImaging;
     }
@@ -231,7 +232,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     .processImaging(processImaging)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
                             Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT);
-            
+
             jobGuid = jobsService.startJob(requestBuilder);
             log.println(SnapshotBuilder_Snapshot_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);
