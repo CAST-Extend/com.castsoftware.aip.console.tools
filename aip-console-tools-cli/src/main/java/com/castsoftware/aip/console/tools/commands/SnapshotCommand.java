@@ -149,7 +149,12 @@ public class SnapshotCommand implements Callable<Integer> {
                     .versionName(foundVersion.getName())
                     .snapshotName(snapshotName)
                     .uploadApplication(true)
-                    .releaseAndSnapshotDate(new Date());
+                    .releaseAndSnapshotDate(new Date())
+                    .processImaging(!disableImaging)
+                    .endStep(
+                            SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                                    Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT)
+                    .uploadApplication(true);
 
             String endStep;
             if (processImaging) {

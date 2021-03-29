@@ -227,7 +227,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     .versionName(versionToAnalyze.getName())
                     .snapshotName(resolveSnapshotName)
                     .uploadApplication(true)
-                    .releaseAndSnapshotDate(new Date());
+                    .releaseAndSnapshotDate(new Date())
             String endStep;
 
             if (processImaging) {
