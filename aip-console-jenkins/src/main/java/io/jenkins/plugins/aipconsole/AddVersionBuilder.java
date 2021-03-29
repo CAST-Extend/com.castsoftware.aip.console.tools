@@ -479,9 +479,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
-                    .processImaging(!disableImaging);
-            if (processImaging) {
-                requestBuilder.processImaging(true);
+                    .processImaging(processImaging);
 
             String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null, applicationHasVersion);
             if (StringUtils.isNotBlank(deliveryConfig)) {

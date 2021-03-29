@@ -133,9 +133,7 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
-                builder.processImaging(true)
-                if (processImaging) {
-                    builder.processImaging(true);
+                builder.processImaging(processImaging)
                         .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
                         .uploadApplication(true);
             } else {

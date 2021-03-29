@@ -228,17 +228,10 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     .snapshotName(resolveSnapshotName)
                     .uploadApplication(true)
                     .releaseAndSnapshotDate(new Date())
-            String endStep;
-
-            if (processImaging) {
-                requestBuilder.processImaging(true);
-                endStep = Constants.PROCESS_IMAGING;
-            } else {
-                endStep = SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                        Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT;
-            }
-            requestBuilder.endStep(endStep);
-
+                    .processImaging(processImaging)
+                    .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                            Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT);
+            
             jobGuid = jobsService.startJob(requestBuilder);
             log.println(SnapshotBuilder_Snapshot_info_pollJobMessage());
             JobState state = pollJob(jobGuid, log);

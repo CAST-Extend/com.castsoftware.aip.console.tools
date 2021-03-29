@@ -156,11 +156,6 @@ public class JobRequestBuilder {
         return this;
     }
 
-    public JobRequestBuilder processImaging(boolean processImaging) {
-        this.processImaging = true;
-        return this;
-    }
-
     private Map<String, String> getJobParameters() {
         Map<String, String> parameters = new HashMap<>();
         parameters.put(Constants.PARAM_APP_GUID, this.appGuid);

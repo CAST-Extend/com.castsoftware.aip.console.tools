@@ -79,7 +79,6 @@ public class Constants {
     public static final String PARAM_ENABLE_AUTO_DISCOVER = "extensionAutoConfigEnabled";
     public static final String PARAM_PROCESS_IMAGING = "processImaging";
     public static final String PARAM_UPLOAD_APPLICATION = "uploadApplication";
-    public static final String PARAM_PROCESS_IMAGING = "processImaging";
 
     // Job Step Names
     public static final String EXTRACT_STEP_NAME = "unzip_source";

@@ -183,10 +183,8 @@ public class AddVersionCommand implements Callable<Integer> {
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
-                    .processImaging(!disableImaging);
-            if (processImaging) {
-                builder.processImaging(true);
-
+                    .processImaging(processImaging);
+           
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null, cloneVersion);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
