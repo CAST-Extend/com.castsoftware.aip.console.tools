@@ -19,7 +19,7 @@ public class SnapshotAction implements RunAction2 {
     private String snapshotName;
     @Nullable
     private String versionName;
-    private boolean disableImaging = false;
+    private boolean processImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
@@ -59,12 +59,12 @@ public class SnapshotAction implements RunAction2 {
         this.versionName = versionName;
     }
 
-    public boolean isDisableImaging() {
-        return disableImaging;
+    public boolean isProcessImaging() {
+        return processImaging;
     }
 
-    public void setDisableImaging(boolean disableImaging) {
-        this.disableImaging = disableImaging;
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
     }
 
     public boolean isFailureIgnored() {

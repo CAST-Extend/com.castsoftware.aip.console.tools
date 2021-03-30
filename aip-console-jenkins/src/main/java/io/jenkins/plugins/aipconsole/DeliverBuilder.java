@@ -463,8 +463,14 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     if (!uploadService.uploadInputStream(applicationGuid, fileName, workspaceFile.length(), bufferedStream)) {
                         throw new UploadException("Uploading was not completed successfully.");
                     }
-                    if (apiInfoDto.isSourcePathPrefixRequired()) {
-                        fileName = "upload:" + expandedAppName + "/main_sources";
+                    if (apiInfoDto.isExtractionRequired()) {
+                        // If we have already extracted the content, the source path will be application main sources
+                        fileName = applicationName + "/main_sources";
+                        if (apiInfoDto.isSourcePathPrefixRequired()) {
+                            fileName = "upload:" + fileName;
+                        }
+                    } else {
+                        fileName = "upload:" + applicationName + "/" + fileName;
                     }
                 }
             }

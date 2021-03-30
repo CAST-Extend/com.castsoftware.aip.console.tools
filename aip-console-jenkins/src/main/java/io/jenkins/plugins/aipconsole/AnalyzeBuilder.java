@@ -77,7 +77,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean withSnapshot = false;
-    private boolean disableImaging = false;
+    private boolean processImaging = false;
 
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
@@ -130,12 +130,13 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         this.withSnapshot = withSnapshot;
     }
 
-    public boolean isDisableImaging() {
-        return disableImaging;
+    public boolean isProcessImaging() {
+        return processImaging;
     }
 
-    public void setDisableImaging(boolean disableImaging) {
-        this.disableImaging = disableImaging;
+    @DataBoundSetter
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
     }
 
     public long getTimeout() {
@@ -239,16 +240,16 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
 
             if (withSnapshot) {
-                requestBuilder.processImaging(!disableImaging)
+                requestBuilder.processImaging(processImaging)
                         .endStep(apiInfoDto.isLastStepConsolidateSnapshot() ?
                                 Constants.CONSOLIDATE_SNAPSHOT :
                                 Constants.UPLOAD_APP_SNAPSHOT)
-                        .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
+                        .snapshotName(String.format("Snapshot-%s", new
+                                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
                         .uploadApplication(true);
             } else {
                 requestBuilder.endStep(Constants.ANALYZE);
             }
-
             requestBuilder.versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());

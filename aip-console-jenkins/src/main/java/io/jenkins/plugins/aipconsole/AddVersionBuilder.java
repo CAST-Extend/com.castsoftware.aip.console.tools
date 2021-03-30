@@ -111,7 +111,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private String backupName = "";
     @Nullable
     private String domainName;
-    private boolean disableImaging = false;
+    private boolean processImaging = false;
 
     @Nullable
     private String snapshotName = "";
@@ -251,12 +251,13 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         this.domainName = domainName;
     }
 
-    public boolean isDisableImaging() {
-        return disableImaging;
+    public boolean isProcessImaging() {
+        return processImaging;
     }
 
-    public void setDisableImaging(boolean disableImaging) {
-        this.disableImaging = disableImaging;
+    @DataBoundSetter
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
     }
 
     @Override
@@ -433,8 +434,15 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     if (!uploadService.uploadInputStream(applicationGuid, fileName, workspaceFile.length(), bufferedStream)) {
                         throw new UploadException("Uploading was not completed successfully.");
                     }
-                    if (apiInfoDto.isSourcePathPrefixRequired()) {
-                        fileName = "upload:" + variableAppName + "/main_sources";
+
+                    if (apiInfoDto.isExtractionRequired()) {
+                        // If we have already extracted the content, the source path will be application main sources
+                        fileName = applicationName + "/main_sources";
+                        if (apiInfoDto.isSourcePathPrefixRequired()) {
+                            fileName = "upload:" + fileName;
+                        }
+                    } else {
+                        fileName = "upload:" + applicationName + "/" + fileName;
                     }
                 }
             }
@@ -480,7 +488,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
-                    .processImaging(!disableImaging);
+                    .processImaging(processImaging);
 
             String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null, applicationHasVersion);
             if (StringUtils.isNotBlank(deliveryConfig)) {

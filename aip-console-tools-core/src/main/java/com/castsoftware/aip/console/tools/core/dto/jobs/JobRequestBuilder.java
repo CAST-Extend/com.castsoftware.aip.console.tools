@@ -87,6 +87,14 @@ public class JobRequestBuilder {
         return this;
     }
 
+    public JobRequestBuilder processImaging(boolean processImaging) {
+        if (processImaging) {
+            uploadApplication(true);
+        }
+        this.processImaging = processImaging;
+        return this;
+    }
+
     public JobRequestBuilder endStep(String endStep) {
         this.endStep = endStep;
         return this;
@@ -148,11 +156,6 @@ public class JobRequestBuilder {
         return this;
     }
 
-    public JobRequestBuilder processImaging(boolean processImaging) {
-        this.processImaging = true;
-        return this;
-    }
-
     private Map<String, String> getJobParameters() {
         Map<String, String> parameters = new HashMap<>();
         parameters.put(Constants.PARAM_APP_GUID, this.appGuid);
@@ -174,6 +177,7 @@ public class JobRequestBuilder {
         parameters.put(Constants.PARAM_VERSION_OBJECTIVES, String.join(",", objectives));
         parameters.put(Constants.PARAM_RELEASE_DATE, releaseDateStr);
         parameters.put(Constants.PARAM_ENABLE_AUTO_DISCOVER, Boolean.toString(autoDiscover));
+        parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
         if (StringUtils.isBlank(snapshotDateStr)) {
             parameters.put(Constants.PARAM_SNAPSHOT_CAPTURE_DATE, releaseDateStr);
         } else {

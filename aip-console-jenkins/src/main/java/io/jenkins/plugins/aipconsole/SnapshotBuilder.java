@@ -75,7 +75,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     private String applicationGuid;
     @Nullable
     private String snapshotName;
-    private boolean disableImaging = false;
+    private boolean processImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
@@ -121,12 +121,13 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
         this.failureIgnored = failureIgnored;
     }
 
-    public boolean isDisableImaging() {
-        return disableImaging;
+    public boolean isProcessImaging() {
+        return processImaging;
     }
 
-    public void setDisableImaging(boolean disableImaging) {
-        this.disableImaging = disableImaging;
+    @DataBoundSetter
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
     }
 
     public long getTimeout() {
@@ -230,10 +231,9 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
                     .snapshotName(resolveSnapshotName)
                     .uploadApplication(true)
                     .releaseAndSnapshotDate(new Date())
-                    .processImaging(!disableImaging)
+                    .processImaging(processImaging)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                            Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT)
-                    .uploadApplication(true);
+                            Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT);
 
             jobGuid = jobsService.startJob(requestBuilder);
             log.println(SnapshotBuilder_Snapshot_info_pollJobMessage());
