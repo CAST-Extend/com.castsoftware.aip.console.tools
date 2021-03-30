@@ -69,8 +69,8 @@ public class SnapshotCommand implements Callable<Integer> {
             description = "The name of the snapshot to create")
     private String snapshotName;
 
-    @CommandLine.Option(names = "--disable-imaging", description = "If provided, uploading data to Imaging will be disabled. Note: Nothing will be pushed to Imaging if no instance is set up.")
-    private boolean disableImaging = false;
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging")
+    private boolean processImaging = false;
 
     public SnapshotCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
@@ -150,11 +150,13 @@ public class SnapshotCommand implements Callable<Integer> {
                     .snapshotName(snapshotName)
                     .uploadApplication(true)
                     .releaseAndSnapshotDate(new Date())
-                    .processImaging(!disableImaging)
+                    .processImaging(processImaging)
                     .endStep(
                             SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
                                     Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT)
-                    .uploadApplication(true);
+                    .uploadApplication(true)
+                    .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
+                            Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT);
 
             log.info("Running Snapshot Job on application '{}' with Version '{}' (guid: '{}')", applicationName, foundVersion.getName(), foundVersion.getGuid());
             String jobGuid = jobsService.startJob(builder);

@@ -32,7 +32,7 @@ public class AddVersionAction implements RunAction2 {
     private String backupName = "";
     @Nullable
     private String domainName;
-    private boolean disableImaging = false;
+    private boolean processImaging = false;
 
     @Nullable
     private String snapshotName;
@@ -147,12 +147,12 @@ public class AddVersionAction implements RunAction2 {
         this.backupName = backupName;
     }
 
-    public boolean isDisableImaging() {
-        return disableImaging;
+    public boolean isProcessImaging() {
+        return processImaging;
     }
 
-    public void setDisableImaging(boolean disableImaging) {
-        this.disableImaging = disableImaging;
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
     }
 
     @Nullable

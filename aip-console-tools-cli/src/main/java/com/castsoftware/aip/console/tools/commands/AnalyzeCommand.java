@@ -67,8 +67,8 @@ public class AnalyzeCommand implements Callable<Integer> {
             description = "Creates a snapshot after running the analysis.")
     private boolean withSnapshot;
 
-    @CommandLine.Option(names = "--disable-imaging", description = "If provided, uploading data to Imaging will be disabled. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console")
-    private boolean disableImaging = false;
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console")
+    private boolean processImaging = false;
 
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
@@ -133,8 +133,7 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
-                builder.processImaging(true)
-                        .endStep(apiInfoDto.isLastStepConsolidateSnapshot() ? Constants.CONSOLIDATE_SNAPSHOT : Constants.UPLOAD_APP_SNAPSHOT)
+                builder.processImaging(processImaging)
                         .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
                         .uploadApplication(true);
             } else {
