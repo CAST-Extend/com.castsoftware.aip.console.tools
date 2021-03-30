@@ -175,6 +175,8 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
             jobsService = injector.getInstance(JobsService.class);
             applicationService = injector.getInstance(ApplicationService.class);
         }
+        
+        apiService.setVerbose(getDescriptor().configuration.isVerbose());
 
         String apiServerUrl = getDescriptor().getAipConsoleUrl();
         String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());

@@ -146,6 +146,10 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
             Guice.createInjector(new AipConsoleModule()).injectMembers(this);
         }
 
+        if (apiService != null) {
+            apiService.setVerbose(getDescriptor().configuration.isVerbose());
+        }
+
         String apiServerUrl = getDescriptor().getAipConsoleUrl();
         String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
         String username = getDescriptor().getAipConsoleUsername();

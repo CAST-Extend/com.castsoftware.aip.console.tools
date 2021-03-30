@@ -167,6 +167,8 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
             applicationService = injector.getInstance(ApplicationService.class);
         }
 
+        apiService.setVerbose(getDescriptor().configuration.isVerbose());
+
         String apiServerUrl = getDescriptor().getAipConsoleUrl();
         String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
         String username = getDescriptor().getAipConsoleUsername();
