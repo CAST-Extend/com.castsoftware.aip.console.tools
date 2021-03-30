@@ -131,7 +131,7 @@ The available options are :
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--snapshot-name` (option) The name of the snapshot to generate, default will be based on the date and time
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
-* `--disable-imaging` (optional): Disables sharing data with the configured Imaging instance linked to AIP Console. Note that this parameter has no effect if Imaging is not configured on AIP Console.
+* `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:
 * `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
@@ -177,7 +177,7 @@ The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot` or `-S` (optional): Also runs snapshot creation after analysis.
-* `--disable-imaging` (optional): If snapshot option is provided, disables sharing data with the configured Imaging instance linked to AIP Console. Note that this parameter has no effect if Imaging is not configured on AIP Console.
+* `--process-imaging` (optional): If snapshot option is provided, Sharing data with the configured Imaging instance linked to AIP Console.
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
@@ -194,7 +194,7 @@ The available options are :
 * `--version-name` or `-v` (optional): The name of the version to create. *default*: The current version (version marked as current).
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name. *default*: Defaults to `Snapshot-YYYY-MM-DDThh-mm-ss` (based on the current date and time)
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
-* `--disable-imaging` (optional): Disables sharing data with the configured Imaging instance linked to AIP Console. Note that this parameter has no effect if Imaging is not configured on AIP Console.
+* `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90

@@ -238,17 +238,15 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
 
             if (withSnapshot) {
-                if (processImaging) {
-                    requestBuilder.processImaging(true)
-                            .endStep(apiInfoDto.isLastStepConsolidateSnapshot() ?
-                                    Constants.CONSOLIDATE_SNAPSHOT :
-                                    Constants.UPLOAD_APP_SNAPSHOT)
-                            .snapshotName(String.format("Snapshot-%s", new
-                                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
-                            .uploadApplication(true);
-                } else {
-                    requestBuilder.endStep(Constants.ANALYZE);
-                }
+                requestBuilder.processImaging(processImaging)
+                        .endStep(apiInfoDto.isLastStepConsolidateSnapshot() ?
+                                Constants.CONSOLIDATE_SNAPSHOT :
+                                Constants.UPLOAD_APP_SNAPSHOT)
+                        .snapshotName(String.format("Snapshot-%s", new
+                                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
+                        .uploadApplication(true);
+            } else {
+                requestBuilder.endStep(Constants.ANALYZE);
             }
             requestBuilder.versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())

@@ -97,7 +97,7 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version")
     private boolean enableSecurityDataflow = false;
 
-    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging. Note: If Imaging is not set up, data will not be pushed.")
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging")
     private boolean processImaging = false;
 
     /**
@@ -184,7 +184,7 @@ public class AddVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
-           
+
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null, cloneVersion);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);

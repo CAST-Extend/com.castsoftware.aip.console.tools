@@ -175,6 +175,7 @@ Under `Advanced Settings` you will find the following parameters :
 * Ignore Analysis Failure: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
 * Node Name (optional): The name of the AIP Node on which the application will be created. If none is specified, AIP Console will pick a node. <u>Only used if `Create Application if missing` is Checked</u>
 * Connection Timeout: Timeout in seconds for each calls to AIP Console.
+* Publish to Imaging: Publish to Imaging if Imaging is configured with AIP Console
 
 #### Deliver
 
