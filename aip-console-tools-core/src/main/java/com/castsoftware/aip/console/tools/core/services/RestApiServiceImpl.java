@@ -268,13 +268,6 @@ public class RestApiServiceImpl implements RestApiService {
                 .build();
         log.fine(String.format("Executing call with method %s to endpoint %s", method, endpoint));
         log.finest("Entity is " + entity);
-        System.out.println("------------------------- SENDING " + method + " REQUEST TO CONSOLE --------------------------");
-        try {
-            System.out.println(mapper.writeValueAsString(entity));
-        } catch (Exception e) {
-            System.out.println("Can't write stuff as json for some reason...");
-        }
-        System.out.println("----------------------------------------------------------------------------------------------");
 
         try (Response response = client.newCall(request).execute()) {
             if (ACCEPTED_HTTP_CODES.contains(response.code())) {
