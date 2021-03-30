@@ -86,6 +86,7 @@ public class SnapshotCommand implements Callable<Integer> {
             log.error("No application name provided. Exiting.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
+        restApiService.setVerbose(sharedOptions.isVerbose());
 
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {

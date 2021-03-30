@@ -130,6 +130,7 @@ public class AddVersionCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         ApiInfoDto apiInfo = null;
+        restApiService.setVerbose(sharedOptions.isVerbose());
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);

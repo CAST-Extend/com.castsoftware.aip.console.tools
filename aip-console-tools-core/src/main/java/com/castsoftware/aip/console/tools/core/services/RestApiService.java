@@ -3,7 +3,6 @@ package com.castsoftware.aip.console.tools.core.services;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
 import okhttp3.Response;
 
 import java.util.Map;
@@ -45,6 +44,8 @@ public interface RestApiService {
      * @throws ApiCallException
      */
     void login() throws ApiCallException;
+
+    void setVerbose(boolean verbose);
 
     /**
      * Retrieve the API Info from AIP Console

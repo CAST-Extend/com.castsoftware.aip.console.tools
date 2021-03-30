@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.exceptions.AipCallExceptionHelper;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
@@ -59,6 +60,7 @@ public class RestApiServiceImpl implements RestApiService {
     private String serverUrl;
     private String username;
     private String key;
+    private boolean verbose;
 
     public RestApiServiceImpl() {
         this.cookieJar = new QueryableCookieJar();
@@ -109,7 +111,7 @@ public class RestApiServiceImpl implements RestApiService {
 
         if(StringUtils.isBlank(apiKey)) {
             log.severe("No Password or API Key provided to log in to AIP Console.");
-            throw new ApiKeyMissingException("No Password or API Key provided to log in to AIP Console.");
+            throw AipCallExceptionHelper.getThrowableApiCallException(verbose, new ApiKeyMissingException("No Password or API Key provided to log in to AIP Console."));
         }
 
         if (!StringUtils.startsWithIgnoreCase(serverUrl, "http")) {
@@ -279,7 +281,7 @@ public class RestApiServiceImpl implements RestApiService {
                 messageBody = new JSONArray(response.body().string()).getJSONObject(0).getString("defaultMessage");
             }
             message += "\nContent was: " + messageBody;
-            throw new ApiCallException(response.code(), message);
+            throw AipCallExceptionHelper.getThrowableApiCallException(verbose, response.code(), message);
         } catch (IOException e) {
             log.log(Level.SEVERE, "Unable to send request", e);
             throw new ApiCallException(500, e);
@@ -334,13 +336,13 @@ public class RestApiServiceImpl implements RestApiService {
             log.severe("Login to AIP Console failed (http status is " + response.code() + ")");
             String message = "EMPTY";
             if (response.body() != null) {
-                message = new JSONObject(response.body().string()).getString("defaultMessage");
+                message = new JSONObject(response.body().string()).getString("error");
             }
             log.severe("Content was " + message);
-            throw new ApiCallException(response.code(), "Unable to login to AIP Console");
+            throw AipCallExceptionHelper.getThrowableApiCallException(verbose, response.code(), "Unable to login to AIP Console");
         } catch (IOException e) {
             log.log(Level.SEVERE, "Unable to send request", e);
-            throw new ApiCallException(500, e);
+            throw AipCallExceptionHelper.getThrowableApiCallException(verbose, 500, e);
         }
     }
 
@@ -366,7 +368,7 @@ public class RestApiServiceImpl implements RestApiService {
                     entity == null ? "" : mapper.writeValueAsString(entity));
         } catch (JsonProcessingException e) {
             log.log(Level.SEVERE, "Unable to map object of type " + entity.getClass().getName() + " to JSON", e);
-            throw new ApiCallException(500, e);
+            throw AipCallExceptionHelper.getThrowableApiCallException(verbose, 500, e);
         }
     }
 
@@ -443,5 +445,10 @@ public class RestApiServiceImpl implements RestApiService {
                 return chain.proceed(reqBuilder.build());
             }
         }
+    }
+
+    @Override
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 }
