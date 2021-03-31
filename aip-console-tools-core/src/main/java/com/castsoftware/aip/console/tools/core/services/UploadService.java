@@ -7,6 +7,8 @@ import java.io.InputStream;
 
 public interface UploadService {
 
+    String getSourcesFolder();
+
     /**
      * Calls AIP Console API to check for remote files or upload a local file
      *

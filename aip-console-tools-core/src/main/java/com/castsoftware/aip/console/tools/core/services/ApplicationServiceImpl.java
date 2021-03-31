@@ -32,8 +32,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toSet;
-
 @Log
 public class ApplicationServiceImpl implements ApplicationService {
 
@@ -47,25 +45,35 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String getApplicationGuidFromName(String applicationName) throws ApplicationServiceException {
-        return getApplications()
-                .getApplications()
-                .stream()
-                .filter(Objects::nonNull)
-                .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationName, a.getName()))
-                .findFirst()
-                .map(ApplicationDto::getGuid)
-                .orElse(null);
+        ApplicationDto app = getApplicationFromName(applicationName);
+        return app == null ? null : app.getGuid();
     }
 
     @Override
     public String getApplicationNameFromGuid(String applicationGuid) throws ApplicationServiceException {
+        ApplicationDto app = getApplicationFromGuid(applicationGuid);
+        return app == null ? null : app.getName();
+    }
+
+    @Override
+    public ApplicationDto getApplicationFromGuid(String applicationGuid) throws ApplicationServiceException {
         return getApplications()
                 .getApplications()
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationGuid, a.getGuid()))
                 .findFirst()
-                .map(ApplicationDto::getName)
+                .orElse(null);
+    }
+
+    @Override
+    public ApplicationDto getApplicationFromName(String applicationName) throws ApplicationServiceException {
+        return getApplications()
+                .getApplications()
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationName, a.getName()))
+                .findFirst()
                 .orElse(null);
     }
 
@@ -83,11 +91,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName) throws ApplicationServiceException {
-        return getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, null);
+        return getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, null, true);
     }
 
     @Override
-    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName) throws ApplicationServiceException {
+    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName, boolean logOutput) throws ApplicationServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new ApplicationServiceException("No application name provided.");
         }
@@ -122,8 +130,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                 }
                 log.info(infoMessage);
 
-                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName);
-                return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
+                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false);
+                return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null, logOutput);
             } catch (JobServiceException | ApiCallException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);
                 throw new ApplicationServiceException("Unable to create application automatically.", e);
@@ -152,7 +160,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns) throws JobServiceException, PackagePathInvalidException {
+    public String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns, boolean rescan) throws JobServiceException, PackagePathInvalidException {
         try {
             Set<DeliveryPackageDto> packages = new HashSet<>();
             VersionDto previousVersion = getApplicationVersion(appGuid)
@@ -160,7 +168,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .filter(v -> v.getStatus().ordinal() >= VersionStatus.DELIVERED.ordinal())
                     .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
             Set<String> ignorePatterns = StringUtils.isEmpty(exclusionPatterns) ? Collections.emptySet() : Arrays.stream(exclusionPatterns.split(",")).collect(Collectors.toSet());
-            if (previousVersion != null) {
+            if (previousVersion != null && rescan) {
                 packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
                 if (StringUtils.isEmpty(exclusionPatterns) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
@@ -204,13 +212,15 @@ public class ApplicationServiceImpl implements ApplicationService {
             if (packageReponse != null) {
                 Set<DeliveryPackageDto> packages = restApiService.mapResponse(packageReponse, new TypeReference<Set<DeliveryPackageDto>>() {
                 });
-                if (packages.stream().anyMatch(p -> p.getPath() == null)) {
+
+                ApplicationDto app = getApplicationFromGuid(appGuid);
+                if (!app.isInPlaceMode() && packages.stream().anyMatch(p -> p.getPath() == null)) {
                     throw new PackagePathInvalidException(packages.stream().filter(p -> p.getPath() == null).collect(Collectors.toSet()));
                 }
                 return packages;
             }
             return Collections.emptySet();
-        } catch (ApiCallException | InterruptedException e) {
+        } catch (ApiCallException | InterruptedException | ApplicationServiceException e) {
             throw new JobServiceException("Error discovering packages", e);
         }
     }

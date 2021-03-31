@@ -1,13 +1,8 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
-import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
-import com.castsoftware.aip.console.tools.core.dto.VersionDto;
-import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverPackageRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
@@ -17,21 +12,16 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.LogUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
-import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 @Log
 public class JobsServiceImpl implements JobsService {
@@ -63,22 +52,23 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startCreateApplication(String applicationName) throws JobServiceException {
+    public String startCreateApplication(String applicationName, boolean inplaceMode) throws JobServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new JobServiceException("Application name is empty. Unable to create application");
         }
-        return startCreateApplication(applicationName, null);
+        return startCreateApplication(applicationName, null, inplaceMode);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid) throws JobServiceException {
-        return startCreateApplication(applicationName, nodeGuid, null);
+    public String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode) throws JobServiceException {
+        return startCreateApplication(applicationName, nodeGuid, null, inplaceMode);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, String domainName) throws JobServiceException {
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode) throws JobServiceException {
         Map<String, String> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
+        jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(inplaceMode));
         if (StringUtils.isNotBlank(nodeGuid)) {
             jobParams.put(Constants.PARAM_NODE_GUID, nodeGuid);
         }
@@ -175,14 +165,15 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public JobState pollAndWaitForJobFinished(String jobGuid) throws JobServiceException {
-        return pollAndWaitForJobFinished(jobGuid, JobStatus::getState);
+        return pollAndWaitForJobFinished(jobGuid, JobStatus::getState, true);
     }
 
     @Override
-    public <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobStatusWithSteps, R> callback) throws JobServiceException {
+    public <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobStatusWithSteps, R> callback, boolean logOutput) throws JobServiceException {
+        Consumer<LogContentDto> pollingCallback = !logOutput ? null : jobContentDto -> printLog(jobContentDto);
         return pollAndWaitForJobFinished(jobGuid,
                 jobStep -> log.info("Current step is : " + jobStep.getProgressStep()),
-                jobContentDto -> printLog(jobContentDto),
+                pollingCallback,
                 callback);
     }
 
@@ -213,7 +204,7 @@ public class JobsServiceImpl implements JobsService {
                     startOffset = 0;
                 }
 
-                if (!StringUtils.isAnyBlank(logName, currentStep)) {
+                if (pollingCallback != null && !StringUtils.isAnyBlank(logName, currentStep)) {
                     LogContentDto logContent = getLogContent(jobGuid, currentStep, logName, startOffset);
                     if (logContent != null && !logContent.getLines().isEmpty()) {
                         pollingCallback.accept(logContent);

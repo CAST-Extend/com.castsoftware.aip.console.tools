@@ -1,5 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -79,10 +82,12 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--snapshot-name", paramLabel = "SNAPSHOT_NAME", description = "The name of the snapshot to generate")
     private String snapshotName;
     /**
-     * Whether or not to clone previous version
+     * Disable cloning previous version automatically.
      */
-    @CommandLine.Option(names = {"-c", "--clone", "--rescan", "--copy-previous-config"}, description = "Clones the latest version configuration instead of creating a new application")
-    private boolean cloneVersion = true;
+    @CommandLine.Option(names = {"--no-clone", "--no-rescan", "--new-configuration"},
+            description = "Enable this flag to create a new version without cloning the latest version configuration.",
+            defaultValue = "false")
+    private boolean disableClone = false;
     /**
      * Whether or not to automatically create the application before Adding a version (if the application could not be found)
      */
@@ -91,6 +96,9 @@ public class AddVersionCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version")
     private boolean enableSecurityDataflow = false;
+
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging")
+    private boolean processImaging = false;
 
     /**
      * The name of the target node where application will be created. Only used if --auto-create is true and the application doesn't exists
@@ -121,16 +129,20 @@ public class AddVersionCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
+        ApiInfoDto apiInfo = null;
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
             }
             restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
+            apiInfo = restApiService.getAipConsoleApiInfo();
         } catch (ApiKeyMissingException e) {
             return Constants.RETURN_NO_PASSWORD;
         } catch (ApiCallException e) {
             return Constants.RETURN_LOGIN_ERROR;
         }
+
+        log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
 
         if (StringUtils.isBlank(applicationName) && StringUtils.isBlank(applicationGuid)) {
             log.error("No application name or application guid provided. Exiting.");
@@ -140,7 +152,7 @@ public class AddVersionCommand implements Callable<Integer> {
         try {
             if (StringUtils.isBlank(applicationGuid)) {
                 log.info("Searching for application '{}' on AIP Console", applicationName);
-                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName);
+                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, sharedOptions.isVerbose());
                 if (StringUtils.isBlank(applicationGuid)) {
                     String message = autoCreate ?
                             "Creation of the application '{}' failed on AIP Console" :
@@ -154,19 +166,26 @@ public class AddVersionCommand implements Callable<Integer> {
                 applicationName = applicationService.getApplicationNameFromGuid(applicationGuid);
             }
 
+            ApplicationDto app = applicationService.getApplicationFromName(applicationName);
+            if (app.isInPlaceMode() && Files.isRegularFile(filePath.toPath())) {
+                log.error("The application is created in \"in-place\" mode, only folder path is allowed to deliver in this mode.");
+                return Constants.RETURN_INPLACE_MODE_ERROR;
+            }
+
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
 
             // check that the application actually has versions, otherwise it's just an add version job
-            cloneVersion = cloneVersion && applicationService.applicationHasVersion(applicationGuid);
+            boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupEnabled)
-                    .backupName(backupName);
+                    .backupName(backupName)
+                    .processImaging(processImaging);
 
-            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null);
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null, cloneVersion);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
             }
@@ -180,7 +199,7 @@ public class AddVersionCommand implements Callable<Integer> {
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
             // Register shutdown hook to cancel the job
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             // Deregister the shutdown hook since the job is finished and we won't need to cancel it
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {

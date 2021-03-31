@@ -1,14 +1,15 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -50,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -57,9 +59,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appCreateError;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
@@ -118,6 +120,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     private String exclusionPatterns = "";
 
     private boolean autoDiscover = true;
+    private boolean setAsCurrent = false;
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
@@ -179,6 +182,19 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setAutoDiscover(boolean autoDiscover) {
         this.autoDiscover = autoDiscover;
+    }
+
+    public boolean isSetAsCurrent() {
+        return setAsCurrent;
+    }
+
+    public boolean getSetAsCurrent() {
+        return isSetAsCurrent();
+    }
+
+    @DataBoundSetter
+    public void setSetAsCurrent(boolean setAsCurrent) {
+        this.setAsCurrent = setAsCurrent;
     }
 
     @Nullable
@@ -272,6 +288,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         return (DeliverDescriptorImpl) super.getDescriptor();
     }
 
+
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
@@ -321,8 +338,11 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         EnvVars vars = run.getEnvironment(listener);
         String expandedAppName = vars.expand(applicationName);
         ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
+        boolean inplaceMode = false;
         try {
-            applicationGuid = applicationService.getApplicationGuidFromName(expandedAppName);
+            ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
+            inplaceMode = app == null ? false : app.isInPlaceMode();
+            applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(expandedAppName));
             e.printStackTrace(listener.getLogger());
@@ -331,6 +351,14 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         }
 
         String resolvedFilePath = vars.expand(filePath);
+
+        // inplace mode only allows the folders
+        if (inplaceMode && Files.isRegularFile(Paths.get(resolvedFilePath))) {
+            listener.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
+            run.setResult(Result.NOT_BUILT);
+            return;
+        }
+        
         String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath);
         FilePath workspaceFile = null;
         // Local file
@@ -384,12 +412,10 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName);
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
-                        logContentDto -> {
-                            logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                        },
+                        getPollingCallback(log),
                         s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
                 if (StringUtils.isBlank(applicationGuid)) {
                     listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(expandedAppName, apiServerUrl));
@@ -490,8 +516,12 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
 
+            if (inplaceMode || isSetAsCurrent()) {
+                requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
+            }
+
             log.println("Exclusion patterns : " + exclusionPatterns);
-            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns));
+            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns, applicationHasVersion));
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);
@@ -586,10 +616,15 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                         jobStatusWithSteps.getAppName() + " - " +
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
                 ),
+                getPollingCallback(log),
+                JobStatus::getState);
+    }
+
+    private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
+        return !getDescriptor().configuration.isVerbose() ? null :
                 logContentDto -> {
                     logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                },
-                JobStatus::getState);
+                };
     }
 
     @Symbol("aipDeliver")

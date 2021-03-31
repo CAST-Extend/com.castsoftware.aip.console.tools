@@ -26,6 +26,9 @@ public class SharedOptions {
     @CommandLine.Option(names = {"--timeout"}, description = "The timeout in seconds for calls to AIP Console. Defaults to a 90s timeout", defaultValue = "90")
     private long timeout;
 
+    @CommandLine.Option(names = {"--verbose"}, description = "Whether the command log should be output to the console or not, defaulted to true")
+    private boolean verbose = true;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -77,6 +80,14 @@ public class SharedOptions {
         this.timeout = timeout;
     }
 
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+    }
+
     public String getApiKeyValue() {
         if (apiKeyEnvVariable != null) {
             return System.getenv(apiKeyEnvVariable);
@@ -100,6 +111,7 @@ public class SharedOptions {
                 ", username='" + username + '\'' +
                 ", timeout='" + timeout + '\'' +
                 ", unmatchedOptions=" + unmatchedOptions +
+                ", log output= " + verbose +
                 '}';
     }
 }

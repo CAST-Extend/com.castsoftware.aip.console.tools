@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -99,7 +100,7 @@ public class ApplicationServiceImplTest {
     public void testGetOrCreateApplicationCreateJobFailure() throws Exception {
         when(restApiService.getForEntity(API_APP_ENDPOINT, Applications.class))
                 .thenReturn(new Applications());
-        when(jobsService.startCreateApplication(TEST_APP_NAME, null, null))
+        when(jobsService.startCreateApplication(TEST_APP_NAME, null, null, false))
                 .thenThrow(new JobServiceException());
 
         applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, true);
@@ -110,9 +111,9 @@ public class ApplicationServiceImplTest {
     public void testGetOrCreateApplicationJobFailed() throws Exception {
         when(restApiService.getForEntity(API_APP_ENDPOINT, Applications.class))
                 .thenReturn(new Applications());
-        when(jobsService.startCreateApplication(TEST_APP_NAME, null, null))
+        when(jobsService.startCreateApplication(TEST_APP_NAME, null, null, false))
                 .thenReturn(TEST_JOB_GUID);
-        when(jobsService.pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any()))
+        when(jobsService.pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), anyBoolean()))
                 .thenReturn(null);
 
         String appGuid = applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, true);
@@ -123,9 +124,9 @@ public class ApplicationServiceImplTest {
     public void testGetOrCreateApplicationOk() throws Exception {
         when(restApiService.getForEntity(API_APP_ENDPOINT, Applications.class))
                 .thenReturn(new Applications());
-        when(jobsService.startCreateApplication(TEST_APP_NAME, null, null))
+        when(jobsService.startCreateApplication(TEST_APP_NAME, null, null, false))
                 .thenReturn(TEST_JOB_GUID);
-        when(jobsService.pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any()))
+        when(jobsService.pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), anyBoolean()))
                 .thenReturn(TEST_APP_GUID);
 
         String appGuid = applicationService.getOrCreateApplicationFromName(TEST_APP_NAME, true);

@@ -15,8 +15,6 @@ import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
-import jdk.nashorn.internal.objects.NativeUint8Array;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +66,9 @@ public class AnalyzeCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-S", "--snapshot"},
             description = "Creates a snapshot after running the analysis.")
     private boolean withSnapshot;
+
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console")
+    private boolean processImaging = false;
 
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
@@ -132,12 +133,9 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
-                builder.endStep(
-                        SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                                Constants.CONSOLIDATE_SNAPSHOT :
-                                Constants.UPLOAD_APP_SNAPSHOT);
-                builder.snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
-                builder.uploadApplication(true);
+                builder.processImaging(processImaging)
+                        .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
+                        .uploadApplication(true);
             } else {
                 builder.endStep(Constants.ANALYZE);
             }
@@ -151,7 +149,7 @@ public class AnalyzeCommand implements Callable<Integer> {
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
 
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity());
+            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Application Analysis completed successfully");
