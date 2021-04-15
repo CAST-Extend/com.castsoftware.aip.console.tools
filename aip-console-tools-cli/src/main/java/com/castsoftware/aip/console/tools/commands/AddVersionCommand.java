@@ -81,23 +81,33 @@ public class AddVersionCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = "--snapshot-name", paramLabel = "SNAPSHOT_NAME", description = "The name of the snapshot to generate")
     private String snapshotName;
+
     /**
      * Disable cloning previous version automatically.
      */
     @CommandLine.Option(names = {"--no-clone", "--no-rescan", "--new-configuration"},
-            description = "Enable this flag to create a new version without cloning the latest version configuration.",
+            description = "Enable this flag to create a new version without cloning the latest version configuration. Default: ${DEFAULT-VALUE}",
             defaultValue = "false")
     private boolean disableClone = false;
+
+    /**
+     * Whether or not to clone previous version: backward compatibility
+     */
+    @CommandLine.Option(names = {"-c", "--clone", "--rescan", "--copy-previous-config"}
+            , description = "Clones the latest version configuration instead of creating a new application",
+            hidden = true, defaultValue = "false")
+    private boolean copyVersion;
+
     /**
      * Whether or not to automatically create the application before Adding a version (if the application could not be found)
      */
-    @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
+    @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version. Default: ${DEFAULT-VALUE}", defaultValue = "false")
     private boolean autoCreate = false;
 
-    @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version")
+    @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version. Default: ${DEFAULT-VALUE}", defaultValue = "false")
     private boolean enableSecurityDataflow = false;
 
-    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging")
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging", defaultValue = "false")
     private boolean processImaging = false;
 
     /**
@@ -109,7 +119,7 @@ public class AddVersionCommand implements Callable<Integer> {
     /**
      * Run a backup before delivering the new version
      */
-    @CommandLine.Option(names = {"-b", "--backup"}, description = "Enable backup of application before delivering the new version")
+    @CommandLine.Option(names = {"-b", "--backup"}, description = "Enable backup of application before delivering the new version", defaultValue = "false")
     private boolean backupEnabled = false;
 
     /**
@@ -175,7 +185,8 @@ public class AddVersionCommand implements Callable<Integer> {
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
 
             // check that the application actually has versions, otherwise it's just an add version job
-            boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
+            boolean cloneOperating = copyVersion || !disableClone;
+            boolean cloneVersion = (app.isInPlaceMode() || cloneOperating) && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .versionName(versionName)

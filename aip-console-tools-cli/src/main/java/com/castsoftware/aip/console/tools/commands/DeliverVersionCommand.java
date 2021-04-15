@@ -78,16 +78,24 @@ public class DeliverVersionCommand implements Callable<Integer> {
     private boolean autoDeploy = false;
 
     @CommandLine.Option(names = {"--no-clone", "--no-rescan", "--create-new-version"},
-            description = "Enable this flag to create a new version without cloning the latest version configuration. Note that when using \"in-place\" more, this parameter will be ignore and versions will always be cloned.",
+            description = "Enable this flag to create a new version without cloning the latest version configuration. Note that when using \"Simplified Delivery\" mode, this parameter will be ignore and versions will always be cloned. Default: ${DEFAULT-VALUE}",
             defaultValue = "false")
     private boolean disableClone = false;
 
+    /**
+     * Whether or not to clone previous version: backward compatibility
+     */
+    @CommandLine.Option(names = {"-c", "--clone", "--rescan", "--copy-previous-config"}
+            , description = "Clones the latest version configuration instead of creating a new application",
+            hidden = true, defaultValue = "false")
+    private boolean copyVersion;
+
     @CommandLine.Option(names = "--auto-create",
-            description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
+            description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version. Default: ${DEFAULT-VALUE}")
     private boolean autoCreate = false;
 
     @CommandLine.Option(names = "--enable-security-dataflow",
-            description = "If defined, this will activate the security dataflow for this version")
+            description = "If defined, this will activate the security dataflow for this version. Default: ${DEFAULT-VALUE}")
     private boolean enableSecurityDataflow = false;
 
     @CommandLine.Option(names = "--node-name",
@@ -95,7 +103,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
     private String nodeName;
 
     @CommandLine.Option(names = {"-b", "--backup"},
-            description = "Enable backup of application before delivering the new version")
+            description = "Enable backup of application before delivering the new version. Default: ${DEFAULT-VALUE}")
     private boolean backupEnabled = false;
 
     @CommandLine.Option(names = "--backup-name",
@@ -104,7 +112,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
     private String backupName;
 
     @CommandLine.Option(names = "--auto-discover",
-            description = "AIP Console will discover new technologies and install new extensions, to disable if run consistency check")
+            description = "AIP Console will discover new technologies and install new extensions, to disable if run consistency check. Default: ${DEFAULT-VALUE}")
     private boolean autoDiscover = true;
 
     @CommandLine.Option(names = {"-exclude", "--exclude-patterns"},
@@ -112,7 +120,8 @@ public class DeliverVersionCommand implements Callable<Integer> {
     private String exclusionPatterns;
 
     @CommandLine.Option(names = {"-current", "--set-as-current"},
-            description = "true or false depending on whether the version should be set as the current one or not.")
+            description = "true or false depending on whether the version should be set as the current one or not. Default: ${DEFAULT-VALUE}",
+            defaultValue = "false")
     private boolean setAsCurrent = false;
 
     /**
@@ -176,7 +185,8 @@ public class DeliverVersionCommand implements Callable<Integer> {
             // check that the application actually has versions, otherwise it's just an add version job
 
             // Clone the version if we're in "in-place" mode or the user wants to clone the version and the application has versions
-            boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
+            boolean cloneOperating = copyVersion || !disableClone;
+            boolean cloneVersion = (app.isInPlaceMode() || cloneOperating) && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder
                     .newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
