@@ -21,7 +21,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -44,14 +43,10 @@ import java.util.function.Function;
 @Getter
 @Setter
 public class AddVersionCommand implements Callable<Integer> {
-    @Autowired
-    private RestApiService restApiService;
-    @Autowired
-    private JobsService jobsService;
-    @Autowired
-    private UploadService uploadService;
-    @Autowired
-    private ApplicationService applicationService;
+    private final RestApiService restApiService;
+    private final JobsService jobsService;
+    private final UploadService uploadService;
+    private final ApplicationService applicationService;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;

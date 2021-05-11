@@ -19,7 +19,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -47,13 +46,9 @@ import java.util.function.Function;
 @Setter
 public class AnalyzeCommand implements Callable<Integer> {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    @Autowired
-    private RestApiService restApiService;
-    @Autowired
-    private JobsService jobsService;
-    @Autowired
-    private ApplicationService applicationService;
-
+    private final RestApiService restApiService;
+    private final JobsService jobsService;
+    private final ApplicationService applicationService;
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
