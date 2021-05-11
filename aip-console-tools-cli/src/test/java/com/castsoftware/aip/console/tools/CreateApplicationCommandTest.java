@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 //@ExtendWith(MockitoExtension.class)
-public class AipCommandsTest {
+public class CreateApplicationCommandTest {
     private static final String TEST_CREATRE_APP = "To_Create_App-name";
     private static final String TEST_API_KEY = "API-Key";
 
