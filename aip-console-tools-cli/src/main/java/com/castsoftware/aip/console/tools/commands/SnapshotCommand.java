@@ -69,7 +69,9 @@ public class SnapshotCommand implements Callable<Integer> {
             description = "The name of the snapshot to create")
     private String snapshotName;
 
-    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging")
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging"
+            + "if specified without parameter: ${FALLBACK-VALUE}"
+            , defaultValue = "false", fallbackValue = "true")
     private boolean processImaging = false;
 
     public SnapshotCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
@@ -77,7 +79,6 @@ public class SnapshotCommand implements Callable<Integer> {
         this.jobsService = jobsService;
         this.applicationService = applicationService;
     }
-
 
     @Override
     public Integer call() throws Exception {

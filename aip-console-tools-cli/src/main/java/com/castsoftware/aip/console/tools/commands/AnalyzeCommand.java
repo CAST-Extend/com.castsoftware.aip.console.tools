@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -46,9 +47,13 @@ import java.util.function.Function;
 @Setter
 public class AnalyzeCommand implements Callable<Integer> {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    private final RestApiService restApiService;
-    private final JobsService jobsService;
-    private final ApplicationService applicationService;
+    @Autowired
+    private RestApiService restApiService;
+    @Autowired
+    private JobsService jobsService;
+    @Autowired
+    private ApplicationService applicationService;
+
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
@@ -64,10 +69,13 @@ public class AnalyzeCommand implements Callable<Integer> {
     private String versionName;
 
     @CommandLine.Option(names = {"-S", "--snapshot"},
-            description = "Creates a snapshot after running the analysis.")
+            description = "Creates a snapshot after running the analysis." + "if specified without parameter: ${FALLBACK-VALUE}"
+            , defaultValue = "false", fallbackValue = "true")
     private boolean withSnapshot;
 
-    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console")
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console"
+            + "if specified without parameter: ${FALLBACK-VALUE}"
+            , defaultValue = "false", fallbackValue = "true")
     private boolean processImaging = false;
 
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {

@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -44,10 +45,14 @@ import java.util.function.Function;
 @Getter
 @Setter
 public class DeliverVersionCommand implements Callable<Integer> {
-    private final RestApiService restApiService;
-    private final JobsService jobsService;
-    private final UploadService uploadService;
-    private final ApplicationService applicationService;
+    @Autowired
+    private RestApiService restApiService;
+    @Autowired
+    private JobsService jobsService;
+    @Autowired
+    private UploadService uploadService;
+    @Autowired
+    private ApplicationService applicationService;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -79,7 +84,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = {"--no-clone", "--no-rescan", "--create-new-version"},
             description = "Enable this flag to create a new version without cloning the latest version configuration. Note that when using \"Simplified Delivery\" mode, this parameter will be ignore and versions will always be cloned. Default: ${DEFAULT-VALUE}",
-            defaultValue = "false")
+            defaultValue = "false", fallbackValue = "true")
     private boolean disableClone = false;
 
     /**
@@ -87,15 +92,21 @@ public class DeliverVersionCommand implements Callable<Integer> {
      */
     @CommandLine.Option(names = {"-c", "--clone", "--rescan", "--copy-previous-config"}
             , description = "Clones the latest version configuration instead of creating a new application",
-            hidden = true, defaultValue = "false")
+            hidden = true, defaultValue = "false", fallbackValue = "true")
     private boolean copyVersion;
 
     @CommandLine.Option(names = "--auto-create",
-            description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version. Default: ${DEFAULT-VALUE}")
+            description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version. Default: ${DEFAULT-VALUE}"
+                    + "if specified without parameter: ${FALLBACK-VALUE}"
+            , defaultValue = "false"
+            , fallbackValue = "true")
     private boolean autoCreate = false;
 
     @CommandLine.Option(names = "--enable-security-dataflow",
-            description = "If defined, this will activate the security dataflow for this version. Default: ${DEFAULT-VALUE}")
+            description = "If defined, this will activate the security dataflow for this version. Default: ${DEFAULT-VALUE}"
+                    + "if specified without parameter: ${FALLBACK-VALUE}"
+            , defaultValue = "false"
+            , fallbackValue = "true")
     private boolean enableSecurityDataflow = false;
 
     @CommandLine.Option(names = "--node-name",
@@ -103,8 +114,11 @@ public class DeliverVersionCommand implements Callable<Integer> {
     private String nodeName;
 
     @CommandLine.Option(names = {"-b", "--backup"},
-            description = "Enable backup of application before delivering the new version. Default: ${DEFAULT-VALUE}")
-    private boolean backupEnabled = false;
+            description = "Enable backup of application before delivering the new version. Default: ${DEFAULT-VALUE}"
+                    + "if specified without parameter: ${FALLBACK-VALUE}"
+            , defaultValue = "false"
+            , fallbackValue = "true")
+    private boolean backupEnabled;
 
     @CommandLine.Option(names = "--backup-name",
             paramLabel = "BACKUP_NAME",
@@ -112,8 +126,12 @@ public class DeliverVersionCommand implements Callable<Integer> {
     private String backupName;
 
     @CommandLine.Option(names = "--auto-discover",
-            description = "AIP Console will discover new technologies and install new extensions, to disable if run consistency check. Default: ${DEFAULT-VALUE}")
-    private boolean autoDiscover = true;
+            description = "AIP Console will discover new technologies and install new extensions, to disable if run consistency check. Default: ${DEFAULT-VALUE}"
+                    + "if specified without parameter: ${FALLBACK-VALUE}",
+            defaultValue = "true",
+            fallbackValue = "true"
+    )
+    private boolean autoDiscover;
 
     @CommandLine.Option(names = {"-exclude", "--exclude-patterns"},
             description = "File patterns(glob pattern) to exclude in the delivery, separated with comma")
@@ -121,8 +139,9 @@ public class DeliverVersionCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = {"-current", "--set-as-current"},
             description = "true or false depending on whether the version should be set as the current one or not. Default: ${DEFAULT-VALUE}",
-            defaultValue = "false")
-    private boolean setAsCurrent = false;
+            defaultValue = "false",
+            fallbackValue = "true")
+    private boolean setAsCurrent;
 
     /**
      * Domain name

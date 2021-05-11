@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -43,10 +44,14 @@ import java.util.function.Function;
 @Getter
 @Setter
 public class AddVersionCommand implements Callable<Integer> {
-    private final RestApiService restApiService;
-    private final JobsService jobsService;
-    private final UploadService uploadService;
-    private final ApplicationService applicationService;
+    @Autowired
+    private RestApiService restApiService;
+    @Autowired
+    private JobsService jobsService;
+    @Autowired
+    private UploadService uploadService;
+    @Autowired
+    private ApplicationService applicationService;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -87,7 +92,7 @@ public class AddVersionCommand implements Callable<Integer> {
      */
     @CommandLine.Option(names = {"--no-clone", "--no-rescan", "--new-configuration"},
             description = "Enable this flag to create a new version without cloning the latest version configuration. Default: ${DEFAULT-VALUE}",
-            defaultValue = "false")
+            defaultValue = "false", fallbackValue = "true")
     private boolean disableClone = false;
 
     /**
@@ -95,19 +100,25 @@ public class AddVersionCommand implements Callable<Integer> {
      */
     @CommandLine.Option(names = {"-c", "--clone", "--rescan", "--copy-previous-config"}
             , description = "Clones the latest version configuration instead of creating a new application",
-            hidden = true, defaultValue = "false")
+            hidden = true, defaultValue = "false", fallbackValue = "true")
     private boolean copyVersion;
 
     /**
      * Whether or not to automatically create the application before Adding a version (if the application could not be found)
      */
-    @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version. Default: ${DEFAULT-VALUE}", defaultValue = "false")
+    @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version. Default: ${DEFAULT-VALUE}"
+            + "if specified without parameter: ${FALLBACK-VALUE}"
+            , defaultValue = "false", fallbackValue = "true")
     private boolean autoCreate = false;
 
-    @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version. Default: ${DEFAULT-VALUE}", defaultValue = "false")
+    @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version. Default: ${DEFAULT-VALUE}"
+            + "if specified without parameter: ${FALLBACK-VALUE}"
+            , defaultValue = "false", fallbackValue = "true")
     private boolean enableSecurityDataflow = false;
 
-    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging", defaultValue = "false")
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging"
+            + "if specified without parameter: ${FALLBACK-VALUE}"
+            , defaultValue = "false", fallbackValue = "true")
     private boolean processImaging = false;
 
     /**
@@ -119,7 +130,9 @@ public class AddVersionCommand implements Callable<Integer> {
     /**
      * Run a backup before delivering the new version
      */
-    @CommandLine.Option(names = {"-b", "--backup"}, description = "Enable backup of application before delivering the new version", defaultValue = "false")
+    @CommandLine.Option(names = {"-b", "--backup"},
+            description = "Enable backup of application before delivering the new version" + "if specified without parameter: ${FALLBACK-VALUE}"
+            , defaultValue = "false", fallbackValue = "true")
     private boolean backupEnabled = false;
 
     /**
