@@ -32,8 +32,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toSet;
-
 @Log
 public class ApplicationServiceImpl implements ApplicationService {
 
@@ -93,11 +91,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName) throws ApplicationServiceException {
-        return getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, null);
+        return getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, null, true);
     }
 
     @Override
-    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName) throws ApplicationServiceException {
+    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName, boolean logOutput) throws ApplicationServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new ApplicationServiceException("No application name provided.");
         }
@@ -133,7 +131,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 log.info(infoMessage);
 
                 String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false);
-                return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
+                return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null, logOutput);
             } catch (JobServiceException | ApiCallException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);
                 throw new ApplicationServiceException("Unable to create application automatically.", e);
@@ -162,7 +160,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns) throws JobServiceException, PackagePathInvalidException {
+    public String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns, boolean rescan) throws JobServiceException, PackagePathInvalidException {
         try {
             Set<DeliveryPackageDto> packages = new HashSet<>();
             VersionDto previousVersion = getApplicationVersion(appGuid)
@@ -170,7 +168,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .filter(v -> v.getStatus().ordinal() >= VersionStatus.DELIVERED.ordinal())
                     .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
             Set<String> ignorePatterns = StringUtils.isEmpty(exclusionPatterns) ? Collections.emptySet() : Arrays.stream(exclusionPatterns.split(",")).collect(Collectors.toSet());
-            if (previousVersion != null) {
+            if (previousVersion != null && rescan) {
                 packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
                 if (StringUtils.isEmpty(exclusionPatterns) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();

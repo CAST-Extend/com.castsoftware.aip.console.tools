@@ -4,12 +4,12 @@ import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -59,9 +59,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appCreateError;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
@@ -120,6 +120,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     private String exclusionPatterns = "";
 
     private boolean autoDiscover = true;
+    private boolean setAsCurrent = false;
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
@@ -181,6 +182,19 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setAutoDiscover(boolean autoDiscover) {
         this.autoDiscover = autoDiscover;
+    }
+
+    public boolean isSetAsCurrent() {
+        return setAsCurrent;
+    }
+
+    public boolean getSetAsCurrent() {
+        return isSetAsCurrent();
+    }
+
+    @DataBoundSetter
+    public void setSetAsCurrent(boolean setAsCurrent) {
+        this.setAsCurrent = setAsCurrent;
     }
 
     @Nullable
@@ -273,6 +287,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     public DeliverDescriptorImpl getDescriptor() {
         return (DeliverDescriptorImpl) super.getDescriptor();
     }
+
 
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
@@ -400,9 +415,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
-                        logContentDto -> {
-                            logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                        },
+                        getPollingCallback(log),
                         s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
                 if (StringUtils.isBlank(applicationGuid)) {
                     listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(expandedAppName, apiServerUrl));
@@ -448,8 +461,14 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     if (!uploadService.uploadInputStream(applicationGuid, fileName, workspaceFile.length(), bufferedStream)) {
                         throw new UploadException("Uploading was not completed successfully.");
                     }
-                    if (apiInfoDto.isSourcePathPrefixRequired()) {
-                        fileName = "upload:" + expandedAppName + "/main_sources";
+                    if (apiInfoDto.isExtractionRequired()) {
+                        // If we have already extracted the content, the source path will be application main sources
+                        fileName = applicationName + "/main_sources";
+                        if (apiInfoDto.isSourcePathPrefixRequired()) {
+                            fileName = "upload:" + fileName;
+                        }
+                    } else {
+                        fileName = "upload:" + applicationName + "/" + fileName;
                     }
                 }
             }
@@ -496,12 +515,13 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
-            if (inplaceMode){
+
+            if (inplaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
 
             log.println("Exclusion patterns : " + exclusionPatterns);
-            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns));
+            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns, applicationHasVersion));
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);
@@ -596,10 +616,15 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                         jobStatusWithSteps.getAppName() + " - " +
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
                 ),
+                getPollingCallback(log),
+                JobStatus::getState);
+    }
+
+    private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
+        return !getDescriptor().configuration.isVerbose() ? null :
                 logContentDto -> {
                     logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                },
-                JobStatus::getState);
+                };
     }
 
     @Symbol("aipDeliver")

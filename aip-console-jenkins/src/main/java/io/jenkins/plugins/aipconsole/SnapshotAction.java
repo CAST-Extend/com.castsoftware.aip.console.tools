@@ -19,6 +19,7 @@ public class SnapshotAction implements RunAction2 {
     private String snapshotName;
     @Nullable
     private String versionName;
+    private boolean processImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
@@ -56,6 +57,14 @@ public class SnapshotAction implements RunAction2 {
 
     public void setVersionName(@Nullable String versionName) {
         this.versionName = versionName;
+    }
+
+    public boolean isProcessImaging() {
+        return processImaging;
+    }
+
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
     }
 
     public boolean isFailureIgnored() {

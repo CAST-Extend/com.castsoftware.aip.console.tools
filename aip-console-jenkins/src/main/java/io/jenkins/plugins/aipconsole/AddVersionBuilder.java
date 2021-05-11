@@ -3,12 +3,12 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -55,9 +55,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appCreateError;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
@@ -98,6 +98,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
+
     @Nullable
     private String versionName = "";
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -110,6 +111,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     private String backupName = "";
     @Nullable
     private String domainName;
+    private boolean processImaging = false;
 
     @Nullable
     private String snapshotName = "";
@@ -249,6 +251,15 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         this.domainName = domainName;
     }
 
+    public boolean isProcessImaging() {
+        return processImaging;
+    }
+
+    @DataBoundSetter
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
+    }
+
     @Override
     public AddVersionDescriptorImpl getDescriptor() {
         return (AddVersionDescriptorImpl) super.getDescriptor();
@@ -377,9 +388,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
-                        logContentDto -> {
-                            logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                        },
+                        getPollingCallback(log),
                         s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
                 if (StringUtils.isBlank(applicationGuid)) {
                     listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(variableAppName, apiServerUrl));
@@ -424,8 +433,15 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     if (!uploadService.uploadInputStream(applicationGuid, fileName, workspaceFile.length(), bufferedStream)) {
                         throw new UploadException("Uploading was not completed successfully.");
                     }
-                    if (apiInfoDto.isSourcePathPrefixRequired()) {
-                        fileName = "upload:" + variableAppName + "/main_sources";
+
+                    if (apiInfoDto.isExtractionRequired()) {
+                        // If we have already extracted the content, the source path will be application main sources
+                        fileName = applicationName + "/main_sources";
+                        if (apiInfoDto.isSourcePathPrefixRequired()) {
+                            fileName = "upload:" + fileName;
+                        }
+                    } else {
+                        fileName = "upload:" + applicationName + "/" + fileName;
                     }
                 }
             }
@@ -470,12 +486,10 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                     .versionName(resolvedVersionName)
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
-                    .backupName(backupName);
-            if (inplaceMode){
-                requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
-            }
+                    .backupName(backupName)
+                    .processImaging(processImaging);
 
-            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null);
+            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null, applicationHasVersion);
             if (StringUtils.isNotBlank(deliveryConfig)) {
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
             }
@@ -543,15 +557,20 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
         return null;
     }
 
+    private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
+        return !getDescriptor().configuration.isVerbose() ? null :
+                logContentDto -> {
+                    logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
+                };
+    }
+
     private JobState pollJob(String jobGuid, PrintStream log) throws JobServiceException {
         return jobsService.pollAndWaitForJobFinished(jobGuid,
                 jobStatusWithSteps -> log.println(
                         jobStatusWithSteps.getAppName() + " - " +
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
                 ),
-                logContentDto -> {
-                    logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                },
+                getPollingCallback(log),
                 JobStatus::getState);
     }
 

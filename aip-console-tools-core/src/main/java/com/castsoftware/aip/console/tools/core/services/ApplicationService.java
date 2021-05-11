@@ -66,10 +66,11 @@ public interface ApplicationService {
      * @param autoCreate      Whether the application should be created if it couldn't be found
      * @param nodeName        The name of the node on which the application
      * @param domainName      The name of the domain to assign to the application
+     * @param logOutput whether the log is displa
      * @return An application GUID or null if non was found
      * @throws ApplicationServiceException
      */
-    String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName) throws ApplicationServiceException;
+    String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName, boolean logOutput) throws ApplicationServiceException;
 
     /**
      * Retrieve an application's version
@@ -86,5 +87,5 @@ public interface ApplicationService {
      * @param exclusionPatterns
      * @return
      */
-    String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns) throws JobServiceException, PackagePathInvalidException;
+    String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns, boolean rescan) throws JobServiceException, PackagePathInvalidException;
 }

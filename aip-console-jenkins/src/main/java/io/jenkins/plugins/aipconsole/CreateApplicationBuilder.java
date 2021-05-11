@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -31,6 +32,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_emptyApiKey;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_emptyUrl;
@@ -161,6 +163,7 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
         }
 
         String expandedAppName = run.getEnvironment(listener).expand(applicationName);
+        String expandedDomainName = run.getEnvironment(listener).expand(domainName);
 
         try {
             // update timeout of HTTP Client if different from default
@@ -176,13 +179,16 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
             }
 
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
-            String createJobGuid = jobsService.startCreateApplication(expandedAppName, inPlaceMode);
+            String createJobGuid = jobsService.startCreateApplication(expandedAppName, null, expandedDomainName, inPlaceMode);
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
-            JobState endState = jobsService.pollAndWaitForJobFinished(createJobGuid,
-                    jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+            Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
                     logContentDto -> {
                         logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                    },
+                    };
+
+            JobState endState = jobsService.pollAndWaitForJobFinished(createJobGuid,
+                    jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                    pollingCallback,
                     jobStatusWithSteps -> {
                         applicationGuid = jobStatusWithSteps.getAppGuid();
                         return jobStatusWithSteps.getState();

@@ -79,7 +79,7 @@ public class AddVersionBuilderTest extends JenkinsBasicTest {
         job.setDomainName("");
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
-
+    
     @Test
     public void testBuildFreestyleDefaultOk() throws Exception {
         FreeStyleProject project = getProjectWithDefaultAddVersionAndFile(JenkinsBasicTest.TEST_ARCHIVE_NAME);
