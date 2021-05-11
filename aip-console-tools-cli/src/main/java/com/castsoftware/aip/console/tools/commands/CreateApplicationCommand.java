@@ -73,6 +73,9 @@ public class CreateApplicationCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
+        System.out.println("--verbose= " + sharedOptions.isVerbose());
+        System.out.println("--inPlaceMode= " + inPlaceMode);
+
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);

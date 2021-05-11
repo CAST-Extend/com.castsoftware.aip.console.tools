@@ -3,7 +3,10 @@ package com.castsoftware.aip.console.tools;
 import com.castsoftware.aip.console.tools.commands.CreateApplicationCommand;
 import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import picocli.CommandLine;
 import picocli.spring.PicocliSpringFactory;
@@ -12,8 +15,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(MockitoJUnitRunner.class)
+//@ExtendWith(MockitoExtension.class)
 public class AipCommandsTest {
+    private static final String TEST_CREATRE_APP = "To_Create_App-name";
+    private static final String TEST_API_KEY = "API-Key";
+
     private AnnotationConfigApplicationContext context;
+    private CommandLine createAppCmdLine;
+    private CreateApplicationCommand createAppCmd;
+
+    @Before
+    public void startup() {
+        load(AipIntegrationCliMain.class);
+        CommandLine.IFactory factory = this.context.getBean(SpringAwareCommandFactory.class);
+        createAppCmd = this.context.getBean(CreateApplicationCommand.class);
+        createAppCmdLine = new CommandLine(createAppCmd, factory);
+    }
 
     @After
     public void tearDown() {
@@ -40,16 +58,39 @@ public class AipCommandsTest {
 
     @Test
     public void testCreateApplicationCommand() {
-        load(AipIntegrationCliMain.class);
-        CommandLine.IFactory factory = this.context.getBean(SpringAwareCommandFactory.class);
-        CreateApplicationCommand createAppCmd = this.context.getBean(CreateApplicationCommand.class);
-        CommandLine cmd = new CommandLine(createAppCmd, factory);
-        String TEST_CREATRE_APP = "To_Create_App-name";
-        String[] sb = new String[]{"new", "--apikey", "API-Key", "--app-name", TEST_CREATRE_APP, "--inplace-mode", "true", "--verbose", "false"};
-        cmd.parseArgs(sb);
+        String[] sb = new String[]{"new", "--apikey", TEST_API_KEY, "--app-name=" + TEST_CREATRE_APP, "--inplace-mode", "true"};
+        createAppCmdLine.parseArgs(sb);
+        assertEquals(TEST_API_KEY, createAppCmd.getSharedOptions().getApiKey());
         assertEquals(TEST_CREATRE_APP, createAppCmd.getApplicationName());
         assertEquals(true, createAppCmd.isInPlaceMode());
-        //assertEquals(false, createAppCmd.getSharedOptions().isVerbose());
+        assertEquals(true, createAppCmd.getSharedOptions().isVerbose());
+    }
+
+    @Test
+    public void testCreateApplicationCommand_withAlias() {
+        String[] sb = new String[]{"new", "--apikey", TEST_API_KEY, "-n", TEST_CREATRE_APP, "--inplace-mode=true", "--verbose=false"};
+        createAppCmdLine.parseArgs(sb);
+        assertEquals(TEST_CREATRE_APP, createAppCmd.getApplicationName());
+        assertEquals(true, createAppCmd.isInPlaceMode());
+        assertEquals(false, createAppCmd.getSharedOptions().isVerbose());
+    }
+
+    @Test
+    public void testCreateApplicationCommand_withParamWithoutValue() {
+        String[] sb = new String[]{"new", "--apikey=" + TEST_API_KEY, "-n", TEST_CREATRE_APP, "--inplace-mode", "--verbose"};
+        createAppCmdLine.parseArgs(sb);
+        assertEquals(TEST_CREATRE_APP, createAppCmd.getApplicationName());
+        assertEquals(true, createAppCmd.isInPlaceMode());
+        assertEquals(true, createAppCmd.getSharedOptions().isVerbose());
+    }
+
+    @Test
+    public void testCreateApplicationCommand_withDefaultParamValues() {
+        String[] sb = new String[]{"new", "--apikey=API-Key", "-n", TEST_CREATRE_APP};
+        createAppCmdLine.parseArgs(sb);
+        assertEquals(TEST_CREATRE_APP, createAppCmd.getApplicationName());
+        assertEquals(false, createAppCmd.isInPlaceMode());
+        assertEquals(true, createAppCmd.getSharedOptions().isVerbose());
     }
 
     private void load(Class<?> config, String... environment) {
