@@ -64,10 +64,12 @@ public class AnalyzeCommand implements Callable<Integer> {
     private String versionName;
 
     @CommandLine.Option(names = {"-S", "--snapshot"},
-            description = "Creates a snapshot after running the analysis.")
+            description = "Creates a snapshot after running the analysis." + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
     private boolean withSnapshot;
 
-    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console")
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean processImaging = false;
 
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {

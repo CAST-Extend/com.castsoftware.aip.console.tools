@@ -26,7 +26,8 @@ public class SharedOptions {
     @CommandLine.Option(names = {"--timeout"}, description = "The timeout in seconds for calls to AIP Console. Defaults to a 90s timeout", defaultValue = "90")
     private long timeout;
 
-    @CommandLine.Option(names = {"--verbose"}, description = "Whether the command log should be output to the console or not, defaulted to true")
+    @CommandLine.Option(names = {"--verbose"}, description = "Whether the command log should be output to the console or not, defaulted to true"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean verbose = true;
 
     @CommandLine.Unmatched
