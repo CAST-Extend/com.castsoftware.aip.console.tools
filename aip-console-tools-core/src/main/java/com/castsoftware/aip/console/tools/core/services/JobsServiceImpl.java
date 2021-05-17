@@ -184,6 +184,7 @@ public class JobsServiceImpl implements JobsService {
         String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(jobGuid);
         String previousStep = "";
         log.fine("Checking status of Job with GUID " + jobGuid);
+        int retryCount = 0;
         try {
             JobStatusWithSteps jobStatus;
             String logName = null;
@@ -196,7 +197,15 @@ public class JobsServiceImpl implements JobsService {
                 // Sometimes it takes more than 10 secs till the jobstatus is ready
                 jobStatus = getJobStatus(jobDetailsEndpoint);
                 if (jobStatus == null) {
-                    continue;
+                    if (retryCount < 20) {
+                        ++retryCount;
+                        continue;
+                    } else {
+                        throw new ApiCallException(500, "Failed to get job status after retrying 20 times");
+                    }
+
+                } else {
+                    retryCount = 0;
                 }
 
                 String currentStep = jobStatus.getProgressStep();
