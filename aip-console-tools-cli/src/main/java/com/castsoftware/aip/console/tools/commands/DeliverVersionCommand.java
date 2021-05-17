@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -44,10 +45,14 @@ import java.util.function.Function;
 @Getter
 @Setter
 public class DeliverVersionCommand implements Callable<Integer> {
-    private final RestApiService restApiService;
-    private final JobsService jobsService;
-    private final UploadService uploadService;
-    private final ApplicationService applicationService;
+    @Autowired
+    private RestApiService restApiService;
+    @Autowired
+    private JobsService jobsService;
+    @Autowired
+    private UploadService uploadService;
+    @Autowired
+    private ApplicationService applicationService;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -134,13 +139,6 @@ public class DeliverVersionCommand implements Callable<Integer> {
      */
     @CommandLine.Option(names = "--domain-name", paramLabel = "DOMAIN_NAME", description = "The name of the domain to assign to the application. Will be created if it doesn't exists. No domain will be assigned if left empty. Will only be used when creating the application.")
     private String domainName;
-
-    public DeliverVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
-        this.restApiService = restApiService;
-        this.jobsService = jobsService;
-        this.uploadService = uploadService;
-        this.applicationService = applicationService;
-    }
 
     @Override
     public Integer call() throws Exception {

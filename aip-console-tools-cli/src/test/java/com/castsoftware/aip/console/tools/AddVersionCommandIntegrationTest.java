@@ -1,27 +1,294 @@
 package com.castsoftware.aip.console.tools;
 
-import org.assertj.core.util.Arrays;
+import com.castsoftware.aip.console.tools.commands.AddVersionCommand;
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
+import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
+import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.services.ApplicationService;
+import com.castsoftware.aip.console.tools.core.services.JobsService;
+import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.services.UploadService;
+import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+import picocli.CommandLine;
 
-@RunWith(MockitoJUnitRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("INTEGRATION_PROFILE_TEST")
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {AipConsoleToolsCliIntegrationTest.class})
+@ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
 public class AddVersionCommandIntegrationTest {
-
     @Autowired
-    private AipConsoleToolsCommandTest aipConsoleToolsCommandTest;
+    private AddVersionCommand addVersionCommand;
+    @Autowired
+    private SpringAwareCommandFactory springAwareCommandFactory;
+
+    private int consoleUsageWidth = 120;
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+
+    @MockBean
+    private RestApiService restApiService;
+    @MockBean
+    private JobsService jobsService;
+    @MockBean
+    private UploadService uploadService;
+    @MockBean
+    private ApplicationService applicationService;
+
+    private CommandLine cliToTest;
+    private static final ApplicationDto simplifiedModeApp = ApplicationDto.builder().guid(TestConstants.TEST_APP_GUID).name(TestConstants.TEST_CREATRE_APP).inPlaceMode(true).build();
+
+    private String[] defaultArgs;
+    private Path sflPath;
+    private Path zippedSourcesPath;
+
+    @Before
+    public void startup() throws IOException {
+        sflPath = folder.getRoot().toPath().resolve("SFL");
+        Files.createDirectories(sflPath);
+        zippedSourcesPath = sflPath.resolve("fake_sources.zip");
+        zippedSourcesPath.toFile().createNewFile();
+        when(restApiService.getAipConsoleApiInfo()).thenReturn(ApiInfoDto.builder().apiVersion("1.23.0").build());
+        defaultArgs = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--file", sflPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--no-clone", "--copy-previous-config",
+                "--auto-create", "--enable-security-dataflow",
+                "--process-imaging", "--backup",
+                "--backup-name", TestConstants.TEST_BACKUP_NAME,
+                "--domain-name", TestConstants.TEST_DOMAIN};
+    }
+
+    @After
+    public void after() {
+        // ===================================
+        //command not recreated between test.
+        //So just clear the command as if it was brand newly created
+        //The best way is to run java -jar .\aip-console-tools-cli.jar add ...
+        // So that app creates new instances of commands.
+        // Still this woks fine renewing parameters values each time.
+        // Here only String types, but each test should set velues to requested ones
+        // ===================================
+        addVersionCommand.setApplicationGuid(null);
+        addVersionCommand.setApplicationName(null);
+        addVersionCommand.setBackupName(null);
+        addVersionCommand.setDomainName(null);
+        addVersionCommand.setFilePath(null);
+        addVersionCommand.setNodeName(null);
+        addVersionCommand.setVersionName(null);
+        folder.delete();
+    }
 
     @Test
-    public void testAddVersionCommand() {
-        String[] args = Arrays.array(
-                "deliver", "--apikey", "mU8cxSEw.9rnybaSe0P9eawM10LmIPIFFGMEEUdfc",
-                "-n", "Normal-mode-App", "-f", "Tests-1.22.1/Demo-12-03-21/", "-v", "V2", "--clone", "false");
-
-        aipConsoleToolsCommandTest.main(args);
+    public void testUsageHelp() {
+        String expected = String.format("" + "Usage: AddVersion [-bhV] [--auto-create] [--enable-security-dataflow]%n" +
+                "                  [--no-clone] [--process-imaging] [--verbose] [--apikey%n" +
+                "                  [=<apiKey>]] [-a=APPLICATION_GUID] [--apikey:%n" +
+                "                  env=ENV_VAR_NAME] [--backup-name=BACKUP_NAME]%n" +
+                "                  [--domain-name=DOMAIN_NAME] -f=FILE [-n=APPLICATION_NAME]%n" +
+                "                  [--node-name=NODE_NAME] [-s=AIP_CONSOLE_URL]%n" +
+                "                  [--snapshot-name=SNAPSHOT_NAME] [--timeout=<timeout>]%n" +
+                "                  [--user=<username>] [-v=VERSION_NAME]%n" +
+                "Creates a new version, runs an analysis and creates a snapshot for an%n" +
+                "application on AIP Console%n" +
+                "  -a, --app-guid=APPLICATION_GUID%n" +
+                "                            The GUID of the application to rescan%n" +
+                "      --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt%n" +
+                "                              entry if no value is passed.%n" +
+                "      --apikey:env=ENV_VAR_NAME%n" +
+                "                            The name of the environment variable containing the%n" +
+                "                              AIP Key to access AIP Console%n" +
+                "      --auto-create         If the given application name doesn't exist on the%n" +
+                "                              target server, it'll be automatically created%n" +
+                "                              before creating a new version if specified%n" +
+                "                              without parameter: true%n" +
+                "  -b, --backup              Enable backup of application before delivering the%n" +
+                "                              new version if specified without parameter: true%n" +
+                "      --backup-name=BACKUP_NAME%n" +
+                "                            The name of the backup to create before delivering%n" +
+                "                              the new version. Defaults to 'backup_date.time'%n" +
+                "      --domain-name=DOMAIN_NAME%n" +
+                "                            The name of the domain to assign to the%n" +
+                "                              application. Will be created if it doesn't%n" +
+                "                              exists. No domain will be assigned if left empty.%n" +
+                "      --enable-security-dataflow%n" +
+                "                            If defined, this will activate the security%n" +
+                "                              dataflow for this version if specified without%n" +
+                "                              parameter: true%n" +
+                "  -f, --file=FILE           A local zip or tar.gz file OR a path to a folder on%n" +
+                "                              the node where the source if saved%n" +
+                "  -h, --help                Show this help message and exit.%n" +
+                "  -n, --app-name=APPLICATION_NAME%n" +
+                "                            The Name of the application to rescan%n" +
+                "      --no-clone, --no-rescan, --new-configuration%n" +
+                "                            Enable this flag to create a new version without%n" +
+                "                              cloning the latest version configuration. if%n" +
+                "                              specified without parameter: true%n" +
+                "      --node-name=NODE_NAME The name of the node on which the application will%n" +
+                "                              be created. Ignored if no --auto-create or the%n" +
+                "                              application already exists.%n" +
+                "      --process-imaging     If provided, will upload data to Imaging if%n" +
+                "                              specified without parameter: true%n" +
+                "  -s, --server-url=AIP_CONSOLE_URL%n" +
+                "                            The base URL for AIP Console (defaults to http:%n" +
+                "                              //localhost:8081)%n" +
+                "      --snapshot-name=SNAPSHOT_NAME%n" +
+                "                            The name of the snapshot to generate%n" +
+                "      --timeout=<timeout>   The timeout in seconds for calls to AIP Console.%n" +
+                "                              Defaults to a 90s timeout%n" +
+                "      --user=<username>     User name. Use this if no API Key generation is%n" +
+                "                              available on AIP Console. Provide the user's%n" +
+                "                              password in the apikey parameter.%n" +
+                "  -v, --version-name=VERSION_NAME%n" +
+                "                            The name of the version to create%n" +
+                "  -V, --version             Print version information and exit.%n" +
+                "      --verbose             Whether the command log should be output to the%n" +
+                "                              console or not, defaulted to true if specified%n" +
+                "                              without parameter: true%n");
+        String actual = new CommandLine(addVersionCommand, springAwareCommandFactory)
+                .getUsageMessage(CommandLine.Help.Ansi.OFF);
+        assertThat(expected, is(actual));
     }
+
+    @Test
+    public void testAddVersionCommand_FailToCreateApplication() throws ApplicationServiceException {
+        String[] args = defaultArgs;
+        // No existing application
+        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyBoolean())).thenReturn(null);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(simplifiedModeApp);
+
+        runStringArgs(addVersionCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_APPLICATION_NOT_FOUND));
+    }
+
+    @Test
+    public void testAddVersionCommand_SimplifiedDeliveryWithFileProvided() throws ApplicationServiceException {
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "-f", zippedSourcesPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--domain-name", TestConstants.TEST_DOMAIN,
+                "--node-name", TestConstants.TEST_NODE};
+
+        // gives the existing application
+        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(simplifiedModeApp);
+
+        runStringArgs(addVersionCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_INPLACE_MODE_ERROR));
+    }
+
+    @Test
+    public void testAddVersionCommand_RunAddVersionJobCompleted() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
+        boolean verbose = true;
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "-f", sflPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--domain-name", TestConstants.TEST_DOMAIN,
+                "--node-name", TestConstants.TEST_NODE};
+
+        // gives the existing application
+        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(simplifiedModeApp);
+        when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
+        when(applicationService.applicationHasVersion(TestConstants.TEST_APP_GUID)).thenReturn(false);
+        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), null, false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
+        when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
+
+        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(JobState.COMPLETED);
+        jobStatus.setCreated(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
+
+        runStringArgs(addVersionCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    @Test
+    public void testAddVersionCommand() throws ApplicationServiceException {
+        String[] args = defaultArgs;
+
+        // gives the existing application
+        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
+
+        runStringArgs(addVersionCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+    }
+
+    private int exitCode;
+
+    private void runStringArgs(Callable<Integer> command, String[] args) {
+        try {
+            cliToTest = new CommandLine(command, springAwareCommandFactory);
+            cliToTest.setUsageHelpWidth(consoleUsageWidth);
+            List<Object> returnedResults = cliToTest.parseWithHandler(new CommandLine.RunLast(), args);
+            if (returnedResults != null) {
+                exitCode = returnedResults.stream()
+                        .map(o -> o instanceof Integer ? (Integer) o : null)
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .orElse(Constants.RETURN_OK);
+            } else {
+                // Help message was shown
+                exitCode = cliToTest.getUnmatchedArguments().isEmpty() ? 0 : 1;
+            }
+        } catch (Throwable t) {
+            exitCode = Constants.UNKNOWN_ERROR;
+        }
+        //System.exit(exitCode);
+    }
+
 }
