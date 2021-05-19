@@ -7,7 +7,6 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +32,6 @@ import static org.mockito.Mockito.when;
 public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     @Autowired
     private CreateApplicationCommand createApplicationCommand;
-    @Autowired
-    private SpringAwareCommandFactory springAwareCommandFactory;
 
     @Override
     protected void cleanupTestCommant() {
@@ -45,7 +42,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
     }
 
     @Test
-    public void testCreateApplicationCommandUsageHelp() {
+    public void testCreateApplicationCommand_UsageHelp() {
         String expected = String.format("" +
                 "Usage: CreateApplication [-hV] [--inplace-mode] [--verbose] [--apikey%n" +
                 "                         [=<apiKey>]] [--apikey:env=ENV_VAR_NAME]%n" +
