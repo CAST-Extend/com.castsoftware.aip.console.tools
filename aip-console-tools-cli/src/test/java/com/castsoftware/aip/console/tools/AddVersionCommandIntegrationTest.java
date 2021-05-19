@@ -1,8 +1,6 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.AddVersionCommand;
-import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
-import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -10,33 +8,17 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
-import com.castsoftware.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.aip.console.tools.core.services.JobsService;
-import com.castsoftware.aip.console.tools.core.services.RestApiService;
-import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,53 +32,12 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {AipConsoleToolsCliIntegrationTest.class})
 @ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
-public class AddVersionCommandIntegrationTest {
+public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     @Autowired
     private AddVersionCommand addVersionCommand;
-    @Autowired
-    private SpringAwareCommandFactory springAwareCommandFactory;
 
-    private int consoleUsageWidth = 120;
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
-
-    @MockBean
-    private RestApiService restApiService;
-    @MockBean
-    private JobsService jobsService;
-    @MockBean
-    private UploadService uploadService;
-    @MockBean
-    private ApplicationService applicationService;
-
-    private CommandLine cliToTest;
-    private static final ApplicationDto simplifiedModeApp = ApplicationDto.builder().guid(TestConstants.TEST_APP_GUID).name(TestConstants.TEST_CREATRE_APP).inPlaceMode(true).build();
-
-    private String[] defaultArgs;
-    private Path sflPath;
-    private Path zippedSourcesPath;
-
-    @Before
-    public void startup() throws IOException {
-        sflPath = folder.getRoot().toPath().resolve("SFL");
-        Files.createDirectories(sflPath);
-        zippedSourcesPath = sflPath.resolve("fake_sources.zip");
-        zippedSourcesPath.toFile().createNewFile();
-        when(restApiService.getAipConsoleApiInfo()).thenReturn(ApiInfoDto.builder().apiVersion("1.23.0").build());
-        defaultArgs = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
-                "--file", sflPath.toString(),
-                "--version-name", TestConstants.TEST_VERSION_NAME,
-                "--no-clone", "--copy-previous-config",
-                "--auto-create", "--enable-security-dataflow",
-                "--process-imaging", "--backup",
-                "--backup-name", TestConstants.TEST_BACKUP_NAME,
-                "--domain-name", TestConstants.TEST_DOMAIN};
-    }
-
-    @After
-    public void after() {
+    @Override
+    protected void cleanupTestCommant() {
         // ===================================
         //command not recreated between test.
         //So just clear the command as if it was brand newly created
@@ -105,6 +46,7 @@ public class AddVersionCommandIntegrationTest {
         // Still this woks fine renewing parameters values each time.
         // Here only String types, but each test should set velues to requested ones
         // ===================================
+        resetSharedOptions(addVersionCommand.getSharedOptions());
         addVersionCommand.setApplicationGuid(null);
         addVersionCommand.setApplicationName(null);
         addVersionCommand.setBackupName(null);
@@ -112,7 +54,6 @@ public class AddVersionCommandIntegrationTest {
         addVersionCommand.setFilePath(null);
         addVersionCommand.setNodeName(null);
         addVersionCommand.setVersionName(null);
-        folder.delete();
     }
 
     @Test
@@ -191,7 +132,7 @@ public class AddVersionCommandIntegrationTest {
         String[] args = defaultArgs;
         // No existing application
         when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyBoolean())).thenReturn(null);
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(simplifiedModeApp);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
 
         runStringArgs(addVersionCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
@@ -211,7 +152,7 @@ public class AddVersionCommandIntegrationTest {
         // gives the existing application
         when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
         when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(simplifiedModeApp);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
 
         runStringArgs(addVersionCommand, args);
 
@@ -233,7 +174,7 @@ public class AddVersionCommandIntegrationTest {
         // gives the existing application
         when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
         when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(simplifiedModeApp);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
         when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
         when(applicationService.applicationHasVersion(TestConstants.TEST_APP_GUID)).thenReturn(false);
         when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), null, false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
@@ -268,27 +209,5 @@ public class AddVersionCommandIntegrationTest {
         assertThat(spec, is(notNullValue()));
     }
 
-    private int exitCode;
-
-    private void runStringArgs(Callable<Integer> command, String[] args) {
-        try {
-            cliToTest = new CommandLine(command, springAwareCommandFactory);
-            cliToTest.setUsageHelpWidth(consoleUsageWidth);
-            List<Object> returnedResults = cliToTest.parseWithHandler(new CommandLine.RunLast(), args);
-            if (returnedResults != null) {
-                exitCode = returnedResults.stream()
-                        .map(o -> o instanceof Integer ? (Integer) o : null)
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .orElse(Constants.RETURN_OK);
-            } else {
-                // Help message was shown
-                exitCode = cliToTest.getUnmatchedArguments().isEmpty() ? 0 : 1;
-            }
-        } catch (Throwable t) {
-            exitCode = Constants.UNKNOWN_ERROR;
-        }
-        //System.exit(exitCode);
-    }
 
 }
