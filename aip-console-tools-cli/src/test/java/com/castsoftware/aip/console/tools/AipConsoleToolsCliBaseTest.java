@@ -20,6 +20,7 @@ import picocli.CommandLine;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -49,6 +50,7 @@ public abstract class AipConsoleToolsCliBaseTest {
     protected Path sflPath;
     protected Path zippedSourcesPath;
     protected int exitCode;
+    private List<String> unExpectedParameters;
 
     @Before
     public void startup() throws IOException {
@@ -71,7 +73,14 @@ public abstract class AipConsoleToolsCliBaseTest {
 
     protected abstract void cleanupTestCommant();
 
+    protected List<String> getUnExpectedParameters() {
+        return unExpectedParameters;
+    }
+
     protected void resetSharedOptions(SharedOptions command) {
+        if (unExpectedParameters != null) {
+            unExpectedParameters.clear();
+        }
         command.setApiKey(null);
         command.setApiKeyEnvVariable(null);
         command.setServerRootUrl(null);
@@ -108,7 +117,9 @@ public abstract class AipConsoleToolsCliBaseTest {
                         .orElse(Constants.RETURN_OK);
             } else {
                 // Help message was shown
-                exitCode = cliToTest.getUnmatchedArguments().isEmpty() ? 0 : 1;
+                //Call to getUnmatchedArguments() seems to clear the content
+                unExpectedParameters = new ArrayList<>(cliToTest.getUnmatchedArguments());
+                exitCode = unExpectedParameters.isEmpty() ? 0 : 1;
             }
         } catch (Throwable t) {
             exitCode = Constants.UNKNOWN_ERROR;

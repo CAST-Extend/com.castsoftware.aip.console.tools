@@ -204,5 +204,4 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
-
 }
