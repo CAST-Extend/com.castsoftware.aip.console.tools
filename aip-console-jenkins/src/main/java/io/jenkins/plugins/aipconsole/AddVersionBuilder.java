@@ -22,6 +22,7 @@ import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.sun.org.apache.regexp.internal.RE;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -335,13 +336,13 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath);
+        String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(resolvedFilePath);
         FilePath workspaceFile = null;
         if (StringUtils.equalsAnyIgnoreCase(fileExt, "zip", "tgz", "tar.gz")) {
             workspaceFile = workspace.child(resolvedFilePath);
             isUpload = true;
             if (!workspaceFile.exists()) {
-                listener.error(AddVersionBuilder_AddVersion_error_fileNotFound(filePath));
+                listener.error(AddVersionBuilder_AddVersion_error_fileNotFound(resolvedFilePath));
                 run.setResult(Result.NOT_BUILT);
                 return;
             }
@@ -411,15 +412,15 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
                 //call api to check if the folder exists
                 try {
-                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(filePath).toString()).build();
+                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(resolvedFilePath).toString()).build();
                     apiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
                 } catch (ApiCallException e) {
-                    listener.error("Unable to find the file " + filePath + " in the source.folder.location on AIP Console.");
+                    listener.error("Unable to find the file " + resolvedFilePath + " in the source.folder.location on AIP Console.");
                     e.printStackTrace(log);
                     run.setResult(defaultResult);
                     return;
                 }
-                fileName = Paths.get(filePath).toString();
+                fileName = Paths.get(resolvedFilePath).toString();
                 if (apiInfoDto.isSourcePathPrefixRequired()) {
                     fileName = "sources:" + fileName;
                 }
