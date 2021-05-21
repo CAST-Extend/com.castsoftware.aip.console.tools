@@ -22,7 +22,6 @@ import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.sun.org.apache.regexp.internal.RE;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
