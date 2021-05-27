@@ -184,6 +184,7 @@ public class JobsServiceImpl implements JobsService {
         String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(jobGuid);
         String previousStep = "";
         log.fine("Checking status of Job with GUID " + jobGuid);
+        int retryCount = 0;
         try {
             JobStatusWithSteps jobStatus;
             String logName = null;
@@ -192,7 +193,21 @@ public class JobsServiceImpl implements JobsService {
                 Thread.sleep(pollingSleepDuration);
                 // Force login to keep session alive (jobs endpoint doesn't refresh session status)
                 restApiService.login();
-                jobStatus = restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
+
+                // Sometimes it takes more than 10 secs till the jobstatus is ready
+                jobStatus = getJobStatus(jobDetailsEndpoint);
+                if (jobStatus == null) {
+                    if (retryCount < 20) {
+                        ++retryCount;
+                        continue;
+                    } else {
+                        throw new ApiCallException(500, "Failed to get job status after retrying 20 times");
+                    }
+
+                } else {
+                    retryCount = 0;
+                }
+
                 String currentStep = jobStatus.getProgressStep();
 
                 if (currentStep != null && !currentStep.equalsIgnoreCase(previousStep)) {
@@ -250,6 +265,15 @@ public class JobsServiceImpl implements JobsService {
             return logs.stream().filter(l -> l.getLogType().equalsIgnoreCase("MAIN_LOG")).findFirst().map(LogsDto::getLogName).orElse(null);
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error to get the log name");
+            return null;
+        }
+    }
+
+    private JobStatusWithSteps getJobStatus(String jobDetailsEndpoint) {
+        try {
+            return restApiService.getForEntity(jobDetailsEndpoint, JobStatusWithSteps.class);
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Error to get job status " + jobDetailsEndpoint);
             return null;
         }
     }

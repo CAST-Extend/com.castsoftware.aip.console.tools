@@ -86,19 +86,24 @@ public class AddVersionCommand implements Callable<Integer> {
      * Disable cloning previous version automatically.
      */
     @CommandLine.Option(names = {"--no-clone", "--no-rescan", "--new-configuration"},
-            description = "Enable this flag to create a new version without cloning the latest version configuration.",
-            defaultValue = "false")
+            description = "Enable this flag to create a new version without cloning the latest version configuration."
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            defaultValue = "false", fallbackValue = "true")
     private boolean disableClone = false;
     /**
      * Whether or not to automatically create the application before Adding a version (if the application could not be found)
      */
-    @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version")
+    @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean autoCreate = false;
 
-    @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version")
+    @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version"
+            + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
     private boolean enableSecurityDataflow = false;
 
-    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging")
+    @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean processImaging = false;
 
     /**
@@ -110,7 +115,8 @@ public class AddVersionCommand implements Callable<Integer> {
     /**
      * Run a backup before delivering the new version
      */
-    @CommandLine.Option(names = {"-b", "--backup"}, description = "Enable backup of application before delivering the new version")
+    @CommandLine.Option(names = {"-b", "--backup"}, description = "Enable backup of application before delivering the new version"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean backupEnabled = false;
 
     /**
