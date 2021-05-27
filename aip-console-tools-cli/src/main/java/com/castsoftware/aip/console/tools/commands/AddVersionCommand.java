@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -193,6 +194,8 @@ public class AddVersionCommand implements Callable<Integer> {
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);
             }
+
+            DebugOptionsDto oldDebugOptions = applicationService.getDebugOptions(applicationGuid);
 
             String jobGuid = jobsService.startAddVersionJob(builder);
             // add a shutdown hook, to cancel the job

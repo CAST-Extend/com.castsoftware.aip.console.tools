@@ -3,6 +3,7 @@ package com.castsoftware.aip.console.tools.core.services;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
+import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
@@ -156,6 +157,34 @@ public class ApplicationServiceImpl implements ApplicationService {
             });
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to retrieve the applications' versions", e);
+        }
+    }
+
+    @Override
+    public DebugOptionsDto getDebugOptions(String appGuid) throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getDebugOptionsPath(appGuid), new TypeReference<DebugOptionsDto>() {
+            });
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to retrieve the applications' debug options settings", e);
+        }
+    }
+
+    @Override
+    public void updateShowSqlDebugOption(String appGuid, boolean showSql) throws ApplicationServiceException {
+        try {
+            restApiService.putForEntity(ApiEndpointHelper.getDebugOptionShowSqlPath(appGuid), showSql, void.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to update the application' Show Sql debug option", e);
+        }
+    }
+
+    @Override
+    public void updateAmtProfileDebugOption(String appGuid, boolean amtProfile) throws ApplicationServiceException {
+        try {
+            restApiService.putForEntity(ApiEndpointHelper.getDebugOptionAmtProfilePath(appGuid), amtProfile, void.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to update the application' AMT Profiling debug option", e);
         }
     }
 
