@@ -100,4 +100,6 @@ public interface ApplicationService {
     void updateShowSqlDebugOption(String appGuid, boolean showSql) throws ApplicationServiceException;
 
     void updateAmtProfileDebugOption(String appGuid, boolean amtProfile) throws ApplicationServiceException;
+
+    void resetDebugOptions(String appGuid, DebugOptionsDto debugOptionsDto) throws ApplicationServiceException;
 }

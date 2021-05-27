@@ -60,6 +60,10 @@ public class ApiEndpointHelper {
         return getDebugOptionsPath(appGuid) + AMT_PROFILE_ENDPOINT;
     }
 
+    public static String getAmtProfilingDownloadUrl(String appGuid) {
+        return ApiEndpointHelper.getDebugOptionsPath(appGuid) + "/logs" + AMT_PROFILE_ENDPOINT + "/download";
+    }
+
     public static String getJobsEndpoint() {
         return ROOT_PATH + JOBS_ENDPOINT;
     }

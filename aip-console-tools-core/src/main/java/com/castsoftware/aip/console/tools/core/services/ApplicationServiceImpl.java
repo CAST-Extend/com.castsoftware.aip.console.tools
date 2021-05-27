@@ -5,6 +5,7 @@ import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
+import com.castsoftware.aip.console.tools.core.dto.JsonDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
@@ -173,7 +174,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public void updateShowSqlDebugOption(String appGuid, boolean showSql) throws ApplicationServiceException {
         try {
-            restApiService.putForEntity(ApiEndpointHelper.getDebugOptionShowSqlPath(appGuid), showSql, void.class);
+            restApiService.putForEntity(ApiEndpointHelper.getDebugOptionShowSqlPath(appGuid), JsonDto.of(showSql), String.class);
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to update the application' Show Sql debug option", e);
         }
@@ -182,10 +183,21 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public void updateAmtProfileDebugOption(String appGuid, boolean amtProfile) throws ApplicationServiceException {
         try {
-            restApiService.putForEntity(ApiEndpointHelper.getDebugOptionAmtProfilePath(appGuid), amtProfile, void.class);
+            //--------------------------------------------------------------
+            //The PUT shouldn't returned anything than void.class, but doing so clashed as object mapper is trying to map
+            //Some response body. The response interpreter here does behave as expected.
+            //Using String.class prevents from type clash (!#?)
+            //--------------------------------------------------------------
+            restApiService.putForEntity(ApiEndpointHelper.getDebugOptionAmtProfilePath(appGuid), JsonDto.of(amtProfile), String.class);
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to update the application' AMT Profiling debug option", e);
         }
+    }
+
+    @Override
+    public void resetDebugOptions(String appGuid, DebugOptionsDto debugOptionsDto) throws ApplicationServiceException {
+        updateShowSqlDebugOption(appGuid, debugOptionsDto.isShowSql());
+        updateAmtProfileDebugOption(appGuid, debugOptionsDto.isActivateAmtMemoryProfile());
     }
 
     @Override
