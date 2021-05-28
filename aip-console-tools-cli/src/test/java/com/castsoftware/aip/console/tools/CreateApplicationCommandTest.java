@@ -11,8 +11,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import picocli.CommandLine;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateApplicationCommandTest {
@@ -37,15 +35,7 @@ public class CreateApplicationCommandTest {
             this.context.close();
         }
     }
-
-    @Test
-    public void testSpringAwareCommandFactory() {
-        load(AipIntegrationCliMain.class);
-        CommandLine.IFactory factory = this.context.getBean(SpringAwareCommandFactory.class);
-        assertNotNull(factory);
-        assertTrue(factory instanceof SpringAwareCommandFactory);
-    }
-
+    
     @Test
     public void testCreateApplicationCommand() {
         String[] sb = new String[]{"new", "--apikey", TEST_API_KEY, "--app-name=" + TEST_CREATRE_APP, "--inplace-mode", "true"};
