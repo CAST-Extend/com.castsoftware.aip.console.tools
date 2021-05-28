@@ -1,23 +1,12 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.SnapshotCommand;
-import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
 import org.junit.Test;
 import picocli.CommandLine;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class SnapshotCommandTest extends AipCommandTest<SnapshotCommand> {
-    @Test
-    public void testSpringAwareCommandFactory() {
-        load(AipIntegrationCliMain.class);
-        CommandLine.IFactory factory = this.context.getBean(SpringAwareCommandFactory.class);
-        assertNotNull(factory);
-        assertTrue(factory instanceof SpringAwareCommandFactory);
-    }
-
     @Test
     public void testSnapshotCommand_WithDefaultParams() {
         String[] sb = new String[]{"--apikey",

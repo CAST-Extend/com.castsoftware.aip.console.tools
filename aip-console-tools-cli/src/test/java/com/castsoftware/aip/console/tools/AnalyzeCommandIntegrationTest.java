@@ -41,7 +41,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     private AnalyzeCommand analyzeCommand;
 
     @Override
-    protected void cleanupTestCommant() {
+    protected void cleanupTestCommand() {
         // ===================================
         //command not recreated between test.
         //So just clear the command as if it was brand newly created
@@ -54,50 +54,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         analyzeCommand.setApplicationName(null);
         analyzeCommand.setVersionName(null);
     }
-
-    @Test
-    public void testAnalyzeCommand_UsageHelp() {
-        String expected = String.format("" +
-                "Usage: Analysis [-hSV] [--process-imaging] [--verbose] [--apikey[=<apiKey>]]%n" +
-                "                [--apikey:env=ENV_VAR_NAME] -n=APPLICATION_NAME%n" +
-                "                [-s=AIP_CONSOLE_URL] [--timeout=<timeout>] [--user=<username>]%n" +
-                "                [-v=VERSION_NAME]%n" +
-                "Analyses an existing version on AIP Console%n" +
-                "      --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt%n" +
-                "                              entry if no value is passed.%n" +
-                "      --apikey:env=ENV_VAR_NAME%n" +
-                "                            The name of the environment variable containing the%n" +
-                "                              AIP Key to access AIP Console%n" +
-                "  -h, --help                Show this help message and exit.%n" +
-                "  -n, --app-name=APPLICATION_NAME%n" +
-                "                            The Name of the application to analyze%n" +
-                "      --process-imaging     If provided, will upload data to Imaging. Note:%n" +
-                "                              Parameter will be ignored if snapshot option is%n" +
-                "                              not provided and Imaging is not setup in AIP%n" +
-                "                              Console if specified without parameter: true%n" +
-                "  -s, --server-url=AIP_CONSOLE_URL%n" +
-                "                            The base URL for AIP Console (defaults to http:%n" +
-                "                              //localhost:8081)%n" +
-                "  -S, --snapshot            Creates a snapshot after running the analysis. if%n" +
-                "                              specified without parameter: true%n" +
-                "      --timeout=<timeout>   The timeout in seconds for calls to AIP Console.%n" +
-                "                              Defaults to a 90s timeout%n" +
-                "      --user=<username>     User name. Use this if no API Key generation is%n" +
-                "                              available on AIP Console. Provide the user's%n" +
-                "                              password in the apikey parameter.%n" +
-                "  -v, --version-name=VERSION_NAME%n" +
-                "                            The name of the version to analyze. If omitted, the%n" +
-                "                              latest version will be used.%n" +
-                "  -V, --version             Print version information and exit.%n" +
-                "      --verbose             Whether the command log should be output to the%n" +
-                "                              console or not, defaulted to true if specified%n" +
-                "                              without parameter: true%n"
-        );
-        String actual = new CommandLine(analyzeCommand, springAwareCommandFactory)
-                .getUsageMessage(CommandLine.Help.Ansi.OFF);
-        assertThat(expected, is(actual));
-    }
-
+    
     @Test
     public void testAnalyzeCommand_UnexpectedParameters() {
         boolean verbose = true;

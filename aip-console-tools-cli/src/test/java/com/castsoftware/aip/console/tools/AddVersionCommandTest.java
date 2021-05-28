@@ -1,16 +1,12 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.AddVersionCommand;
-import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import picocli.CommandLine;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AddVersionCommandTest extends AipCommandTest<AddVersionCommand> {
@@ -20,14 +16,6 @@ public class AddVersionCommandTest extends AipCommandTest<AddVersionCommand> {
     protected static final String TEST_BACKUP_NAME = "Bak-Name";
     protected static final String TEST_VERSION_NAME = "V-1";
     protected static final String TEST_SRC_FOLDER = "SubFolder";
-
-    @Test
-    public void testSpringAwareCommandFactory() {
-        load(AipIntegrationCliMain.class);
-        CommandLine.IFactory factory = this.context.getBean(SpringAwareCommandFactory.class);
-        assertNotNull(factory);
-        assertTrue(factory instanceof SpringAwareCommandFactory);
-    }
 
     @Test
     public void testAddVersionCommand_WithDefaultParams() {

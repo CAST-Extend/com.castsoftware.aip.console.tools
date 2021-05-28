@@ -37,7 +37,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     private AddVersionCommand addVersionCommand;
 
     @Override
-    protected void cleanupTestCommant() {
+    protected void cleanupTestCommand() {
         // ===================================
         //command not recreated between test.
         //So just clear the command as if it was brand newly created
@@ -54,77 +54,6 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         addVersionCommand.setFilePath(null);
         addVersionCommand.setNodeName(null);
         addVersionCommand.setVersionName(null);
-    }
-
-    @Test
-    public void testUsageHelp() {
-        String expected = String.format("" + "Usage: AddVersion [-bhV] [--auto-create] [--enable-security-dataflow]%n" +
-                "                  [--no-clone] [--process-imaging] [--verbose] [--apikey%n" +
-                "                  [=<apiKey>]] [-a=APPLICATION_GUID] [--apikey:%n" +
-                "                  env=ENV_VAR_NAME] [--backup-name=BACKUP_NAME]%n" +
-                "                  [--domain-name=DOMAIN_NAME] -f=FILE [-n=APPLICATION_NAME]%n" +
-                "                  [--node-name=NODE_NAME] [-s=AIP_CONSOLE_URL]%n" +
-                "                  [--snapshot-name=SNAPSHOT_NAME] [--timeout=<timeout>]%n" +
-                "                  [--user=<username>] [-v=VERSION_NAME]%n" +
-                "Creates a new version, runs an analysis and creates a snapshot for an%n" +
-                "application on AIP Console%n" +
-                "  -a, --app-guid=APPLICATION_GUID%n" +
-                "                            The GUID of the application to rescan%n" +
-                "      --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt%n" +
-                "                              entry if no value is passed.%n" +
-                "      --apikey:env=ENV_VAR_NAME%n" +
-                "                            The name of the environment variable containing the%n" +
-                "                              AIP Key to access AIP Console%n" +
-                "      --auto-create         If the given application name doesn't exist on the%n" +
-                "                              target server, it'll be automatically created%n" +
-                "                              before creating a new version if specified%n" +
-                "                              without parameter: true%n" +
-                "  -b, --backup              Enable backup of application before delivering the%n" +
-                "                              new version if specified without parameter: true%n" +
-                "      --backup-name=BACKUP_NAME%n" +
-                "                            The name of the backup to create before delivering%n" +
-                "                              the new version. Defaults to 'backup_date.time'%n" +
-                "      --domain-name=DOMAIN_NAME%n" +
-                "                            The name of the domain to assign to the%n" +
-                "                              application. Will be created if it doesn't%n" +
-                "                              exists. No domain will be assigned if left empty.%n" +
-                "      --enable-security-dataflow%n" +
-                "                            If defined, this will activate the security%n" +
-                "                              dataflow for this version if specified without%n" +
-                "                              parameter: true%n" +
-                "  -f, --file=FILE           A local zip or tar.gz file OR a path to a folder on%n" +
-                "                              the node where the source if saved%n" +
-                "  -h, --help                Show this help message and exit.%n" +
-                "  -n, --app-name=APPLICATION_NAME%n" +
-                "                            The Name of the application to rescan%n" +
-                "      --no-clone, --no-rescan, --new-configuration%n" +
-                "                            Enable this flag to create a new version without%n" +
-                "                              cloning the latest version configuration. if%n" +
-                "                              specified without parameter: true%n" +
-                "      --node-name=NODE_NAME The name of the node on which the application will%n" +
-                "                              be created. Ignored if no --auto-create or the%n" +
-                "                              application already exists.%n" +
-                "      --process-imaging     If provided, will upload data to Imaging if%n" +
-                "                              specified without parameter: true%n" +
-                "  -s, --server-url=AIP_CONSOLE_URL%n" +
-                "                            The base URL for AIP Console (defaults to http:%n" +
-                "                              //localhost:8081)%n" +
-                "      --snapshot-name=SNAPSHOT_NAME%n" +
-                "                            The name of the snapshot to generate%n" +
-                "      --timeout=<timeout>   The timeout in seconds for calls to AIP Console.%n" +
-                "                              Defaults to a 90s timeout%n" +
-                "      --user=<username>     User name. Use this if no API Key generation is%n" +
-                "                              available on AIP Console. Provide the user's%n" +
-                "                              password in the apikey parameter.%n" +
-                "  -v, --version-name=VERSION_NAME%n" +
-                "                            The name of the version to create%n" +
-                "  -V, --version             Print version information and exit.%n" +
-                "      --verbose             Whether the command log should be output to the%n" +
-                "                              console or not, defaulted to true if specified%n" +
-                "                              without parameter: true%n");
-        String actual = new CommandLine(addVersionCommand, springAwareCommandFactory)
-                .getUsageMessage(CommandLine.Help.Ansi.OFF);
-        assertThat(expected, is(actual));
     }
 
     @Test

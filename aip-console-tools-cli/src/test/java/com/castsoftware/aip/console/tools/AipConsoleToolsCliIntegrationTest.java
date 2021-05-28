@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import picocli.CommandLine;
 
-//@SpringBootApplication
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration

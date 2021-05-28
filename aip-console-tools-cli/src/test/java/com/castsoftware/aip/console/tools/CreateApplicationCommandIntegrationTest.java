@@ -34,54 +34,11 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
     private CreateApplicationCommand createApplicationCommand;
 
     @Override
-    protected void cleanupTestCommant() {
+    protected void cleanupTestCommand() {
         resetSharedOptions(createApplicationCommand.getSharedOptions());
         createApplicationCommand.setApplicationName(null);
         createApplicationCommand.setDomainName(null);
         createApplicationCommand.setNodeName(null);
-    }
-
-    @Test
-    public void testCreateApplicationCommand_UsageHelp() {
-        String expected = String.format("" +
-                "Usage: CreateApplication [-hV] [--inplace-mode] [--verbose] [--apikey%n" +
-                "                         [=<apiKey>]] [--apikey:env=ENV_VAR_NAME]%n" +
-                "                         [--domain-name=DOMAIN_NAME] -n=APPLICATION_NAME%n" +
-                "                         [--node-name=NODE_NAME] [-s=AIP_CONSOLE_URL]%n" +
-                "                         [--timeout=<timeout>] [--user=<username>]%n" +
-                "Creates a new application on AIP Console%n" +
-                "      --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt%n" +
-                "                              entry if no value is passed.%n" +
-                "      --apikey:env=ENV_VAR_NAME%n" +
-                "                            The name of the environment variable containing the%n" +
-                "                              AIP Key to access AIP Console%n" +
-                "      --domain-name=DOMAIN_NAME%n" +
-                "                            The name of the domain to assign to the%n" +
-                "                              application. Will be created if it doesn't%n" +
-                "                              exists. No domain will be assigned if left empty.%n" +
-                "  -h, --help                Show this help message and exit.%n" +
-                "      --inplace-mode        If true then no history will be kept for delivered%n" +
-                "                              sources. if specified without parameter: true%n" +
-                "  -n, --app-name=APPLICATION_NAME%n" +
-                "                            The name of the application to create%n" +
-                "      --node-name=NODE_NAME The name of the node on which the application will%n" +
-                "                              be created.%n" +
-                "  -s, --server-url=AIP_CONSOLE_URL%n" +
-                "                            The base URL for AIP Console (defaults to http:%n" +
-                "                              //localhost:8081)%n" +
-                "      --timeout=<timeout>   The timeout in seconds for calls to AIP Console.%n" +
-                "                              Defaults to a 90s timeout%n" +
-                "      --user=<username>     User name. Use this if no API Key generation is%n" +
-                "                              available on AIP Console. Provide the user's%n" +
-                "                              password in the apikey parameter.%n" +
-                "  -V, --version             Print version information and exit.%n" +
-                "      --verbose             Whether the command log should be output to the%n" +
-                "                              console or not, defaulted to true if specified%n" +
-                "                              without parameter: true%n"
-        );
-        String actual = new CommandLine(createApplicationCommand, springAwareCommandFactory)
-                .getUsageMessage(CommandLine.Help.Ansi.OFF);
-        assertThat(expected, is(actual));
     }
 
     @Test

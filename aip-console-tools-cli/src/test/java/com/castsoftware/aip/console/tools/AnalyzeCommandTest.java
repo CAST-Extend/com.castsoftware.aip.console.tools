@@ -1,25 +1,14 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.AnalyzeCommand;
-import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import picocli.CommandLine;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AnalyzeCommandTest extends AipCommandTest<AnalyzeCommand> {
-    @Test
-    public void testSpringAwareCommandFactory() {
-        load(AipIntegrationCliMain.class);
-        CommandLine.IFactory factory = this.context.getBean(SpringAwareCommandFactory.class);
-        assertNotNull(factory);
-        assertTrue(factory instanceof SpringAwareCommandFactory);
-    }
 
     @Test
     public void testAnalyzeCommand_WithDefaultParams() {

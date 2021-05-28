@@ -9,14 +9,12 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import picocli.CommandLine;
-import picocli.spring.PicocliSpringFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
-//@ExtendWith(MockitoExtension.class)
 public class CreateApplicationCommandTest {
     private static final String TEST_CREATRE_APP = "To_Create_App-name";
     private static final String TEST_API_KEY = "API-Key";
@@ -46,14 +44,6 @@ public class CreateApplicationCommandTest {
         CommandLine.IFactory factory = this.context.getBean(SpringAwareCommandFactory.class);
         assertNotNull(factory);
         assertTrue(factory instanceof SpringAwareCommandFactory);
-    }
-
-    @Test
-    public void testPicocliSpringFactory() {
-        load(AipIntegrationCliMain.class);
-        CommandLine.IFactory factory = this.context.getBean(PicocliSpringFactory.class);
-        assertNotNull(factory);
-        assertTrue(factory instanceof PicocliSpringFactory);
     }
 
     @Test
@@ -95,7 +85,6 @@ public class CreateApplicationCommandTest {
 
     private void load(Class<?> config, String... environment) {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
-        //EnvironmentTestUtils.addEnvironment(applicationContext, environment);
         applicationContext.register(config);
         applicationContext.refresh();
         this.context = applicationContext;

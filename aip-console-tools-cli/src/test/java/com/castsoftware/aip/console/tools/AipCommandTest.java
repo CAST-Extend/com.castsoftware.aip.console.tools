@@ -1,8 +1,13 @@
 package com.castsoftware.aip.console.tools;
 
+import com.castsoftware.aip.console.tools.core.services.ApplicationServiceImpl;
+import com.castsoftware.aip.console.tools.core.services.JobsServiceImpl;
+import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.services.UploadServiceImpl;
 import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import picocli.CommandLine;
 
@@ -14,6 +19,15 @@ public abstract class AipCommandTest<T extends Callable<Integer>> {
     protected AnnotationConfigApplicationContext context;
     protected CommandLine aipCommandLine;
     private Class<T> classType;
+
+    @MockBean
+    protected RestApiService restApiService;
+    @MockBean
+    protected JobsServiceImpl jobsService;
+    @MockBean
+    protected UploadServiceImpl uploadService;
+    @MockBean
+    protected ApplicationServiceImpl applicationService;
 
     @Before
     public void startup() {

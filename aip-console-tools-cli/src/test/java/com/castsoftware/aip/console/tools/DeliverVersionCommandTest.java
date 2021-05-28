@@ -1,28 +1,16 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.DeliverVersionCommand;
-import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import picocli.CommandLine;
 
 import static com.castsoftware.aip.console.tools.TestConstants.TEST_BACKUP_NAME;
 import static com.castsoftware.aip.console.tools.TestConstants.TEST_SRC_FOLDER;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeliverVersionCommandTest extends AipCommandTest<DeliverVersionCommand> {
-    @Test
-    public void testSpringAwareCommandFactory() {
-        load(AipIntegrationCliMain.class);
-        CommandLine.IFactory factory = this.context.getBean(SpringAwareCommandFactory.class);
-        assertNotNull(factory);
-        assertTrue(factory instanceof SpringAwareCommandFactory);
-    }
-
     @Test
     public void testDeliverVersionCommand_WithDefaultParams() {
         String[] sb = new String[]{"--apikey", TestConstants.TEST_API_KEY,

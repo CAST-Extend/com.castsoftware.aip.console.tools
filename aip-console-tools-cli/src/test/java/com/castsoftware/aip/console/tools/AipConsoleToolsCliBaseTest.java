@@ -71,7 +71,7 @@ public abstract class AipConsoleToolsCliBaseTest {
                 "--domain-name", TestConstants.TEST_DOMAIN};
     }
 
-    protected abstract void cleanupTestCommant();
+    protected abstract void cleanupTestCommand();
 
     protected List<String> getUnExpectedParameters() {
         return unExpectedParameters;
@@ -100,7 +100,7 @@ public abstract class AipConsoleToolsCliBaseTest {
         // Still this woks fine renewing parameters values each time.
         // Here only String types, but each test should set velue to requested ones
         // ===================================
-        cleanupTestCommant();
+        cleanupTestCommand();
         folder.delete();
     }
 

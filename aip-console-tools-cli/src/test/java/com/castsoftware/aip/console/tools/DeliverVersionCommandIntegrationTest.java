@@ -38,7 +38,7 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
     private DeliverVersionCommand deliverVersionCommand;
 
     @Override
-    protected void cleanupTestCommant() {
+    protected void cleanupTestCommand() {
         // ===================================
         //command not recreated between test.
         //So just clear the command as if it was brand newly created
@@ -54,85 +54,6 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
         deliverVersionCommand.setFilePath(null);
         deliverVersionCommand.setNodeName(null);
         deliverVersionCommand.setVersionName(null);
-    }
-
-    @Test
-    public void testDeliverVersionCommand_UsageHelp() {
-        String expected = String.format("" +
-                "Usage: Deliver [-bhV] [--auto-create] [--auto-discover] [-current]%n" +
-                "               [--enable-security-dataflow] [--no-clone] [--verbose] [--apikey%n" +
-                "               [=<apiKey>]] [--apikey:env=ENV_VAR_NAME]%n" +
-                "               [--backup-name=BACKUP_NAME] [--domain-name=DOMAIN_NAME]%n" +
-                "               [-exclude=<exclusionPatterns>] -f=FILE -n=APPLICATION_NAME%n" +
-                "               [--node-name=NODE_NAME] [-s=AIP_CONSOLE_URL]%n" +
-                "               [--timeout=<timeout>] [--user=<username>] [-v=VERSION_NAME]%n" +
-                "Delivers a new version to AIP Console%n" +
-                "      --apikey[=<apiKey>]   The API Key to access AIP Console. Will prompt%n" +
-                "                              entry if no value is passed.%n" +
-                "      --apikey:env=ENV_VAR_NAME%n" +
-                "                            The name of the environment variable containing the%n" +
-                "                              AIP Key to access AIP Console%n" +
-                "      --auto-create         If the given application name doesn't exist on the%n" +
-                "                              target server, it'll be automatically created%n" +
-                "                              before creating a new version if specified%n" +
-                "                              without parameter: true%n" +
-                "      --auto-discover       AIP Console will discover new technologies and%n" +
-                "                              install new extensions, to disable if run%n" +
-                "                              consistency check if specified without parameter:%n" +
-                "                              true%n" +
-                "  -b, --backup              Enable backup of application before delivering the%n" +
-                "                              new version if specified without parameter: true%n" +
-                "      --backup-name=BACKUP_NAME%n" +
-                "                            The name of the backup to create before delivering%n" +
-                "                              the new version. Defaults to 'backup_date.time'%n" +
-                "      -current, --set-as-current%n" +
-                "                            true or false depending on whether the version%n" +
-                "                              should be set as the current one or not. if%n" +
-                "                              specified without parameter: true%n" +
-                "      --domain-name=DOMAIN_NAME%n" +
-                "                            The name of the domain to assign to the%n" +
-                "                              application. Will be created if it doesn't%n" +
-                "                              exists. No domain will be assigned if left empty.%n" +
-                "                              Will only be used when creating the application.%n" +
-                "      --enable-security-dataflow%n" +
-                "                            If defined, this will activate the security%n" +
-                "                              dataflow for this version if specified without%n" +
-                "                              parameter: true%n" +
-                "      -exclude, --exclude-patterns=<exclusionPatterns>%n" +
-                "                            File patterns(glob pattern) to exclude in the%n" +
-                "                              delivery, separated with comma%n" +
-                "  -f, --file=FILE           A local zip or tar.gz file OR a path to a folder on%n" +
-                "                              the node where the source if saved%n" +
-                "  -h, --help                Show this help message and exit.%n" +
-                "  -n, --app-name=APPLICATION_NAME%n" +
-                "                            The Name of the application to rescan%n" +
-                "      --no-clone, --no-rescan, --create-new-version%n" +
-                "                            Enable this flag to create a new version without%n" +
-                "                              cloning the latest version configuration. Note%n" +
-                "                              that when using \"in-place\" more, this parameter%n" +
-                "                              will be ignore and versions will always be%n" +
-                "                              cloned. if specified without parameter: true%n" +
-                "      --node-name=NODE_NAME The name of the node on which the application will%n" +
-                "                              be created. Ignored if no --auto-create or the%n" +
-                "                              application already exists.%n" +
-                "  -s, --server-url=AIP_CONSOLE_URL%n" +
-                "                            The base URL for AIP Console (defaults to http:%n" +
-                "                              //localhost:8081)%n" +
-                "      --timeout=<timeout>   The timeout in seconds for calls to AIP Console.%n" +
-                "                              Defaults to a 90s timeout%n" +
-                "      --user=<username>     User name. Use this if no API Key generation is%n" +
-                "                              available on AIP Console. Provide the user's%n" +
-                "                              password in the apikey parameter.%n" +
-                "  -v, --version-name=VERSION_NAME%n" +
-                "                            The name of the version to create%n" +
-                "  -V, --version             Print version information and exit.%n" +
-                "      --verbose             Whether the command log should be output to the%n" +
-                "                              console or not, defaulted to true if specified%n" +
-                "                              without parameter: true%n"
-        );
-        String actual = new CommandLine(deliverVersionCommand, springAwareCommandFactory)
-                .getUsageMessage(CommandLine.Help.Ansi.OFF);
-        assertThat(expected, is(actual));
     }
 
     @Test
