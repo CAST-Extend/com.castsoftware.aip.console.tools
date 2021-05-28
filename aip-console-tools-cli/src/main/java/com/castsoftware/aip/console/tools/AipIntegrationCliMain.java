@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.annotation.Profile;
 import picocli.CommandLine;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Objects;
 
 @SpringBootApplication
 @Slf4j
+@Profile(Constants.EXECUTION_PROFILE_DEFAULT)
 public class AipIntegrationCliMain implements CommandLineRunner {
 
     @Autowired
