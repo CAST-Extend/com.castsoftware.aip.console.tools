@@ -62,7 +62,8 @@ public class CreateApplicationCommand implements Callable<Integer> {
     private String domainName;
 
     @CommandLine.Option(names = "--inplace-mode",
-            description = "If true then no history will be kept for delivered sources.")
+            description = "If true then no history will be kept for delivered sources." + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
     private boolean inPlaceMode = false;
 
     @CommandLine.Unmatched
