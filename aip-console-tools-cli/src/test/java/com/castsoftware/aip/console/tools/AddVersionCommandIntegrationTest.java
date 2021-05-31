@@ -138,5 +138,4 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         assertThat(spec, is(notNullValue()));
     }
 
-
 }

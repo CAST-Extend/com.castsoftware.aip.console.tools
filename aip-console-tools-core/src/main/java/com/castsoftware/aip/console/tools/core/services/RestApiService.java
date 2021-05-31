@@ -45,6 +45,12 @@ public interface RestApiService {
      */
     void login() throws ApiCallException;
 
+    /**
+     * Used by the service to display the stack trace depending on whether the argument
+     * is set to true or not. <p>Each Action or Builder should manage this by itself
+     *
+     * @param verbose enable or disable stack trace output.
+     */
     void setVerbose(boolean verbose);
 
     /**
