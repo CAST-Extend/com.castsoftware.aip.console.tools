@@ -21,6 +21,8 @@ public class Constants {
     public static final int RETURN_APPLICATION_NO_VERSION = 9;
     public static final int RETURN_APPLICATION_VERSION_NOT_FOUND = 10;
     public static final int RETURN_INPLACE_MODE_ERROR = 11;
+    // Keep ordinal to 9 fro backward compatibility
+    public static final int RETURN_VERSION_WITH_ANALYSIS_DONE_NOT_FOUND = 9;
 
     public static final int UNKNOWN_ERROR = 1000;
 
@@ -92,5 +94,6 @@ public class Constants {
 
     // Other constants
     public static final long DEFAULT_HTTP_TIMEOUT = 90L;
+    public static final String EXECUTION_PROFILE_DEFAULT = "default";
 }
 
