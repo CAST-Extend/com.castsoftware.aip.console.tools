@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import hudson.model.Run;
+import hudson.util.Secret;
 import jenkins.model.RunAction2;
 
 import javax.annotation.CheckForNull;
@@ -21,6 +22,28 @@ public class CreateApplicationAction implements RunAction2 {
     private String nodeName;
     @Nullable
     private String domainName;
+    @Nullable
+    private String aipConsoleUrl;
+    @Nullable
+    private Secret apiKey;
+
+    public void setApiKey(Secret apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    @Nullable
+    public Secret getApiKey() {
+        return apiKey;
+    }
+
+    public void setAipConsoleUrl(String aipConsoleUrl) {
+        this.aipConsoleUrl = aipConsoleUrl;
+    }
+
+    @Nullable
+    public String getAipConsoleUrl() {
+        return aipConsoleUrl;
+    }
 
     public Run getRun() {
         return run;

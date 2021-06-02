@@ -97,6 +97,10 @@ public class AddVersionBuilderTest {
 
     @InjectMocks
     private AddVersionBuilder addVersionBuilder;
+    @InjectMocks
+    private AipConsoleGlobalConfiguration configuration;
+    @Rule
+    public JenkinsRule jr = new JenkinsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -117,7 +121,21 @@ public class AddVersionBuilderTest {
         job.setDomainName("");
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
-    
+
+    @Test
+    public void testAddVersionStepToJob_TargetingPrivateConsole() throws Exception {
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        configuration.setAipConsoleUrl("https://localhost:8089");
+        configuration.setApiKey(Secret.fromString("A-B-C-D"));
+        project.getBuildersList().add(addVersionBuilder);
+        addVersionBuilder.setApiKey(Secret.fromString("Z-Y-X"));
+        //addVersionBuilder.setAipConsoleUrl("http://localhost:8083");
+        AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
+        job.setApiKey(Secret.fromString("Z-Y-X"));
+        job.setAipConsoleUrl(addVersionBuilder.getDescriptor().getAipConsoleUrl());
+        jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
+    }
+
     @Test
     public void testBuildFreestyleDefaultOk() throws Exception {
         FreeStyleProject project = getProjectWithDefaultAddVersionAndFile(TEST_ARCHIVE_NAME);

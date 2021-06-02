@@ -78,6 +78,27 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
     private boolean processImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+    private String aipConsoleUrl;
+    private Secret apiKey;
+
+    @DataBoundSetter
+    public void setApiKey(Secret apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public Secret getApiKey() {
+        return apiKey == null ? getDescriptor().getAipConsoleSecret() : apiKey;
+    }
+
+    @DataBoundSetter
+    public void setAipConsoleUrl(String aipConsoleUrl) {
+        this.aipConsoleUrl = aipConsoleUrl;
+    }
+
+    @CheckForNull
+    public String getAipConsoleUrl() {
+        return StringUtils.isEmpty(aipConsoleUrl) ? getDescriptor().getAipConsoleUrl() : aipConsoleUrl;
+    }
 
     @DataBoundConstructor
     public SnapshotBuilder(String applicationName) {

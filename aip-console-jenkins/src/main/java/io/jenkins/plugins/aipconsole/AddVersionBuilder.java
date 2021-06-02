@@ -42,6 +42,7 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -93,6 +94,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @Inject
     private ApplicationService applicationService;
 
+    private String aipConsoleUrl;
+    private Secret apiKey;
+
     private String applicationName;
     private String applicationGuid;
     private String filePath;
@@ -120,6 +124,25 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     public AddVersionBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
         this.filePath = filePath;
+    }
+
+    @DataBoundSetter
+    public void setApiKey(Secret apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public Secret getApiKey() {
+        return apiKey == null ? getDescriptor().getAipConsoleSecret() : apiKey;
+    }
+
+    @DataBoundSetter
+    public void setAipConsoleUrl(String aipConsoleUrl) {
+        this.aipConsoleUrl = aipConsoleUrl;
+    }
+
+    @CheckForNull
+    public String getAipConsoleUrl() {
+        return StringUtils.isEmpty(aipConsoleUrl) ? getDescriptor().getAipConsoleUrl() : aipConsoleUrl;
     }
 
     public String getApplicationName() {
@@ -292,8 +315,8 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
             applicationService = injector.getInstance(ApplicationService.class);
         }
 
-        String apiServerUrl = getDescriptor().getAipConsoleUrl();
-        String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
+        String apiServerUrl = getAipConsoleUrl();
+        String apiKey = Secret.toString(getApiKey());
         String username = getDescriptor().getAipConsoleUsername();
         // Job level timeout different from default ? use it, else use the global config level timeout
         long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());

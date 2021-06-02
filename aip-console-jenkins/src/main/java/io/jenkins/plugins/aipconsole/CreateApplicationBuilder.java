@@ -27,6 +27,7 @@ import org.jvnet.localizer.ResourceBundleHolder;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -75,6 +76,27 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
     private String domainName;
 
     private boolean inPlaceMode;
+    private String aipConsoleUrl;
+    private Secret apiKey;
+
+    @DataBoundSetter
+    public void setApiKey(Secret apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public Secret getApiKey() {
+        return apiKey == null ? getDescriptor().getAipConsoleSecret() : apiKey;
+    }
+
+    @DataBoundSetter
+    public void setAipConsoleUrl(String aipConsoleUrl) {
+        this.aipConsoleUrl = aipConsoleUrl;
+    }
+
+    @CheckForNull
+    public String getAipConsoleUrl() {
+        return StringUtils.isEmpty(aipConsoleUrl) ? getDescriptor().getAipConsoleUrl() : aipConsoleUrl;
+    }
 
     @DataBoundConstructor
     public CreateApplicationBuilder(String applicationName) {

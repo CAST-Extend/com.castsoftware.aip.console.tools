@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import hudson.model.Run;
+import hudson.util.Secret;
 import jenkins.model.RunAction2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,10 @@ import javax.annotation.Nullable;
 
 public class SnapshotAction implements RunAction2 {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnapshotAction.class);
+    @Nullable
+    private String aipConsoleUrl;
+    @Nullable
+    private Secret apiKey;
     @CheckForNull
     private String applicationName;
     @Nullable
@@ -22,6 +27,24 @@ public class SnapshotAction implements RunAction2 {
     private boolean processImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+
+    public void setApiKey(Secret apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    @Nullable
+    public Secret getApiKey() {
+        return apiKey;
+    }
+
+    public void setAipConsoleUrl(String aipConsoleUrl) {
+        this.aipConsoleUrl = aipConsoleUrl;
+    }
+
+    @Nullable
+    public String getAipConsoleUrl() {
+        return aipConsoleUrl;
+    }
 
     @CheckForNull
     public String getApplicationName() {

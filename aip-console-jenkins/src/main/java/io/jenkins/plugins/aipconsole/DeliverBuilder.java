@@ -43,6 +43,7 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -121,11 +122,33 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
 
     private boolean autoDiscover = true;
     private boolean setAsCurrent = false;
+    private String aipConsoleUrl;
+    private Secret apiKey;
+
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
         this.filePath = filePath;
+    }
+
+    @DataBoundSetter
+    public void setApiKey(Secret apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public Secret getApiKey() {
+        return apiKey == null ? getDescriptor().getAipConsoleSecret() : apiKey;
+    }
+
+    @DataBoundSetter
+    public void setAipConsoleUrl(String aipConsoleUrl) {
+        this.aipConsoleUrl = aipConsoleUrl;
+    }
+
+    @CheckForNull
+    public String getAipConsoleUrl() {
+        return StringUtils.isEmpty(aipConsoleUrl) ? getDescriptor().getAipConsoleUrl() : aipConsoleUrl;
     }
 
     public String getApplicationName() {

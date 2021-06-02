@@ -68,6 +68,9 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     @Inject
     private ApplicationService applicationService;
 
+    private String aipConsoleUrl;
+    private Secret apiKey;
+
     @CheckForNull
     private String applicationName;
     @Nullable
@@ -82,6 +85,25 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    @DataBoundSetter
+    public void setApiKey(Secret apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public Secret getApiKey() {
+        return apiKey == null ? getDescriptor().getAipConsoleSecret() : apiKey;
+    }
+
+    @DataBoundSetter
+    public void setAipConsoleUrl(String aipConsoleUrl) {
+        this.aipConsoleUrl = aipConsoleUrl;
+    }
+
+    @CheckForNull
+    public String getAipConsoleUrl() {
+        return StringUtils.isEmpty(aipConsoleUrl) ? getDescriptor().getAipConsoleUrl() : aipConsoleUrl;
     }
 
     @CheckForNull
