@@ -25,8 +25,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
 import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
@@ -56,7 +54,7 @@ import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_Analyze_erro
 import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
-public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
+public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     @Inject
@@ -67,9 +65,6 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
     @Inject
     private ApplicationService applicationService;
-
-    private String aipConsoleUrl;
-    private Secret apiKey;
 
     @CheckForNull
     private String applicationName;
@@ -85,25 +80,6 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
         this.applicationName = applicationName;
-    }
-
-    @DataBoundSetter
-    public void setApiKey(Secret apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public Secret getApiKey() {
-        return apiKey == null ? getDescriptor().getAipConsoleSecret() : apiKey;
-    }
-
-    @DataBoundSetter
-    public void setAipConsoleUrl(String aipConsoleUrl) {
-        this.aipConsoleUrl = aipConsoleUrl;
-    }
-
-    @CheckForNull
-    public String getAipConsoleUrl() {
-        return StringUtils.isEmpty(aipConsoleUrl) ? getDescriptor().getAipConsoleUrl() : aipConsoleUrl;
     }
 
     @CheckForNull
@@ -199,8 +175,8 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
             applicationService = injector.getInstance(ApplicationService.class);
         }
 
-        String apiServerUrl = getDescriptor().getAipConsoleUrl();
-        String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
+        String apiServerUrl = getAipConsoleUrl();
+        String apiKey = Secret.toString(getApiKey());
         String username = getDescriptor().getAipConsoleUsername();
         // Job level timeout different from default ? use it, else use the global config level timeout
         long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());
@@ -338,8 +314,8 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
         if (StringUtils.isAnyBlank(applicationName)) {
             return Messages.GenericError_error_missingRequiredParameters();
         }
-        String apiServerUrl = getDescriptor().getAipConsoleUrl();
-        String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
+        String apiServerUrl = getAipConsoleUrl();
+        String apiKey = Secret.toString(getApiKey());
 
         if (StringUtils.isBlank(apiServerUrl)) {
             return Messages.GenericError_error_noServerUrl();
@@ -353,7 +329,7 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
 
     @Symbol("aipAnalyze")
     @Extension
-    public static final class AnalyzeDescriptorImpl extends BuildStepDescriptor<Builder> {
+    public static final class AnalyzeDescriptorImpl extends BaseActionBuilderDescriptor {
 
         @Inject
         private AipConsoleGlobalConfiguration configuration;
@@ -369,18 +345,22 @@ public class AnalyzeBuilder extends Builder implements SimpleBuildStep {
             return AnalyzeBuilder_DescriptorImpl_displayName();
         }
 
+        @Override
         public String getAipConsoleUrl() {
             return configuration.getAipConsoleUrl();
         }
 
+        @Override
         public Secret getAipConsoleSecret() {
             return configuration.getApiKey();
         }
 
+        @Override
         public String getAipConsoleUsername() {
             return configuration.getUsername();
         }
 
+        @Override
         public int getTimeout() {
             return configuration.getTimeout();
         }

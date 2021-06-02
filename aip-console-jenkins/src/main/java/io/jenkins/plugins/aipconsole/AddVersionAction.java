@@ -2,7 +2,6 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import hudson.model.Run;
-import hudson.util.Secret;
 import jenkins.model.RunAction2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,12 +9,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-public class AddVersionAction implements RunAction2 {
+public class AddVersionAction extends BaseAction implements RunAction2 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddVersionAction.class);
-    @Nullable
-    private String aipConsoleUrl;
-    @Nullable
-    private Secret apiKey;
 
     @CheckForNull
     private String applicationName;
@@ -47,24 +42,6 @@ public class AddVersionAction implements RunAction2 {
     public AddVersionAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
         this.applicationName = applicationName;
         this.filePath = filePath;
-    }
-
-    public void setApiKey(Secret apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    @Nullable
-    public Secret getApiKey() {
-        return apiKey;
-    }
-
-    public void setAipConsoleUrl(String aipConsoleUrl) {
-        this.aipConsoleUrl = aipConsoleUrl;
-    }
-
-    @Nullable
-    public String getAipConsoleUrl() {
-        return aipConsoleUrl;
     }
 
     @CheckForNull

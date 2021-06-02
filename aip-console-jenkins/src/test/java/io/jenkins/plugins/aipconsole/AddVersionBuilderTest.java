@@ -97,10 +97,6 @@ public class AddVersionBuilderTest {
 
     @InjectMocks
     private AddVersionBuilder addVersionBuilder;
-    @InjectMocks
-    private AipConsoleGlobalConfiguration configuration;
-    @Rule
-    public JenkinsRule jr = new JenkinsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -125,8 +121,6 @@ public class AddVersionBuilderTest {
     @Test
     public void testAddVersionStepToJob_TargetingPrivateConsole() throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        configuration.setAipConsoleUrl("https://localhost:8089");
-        configuration.setApiKey(Secret.fromString("A-B-C-D"));
         project.getBuildersList().add(addVersionBuilder);
         addVersionBuilder.setApiKey(Secret.fromString("Z-Y-X"));
         //addVersionBuilder.setAipConsoleUrl("http://localhost:8083");

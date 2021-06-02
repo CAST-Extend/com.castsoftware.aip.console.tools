@@ -16,8 +16,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
 import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
@@ -27,7 +25,6 @@ import org.jvnet.localizer.ResourceBundleHolder;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -50,7 +47,7 @@ import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
  * Builder to run a "Create application" step.
  * It'll create a new application on AIP Console with the given name
  */
-public class CreateApplicationBuilder extends Builder implements SimpleBuildStep {
+public class CreateApplicationBuilder extends BaseActionBuilder implements SimpleBuildStep {
 
     // Holder for dynamic loading of step name translations
     private final static ResourceBundleHolder holder = ResourceBundleHolder.get(io.jenkins.plugins.aipconsole.Messages.class);
@@ -76,27 +73,6 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
     private String domainName;
 
     private boolean inPlaceMode;
-    private String aipConsoleUrl;
-    private Secret apiKey;
-
-    @DataBoundSetter
-    public void setApiKey(Secret apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public Secret getApiKey() {
-        return apiKey == null ? getDescriptor().getAipConsoleSecret() : apiKey;
-    }
-
-    @DataBoundSetter
-    public void setAipConsoleUrl(String aipConsoleUrl) {
-        this.aipConsoleUrl = aipConsoleUrl;
-    }
-
-    @CheckForNull
-    public String getAipConsoleUrl() {
-        return StringUtils.isEmpty(aipConsoleUrl) ? getDescriptor().getAipConsoleUrl() : aipConsoleUrl;
-    }
 
     @DataBoundConstructor
     public CreateApplicationBuilder(String applicationName) {
@@ -168,8 +144,8 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
             Guice.createInjector(new AipConsoleModule()).injectMembers(this);
         }
 
-        String apiServerUrl = getDescriptor().getAipConsoleUrl();
-        String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
+        String apiServerUrl = getAipConsoleUrl();
+        String apiKey = Secret.toString(getApiKey());
         String username = getDescriptor().getAipConsoleUsername();
         long actualTimeout = timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout();
 
@@ -234,7 +210,7 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
 
     @Symbol("aipCreateApp")
     @Extension
-    public static final class CreateAppDescriptorImpl extends BuildStepDescriptor<Builder> {
+    public static final class CreateAppDescriptorImpl extends BaseActionBuilderDescriptor {
 
         @Inject
         private AipConsoleGlobalConfiguration configuration;
@@ -250,18 +226,22 @@ public class CreateApplicationBuilder extends Builder implements SimpleBuildStep
             return CreateApplicationBuilder_DescriptorImpl_displayName();
         }
 
+        @Override
         public String getAipConsoleUrl() {
             return configuration.getAipConsoleUrl();
         }
 
+        @Override
         public Secret getAipConsoleSecret() {
             return configuration.getApiKey();
         }
 
+        @Override
         public String getAipConsoleUsername() {
             return configuration.getUsername();
         }
 
+        @Override
         public int getTimeout() {
             return configuration.getTimeout();
         }

@@ -31,8 +31,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
 import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
@@ -43,7 +41,6 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -85,7 +82,7 @@ import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noApiKey
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noServerUrl;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
-public class DeliverBuilder extends Builder implements SimpleBuildStep {
+public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep {
     public static final int BUFFER_SIZE = 10 * 1024 * 1024;
     @Inject
     private JobsService jobsService;
@@ -122,33 +119,11 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
 
     private boolean autoDiscover = true;
     private boolean setAsCurrent = false;
-    private String aipConsoleUrl;
-    private Secret apiKey;
-
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
         this.filePath = filePath;
-    }
-
-    @DataBoundSetter
-    public void setApiKey(Secret apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public Secret getApiKey() {
-        return apiKey == null ? getDescriptor().getAipConsoleSecret() : apiKey;
-    }
-
-    @DataBoundSetter
-    public void setAipConsoleUrl(String aipConsoleUrl) {
-        this.aipConsoleUrl = aipConsoleUrl;
-    }
-
-    @CheckForNull
-    public String getAipConsoleUrl() {
-        return StringUtils.isEmpty(aipConsoleUrl) ? getDescriptor().getAipConsoleUrl() : aipConsoleUrl;
     }
 
     public String getApplicationName() {
@@ -339,8 +314,8 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
             applicationService = injector.getInstance(ApplicationService.class);
         }
 
-        String apiServerUrl = getDescriptor().getAipConsoleUrl();
-        String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
+        String apiServerUrl = getAipConsoleUrl();
+        String apiKey = Secret.toString(getApiKey());
         String username = getDescriptor().getAipConsoleUsername();
         // Job level timeout different from default ? use it, else use the global config level timeout
         long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());
@@ -620,8 +595,8 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
         if (StringUtils.isAnyBlank(applicationName, filePath)) {
             return GenericError_error_missingRequiredParameters();
         }
-        String apiServerUrl = getDescriptor().getAipConsoleUrl();
-        String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
+        String apiServerUrl = getAipConsoleUrl();
+        String apiKey = Secret.toString(getApiKey());
 
         if (StringUtils.isBlank(apiServerUrl)) {
             return GenericError_error_noServerUrl();
@@ -652,7 +627,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
 
     @Symbol("aipDeliver")
     @Extension
-    public static final class DeliverDescriptorImpl extends BuildStepDescriptor<Builder> {
+    public static final class DeliverDescriptorImpl extends BaseActionBuilderDescriptor {
 
         @Inject
         private AipConsoleGlobalConfiguration configuration;
@@ -668,18 +643,22 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
             return DeliverBuilder_DescriptorImpl_displayName();
         }
 
+        @Override
         public String getAipConsoleUrl() {
             return configuration.getAipConsoleUrl();
         }
 
+        @Override
         public Secret getAipConsoleSecret() {
             return configuration.getApiKey();
         }
 
+        @Override
         public String getAipConsoleUsername() {
             return configuration.getUsername();
         }
 
+        @Override
         public int getTimeout() {
             return configuration.getTimeout();
         }
