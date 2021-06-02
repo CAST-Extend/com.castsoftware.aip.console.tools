@@ -58,8 +58,6 @@ proceed as follows.
 
 ##### Precedence rule
 
-The value used for AIP Console URL and API Key as well is always comme from the Job if assigned.
-
 * The value used for AIP Console URL and API Key is always coming from the Job itself when assigned.
 * If one field is not assigned then the one from the *Global Configuration* will be used.
 
