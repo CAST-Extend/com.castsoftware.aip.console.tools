@@ -6,9 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
-public abstract class BaseActionBuilder extends Builder {
+public class BaseActionBuilder extends Builder {
+    @Nullable
     private String aipConsoleUrl;
+    @Nullable
     private Secret apiKey;
 
     @Override
@@ -23,7 +26,11 @@ public abstract class BaseActionBuilder extends Builder {
 
     @CheckForNull
     public Secret getApiKey() {
-        return apiKey == null ? getDescriptor().getAipConsoleSecret() : apiKey;
+        return StringUtils.isEmpty(Secret.toString(getLocalApiKey())) ? getDescriptor().getAipConsoleSecret() : getLocalApiKey();
+    }
+
+    public Secret getLocalApiKey() {
+        return apiKey;
     }
 
     @DataBoundSetter

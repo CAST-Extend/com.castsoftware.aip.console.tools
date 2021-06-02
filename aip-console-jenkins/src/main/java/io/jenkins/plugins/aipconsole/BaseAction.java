@@ -4,7 +4,7 @@ import hudson.util.Secret;
 
 import javax.annotation.Nullable;
 
-public abstract class BaseAction {
+public class BaseAction {
     @Nullable
     private String aipConsoleUrl;
     @Nullable
