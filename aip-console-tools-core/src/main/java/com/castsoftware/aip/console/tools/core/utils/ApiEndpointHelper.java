@@ -8,6 +8,9 @@ public class ApiEndpointHelper {
     private static final String UPLOAD_ENDPOINT = "/upload";
     private static final String VERSIONS_ENDPOINT = "/versions";
     private static final String EXTRACT_ENDPOINT = "/extract";
+    private static final String DEBUG_OPTIONS_ENDPOINT = "/debug-options";
+    private static final String SHOW_SQL_ENDPOINT = "/show-sql";
+    private static final String AMT_PROFILE_ENDPOINT = "/activate-amt-memory-profile";
 
     public static String getRootPath() {
         return ROOT_PATH + "/";
@@ -43,6 +46,22 @@ public class ApiEndpointHelper {
 
     public static String getApplicationExtractUploadPath(String appGuid, String uploadGuid) {
         return getApplicationUploadPath(appGuid, uploadGuid) + EXTRACT_ENDPOINT;
+    }
+
+    public static String getDebugOptionsPath(String appGuid) {
+        return getApplicationPath(appGuid) + DEBUG_OPTIONS_ENDPOINT;
+    }
+
+    public static String getDebugOptionShowSqlPath(String appGuid) {
+        return getDebugOptionsPath(appGuid) + SHOW_SQL_ENDPOINT;
+    }
+
+    public static String getDebugOptionAmtProfilePath(String appGuid) {
+        return getDebugOptionsPath(appGuid) + AMT_PROFILE_ENDPOINT;
+    }
+
+    public static String getAmtProfilingDownloadUrl(String appGuid) {
+        return ApiEndpointHelper.getDebugOptionsPath(appGuid) + "/logs" + AMT_PROFILE_ENDPOINT + "/download";
     }
 
     public static String getJobsEndpoint() {
