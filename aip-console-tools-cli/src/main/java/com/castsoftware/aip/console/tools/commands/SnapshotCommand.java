@@ -115,8 +115,7 @@ public class SnapshotCommand implements Callable<Integer> {
             }
             if (versions.stream().noneMatch(v -> v.getStatus().ordinal() >= VersionStatus.ANALYSIS_DONE.ordinal())) {
                 log.error("No analysis done for application '{}'. Cannot create snapshot.", applicationName);
-                // FIXME: Constant for return code
-                return 9;
+                return Constants.RETURN_VERSION_WITH_ANALYSIS_DONE_NOT_FOUND;
             }
             VersionDto foundVersion;
             if (StringUtils.isNotBlank(versionName)) {
