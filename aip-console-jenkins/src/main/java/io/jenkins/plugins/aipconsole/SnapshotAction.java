@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-public class SnapshotAction implements RunAction2 {
+public class SnapshotAction extends BaseAction implements RunAction2 {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnapshotAction.class);
     @CheckForNull
     private String applicationName;
