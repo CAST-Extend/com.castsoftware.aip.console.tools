@@ -28,7 +28,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -42,17 +41,13 @@ import java.util.function.Function;
 @Slf4j
 @Getter
 @Setter
-public class AddVersionCommand implements Callable<Integer> {
-    private final RestApiService restApiService;
+public class AddVersionCommand extends BaseCollableCommand {
     private final JobsService jobsService;
     private final UploadService uploadService;
     private final ApplicationService applicationService;
 
-    @CommandLine.Mixin
-    private SharedOptions sharedOptions;
-
     public AddVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
-        this.restApiService = restApiService;
+        super(restApiService);
         this.jobsService = jobsService;
         this.uploadService = uploadService;
         this.applicationService = applicationService;
@@ -134,9 +129,8 @@ public class AddVersionCommand implements Callable<Integer> {
     private List<String> unmatchedOptions;
 
     @Override
-    public Integer call() {
+    public Integer doCall() {
         ApiInfoDto apiInfo = null;
-        restApiService.setVerbose(sharedOptions.isVerbose());
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
@@ -148,8 +142,6 @@ public class AddVersionCommand implements Callable<Integer> {
         } catch (ApiCallException e) {
             return Constants.RETURN_LOGIN_ERROR;
         }
-
-        log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
 
         if (StringUtils.isBlank(applicationName) && StringUtils.isBlank(applicationGuid)) {
             log.error("No application name or application guid provided. Exiting.");

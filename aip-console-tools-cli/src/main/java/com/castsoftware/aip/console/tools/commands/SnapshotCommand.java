@@ -29,7 +29,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -46,13 +45,10 @@ import java.util.function.Function;
 @Slf4j
 @Getter
 @Setter
-public class SnapshotCommand implements Callable<Integer> {
+public class SnapshotCommand extends BaseCollableCommand {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    private final RestApiService restApiService;
     private final JobsService jobsService;
     private final ApplicationService applicationService;
-    @CommandLine.Mixin
-    private SharedOptions sharedOptions;
 
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
@@ -75,20 +71,18 @@ public class SnapshotCommand implements Callable<Integer> {
     private boolean processImaging = false;
 
     public SnapshotCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
-        this.restApiService = restApiService;
+        super(restApiService);
         this.jobsService = jobsService;
         this.applicationService = applicationService;
     }
 
-
     @Override
-    public Integer call() throws Exception {
+    public Integer doCall() {
         // Runs snapshot + upload
         if (StringUtils.isBlank(applicationName)) {
             log.error("No application name provided. Exiting.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
-        restApiService.setVerbose(sharedOptions.isVerbose());
 
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
