@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -16,6 +17,7 @@ import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
+import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import lombok.Getter;
 import lombok.Setter;
@@ -125,6 +127,20 @@ public class AddVersionCommand extends BaseCollableCommand {
     @CommandLine.Option(names = "--domain-name", paramLabel = "DOMAIN_NAME", description = "The name of the domain to assign to the application. Will be created if it doesn't exists. No domain will be assigned if left empty.")
     private String domainName;
 
+    /**
+     * Application debug options
+     */
+    @CommandLine.Option(names = {"-sql", "--show-sql"}
+            , description = "Enable or Desible application' Show Sql debug option (default: ${DEFAULT-VALUE})"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true"
+            , defaultValue = "false")
+    private boolean showSql;
+    @CommandLine.Option(names = {"-amt", "--amt-profiling"}
+            , description = "Enable or Desible application' AMT Profiling debug option (default: ${DEFAULT-VALUE})"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true"
+            , defaultValue = "false")
+    private boolean amtProfiling;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -142,6 +158,10 @@ public class AddVersionCommand extends BaseCollableCommand {
         } catch (ApiCallException e) {
             return Constants.RETURN_LOGIN_ERROR;
         }
+
+        log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
+        log.info("[Debug options] Show Sql is '{}'", showSql);
+        log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
 
         if (StringUtils.isBlank(applicationName) && StringUtils.isBlank(applicationGuid)) {
             log.error("No application name or application guid provided. Exiting.");
@@ -193,6 +213,17 @@ public class AddVersionCommand extends BaseCollableCommand {
                 builder.snapshotName(snapshotName);
             }
 
+            //==============
+            // Ony set debug option when ON. Run Analysis always consider these options as OFF(disabled)
+            //==============
+            DebugOptionsDto oldDebugOptions = applicationService.getDebugOptions(applicationGuid);
+            if (showSql) {
+                applicationService.updateShowSqlDebugOption(applicationGuid, showSql);
+            }
+            if (amtProfiling) {
+                applicationService.updateAmtProfileDebugOption(applicationGuid, amtProfiling);
+            }
+
             String jobGuid = jobsService.startAddVersionJob(builder);
             // add a shutdown hook, to cancel the job
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
@@ -201,11 +232,16 @@ public class AddVersionCommand extends BaseCollableCommand {
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             // Deregister the shutdown hook since the job is finished and we won't need to cancel it
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            DebugOptionsDto debugOptions = applicationService.getDebugOptions(applicationGuid);
+            applicationService.resetDebugOptions(applicationGuid, oldDebugOptions);
             if (JobState.COMPLETED == jobStatus.getState()) {
+                if (debugOptions.isActivateAmtMemoryProfile()) {
+                    log.info("[Debug options] Amt Profiling file download URL: {}",
+                            sharedOptions.getFullServerRootUrl() + ApiEndpointHelper.getAmtProfilingDownloadUrl(applicationGuid));
+                }
                 log.info("Job completed successfully.");
                 return Constants.RETURN_OK;
             }
-
 
             log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
             return Constants.RETURN_JOB_FAILED;

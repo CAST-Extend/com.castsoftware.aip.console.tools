@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -14,6 +15,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import lombok.Getter;
 import lombok.Setter;
@@ -67,6 +69,19 @@ public class AnalyzeCommand extends BaseCollableCommand {
     @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging. Note: Parameter will be ignored if snapshot option is not provided and Imaging is not setup in AIP Console"
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean processImaging = false;
+    /**
+     * Application debug options
+     */
+    @CommandLine.Option(names = {"-sql", "--show-sql"}
+            , description = "Enable or Desible application' Show Sql debug option (default: ${DEFAULT-VALUE})"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true"
+            , defaultValue = "false")
+    private boolean showSql;
+    @CommandLine.Option(names = {"-amt", "--amt-profiling"}
+            , description = "Enable or Desible application' AMT Profiling debug option (default: ${DEFAULT-VALUE})"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true"
+            , defaultValue = "false")
+    private boolean amtProfiling;
 
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         super(restApiService);
@@ -93,6 +108,8 @@ public class AnalyzeCommand extends BaseCollableCommand {
         }
         String applicationGuid;
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
+        log.info("[Debug options] Show Sql is '{}'", showSql);
+        log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
@@ -142,6 +159,17 @@ public class AnalyzeCommand extends BaseCollableCommand {
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());
 
+            //==============
+            // Ony set debug option when ON. Run Analysis always consider these options as OFF(disabled)
+            //==============
+            DebugOptionsDto oldDebugOptions = applicationService.getDebugOptions(applicationGuid);
+            if (showSql) {
+                applicationService.updateShowSqlDebugOption(applicationGuid, showSql);
+            }
+            if (amtProfiling) {
+                applicationService.updateShowSqlDebugOption(applicationGuid, amtProfiling);
+            }
+
             log.info("Running analysis for application '{}' with version '{}'", applicationName, versionToAnalyze.getName());
             String jobGuid = jobsService.startJob(builder);
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
@@ -149,7 +177,14 @@ public class AnalyzeCommand extends BaseCollableCommand {
             Runtime.getRuntime().addShutdownHook(shutdownHook);
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
+
+            DebugOptionsDto debugOptions = applicationService.getDebugOptions(applicationGuid);
+            applicationService.resetDebugOptions(applicationGuid, oldDebugOptions);
             if (JobState.COMPLETED == jobStatus.getState()) {
+                if (debugOptions.isActivateAmtMemoryProfile()) {
+                    log.info("[Debug options] Amt Profiling file download URL: {}",
+                            sharedOptions.getFullServerRootUrl() + ApiEndpointHelper.getAmtProfilingDownloadUrl(applicationGuid));
+                }
                 log.info("Application Analysis completed successfully");
                 return Constants.RETURN_OK;
             }
