@@ -159,7 +159,6 @@ public class AddVersionCommand extends BaseCollableCommand {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
-        log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
 
