@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.AnalyzeCommand;
+import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -13,6 +14,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -163,6 +165,9 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         versionDto.setStatus(VersionStatus.DELIVERED);
         when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
         when(jobsService.startJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
+        DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
+        when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
+        when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
 
         JobStatusWithSteps jobStatus = new JobStatusWithSteps();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
