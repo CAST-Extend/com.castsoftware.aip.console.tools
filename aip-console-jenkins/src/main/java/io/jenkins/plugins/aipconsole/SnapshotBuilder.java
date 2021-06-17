@@ -26,8 +26,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
 import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
 import jenkins.tasks.SimpleBuildStep;
@@ -59,7 +57,7 @@ import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_er
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_info_pollJobMessage;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_success_complete;
 
-public class SnapshotBuilder extends Builder implements SimpleBuildStep {
+public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildStep {
     @Inject
     private JobsService jobsService;
 
@@ -168,8 +166,8 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
             applicationService = injector.getInstance(ApplicationService.class);
         }
 
-        String apiServerUrl = getDescriptor().getAipConsoleUrl();
-        String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
+        String apiServerUrl = getAipConsoleUrl();
+        String apiKey = Secret.toString(getApiKey());
         String username = getDescriptor().getAipConsoleUsername();
         // Job level timeout different from default ? use it, else use the global config level timeout
         long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());
@@ -294,8 +292,8 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
         if (StringUtils.isBlank(applicationName)) {
             return Messages.GenericError_error_missingRequiredParameters();
         }
-        String apiServerUrl = getDescriptor().getAipConsoleUrl();
-        String apiKey = Secret.toString(getDescriptor().getAipConsoleSecret());
+        String apiServerUrl = getAipConsoleUrl();
+        String apiKey = Secret.toString(getApiKey());
 
         if (StringUtils.isBlank(apiServerUrl)) {
             return Messages.GenericError_error_noServerUrl();
@@ -309,7 +307,7 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
 
     @Symbol("aipSnapshot")
     @Extension
-    public static final class SnapshotDescriptorImpl extends BuildStepDescriptor<Builder> {
+    public static final class SnapshotDescriptorImpl extends BaseActionBuilderDescriptor {
 
         @Inject
         private AipConsoleGlobalConfiguration configuration;
@@ -325,18 +323,22 @@ public class SnapshotBuilder extends Builder implements SimpleBuildStep {
             return SnapshotBuilder_DescriptorImpl_displayName();
         }
 
+        @Override
         public String getAipConsoleUrl() {
             return configuration.getAipConsoleUrl();
         }
 
+        @Override
         public Secret getAipConsoleSecret() {
             return configuration.getApiKey();
         }
 
+        @Override
         public String getAipConsoleUsername() {
             return configuration.getUsername();
         }
 
+        @Override
         public int getTimeout() {
             return configuration.getTimeout();
         }
