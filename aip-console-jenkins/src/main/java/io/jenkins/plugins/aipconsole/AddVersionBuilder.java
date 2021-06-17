@@ -290,6 +290,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             applicationService = injector.getInstance(ApplicationService.class);
         }
 
+        apiService.setVerbose(getDescriptor().configuration.isVerbose());
         String apiServerUrl = getAipConsoleUrl();
         String apiKey = Secret.toString(getApiKey());
         String username = getDescriptor().getAipConsoleUsername();

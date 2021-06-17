@@ -313,6 +313,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             jobsService = injector.getInstance(JobsService.class);
             applicationService = injector.getInstance(ApplicationService.class);
         }
+        
+        apiService.setVerbose(getDescriptor().configuration.isVerbose());
 
         String apiServerUrl = getAipConsoleUrl();
         String apiKey = Secret.toString(getApiKey());

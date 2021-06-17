@@ -166,6 +166,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
             applicationService = injector.getInstance(ApplicationService.class);
         }
 
+        apiService.setVerbose(getDescriptor().configuration.isVerbose());
         String apiServerUrl = getAipConsoleUrl();
         String apiKey = Secret.toString(getApiKey());
         String username = getDescriptor().getAipConsoleUsername();

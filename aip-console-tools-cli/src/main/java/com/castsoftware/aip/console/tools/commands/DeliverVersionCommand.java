@@ -26,7 +26,6 @@ import picocli.CommandLine;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Date;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -43,14 +42,10 @@ import java.util.function.Function;
 @Slf4j
 @Getter
 @Setter
-public class DeliverVersionCommand implements Callable<Integer> {
-    private final RestApiService restApiService;
+public class DeliverVersionCommand extends BaseCollableCommand {
     private final JobsService jobsService;
     private final UploadService uploadService;
     private final ApplicationService applicationService;
-
-    @CommandLine.Mixin
-    private SharedOptions sharedOptions;
 
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
@@ -136,14 +131,14 @@ public class DeliverVersionCommand implements Callable<Integer> {
     private String domainName;
 
     public DeliverVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
-        this.restApiService = restApiService;
+        super(restApiService);
         this.jobsService = jobsService;
         this.uploadService = uploadService;
         this.applicationService = applicationService;
     }
 
     @Override
-    public Integer call() throws Exception {
+    public Integer doCall() {
         // Same as a part of the AddVersion command
         // Upload a local file or register a remote path
         // And then starts a job up to "Delivery"
@@ -163,9 +158,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
         } catch (ApiCallException e) {
             return Constants.RETURN_LOGIN_ERROR;
         }
-
-        log.info("Deliver version command has triggered with log output = '{}'", sharedOptions.isVerbose());
-
+        
         String applicationGuid;
         Thread shutdownHook = null;
 

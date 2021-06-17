@@ -81,12 +81,14 @@ public abstract class AipConsoleToolsCliBaseTest {
         if (unExpectedParameters != null) {
             unExpectedParameters.clear();
         }
-        command.setApiKey(null);
-        command.setApiKeyEnvVariable(null);
-        command.setServerRootUrl(null);
-        command.setUsername(null);
-        if (command.getUnmatchedOptions() != null) {
-            command.getUnmatchedOptions().clear();
+        if (command != null) {
+            command.setApiKey(null);
+            command.setApiKeyEnvVariable(null);
+            command.setServerRootUrl(null);
+            command.setUsername(null);
+            if (command.getUnmatchedOptions() != null) {
+                command.getUnmatchedOptions().clear();
+            }
         }
     }
 

@@ -8,19 +8,15 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -33,18 +29,13 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateApplicationCommand implements Callable<Integer> {
+public class CreateApplicationCommand extends BaseCollableCommand {
+    private final JobsService jobsService;
 
-    @Autowired
-    private JobsService jobsService;
-
-    @Autowired
-    private RestApiService restApiService;
-
-    @CommandLine.Mixin
-    private SharedOptions sharedOptions;
+    public CreateApplicationCommand(RestApiService restApiService, JobsService jobsService) {
+        super(restApiService);
+        this.jobsService = jobsService;
+    }
 
     /**
      * options for the upload and job startup
@@ -70,7 +61,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
     private List<String> unmatchedOptions;
 
     @Override
-    public Integer call() {
+    public Integer doCall() {
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
@@ -81,8 +72,6 @@ public class CreateApplicationCommand implements Callable<Integer> {
         } catch (ApiCallException e) {
             return Constants.RETURN_LOGIN_ERROR;
         }
-
-        log.info("Create application command has triggered with log output = '{}'", sharedOptions.isVerbose());
 
         try {
             String nodeGuid = null;

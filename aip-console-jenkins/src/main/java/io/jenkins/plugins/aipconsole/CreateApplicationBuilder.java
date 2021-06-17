@@ -144,6 +144,9 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
             Guice.createInjector(new AipConsoleModule()).injectMembers(this);
         }
 
+        if (apiService != null) {
+            apiService.setVerbose(getDescriptor().configuration.isVerbose());
+        }
         String apiServerUrl = getAipConsoleUrl();
         String apiKey = Secret.toString(getApiKey());
         String username = getDescriptor().getAipConsoleUsername();
