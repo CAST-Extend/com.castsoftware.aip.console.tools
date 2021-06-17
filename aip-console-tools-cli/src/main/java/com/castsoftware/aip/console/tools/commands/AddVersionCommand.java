@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -13,9 +14,12 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
+import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
+import com.castsoftware.aip.console.tools.core.services.DebugOptionsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
+import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import lombok.Getter;
 import lombok.Setter;
@@ -130,25 +134,43 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--domain-name", paramLabel = "DOMAIN_NAME", description = "The name of the domain to assign to the application. Will be created if it doesn't exists. No domain will be assigned if left empty.")
     private String domainName;
 
+    /**
+     * Application debug options
+     */
+    @CommandLine.Option(names = {"-sql", "--show-sql"}
+            , description = "Enable or Desible application' Show Sql debug option (default: ${DEFAULT-VALUE})"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true"
+            , defaultValue = "false")
+    private boolean showSql;
+    @CommandLine.Option(names = {"-amt", "--amt-profiling"}
+            , description = "Enable or Desible application' AMT Profiling debug option (default: ${DEFAULT-VALUE})"
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true"
+            , defaultValue = "false")
+    private boolean amtProfiling;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
     @Override
     public Integer call() {
         ApiInfoDto apiInfo = null;
+        DebugOptionsService debugOptionsService;
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
             }
             restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
             apiInfo = restApiService.getAipConsoleApiInfo();
+            debugOptionsService = new DebugOptionsServiceImpl(restApiService, apiInfo);
         } catch (ApiKeyMissingException e) {
             return Constants.RETURN_NO_PASSWORD;
         } catch (ApiCallException e) {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
-        log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
+        log.info("AddVersion version command has triggered with log verbose mode = '{}'", sharedOptions.isVerbose());
+        log.info("[Debug options] Show Sql is '{}'", showSql);
+        log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
 
         if (StringUtils.isBlank(applicationName) && StringUtils.isBlank(applicationGuid)) {
             log.error("No application name or application guid provided. Exiting.");
@@ -200,6 +222,9 @@ public class AddVersionCommand implements Callable<Integer> {
                 builder.snapshotName(snapshotName);
             }
 
+            DebugOptionsDto oldDebugOptions = debugOptionsService.updateDebugOptions(applicationGuid,
+                    DebugOptionsDto.builder().showSql(showSql).activateAmtMemoryProfile(amtProfiling).build());
+
             String jobGuid = jobsService.startAddVersionJob(builder);
             // add a shutdown hook, to cancel the job
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
@@ -208,7 +233,13 @@ public class AddVersionCommand implements Callable<Integer> {
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             // Deregister the shutdown hook since the job is finished and we won't need to cancel it
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            DebugOptionsDto debugOptions = debugOptionsService.getDebugOptions(applicationGuid);
+            debugOptionsService.resetDebugOptions(applicationGuid, oldDebugOptions);
             if (JobState.COMPLETED == jobStatus.getState()) {
+                if (debugOptions.isActivateAmtMemoryProfile()) {
+                    log.info("[Debug options] Amt Profiling file download URL: {}",
+                            sharedOptions.getFullServerRootUrl() + ApiEndpointHelper.getAmtProfilingDownloadUrl(applicationGuid));
+                }
                 log.info("Job completed successfully.");
                 return Constants.RETURN_OK;
             }
