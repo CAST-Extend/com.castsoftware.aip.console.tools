@@ -28,7 +28,7 @@ public class AnalyzeAction extends BaseAction implements RunAction2 {
     public AnalyzeAction(@CheckForNull String applicationName) {
         this.applicationName = applicationName;
     }
-
+    
     @CheckForNull
     public String getApplicationName() {
         return applicationName;
