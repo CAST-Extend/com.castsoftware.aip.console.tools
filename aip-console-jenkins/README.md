@@ -38,13 +38,28 @@ To configure the AIP Console plugin, go to the "Configure System" page in the "M
 
 On this page, go to the **AIP Console global configuration** section and enter the following required elements :
 
-* *AIP Console URL* : The URL to access the AIP Console server. Make sure that this address is accessible from the Jenkins Server and the Jenkins Node that might run the plugin as well.
+* *AIP Console URL* : The URL to access the AIP Console server. Make sure that this address is accessible from the
+  Jenkins Server and the Jenkins Node that might run the plugin as well.
 * *API Key* : The API key that will be used to authenticate to AIP Console.
 * *Timeout* : A global timeout setting in seconds before calls to AIP Console will be considered in error.
-* *verbose* : If it's checked then AIP Console log output will be display on screen. To hide major information keep
-  this unchecked.
+* *verbose* : If it's checked then AIP Console log output will be display on screen. To hide major information keep this
+  unchecked.
 
 ![log-output](./doc/images/log-output.png)
+
+#### Using different AIP Console URL and API Key
+
+In case the Job needs to target different AIP Console URL and use a different API Key, it's still possible. To do so,
+proceed as follows.
+
+* Create dedicated Job as describe in the next section
+* Expand the "Advanced Settings" section and fill fields with desired values.
+  ![custom_URL_ApiKey](./doc/images/custom_URL_ApiKey.png)
+
+##### Precedence rule
+
+* The value used for AIP Console URL and API Key is always coming from the Job itself when assigned.
+* If one field is not assigned then the one from the *Global Configuration* will be used.
 
 ### Quick Start
 

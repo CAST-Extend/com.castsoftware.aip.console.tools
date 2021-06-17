@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
  * Action for the Create Application step
  * Stores the application name
  */
-public class CreateApplicationAction implements RunAction2 {
+public class CreateApplicationAction extends BaseAction implements RunAction2 {
     private Run run;
     private String applicationName;
     private boolean failureIgnored = false;
@@ -21,6 +21,7 @@ public class CreateApplicationAction implements RunAction2 {
     private String nodeName;
     @Nullable
     private String domainName;
+
 
     public Run getRun() {
         return run;
