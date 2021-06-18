@@ -21,6 +21,7 @@ import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -123,6 +124,11 @@ public class AddVersionCommand implements Callable<Integer> {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean backupEnabled = false;
 
+    @CommandLine.Option(names = {"--blueprint"}
+            , description = "Add blueprint objective to the objectives list (default: ${DEFAULT-VALUE})."
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", defaultValue = "false")
+    private boolean blueprint;
+
     /**
      * Name of the backup
      */
@@ -214,10 +220,12 @@ public class AddVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
-
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null, cloneVersion);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
+            }
+            if (blueprint) {
+                builder.objectives(VersionObjective.BLUEPRINT);
             }
 
             if (StringUtils.isNotBlank(snapshotName)) {
