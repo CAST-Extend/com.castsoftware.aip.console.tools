@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-public class AnalyzeAction implements RunAction2 {
+public class AnalyzeAction extends BaseAction implements RunAction2 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AnalyzeAction.class);
 
     @CheckForNull
@@ -28,7 +28,7 @@ public class AnalyzeAction implements RunAction2 {
     public AnalyzeAction(@CheckForNull String applicationName) {
         this.applicationName = applicationName;
     }
-
+    
     @CheckForNull
     public String getApplicationName() {
         return applicationName;
