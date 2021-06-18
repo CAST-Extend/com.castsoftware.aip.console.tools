@@ -71,8 +71,11 @@ The application will be created on AIP Console after you've run the Jenkins Job.
 
 The `Add Application Version to AIP Console` will create a new version of an application, run an analysis and create a
 snapshot of that analysis.
+* You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
+  To do so, check the following option checkbox in the "advanced settings" section
+  ![blueprint_objective](./doc/images/blueprint_objective.png)
 
-This step requires the following :
+  This step requires the following :
 
 * An application name for which a new version will be created. <u>This application must exist in AIP Console</u>.
 * A path to a zip or tgz archive file to upload (**NOTE**: you can also provide a folder path; more details in the
@@ -93,6 +96,10 @@ This version and the snapshot can be found in the Application's page in AIP Cons
 
 The `Deliver Source Code to AIP Console` step is similar to the Add version step above.
 
+* You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
+  To do so, check the following option checkbox in the "advanced settings" section
+  ![blueprint_objective](./doc/images/blueprint_objective.png)
+  
 It requires the following :
 
 * An application name for which a new version will be created. <u>This application must exist in AIP Console</u>.

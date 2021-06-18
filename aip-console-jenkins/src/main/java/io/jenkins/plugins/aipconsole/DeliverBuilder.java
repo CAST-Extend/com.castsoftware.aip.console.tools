@@ -20,6 +20,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -121,6 +122,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
 
     private boolean autoDiscover = true;
     private boolean setAsCurrent = false;
+    private boolean blueprint = false;
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
@@ -190,6 +192,19 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
 
     public boolean getSetAsCurrent() {
         return isSetAsCurrent();
+    }
+
+    @DataBoundSetter
+    public void setBlueprint(boolean blueprint) {
+        this.blueprint = blueprint;
+    }
+
+    public boolean getBlueprint() {
+        return isBlueprint();
+    }
+
+    public boolean isBlueprint() {
+        return blueprint;
     }
 
     @DataBoundSetter
@@ -293,7 +308,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
-        boolean applicationHasVersion = this.cloneVersion;
+        boolean applicationHasVersion = cloneVersion;
         boolean isUpload = false;
 
         String errorMessage;
@@ -498,7 +513,7 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
                 resolvedVersionName = String.format("v%s", formatVersionName.format(new Date()));
             }
 
-            if (this.cloneVersion) {
+            if (cloneVersion) {
                 if (applicationHasVersion) {
                     log.println(DeliverBuilder_Deliver_info_startDeliverCloneJob(expandedAppName));
                 } else {
@@ -518,6 +533,10 @@ public class DeliverBuilder extends Builder implements SimpleBuildStep {
 
             if (inplaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
+            }
+            
+            if (isBlueprint()) {
+                requestBuilder.objectives(VersionObjective.BLUEPRINT);
             }
 
             log.println("Exclusion patterns : " + exclusionPatterns);

@@ -19,6 +19,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -115,6 +116,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
 
     @Nullable
     private String snapshotName = "";
+    private boolean blueprint = false;
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -154,6 +156,19 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setAutoCreate(boolean autoCreate) {
         this.autoCreate = autoCreate;
+    }
+
+    @DataBoundSetter
+    public void setBlueprint(boolean blueprint) {
+        this.blueprint = blueprint;
+    }
+
+    public boolean getBlueprint() {
+        return isBlueprint();
+    }
+
+    public boolean isBlueprint() {
+        return blueprint;
     }
 
     public boolean isCloneVersion() {
@@ -269,7 +284,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
-        boolean applicationHasVersion = this.cloneVersion;
+        boolean applicationHasVersion = cloneVersion;
         boolean isUpload = false;
 
         String errorMessage;
@@ -472,7 +487,7 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 resolvedVersionName = String.format("v%s", formatVersionName.format(new Date()));
             }
 
-            if (this.cloneVersion) {
+            if (cloneVersion) {
                 if (applicationHasVersion) {
                     log.println(AddVersionBuilder_AddVersion_info_startCloneVersionJob(variableAppName));
                 } else {
@@ -494,6 +509,9 @@ public class AddVersionBuilder extends Builder implements SimpleBuildStep {
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
             }
 
+            if (isBlueprint()) {
+                requestBuilder.objectives(VersionObjective.BLUEPRINT);
+            }
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
             }
