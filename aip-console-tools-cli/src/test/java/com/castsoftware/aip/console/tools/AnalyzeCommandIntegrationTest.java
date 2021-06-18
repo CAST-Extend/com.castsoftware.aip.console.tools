@@ -20,6 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import picocli.CommandLine;
@@ -43,7 +44,7 @@ import static org.mockito.Mockito.when;
 public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     @Autowired
     private AnalyzeCommand analyzeCommand;
-    @Mock
+    @MockBean
     private DebugOptionsService debugOptionsService;
 
     @Override

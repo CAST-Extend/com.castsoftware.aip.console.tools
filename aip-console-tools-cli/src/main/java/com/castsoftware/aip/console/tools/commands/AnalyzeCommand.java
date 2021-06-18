@@ -23,6 +23,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -89,6 +90,9 @@ public class AnalyzeCommand implements Callable<Integer> {
             , defaultValue = "false")
     private boolean amtProfiling;
 
+    @Autowired
+    private DebugOptionsService debugOptionsService;
+
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
@@ -114,7 +118,6 @@ public class AnalyzeCommand implements Callable<Integer> {
         }
         String applicationGuid;
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
-        DebugOptionsService debugOptionsService = new DebugOptionsServiceImpl(restApiService, apiInfoDto);
 
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);

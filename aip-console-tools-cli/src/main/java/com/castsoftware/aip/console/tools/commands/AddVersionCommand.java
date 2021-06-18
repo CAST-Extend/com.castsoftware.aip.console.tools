@@ -25,6 +25,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -151,17 +152,18 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
+    @Autowired
+    DebugOptionsService debugOptionsService;
+
     @Override
     public Integer call() {
         ApiInfoDto apiInfo = null;
-        DebugOptionsService debugOptionsService;
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
             }
             restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
             apiInfo = restApiService.getAipConsoleApiInfo();
-            debugOptionsService = new DebugOptionsServiceImpl(restApiService, apiInfo);
         } catch (ApiKeyMissingException e) {
             return Constants.RETURN_NO_PASSWORD;
         } catch (ApiCallException e) {
