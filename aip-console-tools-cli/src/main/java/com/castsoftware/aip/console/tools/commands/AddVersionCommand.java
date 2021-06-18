@@ -235,6 +235,7 @@ public class AddVersionCommand implements Callable<Integer> {
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             // Deregister the shutdown hook since the job is finished and we won't need to cancel it
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
+
             DebugOptionsDto debugOptions = debugOptionsService.getDebugOptions(applicationGuid);
             debugOptionsService.resetDebugOptions(applicationGuid, oldDebugOptions);
             if (JobState.COMPLETED == jobStatus.getState()) {
@@ -245,7 +246,6 @@ public class AddVersionCommand implements Callable<Integer> {
                 log.info("Job completed successfully.");
                 return Constants.RETURN_OK;
             }
-
 
             log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
             return Constants.RETURN_JOB_FAILED;
