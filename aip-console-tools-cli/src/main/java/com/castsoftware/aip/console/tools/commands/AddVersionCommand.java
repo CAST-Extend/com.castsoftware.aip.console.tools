@@ -14,6 +14,8 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
+import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
+import com.castsoftware.aip.console.tools.core.services.DebugOptionsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
@@ -23,6 +25,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -149,6 +152,9 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
+    @Autowired
+    DebugOptionsService debugOptionsService;
+
     @Override
     public Integer call() {
         ApiInfoDto apiInfo = null;
@@ -164,7 +170,7 @@ public class AddVersionCommand implements Callable<Integer> {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
-        log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
+        log.info("AddVersion version command has triggered with log verbose mode = '{}'", sharedOptions.isVerbose());
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
 
@@ -218,16 +224,8 @@ public class AddVersionCommand implements Callable<Integer> {
                 builder.snapshotName(snapshotName);
             }
 
-            //==============
-            // Ony set debug option when ON. Run Analysis always consider these options as OFF(disabled)
-            //==============
-            DebugOptionsDto oldDebugOptions = applicationService.getDebugOptions(applicationGuid);
-            if (showSql) {
-                applicationService.updateShowSqlDebugOption(applicationGuid, showSql);
-            }
-            if (amtProfiling) {
-                applicationService.updateAmtProfileDebugOption(applicationGuid, amtProfiling);
-            }
+            DebugOptionsDto oldDebugOptions = debugOptionsService.updateDebugOptions(applicationGuid,
+                    DebugOptionsDto.builder().showSql(showSql).activateAmtMemoryProfile(amtProfiling).build());
 
             String jobGuid = jobsService.startAddVersionJob(builder);
             // add a shutdown hook, to cancel the job
@@ -237,8 +235,9 @@ public class AddVersionCommand implements Callable<Integer> {
             JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             // Deregister the shutdown hook since the job is finished and we won't need to cancel it
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
-            DebugOptionsDto debugOptions = applicationService.getDebugOptions(applicationGuid);
-            applicationService.resetDebugOptions(applicationGuid, oldDebugOptions);
+
+            DebugOptionsDto debugOptions = debugOptionsService.getDebugOptions(applicationGuid);
+            debugOptionsService.resetDebugOptions(applicationGuid, oldDebugOptions);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 if (debugOptions.isActivateAmtMemoryProfile()) {
                     log.info("[Debug options] Amt Profiling file download URL: {}",
