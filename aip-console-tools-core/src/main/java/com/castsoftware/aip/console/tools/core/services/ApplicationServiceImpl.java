@@ -132,8 +132,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                 }
                 log.info(infoMessage);
 
-                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false);
-                return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null, logOutput);
+                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false, null);
+                return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null, logOutput);
             } catch (JobServiceException | ApiCallException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);
                 throw new ApplicationServiceException("Unable to create application automatically.", e);
@@ -162,26 +162,26 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public DebugOptionsDto getDebugOptions(String appGuid) throws ApplicationServiceException {
+    public DebugOptionsDto getDebugOptions(String appGuid) {
         try {
             return restApiService.getForEntity(ApiEndpointHelper.getDebugOptionsPath(appGuid), new TypeReference<DebugOptionsDto>() {
             });
         } catch (ApiCallException e) {
-            throw new ApplicationServiceException("Unable to retrieve the applications' debug options settings", e);
+            return DebugOptionsDto.builder().build();
         }
     }
 
     @Override
-    public void updateShowSqlDebugOption(String appGuid, boolean showSql) throws ApplicationServiceException {
+    public void updateShowSqlDebugOption(String appGuid, boolean showSql) {
         try {
             restApiService.putForEntity(ApiEndpointHelper.getDebugOptionShowSqlPath(appGuid), JsonDto.of(showSql), String.class);
         } catch (ApiCallException e) {
-            throw new ApplicationServiceException("Unable to update the application' Show Sql debug option", e);
+            //log.log(Level.SEVERE, e.getMessage());
         }
     }
 
     @Override
-    public void updateAmtProfileDebugOption(String appGuid, boolean amtProfile) throws ApplicationServiceException {
+    public void updateAmtProfileDebugOption(String appGuid, boolean amtProfile) {
         try {
             //--------------------------------------------------------------
             //The PUT shouldn't returned anything than void.class, but doing so clashed as object mapper is trying to map
@@ -190,12 +190,12 @@ public class ApplicationServiceImpl implements ApplicationService {
             //--------------------------------------------------------------
             restApiService.putForEntity(ApiEndpointHelper.getDebugOptionAmtProfilePath(appGuid), JsonDto.of(amtProfile), String.class);
         } catch (ApiCallException e) {
-            throw new ApplicationServiceException("Unable to update the application' AMT Profiling debug option", e);
+            //log.log(Level.SEVERE, e.getMessage());
         }
     }
 
     @Override
-    public void resetDebugOptions(String appGuid, DebugOptionsDto debugOptionsDto) throws ApplicationServiceException {
+    public void resetDebugOptions(String appGuid, DebugOptionsDto debugOptionsDto) {
         updateShowSqlDebugOption(appGuid, debugOptionsDto.isShowSql());
         updateAmtProfileDebugOption(appGuid, debugOptionsDto.isActivateAmtMemoryProfile());
     }

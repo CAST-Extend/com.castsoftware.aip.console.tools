@@ -81,6 +81,8 @@ public class Constants {
     public static final String PARAM_ENABLE_AUTO_DISCOVER = "extensionAutoConfigEnabled";
     public static final String PARAM_PROCESS_IMAGING = "processImaging";
     public static final String PARAM_UPLOAD_APPLICATION = "uploadApplication";
+    // CAIP header name for console v2
+    public static final String PARAM_CAIP_VERSION = "X-SC-LB-CAIP";
 
     // Job Step Names
     public static final String EXTRACT_STEP_NAME = "unzip_source";

@@ -14,7 +14,7 @@ import java.util.Map;
 @ToString
 public class CreateJobsRequest {
     private JobType jobType;
-    private Map<String, String> jobParameters = new HashMap<>();
+    private Map<String, Object> jobParameters = new HashMap<>();
 
     public JobType getJobType() {
         return jobType;
@@ -24,18 +24,18 @@ public class CreateJobsRequest {
         this.jobType = jobType;
     }
 
-    public Map<String, String> getJobParameters() {
+    public Map<String, Object> getJobParameters() {
         return jobParameters;
     }
 
     public String getParameterValueAsString(String key) {
         if (jobParameters.containsKey(key)) {
-            return jobParameters.get(key);
+            return String.valueOf(jobParameters.get(key));
         }
         return null;
     }
 
-    public void setJobParameters(Map<String, String> jobParameters) {
+    public void setJobParameters(Map<String, Object> jobParameters) {
         this.jobParameters = jobParameters;
     }
 }

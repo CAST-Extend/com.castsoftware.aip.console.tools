@@ -29,9 +29,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -53,7 +56,7 @@ public class JobsServiceImplTest {
     private static final String TEST_ZIP_NAME = "file.zip";
     private static final String TEST_VERSION_NAME = "versionName";
     private static final String TEST_JOB_GUID = "jobGuid";
-    private static final String DEFAULT_OBJECTIVES = "GLOBAL_RISK,FUNCTIONAL_POINTS";
+    private static final List<String> DEFAULT_OBJECTIVES = Arrays.asList("GLOBAL_RISK", "FUNCTIONAL_POINTS");
     private static final long TEST_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(1);
 
     @Mock
@@ -72,15 +75,15 @@ public class JobsServiceImplTest {
 
     @Test(expected = JobServiceException.class)
     public void testCreateApplicationMissingAppName() throws Exception {
-        service.startCreateApplication(null, false);
+        service.startCreateApplication(null, false, null);
         fail("Creating application null name should throw an exception");
     }
 
     @Test(expected = JobServiceException.class)
     public void testCreateApplicationCreateJobFailed() throws Exception {
-        Map<String, String> jobParams = new HashMap<>();
+        Map<String, Object> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
-        jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(false));
+    
         CreateJobsRequest expectedRequest = new CreateJobsRequest();
         expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
         expectedRequest.setJobParameters(jobParams);
@@ -89,44 +92,43 @@ public class JobsServiceImplTest {
                 .postForEntity(eq("/api/jobs"), eq(expectedRequest), eq(SuccessfulJobStartDto.class))
         ).thenThrow(new ApiCallException(500));
 
-        service.startCreateApplication(TEST_APP_NAME, false);
+        service.startCreateApplication(TEST_APP_NAME, false, "8.3.99");
         fail("Create application should have failed due to api call exception");
     }
 
     @Test
     public void testCreateApplicationOkWithUnzipStep() throws Exception {
-        Map<String, String> jobParams = new HashMap<>();
+        Map<String, Object> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, TEST_APP_NAME);
-        jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(false));
+        //jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(false));
+        //jobParams.put(Constants.PARAM_CAIP_VERSION, "8.3.99");
         CreateJobsRequest expectedRequest = new CreateJobsRequest();
         expectedRequest.setJobType(JobType.DECLARE_APPLICATION);
         expectedRequest.setJobParameters(jobParams);
         SuccessfulJobStartDto expectedResult = new SuccessfulJobStartDto();
-        expectedResult.setJobGuid(TEST_JOB_GUID);
-        expectedResult.setAppGuid(TEST_APP_GUID);
+        expectedResult.setGuid(TEST_JOB_GUID);
 
-        when(restApiService
-                .postForEntity(eq("/api/jobs"), eq(expectedRequest), eq(SuccessfulJobStartDto.class))
-        ).thenReturn(expectedResult);
+        doReturn(expectedResult).when(restApiService)
+                .postForEntity(eq("/api/jobs"), eq(expectedRequest), eq(SuccessfulJobStartDto.class));
 
-        String jobGuid = service.startCreateApplication(TEST_APP_NAME, false);
+        String jobGuid = service.startCreateApplication(TEST_APP_NAME, false, "8.3.99");
         assertEquals("Job guid should be the same as mocked guid returned", TEST_JOB_GUID, jobGuid);
     }
 
     @Test(expected = JobServiceException.class)
     public void testAddVersionMissingAppGuid() throws Exception {
-        service.startAddVersionJob(null, null, null, null, null, false);
+        service.startAddVersionJob(null, null, null, null, null, null, false);
         fail("Method call should have thrown an exception");
     }
 
     @Test(expected = JobServiceException.class)
     public void testAddVersionMissingZipFileName() throws Exception {
-        service.startAddVersionJob(TEST_APP_GUID, TEST_APP_NAME, null, null, null, false);
+        service.startAddVersionJob(TEST_APP_GUID, TEST_APP_NAME, null, null, null, null, false);
     }
 
     @Test(expected = JobServiceException.class)
     public void testAddVersionMissingVersionReleaseDate() throws Exception {
-        service.startAddVersionJob(TEST_APP_GUID, null, TEST_ZIP_NAME, null, null, false);
+        service.startAddVersionJob(TEST_APP_GUID, null, null, TEST_ZIP_NAME, null, null, false);
         fail("Method call should have thrown an exception");
     }
 
@@ -136,16 +138,14 @@ public class JobsServiceImplTest {
                 .postForEntity(anyString(), argThat(getCreateJobsRequestMatcher()), ArgumentMatchers.eq(SuccessfulJobStartDto.class))
         ).thenThrow(new ApiCallException(500));
 
-        service.startAddVersionJob(TEST_APP_GUID, TEST_APP_NAME, TEST_ZIP_NAME, TEST_VERSION_NAME, new Date(), false);
+        service.startAddVersionJob(TEST_APP_GUID, TEST_APP_NAME, null, TEST_ZIP_NAME, TEST_VERSION_NAME, new Date(), false);
         fail("Method call should have thrown an exception");
     }
 
     @Test(expected = JobServiceException.class)
     public void testAddVersionResumeJobFailed() throws Exception {
         SuccessfulJobStartDto dto = new SuccessfulJobStartDto();
-        dto.setAppGuid(TEST_APP_GUID);
-        dto.setJobGuid(TEST_JOB_GUID);
-        dto.setJobUrl("/api/jobs/" + TEST_JOB_GUID);
+        dto.setGuid(TEST_JOB_GUID);
         JobStatusWithSteps status = new JobStatusWithSteps();
         status.setState(JobState.STARTING);
 
@@ -171,16 +171,14 @@ public class JobsServiceImplTest {
                 .putForEntity(anyString(), ArgumentMatchers.any(ChangeJobStateRequest.class), ArgumentMatchers.eq(String.class))
         ).thenThrow(new ApiCallException(500));
 
-        service.startAddVersionJob(TEST_APP_GUID, TEST_APP_NAME, TEST_ZIP_NAME, TEST_VERSION_NAME, new Date(), false);
+        service.startAddVersionJob(TEST_APP_GUID, TEST_APP_NAME, null, TEST_ZIP_NAME, TEST_VERSION_NAME, new Date(), false);
         fail("Method call should have thrown an exception");
     }
 
     @Test
     public void testAddVersionCreateJobOk() throws Exception {
         SuccessfulJobStartDto dto = new SuccessfulJobStartDto();
-        dto.setAppGuid(TEST_APP_GUID);
-        dto.setJobGuid(TEST_JOB_GUID);
-        dto.setJobUrl("/api/jobs/" + TEST_JOB_GUID);
+        dto.setGuid(TEST_JOB_GUID);
         JobStatusWithSteps status = new JobStatusWithSteps();
         status.setState(JobState.STARTED);
 
@@ -189,7 +187,7 @@ public class JobsServiceImplTest {
         ).thenReturn(dto);
 
         try {
-            String jobGuid = service.startAddVersionJob(TEST_APP_GUID, TEST_APP_NAME, TEST_ZIP_NAME, TEST_VERSION_NAME, new Date(), false);
+            String jobGuid = service.startAddVersionJob(TEST_APP_GUID, TEST_APP_NAME, null, TEST_ZIP_NAME, TEST_VERSION_NAME, new Date(), false);
             assertEquals(dto.getJobGuid(), jobGuid);
         } catch (JobServiceException e) {
             log.log(Level.SEVERE, "JobServiceException : ", e);
@@ -235,7 +233,7 @@ public class JobsServiceImplTest {
 
     private ArgumentMatcher<CreateJobsRequest> getCreateJobsRequestMatcher() {
         return argument -> {
-            Map<String, String> jobParams = argument.getJobParameters();
+            Map<String, Object> jobParams = argument.getJobParameters();
             if (!(argument.getJobType() == JobType.ADD_VERSION)) {
                 log.severe("Wrong type : " + argument.getJobType());
                 return false;
@@ -244,11 +242,11 @@ public class JobsServiceImplTest {
                 log.severe("No job parameters !");
                 return false;
             }
-            if (!TEST_APP_GUID.equalsIgnoreCase(jobParams.get(Constants.PARAM_APP_GUID))) {
+            if (!TEST_APP_GUID.equalsIgnoreCase(jobParams.get(Constants.PARAM_APP_GUID).toString())) {
                 log.severe("Wrong app guid. Expected 'appGuid' but was " + jobParams.get(Constants.PARAM_APP_GUID));
                 return false;
             }
-            if (!DEFAULT_OBJECTIVES.equalsIgnoreCase(jobParams.get(Constants.PARAM_VERSION_OBJECTIVES))) {
+            if (!DEFAULT_OBJECTIVES.containsAll((Collection<?>) jobParams.get(Constants.PARAM_VERSION_OBJECTIVES))) {
                 log.severe("Wrong version objectives. Expected 'GLOBAL_RISK,FUNCTIONAL_POINTS' but was " + jobParams.get(Constants.PARAM_VERSION_OBJECTIVES));
                 return false;
             }

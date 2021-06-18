@@ -19,7 +19,7 @@ public interface JobsService {
      * @return The job GUID on AIP Console
      * @throws JobServiceException If an error occurs while starting the job
      */
-    String startCreateApplication(String applicationName, boolean inplaceMode) throws JobServiceException;
+    String startCreateApplication(String applicationName, boolean inplaceMode, String caipVersion) throws JobServiceException;
 
     /**
      * Start the "Create application" job, which will create a new application on the target AIP Console instance
@@ -30,7 +30,7 @@ public interface JobsService {
      * @return The job GUID on AIP Console
      * @throws JobServiceException If an error occurs while starting the job
      */
-    String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode) throws JobServiceException;
+    String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode, String caipVersion) throws JobServiceException;
 
     /**
      * Start the "Create application" job, which will create a new application on the target AIP Console instance
@@ -43,7 +43,7 @@ public interface JobsService {
      * @return The job GUID on AIP Console
      * @throws JobServiceException If an error occurs while starting the job
      */
-    String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode) throws JobServiceException;
+    String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion) throws JobServiceException;
 
     /**
      * Start the "Create Version" job, which will create a new version for an application on AIP Console
@@ -56,7 +56,7 @@ public interface JobsService {
      * @return The GUID of the job that was started on AIP Console
      * @throws JobServiceException IF any error occurs while starting the job
      */
-    String startAddVersionJob(String appGuid, String applicationName, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion) throws JobServiceException;
+    String startAddVersionJob(String appGuid, String applicationName, String caipVersion, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion) throws JobServiceException;
 
     /**
      * Start the "Create Version" job, which will create a new version for an application on AIP Console
@@ -70,8 +70,8 @@ public interface JobsService {
      * @return The GUID of the job that was started on AIP Console
      * @throws JobServiceException IF any error occurs while starting the job
      */
-    String startAddVersionJob(String appGuid, String applicationName, String fileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow) throws JobServiceException;
-    
+    String startAddVersionJob(String appGuid, String applicationName, String caipVersion, String fileName, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow) throws JobServiceException;
+
     String startAddVersionJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException;
 
     /**

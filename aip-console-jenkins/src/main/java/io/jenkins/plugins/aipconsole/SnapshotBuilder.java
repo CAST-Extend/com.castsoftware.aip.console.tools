@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -188,8 +189,11 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
         EnvVars vars = run.getEnvironment(listener);
 
         String expandedAppName = vars.expand(applicationName);
+        String caipVersion = null;
         try {
-            applicationGuid = applicationService.getApplicationGuidFromName(expandedAppName);
+            ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
+            applicationGuid = app.getGuid();
+            caipVersion = app.getCaipVersion();
         } catch (ApplicationServiceException e) {
             listener.error(SnapshotBuilder_Snapshot_error_appGuid());
             e.printStackTrace(listener.getLogger());
@@ -220,7 +224,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
                 resolveSnapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
-            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
+            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, caipVersion)
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
                     .versionGuid(versionToAnalyze.getGuid())
                     .versionName(versionToAnalyze.getName())
@@ -270,7 +274,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
         return jobsService.pollAndWaitForJobFinished(jobGuid,
                 jobStatusWithSteps -> log.println(
                         jobStatusWithSteps.getAppName() + " - " +
-                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
+                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
                 JobStatus::getState);

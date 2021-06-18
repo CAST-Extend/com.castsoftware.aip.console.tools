@@ -38,11 +38,13 @@ public class JobRequestBuilder {
     private boolean autoDiscover = true;
     private boolean uploadApplication = false;
     private boolean processImaging = false;
+    private String caipVersion;
 
-    private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType) {
+    private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType, String caipVersion) {
         this.appGuid = appGuid;
         this.sourcePath = sourcePath;
         this.jobType = jobType;
+        this.caipVersion = caipVersion;
         this.startStep = Constants.EXTRACT_STEP_NAME;
         this.endStep = Constants.CONSOLIDATE_SNAPSHOT;
         this.objectives.add(GLOBAL_RISK_OBJECTIVE);
@@ -156,8 +158,8 @@ public class JobRequestBuilder {
         return this;
     }
 
-    private Map<String, String> getJobParameters() {
-        Map<String, String> parameters = new HashMap<>();
+    private Map<String, Object> getJobParameters() {
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put(Constants.PARAM_APP_GUID, this.appGuid);
         parameters.put(Constants.PARAM_VERSION_NAME, this.versionName);
         if (StringUtils.isNotBlank(sourcePath)) {
@@ -174,10 +176,11 @@ public class JobRequestBuilder {
         parameters.put(Constants.PARAM_START_STEP, startStep);
         parameters.put(Constants.PARAM_END_STEP, endStep);
         parameters.put(Constants.PARAM_IGNORE_CHECK, Boolean.toString(ignoreCheck));
-        parameters.put(Constants.PARAM_VERSION_OBJECTIVES, String.join(",", objectives));
+        parameters.put(Constants.PARAM_VERSION_OBJECTIVES, objectives);
         parameters.put(Constants.PARAM_RELEASE_DATE, releaseDateStr);
         parameters.put(Constants.PARAM_ENABLE_AUTO_DISCOVER, Boolean.toString(autoDiscover));
         parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
+        parameters.put(Constants.PARAM_CAIP_VERSION, caipVersion);
         if (StringUtils.isBlank(snapshotDateStr)) {
             parameters.put(Constants.PARAM_SNAPSHOT_CAPTURE_DATE, releaseDateStr);
         } else {
@@ -214,7 +217,7 @@ public class JobRequestBuilder {
         return jobRequest;
     }
 
-    public static JobRequestBuilder newInstance(String appGuid, String sourcePath, JobType jobType) {
-        return new JobRequestBuilder(appGuid, sourcePath, jobType);
+    public static JobRequestBuilder newInstance(String appGuid, String sourcePath, JobType jobType, String caipVersion) {
+        return new JobRequestBuilder(appGuid, sourcePath, jobType, caipVersion);
     }
 }

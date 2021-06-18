@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
@@ -117,11 +118,12 @@ public class AnalyzeCommand implements Callable<Integer> {
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
-            applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
-            if (StringUtils.isBlank(applicationGuid)) {
+            ApplicationDto app = applicationService.getApplicationFromName(applicationName);
+            if (app == null || StringUtils.isEmpty(app.getGuid())) {
                 log.error("Application '{}' was not found on AIP Console", applicationName);
                 return Constants.RETURN_APPLICATION_NOT_FOUND;
             }
+            applicationGuid = app.getGuid();
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             if (versions.isEmpty()) {
                 log.error("No version for the given application. Make sure at least one version has been delivered");
@@ -148,7 +150,7 @@ public class AnalyzeCommand implements Callable<Integer> {
             // Deploy if auto deploy is true AND version to analyze has status DELIVERED (otherwise just do analysis)
             boolean deployFirst = versionToAnalyze.getStatus() == VersionStatus.DELIVERED;
 
-            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
+            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, app.getCaipVersion())
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {

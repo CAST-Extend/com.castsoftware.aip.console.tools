@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -29,6 +30,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -162,6 +164,8 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
 
         String expandedAppName = run.getEnvironment(listener).expand(applicationName);
         String expandedDomainName = run.getEnvironment(listener).expand(domainName);
+        String expandedNodeName = run.getEnvironment(listener).expand(nodeName);
+
 
         try {
             // update timeout of HTTP Client if different from default
@@ -176,8 +180,18 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
                 apiService.validateUrlAndKey(apiServerUrl, apiKey);
             }
 
+            String nodeGuid = null;
+            if (StringUtils.isNotBlank(expandedNodeName)) {
+                NodeDto[] nodes = apiService.getForEntity("/api/nodes", NodeDto[].class);
+                nodeGuid = Arrays.stream(nodes)
+                        .filter(node -> StringUtils.equalsIgnoreCase(nodeName, node.getName()))
+                        .map(NodeDto::getGuid)
+                        .findFirst()
+                        .orElse(null);
+            }
+
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
-            String createJobGuid = jobsService.startCreateApplication(expandedAppName, null, expandedDomainName, inPlaceMode);
+            String createJobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null);
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
             Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
                     logContentDto -> {
@@ -185,7 +199,7 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
                     };
 
             JobState endState = jobsService.pollAndWaitForJobFinished(createJobGuid,
-                    jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                    jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                     pollingCallback,
                     jobStatusWithSteps -> {
                         applicationGuid = jobStatusWithSteps.getAppGuid();
