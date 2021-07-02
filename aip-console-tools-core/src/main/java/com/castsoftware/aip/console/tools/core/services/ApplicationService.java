@@ -1,9 +1,8 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
@@ -88,4 +87,19 @@ public interface ApplicationService {
      * @return
      */
     String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns, boolean rescan) throws JobServiceException, PackagePathInvalidException;
+
+    /**
+     * Get the existing {@code }debug options} settings
+     *
+     * @param appGuid host application
+     * @return debug options
+     * @throws ApplicationServiceException
+     */
+    DebugOptionsDto getDebugOptions(String appGuid) throws ApplicationServiceException;
+
+    void updateShowSqlDebugOption(String appGuid, boolean showSql) throws ApplicationServiceException;
+
+    void updateAmtProfileDebugOption(String appGuid, boolean amtProfile) throws ApplicationServiceException;
+
+    void resetDebugOptions(String appGuid, DebugOptionsDto debugOptionsDto) throws ApplicationServiceException;
 }
