@@ -76,6 +76,7 @@ public class Constants {
     public static final String PARAM_BACKUP_ENABLED = "backupApplication";
     public static final String PARAM_BACKUP_NAME = "backupName";
     public static final String PARAM_VERSION_GUID = "versionGuid";
+    public static final String PARAM_FROM_VERSION_GUID = "fromVersionGuid";
     public static final String PARAM_SNAPSHOT_NAME = "snapshotName";
     public static final String PARAM_DELIVERY_CONFIG_GUID = "deliveryConfigGuid";
     public static final String PARAM_ENABLE_AUTO_DISCOVER = "extensionAutoConfigEnabled";

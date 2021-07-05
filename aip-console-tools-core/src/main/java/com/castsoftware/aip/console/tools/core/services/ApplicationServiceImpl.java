@@ -42,7 +42,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     public ApplicationServiceImpl(RestApiService restApiService, JobsService jobsService) {
         this.restApiService = restApiService;
-        this.jobService = jobsService;
+        jobService = jobsService;
     }
 
     @Override
@@ -84,6 +84,13 @@ public class ApplicationServiceImpl implements ApplicationService {
         Set<VersionDto> appVersions = getApplicationVersion(applicationGuid);
         return appVersions != null &&
                 !appVersions.isEmpty();
+    }
+
+    @Override
+    public String getApplicationVersionGuidFromName(String applicationGuid, String fromVersionName) throws ApplicationServiceException {
+        Set<VersionDto> appVersions = getApplicationVersion(applicationGuid);
+        Optional<VersionDto> versionDto = appVersions.stream().filter(v -> v.getName().equalsIgnoreCase(fromVersionName)).findFirst();
+        return versionDto.isPresent() ? versionDto.get().getGuid() : null;
     }
 
     @Override

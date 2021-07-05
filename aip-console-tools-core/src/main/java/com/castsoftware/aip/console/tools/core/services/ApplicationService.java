@@ -29,6 +29,14 @@ public interface ApplicationService {
     boolean applicationHasVersion(String applicationGuid) throws ApplicationServiceException;
 
     /**
+     * @param applicationGuid host application GUID
+     * @param fromVersionName the version nae that Guid should be retrieved.
+     * @return the version GUID is exists otherwise null
+     * @throws ApplicationServiceException
+     */
+    String getApplicationVersionGuidFromName(String applicationGuid, String fromVersionName) throws ApplicationServiceException;
+
+    /**
      * Retrieve an application's GUID from the given application name.
      * <p/>
      * If the "autoCreate" parameter is true and the application doesn't exist on AIP Console, it'll automatically create it
