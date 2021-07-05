@@ -115,6 +115,7 @@ public class AddVersionBuilderTest {
         project = jenkins.configRoundtrip(project);
         AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
         job.setDomainName("");
+        job.setFromVersion("");
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
 

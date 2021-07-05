@@ -23,6 +23,9 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     @Nullable
     private String versionName;
+    @Nullable
+    private String fromVersion;
+    
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     @Nullable
@@ -104,6 +107,15 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     public void setVersionName(@Nullable String versionName) {
         this.versionName = versionName;
+    }
+
+    @Nullable
+    public String getFromVersion() {
+        return fromVersion;
+    }
+
+    public void setFromVersion(@Nullable String fromVersion) {
+        this.fromVersion = fromVersion;
     }
 
     public boolean isFailureIgnored() {
