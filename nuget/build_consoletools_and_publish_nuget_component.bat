@@ -114,6 +114,7 @@ if not defined VERSION (
     @echo ERROR: Cannot retrieve version from pom file: %ACTOOLSDIR%\pom.xml
     goto endclean
 )
+set VERSION=%VERSION:-SNAPSHOT=%
 @echo Version is:%VERSION%
 set ID=com.castsoftware.aip.console.tools
 
