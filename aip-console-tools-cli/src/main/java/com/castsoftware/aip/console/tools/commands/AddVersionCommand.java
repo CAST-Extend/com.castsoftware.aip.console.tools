@@ -15,7 +15,6 @@ import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidExce
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
-import com.castsoftware.aip.console.tools.core.services.DebugOptionsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
@@ -84,6 +83,10 @@ public class AddVersionCommand implements Callable<Integer> {
      */
     @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION_NAME", description = "The name of the version to create")
     private String versionName;
+
+    @CommandLine.Option(names = {"-from-v", "--from-version-name"}, paramLabel = "FROM_VERSION_NAME", description = "The name of the version to copy from when clone or rescan is operating.",
+            required = false)
+    private String fromVersionName;
 
     @CommandLine.Option(names = "--snapshot-name", paramLabel = "SNAPSHOT_NAME", description = "The name of the snapshot to generate")
     private String snapshotName;
@@ -212,7 +215,6 @@ public class AddVersionCommand implements Callable<Integer> {
 
             // check that the application actually has versions, otherwise it's just an add version job
             boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
-
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
@@ -227,7 +229,11 @@ public class AddVersionCommand implements Callable<Integer> {
             if (blueprint) {
                 builder.objectives(VersionObjective.BLUEPRINT);
             }
-
+            if (cloneVersion && StringUtils.isNotEmpty(fromVersionName)) {
+                String fromVersionGuid = applicationService.getApplicationVersionGuidFromName(applicationGuid, fromVersionName);
+                log.info("Clone version {} copied from {} with GUID {}", versionName, fromVersionName, fromVersionGuid);
+                builder.fromVersionGuid(fromVersionGuid);
+            }
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);
             }

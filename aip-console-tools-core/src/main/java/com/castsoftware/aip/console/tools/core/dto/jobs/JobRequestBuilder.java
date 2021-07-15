@@ -24,6 +24,7 @@ public class JobRequestBuilder {
     private JobType jobType;
     private String nodeGuid;
     private String versionName;
+    private String fromVersionGuid;
     private String versionGuid;
     private String startStep;
     private String endStep;
@@ -64,6 +65,13 @@ public class JobRequestBuilder {
     public JobRequestBuilder versionName(String versionName) {
         if (StringUtils.isNotBlank(versionName)) {
             this.versionName = versionName;
+        }
+        return this;
+    }
+
+    public JobRequestBuilder fromVersionGuid(String fromVersionGuid) {
+        if (StringUtils.isNotBlank(fromVersionGuid)) {
+            this.fromVersionGuid = fromVersionGuid;
         }
         return this;
     }
@@ -176,6 +184,9 @@ public class JobRequestBuilder {
         }
         if (StringUtils.isNotBlank(versionGuid)) {
             parameters.put(Constants.PARAM_VERSION_GUID, versionGuid);
+        }
+        if (StringUtils.isNotBlank(fromVersionGuid)) {
+            parameters.put(Constants.PARAM_FROM_VERSION_GUID, fromVersionGuid);
         }
         parameters.put(Constants.PARAM_START_STEP, startStep);
         parameters.put(Constants.PARAM_END_STEP, endStep);

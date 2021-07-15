@@ -104,6 +104,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     private boolean cloneVersion = false;
     @Nullable
     private String versionName = "";
+    @Nullable
+    private String fromVersion = "";
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean failureIgnored = false;
     @Nullable
@@ -228,6 +230,16 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     @DataBoundSetter
     public void setVersionName(@Nullable String versionName) {
         this.versionName = versionName;
+    }
+
+    @Nullable
+    public String getFromVersion() {
+        return fromVersion;
+    }
+
+    @DataBoundSetter
+    public void setFromVersion(@Nullable String fromVersion) {
+        this.fromVersion = fromVersion;
     }
 
     public boolean isFailureIgnored() {
@@ -532,11 +544,13 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             if (inplaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
-            
             if (isBlueprint()) {
                 requestBuilder.objectives(VersionObjective.BLUEPRINT);
             }
 
+            if (cloneVersion && StringUtils.isNotEmpty(fromVersion)) {
+                requestBuilder.fromVersionGuid(applicationService.getApplicationVersionGuidFromName(applicationGuid, vars.expand(fromVersion)));
+            }
             log.println("Exclusion patterns : " + exclusionPatterns);
             requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns, applicationHasVersion));
 

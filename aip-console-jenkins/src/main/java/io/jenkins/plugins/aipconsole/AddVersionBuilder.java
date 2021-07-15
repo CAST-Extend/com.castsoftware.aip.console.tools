@@ -100,6 +100,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
     @Nullable
     private String versionName = "";
+    @Nullable
+    private String fromVersion = "";
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean failureIgnored = false;
     @Nullable
@@ -186,6 +188,16 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setVersionName(@Nullable String versionName) {
         this.versionName = versionName;
+    }
+
+    @Nullable
+    public String getFromVersion() {
+        return fromVersion;
+    }
+
+    @DataBoundSetter
+    public void setFromVersion(@Nullable String fromVersion) {
+        this.fromVersion = fromVersion;
     }
 
     public boolean isFailureIgnored() {
@@ -510,6 +522,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             if (isBlueprint()) {
                 requestBuilder.objectives(VersionObjective.BLUEPRINT);
             }
+            if (cloneVersion && StringUtils.isNotEmpty(fromVersion)) {
+                requestBuilder.fromVersionGuid(applicationService.getApplicationVersionGuidFromName(applicationGuid, vars.expand(fromVersion)));
+            }
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
             }
@@ -525,7 +540,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 log.println(AddVersionBuilder_AddVersion_success_analysisComplete());
                 run.setResult(Result.SUCCESS);
             }
-        } catch (JobServiceException e) {
+        } catch (JobServiceException | ApplicationServiceException e) {
             // Should we check if the original cause is an InterruptedException and attempt to cancel the job ?
             if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
                 if (jobGuid != null) {

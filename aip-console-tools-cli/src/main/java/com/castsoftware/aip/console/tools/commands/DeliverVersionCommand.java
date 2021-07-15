@@ -70,6 +70,12 @@ public class DeliverVersionCommand implements Callable<Integer> {
             description = "The name of the version to create")
     private String versionName;
 
+    @CommandLine.Option(names = {"-from-v", "--from-version-name"},
+            paramLabel = "FROM_VERSION_NAME",
+            description = "The name of the version to copy from when clone or rescan is operating.",
+            required = false)
+    private String fromVersionName;
+
     // Hiding this, to avoid breaking commands already using it
     // Analyze command will automatically set as current when starting so it's unnecessary
     @CommandLine.Option(names = {"-d", "--auto-deploy"},
@@ -215,6 +221,11 @@ public class DeliverVersionCommand implements Callable<Integer> {
             }
             if (blueprint) {
                 builder.objectives(VersionObjective.BLUEPRINT);
+            }
+            if (cloneVersion && StringUtils.isNotEmpty(fromVersionName)) {
+                String fromVersionGuid = applicationService.getApplicationVersionGuidFromName(applicationGuid, fromVersionName);
+                log.info("Clone version {} copied from {} with GUID {}", versionName, fromVersionName, fromVersionGuid);
+                builder.fromVersionGuid(fromVersionGuid);
             }
 
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns, cloneVersion);
