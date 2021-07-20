@@ -52,23 +52,23 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startCreateApplication(String applicationName, boolean inplaceMode) throws JobServiceException {
+    public String startCreateApplication(String applicationName, boolean inplaceMode, String caipVersion) throws JobServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new JobServiceException("Application name is empty. Unable to create application");
         }
-        return startCreateApplication(applicationName, null, inplaceMode);
+        return startCreateApplication(applicationName, null, inplaceMode, caipVersion);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode) throws JobServiceException {
-        return startCreateApplication(applicationName, nodeGuid, null, inplaceMode);
+    public String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode, String caipVersion) throws JobServiceException {
+        return startCreateApplication(applicationName, nodeGuid, null, inplaceMode, caipVersion);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode) throws JobServiceException {
-        Map<String, String> jobParams = new HashMap<>();
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion) throws JobServiceException {
+        Map<String, Object> jobParams = new HashMap<>();
         jobParams.put(Constants.PARAM_APP_NAME, applicationName);
-        jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(inplaceMode));
+        //jobParams.put(Constants.PARAM_INPLACE_MODE, String.valueOf(inplaceMode));
         if (StringUtils.isNotBlank(nodeGuid)) {
             jobParams.put(Constants.PARAM_NODE_GUID, nodeGuid);
         }
@@ -90,13 +90,13 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startAddVersionJob(String appGuid, String applicationName, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion)
+    public String startAddVersionJob(String appGuid, String applicationName, String caipVersion, String zipFileName, String versionName, Date versionReleaseDate, boolean cloneVersion)
             throws JobServiceException {
-        return startAddVersionJob(appGuid, applicationName, zipFileName, versionName, versionReleaseDate, cloneVersion, false);
+        return startAddVersionJob(appGuid, applicationName, caipVersion, zipFileName, versionName, versionReleaseDate, cloneVersion, false);
     }
 
     @Override
-    public String startAddVersionJob(String appGuid, String applicationName, String sourcePath, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow)
+    public String startAddVersionJob(String appGuid, String applicationName, String caipVersion, String sourcePath, String versionName, Date versionReleaseDate, boolean cloneVersion, boolean enableSecurityDataflow)
             throws JobServiceException {
         if (StringUtils.isBlank(appGuid)) {
             throw new JobServiceException("No application GUID provided");
@@ -111,7 +111,7 @@ public class JobsServiceImpl implements JobsService {
             DateFormat formatVersionName = new SimpleDateFormat("yyMMdd.HHmmss");
             versionName = "v" + formatVersionName.format(versionReleaseDate);
         }
-        JobRequestBuilder builder = JobRequestBuilder.newInstance(appGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
+        JobRequestBuilder builder = JobRequestBuilder.newInstance(appGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, caipVersion)
                 .versionName(versionName)
                 .releaseAndSnapshotDate(versionReleaseDate)
                 .securityObjective(enableSecurityDataflow);
@@ -172,7 +172,7 @@ public class JobsServiceImpl implements JobsService {
     public <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobStatusWithSteps, R> callback, boolean logOutput) throws JobServiceException {
         Consumer<LogContentDto> pollingCallback = !logOutput ? null : jobContentDto -> printLog(jobContentDto);
         return pollAndWaitForJobFinished(jobGuid,
-                jobStep -> log.info("Current step is : " + jobStep.getProgressStep()),
+                jobStep -> log.info("Current step is : " + jobStep.getCurrentStep()),
                 pollingCallback,
                 callback);
     }
@@ -208,7 +208,7 @@ public class JobsServiceImpl implements JobsService {
                     retryCount = 0;
                 }
 
-                String currentStep = jobStatus.getProgressStep();
+                String currentStep = jobStatus.getCurrentStep();
 
                 if (currentStep != null && !currentStep.equalsIgnoreCase(previousStep)) {
                     previousStep = currentStep;
@@ -243,7 +243,7 @@ public class JobsServiceImpl implements JobsService {
         try {
             ChangeJobStateRequest cancel = new ChangeJobStateRequest();
             cancel.setState(JobState.CANCELED);
-            restApiService.putForEntity(ApiEndpointHelper.getJobDetailsEndpoint(jobGuid), cancel, Void.class);
+            restApiService.postForEntity(ApiEndpointHelper.getJobDetailsEndpoint(jobGuid) + "/cancel", cancel, Void.class);
         } catch (ApiCallException e) {
             throw new JobServiceException(e);
         }

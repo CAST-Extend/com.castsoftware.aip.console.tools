@@ -20,4 +20,5 @@ public class ApplicationDto {
     private String name;
     private String state;
     private boolean inPlaceMode;
+    private String caipVersion;
 }

@@ -361,7 +361,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         }
 
         String fileName = UUID.randomUUID().toString();
-
+        String caipVersion = null;
         try {
 
             // Get the GUID from AIP Console
@@ -398,9 +398,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(variableAppName));
-                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode);
+                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode, null);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
-                        jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                        jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),
                         s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
                 if (StringUtils.isBlank(applicationGuid)) {
@@ -417,6 +417,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             if (applicationHasVersion) {
                 applicationHasVersion = applicationService.applicationHasVersion(applicationGuid);
             }
+
+            ApplicationDto app = applicationService.getApplicationFromGuid(applicationGuid);
+            caipVersion = app.getCaipVersion();
 
             if (!isUpload) {
                 // Rename the file to applicationName-versionName.ext
@@ -494,7 +497,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             } else {
                 log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(variableAppName));
             }
-            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
+            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, caipVersion);
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .versionName(resolvedVersionName)
                     .securityObjective(enableSecurityDataflow)
@@ -586,7 +589,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         return jobsService.pollAndWaitForJobFinished(jobGuid,
                 jobStatusWithSteps -> log.println(
                         jobStatusWithSteps.getAppName() + " - " +
-                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
+                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
                 JobStatus::getState);

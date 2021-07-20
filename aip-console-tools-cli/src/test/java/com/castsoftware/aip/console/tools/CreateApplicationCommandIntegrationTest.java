@@ -71,7 +71,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
         jobStatus.setCreated(new Date());
         jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
 
-        when(jobsService.startCreateApplication(any(String.class), eq(null), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_JOB_GUID);
+        when(jobsService.startCreateApplication(any(String.class), eq(null), any(String.class), anyBoolean(), any(String.class))).thenReturn(TestConstants.TEST_JOB_GUID);
         when(jobsService.pollAndWaitForJobFinished(any(String.class), any(Function.class), anyBoolean())).thenReturn(Constants.RETURN_OK);
 
         runStringArgs(createApplicationCommand, args);

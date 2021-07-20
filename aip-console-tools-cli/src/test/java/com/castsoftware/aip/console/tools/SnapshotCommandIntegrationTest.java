@@ -62,7 +62,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--process-imaging"};
 
-        when(applicationService.getApplicationGuidFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
         versionDto.setStatus(VersionStatus.ACCEPTED);
@@ -82,7 +82,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--process-imaging"};
 
-        when(applicationService.getApplicationGuidFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
         //Set<VersionDto> versions =
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
@@ -112,7 +112,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--process-imaging"};
 
-        when(applicationService.getApplicationGuidFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
         //Set<VersionDto> versions =
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);

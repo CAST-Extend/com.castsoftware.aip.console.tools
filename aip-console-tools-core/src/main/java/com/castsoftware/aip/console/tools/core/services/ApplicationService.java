@@ -95,11 +95,11 @@ public interface ApplicationService {
      * @return debug options
      * @throws ApplicationServiceException
      */
-    DebugOptionsDto getDebugOptions(String appGuid) throws ApplicationServiceException;
+    DebugOptionsDto getDebugOptions(String appGuid);
 
-    void updateShowSqlDebugOption(String appGuid, boolean showSql) throws ApplicationServiceException;
+    void updateShowSqlDebugOption(String appGuid, boolean showSql);
 
-    void updateAmtProfileDebugOption(String appGuid, boolean amtProfile) throws ApplicationServiceException;
+    void updateAmtProfileDebugOption(String appGuid, boolean amtProfile);
 
-    void resetDebugOptions(String appGuid, DebugOptionsDto debugOptionsDto) throws ApplicationServiceException;
+    void resetDebugOptions(String appGuid, DebugOptionsDto debugOptionsDto);
 }

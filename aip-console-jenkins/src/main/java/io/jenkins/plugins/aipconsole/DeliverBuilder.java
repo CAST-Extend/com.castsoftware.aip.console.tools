@@ -425,9 +425,9 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode);
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode, null);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
-                        jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                        jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),
                         s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
                 if (StringUtils.isBlank(applicationGuid)) {
@@ -520,7 +520,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             } else {
                 log.println(DeliverBuilder_Deliver_info_startDeliverCloneJob(expandedAppName));
             }
-            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
+            ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
+            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion());
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
@@ -631,7 +632,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         return jobsService.pollAndWaitForJobFinished(jobGuid,
                 jobStatusWithSteps -> log.println(
                         jobStatusWithSteps.getAppName() + " - " +
-                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
+                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
                 JobStatus::getState);

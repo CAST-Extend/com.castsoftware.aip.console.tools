@@ -213,7 +213,7 @@ public class AddVersionCommand implements Callable<Integer> {
             // check that the application actually has versions, otherwise it's just an add version job
             boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
 
-            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
+            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion())
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .securityObjective(enableSecurityDataflow)

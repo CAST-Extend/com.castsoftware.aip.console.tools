@@ -5,15 +5,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class JobStatusWithSteps extends JobStatus {
     private String failureStep;
-    private String progressStep;
+    private String currentStep;
 
     public JobStatusWithSteps() {
         // Default constructor
     }
 
-    public JobStatusWithSteps(JobStatus status, String progressStep, String failureStep) {
+    public JobStatusWithSteps(JobStatus status, String currentStep, String failureStep) {
         super(status);
-        this.progressStep = progressStep;
+        this.currentStep = currentStep;
         this.failureStep = failureStep;
     }
 
@@ -25,11 +25,11 @@ public class JobStatusWithSteps extends JobStatus {
         this.failureStep = failureStep;
     }
 
-    public String getProgressStep() {
-        return progressStep;
+    public String getCurrentStep() {
+        return currentStep;
     }
 
-    public void setProgressStep(String progressStep) {
-        this.progressStep = progressStep;
+    public void setCurrentStep(String currentStep) {
+        this.currentStep = currentStep;
     }
 }

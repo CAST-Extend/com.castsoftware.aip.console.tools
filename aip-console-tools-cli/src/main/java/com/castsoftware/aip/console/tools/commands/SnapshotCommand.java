@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -103,11 +104,13 @@ public class SnapshotCommand implements Callable<Integer> {
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
-            String applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
-            if (StringUtils.isBlank(applicationGuid)) {
+            ApplicationDto app = applicationService.getApplicationFromName(applicationName);
+            String applicationGuid;
+            if (app == null || StringUtils.isBlank(app.getGuid())) {
                 log.error("Application '{}' was not found on AIP Console", applicationName);
                 return Constants.RETURN_APPLICATION_NOT_FOUND;
             }
+            applicationGuid = app.getGuid();
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             if (versions.isEmpty()) {
                 log.error("No version for the given application. Cannot run Snapshot without an analyzed version");
@@ -144,7 +147,7 @@ public class SnapshotCommand implements Callable<Integer> {
             }
 
             // Run snapshot
-            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
+            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, app.getCaipVersion())
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
                     .versionGuid(foundVersion.getGuid())
                     .versionName(foundVersion.getName())
