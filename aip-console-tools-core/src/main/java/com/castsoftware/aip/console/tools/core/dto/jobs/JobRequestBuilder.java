@@ -1,11 +1,11 @@
 package com.castsoftware.aip.console.tools.core.dto.jobs;
 
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 public class JobRequestBuilder {
-    private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    public static final DateTimeFormatter DELIVERY_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+    public static final DateTimeFormatter DELIVERY_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    public static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final DateFormat VERSION_NAME_FORMATTER = new SimpleDateFormat("yyMMdd.HHmmss");
     private static final String GLOBAL_RISK_OBJECTIVE = "GLOBAL_RISK";
     private static final String FUNCTIONAL_POINTS_OBJECTIVE = "FUNCTIONAL_POINTS";
@@ -39,21 +41,23 @@ public class JobRequestBuilder {
     private boolean autoDiscover = true;
     private boolean uploadApplication = false;
     private boolean processImaging = false;
+    private String caipVersion;
 
-    private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType) {
+    private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType, String caipVersion) {
         this.appGuid = appGuid;
         this.sourcePath = sourcePath;
         this.jobType = jobType;
-        startStep = Constants.EXTRACT_STEP_NAME;
-        endStep = Constants.CONSOLIDATE_SNAPSHOT;
-        objectives.add(GLOBAL_RISK_OBJECTIVE);
-        objectives.add(FUNCTIONAL_POINTS_OBJECTIVE);
+        this.caipVersion = caipVersion;
+        this.startStep = Constants.EXTRACT_STEP_NAME;
+        this.endStep = Constants.CONSOLIDATE_SNAPSHOT;
+        this.objectives.add(GLOBAL_RISK_OBJECTIVE);
+        this.objectives.add(FUNCTIONAL_POINTS_OBJECTIVE);
 
         Date now = new Date();
-        versionName = String.format("v%s", VERSION_NAME_FORMATTER.format(now));
+        this.versionName = String.format("v%s", VERSION_NAME_FORMATTER.format(now));
         String nowStr = RELEASE_DATE_FORMATTER.format(now);
-        releaseDateStr = nowStr;
-        snapshotDateStr = nowStr;
+        this.releaseDateStr = nowStr;
+        this.snapshotDateStr = nowStr;
     }
 
     public JobRequestBuilder nodeGuid(String nodeGuid) {
@@ -118,10 +122,10 @@ public class JobRequestBuilder {
 
     public JobRequestBuilder securityObjective(boolean enable) {
         if (enable) {
-            objectives.add(SECURITY_OBJECTIVE);
+            this.objectives.add(SECURITY_OBJECTIVE);
         }
-        if (!enable && objectives.contains(SECURITY_OBJECTIVE)) {
-            objectives = new ArrayList<>();
+        if (!enable && this.objectives.contains(SECURITY_OBJECTIVE)) {
+            this.objectives = new ArrayList<>();
             objectives.add(GLOBAL_RISK_OBJECTIVE);
             objectives.add(FUNCTIONAL_POINTS_OBJECTIVE);
         }
@@ -133,17 +137,12 @@ public class JobRequestBuilder {
         return this;
     }
 
-    public JobRequestBuilder objectives(VersionObjective objective) {
-        objectives.add(objective.toString());
-        return this;
-    }
-
     public JobRequestBuilder releaseAndSnapshotDate(Date date) {
         if (date == null) {
             return this;
         }
         String dateStr = RELEASE_DATE_FORMATTER.format(date);
-        return releaseDateStr(dateStr)
+        return this.releaseDateStr(dateStr)
                 .snapshotDateStr(dateStr);
     }
 
@@ -153,7 +152,7 @@ public class JobRequestBuilder {
     }
 
     public JobRequestBuilder versionGuid(String guid) {
-        versionGuid = guid;
+        this.versionGuid = guid;
         return this;
     }
 
@@ -162,10 +161,10 @@ public class JobRequestBuilder {
         return this;
     }
 
-    private Map<String, String> getJobParameters() {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put(Constants.PARAM_APP_GUID, appGuid);
-        parameters.put(Constants.PARAM_VERSION_NAME, versionName);
+    private Map<String, Object> getJobParameters() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(Constants.PARAM_APP_GUID, this.appGuid);
+        parameters.put(Constants.PARAM_VERSION_NAME, this.versionName);
         if (StringUtils.isNotBlank(sourcePath)) {
             parameters.put(Constants.PARAM_SOURCE_PATH, sourcePath);
             // for 1.12 compatibility
@@ -180,10 +179,11 @@ public class JobRequestBuilder {
         parameters.put(Constants.PARAM_START_STEP, startStep);
         parameters.put(Constants.PARAM_END_STEP, endStep);
         parameters.put(Constants.PARAM_IGNORE_CHECK, Boolean.toString(ignoreCheck));
-        parameters.put(Constants.PARAM_VERSION_OBJECTIVES, String.join(",", objectives));
+        parameters.put(Constants.PARAM_VERSION_OBJECTIVES, objectives);
         parameters.put(Constants.PARAM_RELEASE_DATE, releaseDateStr);
         parameters.put(Constants.PARAM_ENABLE_AUTO_DISCOVER, Boolean.toString(autoDiscover));
         parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
+        parameters.put(Constants.PARAM_CAIP_VERSION, caipVersion);
         if (StringUtils.isBlank(snapshotDateStr)) {
             parameters.put(Constants.PARAM_SNAPSHOT_CAPTURE_DATE, releaseDateStr);
         } else {
@@ -216,11 +216,11 @@ public class JobRequestBuilder {
     public CreateJobsRequest buildJobRequest() {
         CreateJobsRequest jobRequest = new CreateJobsRequest();
         jobRequest.setJobType(jobType);
-        jobRequest.setJobParameters(getJobParameters());
+        jobRequest.setJobParameters(this.getJobParameters());
         return jobRequest;
     }
 
-    public static JobRequestBuilder newInstance(String appGuid, String sourcePath, JobType jobType) {
-        return new JobRequestBuilder(appGuid, sourcePath, jobType);
+    public static JobRequestBuilder newInstance(String appGuid, String sourcePath, JobType jobType, String caipVersion) {
+        return new JobRequestBuilder(appGuid, sourcePath, jobType, caipVersion);
     }
 }

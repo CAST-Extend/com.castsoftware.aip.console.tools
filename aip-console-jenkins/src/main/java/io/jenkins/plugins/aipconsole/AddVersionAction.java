@@ -33,7 +33,6 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     @Nullable
     private String domainName;
     private boolean processImaging = false;
-    private boolean blueprint = false;
 
     @Nullable
     private String snapshotName;
@@ -155,15 +154,6 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     public void setProcessImaging(boolean processImaging) {
         this.processImaging = processImaging;
     }
-
-    public boolean isBlueprint() {
-        return blueprint;
-    }
-
-    public void setBlueprint(boolean blueprint) {
-        this.blueprint = blueprint;
-    }
-
 
     @Nullable
     public String getDomainName() {

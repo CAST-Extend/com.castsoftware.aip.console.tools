@@ -1,11 +1,12 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
@@ -103,11 +104,13 @@ public class SnapshotCommand implements Callable<Integer> {
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
-            String applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
-            if (StringUtils.isBlank(applicationGuid)) {
+            ApplicationDto app = applicationService.getApplicationFromName(applicationName);
+            String applicationGuid;
+            if (app == null || StringUtils.isBlank(app.getGuid())) {
                 log.error("Application '{}' was not found on AIP Console", applicationName);
                 return Constants.RETURN_APPLICATION_NOT_FOUND;
             }
+            applicationGuid = app.getGuid();
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             if (versions.isEmpty()) {
                 log.error("No version for the given application. Cannot run Snapshot without an analyzed version");
@@ -144,7 +147,7 @@ public class SnapshotCommand implements Callable<Integer> {
             }
 
             // Run snapshot
-            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
+            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, app.getCaipVersion())
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
                     .versionGuid(foundVersion.getGuid())
                     .versionName(foundVersion.getName())
@@ -165,13 +168,13 @@ public class SnapshotCommand implements Callable<Integer> {
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
 
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
+            JobExecutionDto jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 log.info("Snapshot Creation completed successfully.");
                 return Constants.RETURN_OK;
             }
-            log.error("Snapshot Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
+            log.error("Snapshot Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getCurrentStep());
             return Constants.RETURN_JOB_FAILED;
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

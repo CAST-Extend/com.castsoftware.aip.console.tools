@@ -19,7 +19,6 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -114,7 +113,6 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
     @Nullable
     private String snapshotName = "";
-    private boolean blueprint = false;
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -154,19 +152,6 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setAutoCreate(boolean autoCreate) {
         this.autoCreate = autoCreate;
-    }
-
-    @DataBoundSetter
-    public void setBlueprint(boolean blueprint) {
-        this.blueprint = blueprint;
-    }
-
-    public boolean getBlueprint() {
-        return isBlueprint();
-    }
-
-    public boolean isBlueprint() {
-        return blueprint;
     }
 
     public boolean isCloneVersion() {
@@ -282,7 +267,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
-        boolean applicationHasVersion = cloneVersion;
+        boolean applicationHasVersion = this.cloneVersion;
         boolean isUpload = false;
 
         String errorMessage;
@@ -361,7 +346,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         }
 
         String fileName = UUID.randomUUID().toString();
-
+        String caipVersion = null;
         try {
 
             // Get the GUID from AIP Console
@@ -398,9 +383,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(variableAppName));
-                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode);
+                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode, null);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
-                        jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                        jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),
                         s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
                 if (StringUtils.isBlank(applicationGuid)) {
@@ -417,6 +402,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             if (applicationHasVersion) {
                 applicationHasVersion = applicationService.applicationHasVersion(applicationGuid);
             }
+
+            ApplicationDto app = applicationService.getApplicationFromGuid(applicationGuid);
+            caipVersion = app.getCaipVersion();
 
             if (!isUpload) {
                 // Rename the file to applicationName-versionName.ext
@@ -485,7 +473,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 resolvedVersionName = String.format("v%s", formatVersionName.format(new Date()));
             }
 
-            if (cloneVersion) {
+            if (this.cloneVersion) {
                 if (applicationHasVersion) {
                     log.println(AddVersionBuilder_AddVersion_info_startCloneVersionJob(variableAppName));
                 } else {
@@ -494,7 +482,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             } else {
                 log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(variableAppName));
             }
-            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
+            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, caipVersion);
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .versionName(resolvedVersionName)
                     .securityObjective(enableSecurityDataflow)
@@ -507,9 +495,6 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
             }
 
-            if (isBlueprint()) {
-                requestBuilder.objectives(VersionObjective.BLUEPRINT);
-            }
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
             }
@@ -586,7 +571,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         return jobsService.pollAndWaitForJobFinished(jobGuid,
                 jobStatusWithSteps -> log.println(
                         jobStatusWithSteps.getAppName() + " - " +
-                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
+                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
                 JobStatus::getState);

@@ -2,8 +2,8 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.CreateApplicationCommand;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
@@ -65,13 +65,13 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
                 "--domain-name", TestConstants.TEST_DOMAIN};
 
         // gives the existing application
-        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
-        jobStatus.setCreated(new Date());
+        jobStatus.setCreatedDate(new Date());
         jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
 
-        when(jobsService.startCreateApplication(any(String.class), eq(null), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_JOB_GUID);
+        when(jobsService.startCreateApplication(any(String.class), eq(null), any(String.class), anyBoolean(), any(String.class))).thenReturn(TestConstants.TEST_JOB_GUID);
         when(jobsService.pollAndWaitForJobFinished(any(String.class), any(Function.class), anyBoolean())).thenReturn(Constants.RETURN_OK);
 
         runStringArgs(createApplicationCommand, args);

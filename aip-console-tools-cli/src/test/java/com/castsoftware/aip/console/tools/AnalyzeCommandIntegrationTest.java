@@ -4,23 +4,20 @@ import com.castsoftware.aip.console.tools.commands.AnalyzeCommand;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
-import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import picocli.CommandLine;
@@ -44,9 +41,7 @@ import static org.mockito.Mockito.when;
 public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     @Autowired
     private AnalyzeCommand analyzeCommand;
-    @MockBean
-    private DebugOptionsService debugOptionsService;
-
+    
     @Override
     protected void cleanupTestCommand() {
         // ===================================
@@ -104,7 +99,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--app-name=" + TestConstants.TEST_CREATRE_APP,
                 "-S"};
-        when(applicationService.getApplicationGuidFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
         //Set<VersionDto> versions =
         when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Collections.emptySet());
 
@@ -123,7 +118,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--app-name=" + TestConstants.TEST_CREATRE_APP,
                 "-S"};
-        when(applicationService.getApplicationGuidFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
         VersionDto versionDto = new VersionDto();
         versionDto.setName("The-Current-Version");
         when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
@@ -142,7 +137,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
                 TestConstants.TEST_API_KEY,
                 "--app-name=" + TestConstants.TEST_CREATRE_APP,
                 "-S"};
-        when(applicationService.getApplicationGuidFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
         versionDto.setStatus(VersionStatus.DELIVERING);
@@ -163,7 +158,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "-S", "--process-imaging"};
 
-        when(applicationService.getApplicationGuidFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
         //Set<VersionDto> versions =
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
@@ -172,12 +167,12 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         when(jobsService.startJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
         DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
-        when(debugOptionsService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
+        when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
 
-        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
-        jobStatus.setCreated(new Date());
+        jobStatus.setCreatedDate(new Date());
         jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 

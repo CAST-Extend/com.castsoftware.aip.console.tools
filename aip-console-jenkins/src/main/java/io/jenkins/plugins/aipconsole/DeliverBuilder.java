@@ -20,7 +20,6 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -120,7 +119,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     private boolean autoDiscover = true;
     private boolean setAsCurrent = false;
-    private boolean blueprint = false;
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
@@ -190,19 +188,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     public boolean getSetAsCurrent() {
         return isSetAsCurrent();
-    }
-
-    @DataBoundSetter
-    public void setBlueprint(boolean blueprint) {
-        this.blueprint = blueprint;
-    }
-
-    public boolean getBlueprint() {
-        return isBlueprint();
-    }
-
-    public boolean isBlueprint() {
-        return blueprint;
     }
 
     @DataBoundSetter
@@ -306,7 +291,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
-        boolean applicationHasVersion = cloneVersion;
+        boolean applicationHasVersion = this.cloneVersion;
         boolean isUpload = false;
 
         String errorMessage;
@@ -425,9 +410,9 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode);
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode, null);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
-                        jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))),
+                        jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),
                         s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
                 if (StringUtils.isBlank(applicationGuid)) {
@@ -511,7 +496,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 resolvedVersionName = String.format("v%s", formatVersionName.format(new Date()));
             }
 
-            if (cloneVersion) {
+            if (this.cloneVersion) {
                 if (applicationHasVersion) {
                     log.println(DeliverBuilder_Deliver_info_startDeliverCloneJob(expandedAppName));
                 } else {
@@ -520,7 +505,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             } else {
                 log.println(DeliverBuilder_Deliver_info_startDeliverCloneJob(expandedAppName));
             }
-            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
+            ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
+            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion());
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
@@ -531,10 +517,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
             if (inplaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
-            }
-            
-            if (isBlueprint()) {
-                requestBuilder.objectives(VersionObjective.BLUEPRINT);
             }
 
             log.println("Exclusion patterns : " + exclusionPatterns);
@@ -631,7 +613,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         return jobsService.pollAndWaitForJobFinished(jobGuid,
                 jobStatusWithSteps -> log.println(
                         jobStatusWithSteps.getAppName() + " - " +
-                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getProgressStep()))
+                                JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
                 JobStatus::getState);

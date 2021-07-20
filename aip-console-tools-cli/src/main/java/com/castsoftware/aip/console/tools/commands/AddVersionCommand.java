@@ -3,9 +3,9 @@ package com.castsoftware.aip.console.tools.commands;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
@@ -14,19 +14,15 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
-import com.castsoftware.aip.console.tools.core.services.DebugOptionsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -124,11 +120,6 @@ public class AddVersionCommand implements Callable<Integer> {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean backupEnabled = false;
 
-    @CommandLine.Option(names = {"--blueprint"}
-            , description = "Add blueprint objective to the objectives list (default: ${DEFAULT-VALUE})."
-            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", defaultValue = "false")
-    private boolean blueprint;
-
     /**
      * Name of the backup
      */
@@ -158,9 +149,6 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
-    @Autowired
-    DebugOptionsService debugOptionsService;
-
     @Override
     public Integer call() {
         ApiInfoDto apiInfo = null;
@@ -176,7 +164,7 @@ public class AddVersionCommand implements Callable<Integer> {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
-        log.info("AddVersion version command has triggered with log verbose mode = '{}'", sharedOptions.isVerbose());
+        log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
 
@@ -213,39 +201,44 @@ public class AddVersionCommand implements Callable<Integer> {
             // check that the application actually has versions, otherwise it's just an add version job
             boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
 
-            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
+            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion())
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .securityObjective(enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
+
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null, cloneVersion);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
-            }
-            if (blueprint) {
-                builder.objectives(VersionObjective.BLUEPRINT);
             }
 
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);
             }
 
-            DebugOptionsDto oldDebugOptions = debugOptionsService.updateDebugOptions(applicationGuid,
-                    DebugOptionsDto.builder().showSql(showSql).activateAmtMemoryProfile(amtProfiling).build());
+            //==============
+            // Ony set debug option when ON. Run Analysis always consider these options as OFF(disabled)
+            //==============
+            DebugOptionsDto oldDebugOptions = applicationService.getDebugOptions(applicationGuid);
+            if (showSql) {
+                applicationService.updateShowSqlDebugOption(applicationGuid, showSql);
+            }
+            if (amtProfiling) {
+                applicationService.updateAmtProfileDebugOption(applicationGuid, amtProfiling);
+            }
 
             String jobGuid = jobsService.startAddVersionJob(builder);
             // add a shutdown hook, to cancel the job
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
             // Register shutdown hook to cancel the job
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
+            JobExecutionDto jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             // Deregister the shutdown hook since the job is finished and we won't need to cancel it
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
-
-            DebugOptionsDto debugOptions = debugOptionsService.getDebugOptions(applicationGuid);
-            debugOptionsService.resetDebugOptions(applicationGuid, oldDebugOptions);
+            DebugOptionsDto debugOptions = applicationService.getDebugOptions(applicationGuid);
+            applicationService.resetDebugOptions(applicationGuid, oldDebugOptions);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 if (debugOptions.isActivateAmtMemoryProfile()) {
                     log.info("[Debug options] Amt Profiling file download URL: {}",
@@ -255,7 +248,7 @@ public class AddVersionCommand implements Callable<Integer> {
                 return Constants.RETURN_OK;
             }
 
-            log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
+            log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getCurrentStep());
             return Constants.RETURN_JOB_FAILED;
 
         } catch (ApplicationServiceException e) {

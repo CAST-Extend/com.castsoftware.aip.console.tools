@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
@@ -45,6 +46,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+
+import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_CAIP_VERSION;
 
 @Log
 public class RestApiServiceImpl implements RestApiService {
@@ -256,13 +259,20 @@ public class RestApiServiceImpl implements RestApiService {
 
     private <T> T exchangeForEntity(String method, String endpoint, Object entity, JavaType javaType) throws ApiCallException {
         RequestBody body = HttpMethod.requiresRequestBody(method) ? getRequestBodyForEntity(entity) : null;
-        Request request = getRequestBuilder(endpoint)
-                .method(method, body)
-                .build();
+        Request.Builder requestBuilder = getRequestBuilder(endpoint)
+                .method(method, body);
+        // for v2, need to add caip version in the header for job requests
+        if (entity instanceof CreateJobsRequest) {
+            CreateJobsRequest jobsRequest = (CreateJobsRequest) entity;
+            if (StringUtils.isNotEmpty(jobsRequest.getParameterValueAsString(PARAM_CAIP_VERSION))) {
+                requestBuilder.addHeader(PARAM_CAIP_VERSION, jobsRequest.getParameterValueAsString(PARAM_CAIP_VERSION));
+            }
+            requestBuilder.method(method, getRequestBodyForEntityV2(jobsRequest));
+        }
         log.fine(String.format("Executing call with method %s to endpoint %s", method, endpoint));
         log.finest("Entity is " + entity);
 
-        try (Response response = client.newCall(request).execute()) {
+        try (Response response = client.newCall(requestBuilder.build()).execute()) {
             if (ACCEPTED_HTTP_CODES.contains(response.code())) {
                 return mapResponse(response, javaType);
             }
@@ -349,6 +359,18 @@ public class RestApiServiceImpl implements RestApiService {
             return RequestBody.create(
                     jsonMediaType,
                     entity == null ? "" : mapper.writeValueAsString(entity));
+        } catch (JsonProcessingException e) {
+            log.log(Level.SEVERE, "Unable to map object of type " + entity.getClass().getName() + " to JSON", e);
+            throw new ApiCallException(500, e);
+        }
+    }
+
+    private RequestBody getRequestBodyForEntityV2(CreateJobsRequest entity) throws ApiCallException {
+        MediaType jsonMediaType = MediaType.parse(JSON_MEDIA_TYPE);
+        try {
+            return RequestBody.create(
+                    jsonMediaType,
+                    entity == null ? "" : mapper.writeValueAsString(entity.getJobParameters()));
         } catch (JsonProcessingException e) {
             log.log(Level.SEVERE, "Unable to map object of type " + entity.getClass().getName() + " to JSON", e);
             throw new ApiCallException(500, e);

@@ -28,9 +28,6 @@
         <f:entry title="${%cloneVersion}" field="cloneVersion" description="${%cloneVersion.descr}">
             <f:checkbox field="cloneVersion" value="${cloneVersion}" default="true"/>
         </f:entry>
-        <f:entry title="${%blueprint}" field="blueprint" description="${%blueprint.descr}">
-            <f:checkbox field="blueprint" value="${blueprint}" default="false"/>
-        </f:entry>
         <f:entry title="${%backup}" field="backupApplicationEnabled" description="${%backup.descr}">
             <f:checkbox/>
         </f:entry>

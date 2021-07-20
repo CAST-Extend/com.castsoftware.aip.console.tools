@@ -8,14 +8,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class DebugOptionsDto {
-    @Builder.Default
-    boolean showSql=false;
-    @Builder.Default
-    boolean activateAmtMemoryProfile=false;
-    @Builder.Default
-    private boolean amtMemoryProfilingLogAvailable=false;
+    boolean showSql;
+    boolean activateAmtMemoryProfile;
+    private boolean amtMemoryProfilingLogAvailable;
 }

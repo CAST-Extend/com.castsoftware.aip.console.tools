@@ -1,20 +1,19 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
-import com.castsoftware.aip.console.tools.core.services.DebugOptionsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
@@ -23,7 +22,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -90,9 +88,6 @@ public class AnalyzeCommand implements Callable<Integer> {
             , defaultValue = "false")
     private boolean amtProfiling;
 
-    @Autowired
-    private DebugOptionsService debugOptionsService;
-
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
@@ -118,17 +113,17 @@ public class AnalyzeCommand implements Callable<Integer> {
         }
         String applicationGuid;
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
-
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
-            applicationGuid = applicationService.getApplicationGuidFromName(applicationName);
-            if (StringUtils.isBlank(applicationGuid)) {
+            ApplicationDto app = applicationService.getApplicationFromName(applicationName);
+            if (app == null || StringUtils.isEmpty(app.getGuid())) {
                 log.error("Application '{}' was not found on AIP Console", applicationName);
                 return Constants.RETURN_APPLICATION_NOT_FOUND;
             }
+            applicationGuid = app.getGuid();
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             if (versions.isEmpty()) {
                 log.error("No version for the given application. Make sure at least one version has been delivered");
@@ -155,7 +150,7 @@ public class AnalyzeCommand implements Callable<Integer> {
             // Deploy if auto deploy is true AND version to analyze has status DELIVERED (otherwise just do analysis)
             boolean deployFirst = versionToAnalyze.getStatus() == VersionStatus.DELIVERED;
 
-            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
+            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, app.getCaipVersion())
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
@@ -170,19 +165,27 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());
 
-            DebugOptionsDto oldDebugOptions = debugOptionsService.updateDebugOptions(applicationGuid,
-                    DebugOptionsDto.builder().showSql(showSql).activateAmtMemoryProfile(amtProfiling).build());
+            //==============
+            // Ony set debug option when ON. Run Analysis always consider these options as OFF(disabled)
+            //==============
+            DebugOptionsDto oldDebugOptions = applicationService.getDebugOptions(applicationGuid);
+            if (showSql) {
+                applicationService.updateShowSqlDebugOption(applicationGuid, showSql);
+            }
+            if (amtProfiling) {
+                applicationService.updateShowSqlDebugOption(applicationGuid, amtProfiling);
+            }
 
             log.info("Running analysis for application '{}' with version '{}'", applicationName, versionToAnalyze.getName());
             String jobGuid = jobsService.startJob(builder);
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
 
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            JobStatusWithSteps jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
+            JobExecutionDto jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
 
-            DebugOptionsDto debugOptions = debugOptionsService.getDebugOptions(applicationGuid);
-            debugOptionsService.resetDebugOptions(applicationGuid, oldDebugOptions);
+            DebugOptionsDto debugOptions = applicationService.getDebugOptions(applicationGuid);
+            applicationService.resetDebugOptions(applicationGuid, oldDebugOptions);
             if (JobState.COMPLETED == jobStatus.getState()) {
                 if (debugOptions.isActivateAmtMemoryProfile()) {
                     log.info("[Debug options] Amt Profiling file download URL: {}",
@@ -192,7 +195,7 @@ public class AnalyzeCommand implements Callable<Integer> {
                 return Constants.RETURN_OK;
             }
 
-            log.error("Analysis did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getFailureStep());
+            log.error("Analysis did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getCurrentStep());
             return Constants.RETURN_JOB_FAILED;
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

@@ -107,6 +107,8 @@ public class AddVersionBuilderTest {
         MockitoAnnotations.initMocks(this);
         doReturn(ApiInfoDto.builder().apiVersion("1.12.0-DEV").build())
                 .when(restApiService).getAipConsoleApiInfo();
+        doReturn(TEST_APP)
+                .when(applicationService).getApplicationFromGuid(TEST_APP_NAME);
     }
 
     @Test
@@ -297,7 +299,7 @@ public class AddVersionBuilderTest {
         doReturn(null)
                 .when(applicationService).getApplicationFromName(TEST_APP_NAME);
         doThrow(new JobServiceException("cannot create application"))
-                .when(jobsService).startCreateApplication(eq(TEST_APP_NAME), anyString(), anyBoolean());
+                .when(jobsService).startCreateApplication(eq(TEST_APP_NAME), anyString(), anyBoolean(), anyString());
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
@@ -339,7 +341,7 @@ public class AddVersionBuilderTest {
         doReturn(Collections.singletonList(new NodeDto(TEST_NODE_NAME, TEST_NODE_NAME, "http", "localhost", 8082)))
                 .when(restApiService).getForEntity(eq("/api/nodes"), isA(TypeReference.class));
         doReturn("createAppGuid")
-                .when(jobsService).startCreateApplication(TEST_APP_NAME, TEST_NODE_NAME, null, false);
+                .when(jobsService).startCreateApplication(TEST_APP_NAME, TEST_NODE_NAME, null, false, null);
         doReturn(TEST_APP_NAME)
                 .when(jobsService).pollAndWaitForJobFinished(eq("createAppGuid"), any(), any(), any());
         doReturn(true)
