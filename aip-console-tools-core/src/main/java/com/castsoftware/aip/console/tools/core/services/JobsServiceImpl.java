@@ -59,14 +59,14 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode, String caipVersion) throws JobServiceException {
-        return startCreateApplication(applicationName, nodeGuid, null, inplaceMode, caipVersion);
+        return startCreateApplication(applicationName, nodeGuid, null, inplaceMode, caipVersion,null);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion) throws JobServiceException {
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion, String cssServerGuid) throws JobServiceException {
         try {
             CreateApplicationJobRequest.CreateApplicationJobRequestBuilder requestBuilder =
-                    CreateApplicationJobRequest.builder().appName(applicationName).inPlaceMode(inplaceMode).caipVersion(caipVersion);
+                    CreateApplicationJobRequest.builder().appName(applicationName).inPlaceMode(inplaceMode).caipVersion(caipVersion).cssGuid(cssServerGuid);
             if (StringUtils.isNotBlank(domainName)) {
                 requestBuilder.domainName(domainName);
             }

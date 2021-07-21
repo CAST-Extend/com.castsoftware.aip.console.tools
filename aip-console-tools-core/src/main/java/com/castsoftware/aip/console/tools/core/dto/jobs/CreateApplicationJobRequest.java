@@ -18,4 +18,5 @@ public class CreateApplicationJobRequest {
     @Builder.Default
     private boolean inPlaceMode = false;
     private String caipVersion;
+    private String cssGuid;
 }
