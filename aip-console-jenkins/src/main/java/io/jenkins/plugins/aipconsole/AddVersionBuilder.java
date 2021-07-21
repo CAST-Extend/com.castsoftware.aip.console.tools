@@ -414,7 +414,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 //call api to check if the folder exists
                 try {
                     FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(resolvedFilePath).toString()).build();
-                    apiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
+                    apiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
                 } catch (ApiCallException e) {
                     listener.error("Unable to find the file " + resolvedFilePath + " in the source.folder.location on AIP Console.");
                     e.printStackTrace(log);

@@ -438,7 +438,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 //call api to check if the folder exists
                 try {
                     FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(resolvedFilePath).toString()).build();
-                    apiService.postForEntity("/api/applications/" + applicationGuid + "/server-folders", fileCommandRequest, String.class);
+                    apiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
                 } catch (ApiCallException e) {
                     listener.error("Unable to find the file " + resolvedFilePath + " in the source.folder.location");
                     e.printStackTrace(log);
