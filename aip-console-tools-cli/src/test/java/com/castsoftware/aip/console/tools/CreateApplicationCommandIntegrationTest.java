@@ -41,6 +41,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
         createApplicationCommand.setApplicationName(null);
         createApplicationCommand.setDomainName(null);
         createApplicationCommand.setNodeName(null);
+        createApplicationCommand.setCssServerName(null);
     }
 
     @Test
