@@ -9,6 +9,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.LogUtils;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import hudson.Extension;
@@ -181,7 +182,6 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
         String expandedDomainName = run.getEnvironment(listener).expand(domainName);
         String expandedNodeName = run.getEnvironment(listener).expand(nodeName);
 
-
         try {
             // update timeout of HTTP Client if different from default
             if (actualTimeout != Constants.DEFAULT_HTTP_TIMEOUT) {
@@ -206,9 +206,10 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
             }
 
             String cssServerGuid = null;
-            if(StringUtils.isNotEmpty(cssServerName)){
+            String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
+            if(StringUtils.isNotEmpty(expandedCssServerName)){
                 DatabaseConnectionSettingsDto[] cssServers = apiService.getForEntity("api/settings/css-settings", DatabaseConnectionSettingsDto[].class);
-                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db->db.getServerName().equalsIgnoreCase(cssServerName)).findFirst();
+                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db->db.getServerName().equalsIgnoreCase(expandedCssServerName)).findFirst();
                 if (targetCss.isPresent()){
                     cssServerGuid = targetCss.get().getGuid();
                 }
@@ -219,7 +220,7 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
             Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
                     logContentDto -> {
-                        logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
+                        logContentDto.getLines().forEach(logLine -> log.println(LogUtils.replaceAllSensitiveInformation(logLine.getContent())));
                     };
 
             JobState endState = jobsService.pollAndWaitForJobFinished(createJobGuid,

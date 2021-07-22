@@ -76,11 +76,16 @@ In that build step,
 
 ![Deliveries-history](./doc/images/Deliveries-history.png)
 
-The application will be created on AIP Console after you've run the Jenkins Job.
+* By expanding the "Advanced Settings"
+  * You can target a different AIP Console gateway by providing the associated URL and Api Key.
+  * You can choose on which CSS Server you which to store your application' data
+    ![create-app-advanced_settings](./doc/images/create-app-advanced_settings.png)
 
+The application will be created on AIP Console after you've run the Jenkins Job.
 **Important note**
-* When an application is created without the deliveries history then the source code should be located in the Source Folder
-  Path sub-folders. This meant no file will not be accepted.
+
+* When an application is created without the deliveries history then the source code should be located in the Source
+  Folder Path sub-folders. This meant no file will not be accepted.
 
 #### Add Version
 

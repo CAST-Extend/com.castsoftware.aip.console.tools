@@ -67,48 +67,19 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AddVersionBuilderTest {
-    private static final String TEST_URL = "http://localhost:8081";
-    private static final String TEST_KEY = "key";
-    private static final String TEST_CONTENT = "test";
-    private static final String TEST_APP_NAME = "appName";
-    private static final String TEST_ARCHIVE_NAME = "archive.zip";
-    private static final String TEST_JOB_GUID = "jobGuid";
-    private static final String TEST_NODE_NAME = "nodeName";
-    private static final ApplicationDto TEST_APP = ApplicationDto.builder().name(TEST_APP_NAME).guid(TEST_APP_NAME).inPlaceMode(false).build();
-
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-    @Mock
-    private RestApiService restApiService;
-
-    @Mock
-    private UploadService uploadService;
-
-    @Mock
-    private JobsService jobsService;
-
-    @Mock
-    private ApplicationService applicationService;
+public class AddVersionBuilderTest extends BaseBuilderTest{
 
     @InjectMocks
     private AddVersionBuilder addVersionBuilder;
 
     @Before
     public void setUp() throws Exception {
-        AipConsoleGlobalConfiguration config = AipConsoleGlobalConfiguration.get();
-        config.setAipConsoleUrl(TEST_URL);
-        config.setApiKey(Secret.fromString(TEST_KEY));
+        super.startUp();
         addVersionBuilder = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
         MockitoAnnotations.initMocks(this);
         doReturn(ApiInfoDto.builder().apiVersion("1.12.0-DEV").build())
                 .when(restApiService).getAipConsoleApiInfo();
-        doReturn(TEST_APP)
-                .when(applicationService).getApplicationFromGuid(TEST_APP_NAME);
+        doReturn(TEST_APP).when(applicationService).getApplicationFromGuid(TEST_APP_NAME);
     }
 
     @Test
@@ -354,12 +325,6 @@ public class AddVersionBuilderTest {
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(TEST_APP_NAME), build);
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_success_analysisComplete(), build);
-    }
-
-    private FreeStyleProject getProjectWithBuilder(Builder builder) throws IOException {
-        FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(builder);
-        return project;
     }
 
     private FreeStyleProject getProjectWithDefaultAddVersion() throws IOException {
