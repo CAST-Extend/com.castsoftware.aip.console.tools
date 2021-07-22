@@ -19,6 +19,9 @@
         <f:entry title="${%apiKey}" field="apiKey" description="${%apiKey.descr}">
             <f:password />
         </f:entry>
+        <f:entry title="${%cssServerName}" field="cssServerName" description="${%cssServerName.descr}">
+            <f:textbox/>
+        </f:entry>
        <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
             <f:number default="30"/>
         </f:entry>

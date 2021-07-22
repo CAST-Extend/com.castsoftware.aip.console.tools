@@ -3,6 +3,7 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import hudson.model.Run;
 import jenkins.model.RunAction2;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -21,7 +22,8 @@ public class CreateApplicationAction extends BaseAction implements RunAction2 {
     private String nodeName;
     @Nullable
     private String domainName;
-
+    @Nullable
+    private String cssServerName;
 
     public Run getRun() {
         return run;
@@ -58,7 +60,14 @@ public class CreateApplicationAction extends BaseAction implements RunAction2 {
     public void setInPlaceMode(boolean inPlaceMode) {
         this.inPlaceMode = inPlaceMode;
     }
-    
+
+    public String getCssServerName() {
+        return cssServerName;
+    }
+    public void setCssServerName(@Nullable String cssServerName) {
+        this.cssServerName = cssServerName;
+    }
+
     @Override
     public void onAttached(Run<?, ?> run) {
         this.run = run;

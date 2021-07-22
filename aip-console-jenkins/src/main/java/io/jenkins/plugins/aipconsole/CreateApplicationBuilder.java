@@ -181,7 +181,6 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
         String expandedDomainName = run.getEnvironment(listener).expand(domainName);
         String expandedNodeName = run.getEnvironment(listener).expand(nodeName);
 
-
         try {
             // update timeout of HTTP Client if different from default
             if (actualTimeout != Constants.DEFAULT_HTTP_TIMEOUT) {
@@ -206,9 +205,10 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
             }
 
             String cssServerGuid = null;
-            if(StringUtils.isNotEmpty(cssServerName)){
+            String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
+            if(StringUtils.isNotEmpty(expandedCssServerName)){
                 DatabaseConnectionSettingsDto[] cssServers = apiService.getForEntity("api/settings/css-settings", DatabaseConnectionSettingsDto[].class);
-                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db->db.getServerName().equalsIgnoreCase(cssServerName)).findFirst();
+                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db->db.getServerName().equalsIgnoreCase(expandedCssServerName)).findFirst();
                 if (targetCss.isPresent()){
                     cssServerGuid = targetCss.get().getGuid();
                 }
