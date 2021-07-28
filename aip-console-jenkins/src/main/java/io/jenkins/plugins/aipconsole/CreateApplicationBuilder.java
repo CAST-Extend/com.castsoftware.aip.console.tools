@@ -11,6 +11,7 @@ import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -164,8 +165,10 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
             return;
         }
 
-        String expandedAppName = run.getEnvironment(listener).expand(applicationName);
-        String expandedDomainName = run.getEnvironment(listener).expand(domainName);
+        EnvVars vars = run.getEnvironment(listener);
+        String expandedNodeName = vars.expand(nodeName);
+        String expandedAppName = vars.expand(applicationName);
+        String expandedDomainName = vars.expand(domainName);
 
         try {
             // update timeout of HTTP Client if different from default
@@ -181,18 +184,18 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
             }
             // Is there a node name
             String nodeGuid = null;
-            if (StringUtils.isNotBlank(nodeName)) {
+            if (StringUtils.isNotBlank(expandedNodeName)) {
                 try {
                     nodeGuid = apiService.getForEntity("/api/nodes",
                             new TypeReference<List<NodeDto>>() {
                             }).stream()
-                            .filter(n -> StringUtils.equalsIgnoreCase(n.getName(), nodeName))
+                            .filter(n -> StringUtils.equalsIgnoreCase(n.getName(), expandedNodeName))
                             .map(NodeDto::getGuid)
                             .findFirst()
                             .orElse(null);
 
                     if (StringUtils.isBlank(nodeGuid)) {
-                        listener.error(CreateApplicationBuilder_CreateApplication_error_nodeNotFound(nodeName));
+                        listener.error(CreateApplicationBuilder_CreateApplication_error_nodeNotFound(expandedNodeName));
                         run.setResult(defaultResult);
                         return;
                     }

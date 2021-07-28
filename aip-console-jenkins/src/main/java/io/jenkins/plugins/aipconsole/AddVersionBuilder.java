@@ -372,19 +372,20 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                     return;
                 }
                 // Is there a node name
+                String expandedNodeName = vars.expand(nodeName);
                 String nodeGuid = null;
-                if (StringUtils.isNotBlank(nodeName)) {
+                if (StringUtils.isNotBlank(expandedNodeName)) {
                     try {
                         nodeGuid = apiService.getForEntity("/api/nodes",
                                 new TypeReference<List<NodeDto>>() {
                                 }).stream()
-                                .filter(n -> StringUtils.equalsIgnoreCase(n.getName(), nodeName))
+                                .filter(n -> StringUtils.equalsIgnoreCase(n.getName(), expandedNodeName))
                                 .map(NodeDto::getGuid)
                                 .findFirst()
                                 .orElse(null);
 
                         if (StringUtils.isBlank(nodeGuid)) {
-                            listener.error(AddVersionBuilder_AddVersion_error_nodeNotFound(nodeName));
+                            listener.error(AddVersionBuilder_AddVersion_error_nodeNotFound(expandedNodeName));
                             run.setResult(defaultResult);
                             return;
                         }

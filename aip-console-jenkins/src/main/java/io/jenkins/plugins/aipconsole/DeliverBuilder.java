@@ -398,18 +398,19 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 }
                 // Is there a node name
                 String nodeGuid = null;
-                if (StringUtils.isNotBlank(nodeName)) {
+                String expandedNodeName = vars.expand(nodeName);
+                if (StringUtils.isNotBlank(expandedNodeName)) {
                     try {
                         nodeGuid = apiService.getForEntity("/api/nodes",
                                 new TypeReference<List<NodeDto>>() {
                                 }).stream()
-                                .filter(n -> StringUtils.equalsIgnoreCase(n.getName(), nodeName))
+                                .filter(n -> StringUtils.equalsIgnoreCase(n.getName(), expandedNodeName))
                                 .map(NodeDto::getGuid)
                                 .findFirst()
                                 .orElse(null);
 
                         if (StringUtils.isBlank(nodeGuid)) {
-                            listener.error(AddVersionBuilder_AddVersion_error_nodeNotFound(nodeName));
+                            listener.error(AddVersionBuilder_AddVersion_error_nodeNotFound(expandedNodeName));
                             run.setResult(defaultResult);
                             return;
                         }
