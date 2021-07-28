@@ -1,7 +1,5 @@
 ## AIP Console Tools Jenkins Plugin
 
-TODO
-
 ### Purpose
 
 This Jenkins Plugin allows you to automate some parts of using AIP Console, like delivering source code, running an application analysis or generating a snapshot through Jenkins.
