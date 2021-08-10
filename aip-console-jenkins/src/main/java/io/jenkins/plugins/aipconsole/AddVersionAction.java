@@ -20,6 +20,7 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
+    private boolean blueprint = false;
 
     @Nullable
     private String versionName;
@@ -153,6 +154,14 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     public void setProcessImaging(boolean processImaging) {
         this.processImaging = processImaging;
+    }
+
+    public boolean isBlueprint() {
+        return blueprint;
+    }
+
+    public void setBlueprint(boolean blueprint) {
+        this.blueprint = blueprint;
     }
 
     @Nullable

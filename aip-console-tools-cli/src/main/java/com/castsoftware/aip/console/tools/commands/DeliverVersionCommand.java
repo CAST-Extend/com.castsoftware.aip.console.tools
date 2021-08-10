@@ -16,6 +16,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -107,6 +108,11 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     + " if specified without parameter: ${FALLBACK-VALUE}",
             fallbackValue = "true")
     private boolean backupEnabled = false;
+
+    @CommandLine.Option(names = {"--blueprint"}
+            , description = "Add blueprint objective to the objectives list (default: ${DEFAULT-VALUE})."
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", defaultValue = "false")
+    private boolean blueprint;
 
     @CommandLine.Option(names = "--backup-name",
             paramLabel = "BACKUP_NAME",
@@ -205,6 +211,9 @@ public class DeliverVersionCommand implements Callable<Integer> {
             if (app.isInPlaceMode() || setAsCurrent) {
                 //should got up to "set as current" when in-place mode is operating
                 builder.endStep(Constants.SET_CURRENT_STEP_NAME);
+            }
+            if (blueprint) {
+                builder.objectives(VersionObjective.BLUEPRINT);
             }
 
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns, cloneVersion);
