@@ -20,6 +20,7 @@ public class DeliverAction extends BaseAction implements RunAction2 {
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = false;
+    private boolean blueprint = false;
     @Nullable
     private String versionName;
     private boolean failureIgnored = false;
@@ -93,6 +94,14 @@ public class DeliverAction extends BaseAction implements RunAction2 {
 
     public void setCloneVersion(boolean cloneVersion) {
         this.cloneVersion = cloneVersion;
+    }
+
+    public boolean isBlueprint() {
+        return blueprint;
+    }
+
+    public void setBlueprint(boolean blueprint) {
+        this.blueprint = blueprint;
     }
 
     @Nullable

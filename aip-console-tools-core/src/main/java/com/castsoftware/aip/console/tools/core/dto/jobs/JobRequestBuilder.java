@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.dto.jobs;
 
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
@@ -134,6 +135,11 @@ public class JobRequestBuilder {
 
     public JobRequestBuilder releaseDateStr(String releaseDateStr) {
         this.releaseDateStr = releaseDateStr;
+        return this;
+    }
+
+    public JobRequestBuilder objectives(VersionObjective objective) {
+        objectives.add(objective.toString());
         return this;
     }
 

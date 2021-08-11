@@ -8,7 +8,6 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -102,6 +101,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = false;
+    private boolean blueprint = false;
     @Nullable
     private String versionName = "";
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -163,6 +163,19 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     public boolean isCloneVersion() {
         return cloneVersion;
+    }
+
+    @DataBoundSetter
+    public void setBlueprint(boolean blueprint) {
+        this.blueprint = blueprint;
+    }
+
+    public boolean getBlueprint() {
+        return isBlueprint();
+    }
+
+    public boolean isBlueprint() {
+        return blueprint;
     }
 
     @DataBoundSetter

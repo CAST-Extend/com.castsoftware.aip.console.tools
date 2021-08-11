@@ -7,7 +7,6 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -97,6 +96,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
+    private boolean blueprint = false;
 
     @Nullable
     private String versionName = "";
@@ -153,6 +153,19 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setAutoCreate(boolean autoCreate) {
         this.autoCreate = autoCreate;
+    }
+
+    @DataBoundSetter
+    public void setBlueprint(boolean blueprint) {
+        this.blueprint = blueprint;
+    }
+
+    public boolean getBlueprint() {
+        return isBlueprint();
+    }
+
+    public boolean isBlueprint() {
+        return blueprint;
     }
 
     public boolean isCloneVersion() {
