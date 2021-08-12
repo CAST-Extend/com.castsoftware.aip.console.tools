@@ -42,6 +42,7 @@ import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_Cr
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobFailed;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_unavailable;
+import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_cssInfo;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_jobStarted;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_startJob;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_success;
@@ -207,13 +208,15 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
 
             String cssServerGuid = null;
             String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
-            if(StringUtils.isNotEmpty(expandedCssServerName)){
+            if (StringUtils.isNotEmpty(expandedCssServerName)) {
                 DatabaseConnectionSettingsDto[] cssServers = apiService.getForEntity("api/settings/css-settings", DatabaseConnectionSettingsDto[].class);
-                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db->db.getServerName().equalsIgnoreCase(expandedCssServerName)).findFirst();
-                if (targetCss.isPresent()){
+                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db -> db.getServerName().equalsIgnoreCase(expandedCssServerName)).findFirst();
+                if (targetCss.isPresent()) {
                     cssServerGuid = targetCss.get().getGuid();
                 }
             }
+
+            log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(applicationName, cssServerGuid));
 
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
             String createJobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null, cssServerGuid);

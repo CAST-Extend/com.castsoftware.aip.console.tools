@@ -19,7 +19,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.java.Log;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
-import okhttp3.Credentials;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
@@ -318,7 +317,7 @@ public class RestApiServiceImpl implements RestApiService {
 
     @Override
     public void login() throws ApiCallException {
-        Request request = getRequestBuilder("/api/user")
+        Request request = getRequestBuilder("/api/applications")
                 .get()
                 .build();
 
@@ -423,32 +422,9 @@ public class RestApiServiceImpl implements RestApiService {
         @Override
         public Response intercept(Chain chain) throws IOException {
             Request request = chain.request();
-
-            Cookie xsrfCookie = cookieJar.getCookieByName("XSRF-TOKEN");
-
-            Response response;
             Request.Builder reqBuilder = request.newBuilder();
-
-            // get xsrf cookie
-            if (xsrfCookie != null) {
-                log.finest("Setting XSRF-TOKEN header to " + xsrfCookie.value());
-                reqBuilder.header("X-XSRF-TOKEN", xsrfCookie.value());
-            } else {
-                log.finest("No xsrf cookie, next request should set it");
-            }
-
-            if (request.header("Authorization") != null ||
-                    request.header(Constants.API_KEY_HEADER) != null) {
-                // authentication already defined
-                return chain.proceed(reqBuilder.build());
-            } else {
-                if (!StringUtils.isBlank(username)) {
-                    reqBuilder.header("Authorization", Credentials.basic(username, key));
-                } else {
-                    reqBuilder.header(Constants.API_KEY_HEADER, key);
-                }
-                return chain.proceed(reqBuilder.build());
-            }
+            reqBuilder.header(Constants.API_KEY_HEADER, key);
+            return chain.proceed(reqBuilder.build());
         }
     }
 }
