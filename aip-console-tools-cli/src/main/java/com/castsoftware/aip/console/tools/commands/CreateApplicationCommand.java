@@ -95,9 +95,10 @@ public class CreateApplicationCommand implements Callable<Integer> {
         String cssServerGuid = null;
         if(StringUtils.isNotEmpty(cssServerName)){
             try {
-                DatabaseConnectionSettingsDto[] cssServers = restApiService.getForEntity("api/settings/css-settings", DatabaseConnectionSettingsDto[].class);
-                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db->db.getServerName().equalsIgnoreCase(cssServerName)).findFirst();
-                if (targetCss.isPresent()){
+                DatabaseConnectionSettingsDto[] cssServers = restApiService.getForEntity("api/settings/css-settings",
+                        DatabaseConnectionSettingsDto[].class);
+                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db -> db.getServerName().equalsIgnoreCase(cssServerName)).findFirst();
+                if (targetCss.isPresent()) {
                     cssServerGuid = targetCss.get().getGuid();
                 }
             } catch (ApiCallException e) {
@@ -106,6 +107,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
             }
         }
 
+        log.info("Application {} triplets will be hosted by CSS GUID {}", applicationName, cssServerGuid);
         try {
             String nodeGuid = null;
             if (StringUtils.isNotBlank(nodeName)) {
