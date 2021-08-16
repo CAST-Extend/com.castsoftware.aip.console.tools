@@ -19,6 +19,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -512,7 +513,11 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
             }
+            if (isBlueprint()) {
+                requestBuilder.objectives(VersionObjective.BLUEPRINT);
+            }
 
+            log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);
 
             log.println(AddVersionBuilder_AddVersion_info_pollJobMessage());
