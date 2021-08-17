@@ -36,6 +36,7 @@ public class DeliverAction extends BaseAction implements RunAction2 {
     @Nullable
     private String domainName;
     private boolean setAsCurrent = false;
+    private boolean blueprint = false;
 
     private transient Run run;
 
@@ -85,6 +86,14 @@ public class DeliverAction extends BaseAction implements RunAction2 {
 
     public void setSetAsCurrent(boolean setAsCurrent) {
         this.setAsCurrent = setAsCurrent;
+    }
+
+    public boolean isBlueprint() {
+        return blueprint;
+    }
+
+    public void setBlueprint(boolean blueprint) {
+        this.blueprint = blueprint;
     }
 
     public boolean isCloneVersion() {

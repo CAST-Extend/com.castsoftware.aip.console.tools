@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -7,8 +8,10 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -29,6 +32,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -36,6 +40,7 @@ import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_Cr
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_emptyUrl;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobFailed;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_nodeNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_unavailable;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_jobStarted;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_startJob;
@@ -160,8 +165,10 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
             return;
         }
 
-        String expandedAppName = run.getEnvironment(listener).expand(applicationName);
-        String expandedDomainName = run.getEnvironment(listener).expand(domainName);
+        EnvVars vars = run.getEnvironment(listener);
+        String expandedNodeName = vars.expand(nodeName);
+        String expandedAppName = vars.expand(applicationName);
+        String expandedDomainName = vars.expand(domainName);
 
         try {
             // update timeout of HTTP Client if different from default
@@ -175,9 +182,33 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
             } else {
                 apiService.validateUrlAndKey(apiServerUrl, apiKey);
             }
+            // Is there a node name
+            String nodeGuid = null;
+            if (StringUtils.isNotBlank(expandedNodeName)) {
+                try {
+                    nodeGuid = apiService.getForEntity("/api/nodes",
+                            new TypeReference<List<NodeDto>>() {
+                            }).stream()
+                            .filter(n -> StringUtils.equalsIgnoreCase(n.getName(), expandedNodeName))
+                            .map(NodeDto::getGuid)
+                            .findFirst()
+                            .orElse(null);
+
+                    if (StringUtils.isBlank(nodeGuid)) {
+                        listener.error(CreateApplicationBuilder_CreateApplication_error_nodeNotFound(expandedNodeName));
+                        run.setResult(defaultResult);
+                        return;
+                    }
+                } catch (ApiCallException e) {
+                    listener.error("Unable to retrieve the node guid from the given name");
+                    e.printStackTrace(log);
+                    run.setResult(defaultResult);
+                    return;
+                }
+            }
 
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
-            String createJobGuid = jobsService.startCreateApplication(expandedAppName, null, expandedDomainName, inPlaceMode);
+            String createJobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode);
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
             Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
                     logContentDto -> {

@@ -1,5 +1,19 @@
 ## Release Notes :
 
+#### 1.25.2:
+
+Fix Jenkins Plugins:
+* Added variable expansion to Node Name in "Create Application", "Deliver Application" and "Add Version" steps when applicable
+
+#### 1.25.1:
+
+Fix Jenkins Plugin:
+* Fixed an issue where node name was not used when creating new application
+
+#### 1.25.0:
+
+TODO
+
 #### 1.20.0
 
 This version contains compatibility fixes for AIP Console 1.20.0
