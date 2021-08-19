@@ -110,13 +110,7 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public String startAddVersionJob(JobRequestBuilder builder) throws JobServiceException {
-
-        ApiInfoDto apiInfoDto = getApiInfoDto();
-        if (apiInfoDto.isExtractionRequired()) {
-            builder.startStep(Constants.CODE_SCANNER_STEP_NAME);
-        } else {
-            builder.startStep(Constants.EXTRACT_STEP_NAME);
-        }
+        builder.startStep(Constants.EXTRACT_STEP_NAME);
         return startJob(builder);
     }
 
@@ -132,18 +126,7 @@ public class JobsServiceImpl implements JobsService {
                 throw new JobServiceException("No response from AIP Console when start the job");
             }
 
-            // BACKWARDS COMPATIBILITY with 1.9
-            // Job is started in suspended state, and must be resumed
-            if (apiInfoDto.isJobToBeResumed()) {
-                String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(dto.getJobGuid());
-                JobExecutionDto jobStatusWithSteps = restApiService.getForEntity(jobDetailsEndpoint, JobExecutionDto.class);
-                if (jobStatusWithSteps.getState() == JobState.STARTING) {
-                    log.finest("Resuming suspended job");
-                    ChangeJobStateRequest resumeRequest = new ChangeJobStateRequest();
-                    resumeRequest.setState(JobState.STARTED);
-                    restApiService.putForEntity(jobDetailsEndpoint, resumeRequest, String.class);
-                }
-            }
+            // We are in V2 not need to resume job anymore
             log.info("Successfully started Job");
             return dto.getJobGuid();
         } catch (ApiCallException e) {

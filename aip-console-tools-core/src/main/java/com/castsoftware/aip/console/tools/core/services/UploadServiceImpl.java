@@ -85,15 +85,8 @@ public class UploadServiceImpl implements UploadService {
             sourcePath = UUID.randomUUID().toString() + "." + archiveExtension;
             try (InputStream stream = Files.newInputStream(filePath.toPath())) {
                 long fileSize = filePath.length();
-                if (!uploadInputStream(appGuid, sourcePath, fileSize, stream, apiInfo.isExtractionRequired())) {
+                if (!uploadInputStream(appGuid, sourcePath, fileSize, stream, false)) {
                     throw new UploadIncompleteException("Local file fully uploaded, but AIP Console expects more content (fileSize on AIP Console not reached). Check the file you provided wasn't modified since the start of the CLI");
-                }
-                if (apiInfo.isExtractionRequired()) {
-                    // If we have already extracted the content, the source path will be application main sources
-                    sourcePath = appName + "/main_sources";
-                    if (apiInfo.isSourcePathPrefixRequired()) {
-                        sourcePath = "upload:" + sourcePath;
-                    }
                 }
                 return "upload:" + appName + "/" + sourcePath;
             } catch (IOException e) {
@@ -138,8 +131,7 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content)
             throws UploadException {
-        ApiInfoDto dto = restApiService.getAipConsoleApiInfo();
-        return uploadInputStream(appGuid, fileName, fileSize, content, dto.isExtractionRequired());
+        return uploadInputStream(appGuid, fileName, fileSize, content, false);
     }
 
     @Override
