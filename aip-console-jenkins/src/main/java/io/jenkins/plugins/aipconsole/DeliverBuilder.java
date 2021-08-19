@@ -350,11 +350,10 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
         EnvVars vars = run.getEnvironment(listener);
         String expandedAppName = vars.expand(applicationName);
-        ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
-        boolean inplaceMode = false;
+        boolean inPlaceMode = false;
         try {
             ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
-            inplaceMode = app == null ? false : app.isInPlaceMode();
+            inPlaceMode = app == null ? false : app.isInPlaceMode();
             applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(expandedAppName));
@@ -365,8 +364,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
         String resolvedFilePath = vars.expand(filePath);
 
-        // inplace mode only allows the folders
-        if (inplaceMode && Files.isRegularFile(Paths.get(resolvedFilePath))) {
+        // Simplified Delivery  Mode only allows the folders
+        if (inPlaceMode && Files.isRegularFile(Paths.get(resolvedFilePath))) {
             listener.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
             run.setResult(Result.NOT_BUILT);
             return;
@@ -386,7 +385,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         }
 
         String fileName = UUID.randomUUID().toString();
-
         try {
 
             // Get the GUID from AIP Console
@@ -425,7 +423,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inplaceMode, null,null);
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null,null);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),
@@ -460,9 +458,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                     return;
                 }
                 fileName = Paths.get(resolvedFilePath).toString();
-                if (apiInfoDto.isSourcePathPrefixRequired()) {
-                    fileName = "sources:" + fileName;
-                }
+                fileName = "sources:" + fileName;
             } else {
                 fileName = String.format("%s.%s", fileName, fileExt);
 
@@ -474,15 +470,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                     if (!uploadService.uploadInputStream(applicationGuid, fileName, workspaceFile.length(), bufferedStream)) {
                         throw new UploadException("Uploading was not completed successfully.");
                     }
-                    if (apiInfoDto.isExtractionRequired()) {
-                        // If we have already extracted the content, the source path will be application main sources
-                        fileName = applicationName + "/main_sources";
-                        if (apiInfoDto.isSourcePathPrefixRequired()) {
-                            fileName = "upload:" + fileName;
-                        }
-                    } else {
-                        fileName = "upload:" + applicationName + "/" + fileName;
-                    }
+                    fileName = "upload:" + applicationName + "/" + fileName;
                 }
             }
         } catch (ApplicationServiceException e) {
@@ -530,7 +518,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
 
-            if (inplaceMode || isSetAsCurrent()) {
+            if (inPlaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
             if (isBlueprint()) {

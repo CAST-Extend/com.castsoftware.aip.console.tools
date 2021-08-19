@@ -49,33 +49,6 @@ public class ApiInfoDto {
         return getSemVer();
     }
 
-    public boolean isExtractionRequired() {
-        SemVer consoleVersion = getSemVer();
-        // Extract for versions above 1.12
-        return consoleVersion.getMajor() >= 1 && consoleVersion.getMinor() > 12 && consoleVersion.getMinor() < 19;
-    }
-
-    public boolean isSourcePathPrefixRequired() {
-        SemVer consoleVersion = getSemVer();
-        // Prefix is required for versions above 1.12 (?)
-        return consoleVersion.getMajor() > 1 || consoleVersion.getMajor() == 1 && consoleVersion.getMinor() > 12;
-    }
-
-    public boolean isJobStatusWithDuration() {
-        SemVer version = getSemVer();
-        return version.getMajor() >= 1 && version.getMinor() >= 20;
-    }
-
-    public boolean isJobToBeResumed() {
-        SemVer version = getSemVer();
-        return version.getMajor() >= 1 && version.getMinor() <= 9;
-    }
-
-    public boolean isLastStepConsolidateSnapshot() {
-        SemVer version = getSemVer();
-        return version.getMajor() >= 1 && version.getMinor() <= 15;
-    }
-
     private SemVer getSemVer() {
         if (apiVersionSemVer == null) {
             synchronized (this) {

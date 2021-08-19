@@ -323,7 +323,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             run.setResult(defaultResult);
             return;
         }
-        ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
+
         EnvVars vars = run.getEnvironment(listener);
         // Parse variables in application name
         String variableAppName = vars.expand(applicationName);
@@ -436,9 +436,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                     return;
                 }
                 fileName = Paths.get(resolvedFilePath).toString();
-                if (apiInfoDto.isSourcePathPrefixRequired()) {
-                    fileName = "sources:" + fileName;
-                }
+                fileName = "sources:" + fileName;
             } else {
                 fileName = String.format("%s.%s", fileName, fileExt);
                 // if it already exists, delete it (might be a remnant of a previous execution)
@@ -450,15 +448,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                         throw new UploadException("Uploading was not completed successfully.");
                     }
 
-                    if (apiInfoDto.isExtractionRequired()) {
-                        // If we have already extracted the content, the source path will be application main sources
-                        fileName = applicationName + "/main_sources";
-                        if (apiInfoDto.isSourcePathPrefixRequired()) {
-                            fileName = "upload:" + fileName;
-                        }
-                    } else {
-                        fileName = "upload:" + applicationName + "/" + fileName;
-                    }
+                    fileName = "upload:" + applicationName + "/" + fileName;
                 }
             }
         } catch (ApplicationServiceException e) {
