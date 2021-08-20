@@ -1,7 +1,5 @@
 ## AIP Console Tools Jenkins Plugin
 
-TODO
-
 ### Purpose
 
 This Jenkins Plugin allows you to automate some parts of using AIP Console, like delivering source code, running an application analysis or generating a snapshot through Jenkins.
@@ -162,6 +160,20 @@ The Snapshot can then be found inside the `Snapshot` tab in AIP Console.
 
 The quick start only covers the basic usage of each step of the plugin. The following sections provide greater details on what each parameters changes in the behavior of the AIP Console Tools plugin.
 
+#### A Note on variable expansion
+
+Variable expansion means replacing some variables in text fields to an environment variable value.
+
+For example, creating an application with name "${JOB_NAME} (jenkins)", the Plugin will replace '${JOB_NAME}' with the name of the current running job.
+You can use these environment variables on the following fields in each jobs (when defined):
+
+* Application name
+* Version name
+* Snapshot name
+* Node name
+
+You can manually add environment variables to a build or use global jenkins environment variables (see [the jenkins documentation](https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables))
+
 #### Create Application
 
 The create application provides the following parameters :
@@ -184,9 +196,7 @@ The Add Version step provides the following parameters :
   * A Folder Path on the AIP Node relative to the Source Folder Path defined inside AIP Console. For more information, [please see here under Source Folder Location](https://doc.castsoftware.com/display/AIPCONSOLE/Administration+Center+-+Settings) **Requires AIP Console 1.15.0 or above**
 * *Create Application if missing*: If checked and the application cannot be found on AIP Console, it will be created. Otherwise, the step will fail.
 * *Version Name* (optional): The name of the version that will be created. If left blank, the version will be named with the following pattern : `vYYMMDD.hhmmss` based on date and time.
-  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
 * *Snapshot Name* (optional): The name of the snapshot that will be created, if left blank, the snapshot will be named with date and time
-  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
 * *Rescan*: Clone the previous version of the application (similar to the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no version exists, it will run an Add version job instead.
 * *Enable Security Dataflow*: Enabled the Security Objective for this version. Has no effect if `Rescan` is checked.
 
@@ -213,12 +223,10 @@ The Deliver step provides similar parameters to the Add Version step :
 * *Exclusion patterns* : File patterns to exclude in the delivery, the pattern needs to follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
 * *Version Name* (optional): The name of the version that will be created. If left blank, the version will be named with
   the following pattern : `vYYMMDD.hhmmss` based on date and time.
-  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be
-    replaced by the current jobs' build number.
 * *Make version current* (optional): When checked then the version is used as being the current, and it is made ready to
   analyze.  
   ![set-as-current](./doc/images/set-as-current.png)
-* *Copy configration from previous version*: Clone the previous version of the application (similar to
+* *Copy configuration from previous version*: Clone the previous version of the application (similar to
   the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no
   version exists, it will run an Add version job instead.
 * *Enable Security Dataflow*: Enabled the Security Objective for this version. Has no effect if `Rescan` is checked.

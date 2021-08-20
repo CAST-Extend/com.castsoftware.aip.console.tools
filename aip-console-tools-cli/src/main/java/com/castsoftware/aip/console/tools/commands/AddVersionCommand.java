@@ -7,8 +7,17 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
-import com.castsoftware.aip.console.tools.core.exceptions.*;
-import com.castsoftware.aip.console.tools.core.services.*;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
+import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
+import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.services.ApplicationService;
+import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
+import com.castsoftware.aip.console.tools.core.services.JobsService;
+import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
@@ -21,7 +30,6 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -199,9 +207,8 @@ public class AddVersionCommand implements Callable<Integer> {
             }
 
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
-            if (app.isInPlaceMode() && Files.isRegularFile(filePath.toPath())) {
-                log.error("The application is created in \"in-place\" mode, only folder path is allowed to deliver in this mode.");
-                return Constants.RETURN_INPLACE_MODE_ERROR;
+            if (app.isInPlaceMode()) {
+                log.info("The application '{}' is using the \"Simplified Delivery Mode\"", applicationName);
             }
 
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
