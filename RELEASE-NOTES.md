@@ -1,5 +1,10 @@
 ## Release Notes :
 
+#### 1.25.2:
+
+Fix Jenkins Plugins:
+* Added variable expansion to Node Name in "Create Application", "Deliver Application" and "Add Version" steps when applicable
+
 #### 1.25.1:
 
 Fix Jenkins Plugin:
