@@ -60,7 +60,17 @@ proceed as follows.
 
 * The value used for AIP Console URL and API Key is always coming from the Job itself when assigned.
 * If one field is not assigned then the one from the *Global Configuration* will be used.
+### Defining the Analysis Strategy using objectives options
 
+These options can be updated when on-boarding a version using either
+
+* Add Version job
+* Deliver Version job.
+
+The enabled options will be added to the existing default ones: **Global Assessment** and **
+Function Points measurement**. To Enable/Disable **Blueprint** and **Security assessment** you will need to expand
+the **Advanced Settings** of the dedicated job.
+![security-objective](./doc/images/security-objective.png)
 ### Quick Start
 
 #### Create Application

@@ -101,6 +101,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     private boolean autoCreate = false;
     private boolean cloneVersion = false;
     private boolean blueprint = false;
+    private boolean enableSecurityAssessment = false;
+
     @Nullable
     private String versionName = "";
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -175,6 +177,19 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     public boolean isBlueprint() {
         return blueprint;
+    }
+
+    @DataBoundSetter
+    public void setEnableSecurityAssessment(boolean enableFlag) {
+        enableSecurityAssessment = enableFlag;
+    }
+
+    public boolean getEnableSecurityAssessment() {
+        return isSecurityAssessmentEnabled();
+    }
+
+    public boolean isSecurityAssessmentEnabled() {
+        return enableSecurityAssessment;
     }
 
     @DataBoundSetter
@@ -503,7 +518,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
-                    .securityObjective(enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
@@ -511,9 +526,9 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             if (inPlaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
-            if (isBlueprint()) {
-                requestBuilder.objectives(VersionObjective.BLUEPRINT);
-            }
+            requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
+            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+
             log.println("Exclusion patterns : " + exclusionPatterns);
             requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns, applicationHasVersion));
 

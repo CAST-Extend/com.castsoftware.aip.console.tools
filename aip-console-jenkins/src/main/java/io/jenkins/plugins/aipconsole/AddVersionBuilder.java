@@ -1,6 +1,5 @@
 package io.jenkins.plugins.aipconsole;
 
-import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
@@ -48,7 +47,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -98,6 +96,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
     private boolean blueprint = false;
+    private boolean enableSecurityAssessment = false;
 
     @Nullable
     private String versionName = "";
@@ -167,6 +166,19 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
     public boolean isBlueprint() {
         return blueprint;
+    }
+
+    @DataBoundSetter
+    public void setEnableSecurityAssessment(boolean enableFlag) {
+        enableSecurityAssessment = enableFlag;
+    }
+
+    public boolean getEnableSecurityAssessment() {
+        return isSecurityAssessmentEnabled();
+    }
+
+    public boolean isSecurityAssessmentEnabled() {
+        return enableSecurityAssessment;
     }
 
     public boolean isCloneVersion() {
@@ -483,7 +495,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, caipVersion);
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .versionName(resolvedVersionName)
-                    .securityObjective(enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
@@ -496,9 +508,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
             }
-            if (isBlueprint()) {
-                requestBuilder.objectives(VersionObjective.BLUEPRINT);
-            }
+
+            requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
+            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);
