@@ -1,6 +1,5 @@
 package io.jenkins.plugins.aipconsole;
 
-import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
@@ -50,7 +49,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -103,6 +101,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     private boolean autoCreate = false;
     private boolean cloneVersion = false;
     private boolean blueprint = false;
+    private boolean enableSecurityAssessment = false;
+
     @Nullable
     private String versionName = "";
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -177,6 +177,19 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     public boolean isBlueprint() {
         return blueprint;
+    }
+
+    @DataBoundSetter
+    public void setEnableSecurityAssessment(boolean enableFlag) {
+        enableSecurityAssessment = enableFlag;
+    }
+
+    public boolean getEnableSecurityAssessment() {
+        return isSecurityAssessmentEnabled();
+    }
+
+    public boolean isSecurityAssessmentEnabled() {
+        return enableSecurityAssessment;
     }
 
     @DataBoundSetter
@@ -350,10 +363,10 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
         EnvVars vars = run.getEnvironment(listener);
         String expandedAppName = vars.expand(applicationName);
-        boolean inPlaceMode = false;
+        boolean inPlaceMode;
         try {
             ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
-            inPlaceMode = app == null ? false : app.isInPlaceMode();
+            inPlaceMode = app != null && app.isInPlaceMode();
             applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(expandedAppName));
@@ -363,14 +376,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         }
 
         String resolvedFilePath = vars.expand(filePath);
-
-        // Simplified Delivery  Mode only allows the folders
-        if (inPlaceMode && Files.isRegularFile(Paths.get(resolvedFilePath))) {
-            listener.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
-            run.setResult(Result.NOT_BUILT);
-            return;
-        }
-        
         String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(resolvedFilePath);
         FilePath workspaceFile = null;
         // Local file
@@ -449,7 +454,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
                 //call api to check if the folder exists
                 try {
-                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(resolvedFilePath).toString()).build();
+                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(resolvedFilePath)).build();
                     apiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
                 } catch (ApiCallException e) {
                     listener.error("Unable to find the file " + resolvedFilePath + " in the source.folder.location");
@@ -513,7 +518,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
-                    .securityObjective(enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
@@ -521,9 +526,9 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             if (inPlaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
-            if (isBlueprint()) {
-                requestBuilder.objectives(VersionObjective.BLUEPRINT);
-            }
+            requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
+            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+
             log.println("Exclusion patterns : " + exclusionPatterns);
             requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns, applicationHasVersion));
 
@@ -572,8 +577,10 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     /**
      * Download the DMT report to the jenkins workspace
      *
-     * @param workspace
-     * @param versionName
+     * @param workspace source file
+     * @param appGuid host application GUID
+     * @param versionName the version name
+     * @param taskListener log provider
      */
     private void downloadDeliveryReport(FilePath workspace, String appGuid, String versionName, TaskListener taskListener) throws ApplicationServiceException, ApiCallException {
         PrintStream log = taskListener.getLogger();

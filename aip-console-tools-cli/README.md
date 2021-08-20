@@ -20,6 +20,17 @@ You will also need the following :
 
 ![source folder location](doc/images/source_folder_location_config.png)
 
+### Defining the Analysis Strategy using objectives options
+
+These options can be updated when on-boarding a version using either
+
+* Add Version command
+* Deliver Version command
+
+The enabled options will be added to the existing default ones: **Global Assessment** and **
+Function Points measurement**. To Enable/Disable **Data safety investigation** or **Blueprint** and **Security
+assessment** you will need to display the help for dedicated command for more details.
+
 ### Quick Start
 For any of the command line listed bellow, you can use *--verbose* argument to decide whether to display API log information or not.
 

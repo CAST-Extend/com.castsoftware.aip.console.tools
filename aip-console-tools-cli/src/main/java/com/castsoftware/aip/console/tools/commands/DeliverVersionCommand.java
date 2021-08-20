@@ -114,6 +114,12 @@ public class DeliverVersionCommand implements Callable<Integer> {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", defaultValue = "false")
     private boolean blueprint;
 
+    @CommandLine.Option(names = {"-security-assessment", "--enable-security-assessment"},
+            description = "Enable/Disable Security Assessment for this version"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true", defaultValue = "false")
+    private boolean enableSecurityAssessment;
+
     @CommandLine.Option(names = "--backup-name",
             paramLabel = "BACKUP_NAME",
             description = "The name of the backup to create before delivering the new version. Defaults to 'backup_date.time'")
@@ -187,9 +193,8 @@ public class DeliverVersionCommand implements Callable<Integer> {
             }
 
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
-            if (app.isInPlaceMode() && Files.isRegularFile(filePath.toPath())) {
-                log.error("The application is created in \"in-place\" mode, only folder path is allowed to deliver in this mode.");
-                return Constants.RETURN_INPLACE_MODE_ERROR;
+            if (app.isInPlaceMode()) {
+                log.info("The application '{}' is using the \"Simplified Delivery Mode\"", applicationName);
             }
 
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
@@ -203,18 +208,18 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
-                    .securityObjective(enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
 
             if (app.isInPlaceMode() || setAsCurrent) {
-                //should got up to "set as current" when in-place mode is operating
+                //should get up to "set as current" when the Simplified Delivery Mode is operating
                 builder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
-            if (blueprint) {
-                builder.objectives(VersionObjective.BLUEPRINT);
-            }
+
+            builder.objectives(VersionObjective.BLUEPRINT, blueprint);
+            builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
 
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns, cloneVersion);
             log.info("delivery configuration guid " + deliveryConfigGuid);

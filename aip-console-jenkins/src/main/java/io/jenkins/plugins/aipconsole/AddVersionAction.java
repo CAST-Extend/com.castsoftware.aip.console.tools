@@ -21,6 +21,7 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
     private boolean blueprint = false;
+    private boolean enableSecurityAssessment = false;
 
     @Nullable
     private String versionName;
@@ -162,6 +163,13 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     public void setBlueprint(boolean blueprint) {
         this.blueprint = blueprint;
+    }
+    public boolean isSecurityAssessmentEnabled() {
+        return enableSecurityAssessment;
+    }
+
+    public void setSecurityAssessment(boolean enableFlag) {
+        enableSecurityAssessment = enableFlag;
     }
 
     @Nullable

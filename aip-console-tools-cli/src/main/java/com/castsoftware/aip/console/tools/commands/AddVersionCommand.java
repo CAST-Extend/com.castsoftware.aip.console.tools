@@ -126,6 +126,12 @@ public class AddVersionCommand implements Callable<Integer> {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", defaultValue = "false")
     private boolean blueprint;
 
+    @CommandLine.Option(names = {"-security-assessment", "--enable-security-assessment"},
+            description = "Enable/Disable Security Assessment for this version"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true", defaultValue = "false")
+    private boolean enableSecurityAssessment;
+
     /**
      * Name of the backup
      */
@@ -197,9 +203,8 @@ public class AddVersionCommand implements Callable<Integer> {
             }
 
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
-            if (app.isInPlaceMode() && Files.isRegularFile(filePath.toPath())) {
-                log.error("The application is created in \"in-place\" mode, only folder path is allowed to deliver in this mode.");
-                return Constants.RETURN_INPLACE_MODE_ERROR;
+            if (app.isInPlaceMode()) {
+                log.info("The application '{}' is using the \"Simplified Delivery Mode\"", applicationName);
             }
 
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
@@ -210,7 +215,7 @@ public class AddVersionCommand implements Callable<Integer> {
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion())
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
-                    .securityObjective(enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
@@ -219,10 +224,9 @@ public class AddVersionCommand implements Callable<Integer> {
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
             }
-            
-            if (blueprint) {
-                builder.objectives(VersionObjective.BLUEPRINT);
-            }
+
+            builder.objectives(VersionObjective.BLUEPRINT, blueprint);
+            builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
 
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);

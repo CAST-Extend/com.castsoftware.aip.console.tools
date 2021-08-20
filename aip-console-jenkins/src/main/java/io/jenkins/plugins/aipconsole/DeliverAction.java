@@ -21,6 +21,8 @@ public class DeliverAction extends BaseAction implements RunAction2 {
     private boolean autoCreate = false;
     private boolean cloneVersion = false;
     private boolean blueprint = false;
+    private boolean enableSecurityAssessment = false;
+
     @Nullable
     private String versionName;
     private boolean failureIgnored = false;
@@ -102,6 +104,13 @@ public class DeliverAction extends BaseAction implements RunAction2 {
 
     public void setBlueprint(boolean blueprint) {
         this.blueprint = blueprint;
+    }
+
+    public boolean isSecurityAssessmentEnabled() {
+        return enableSecurityAssessment;
+    }
+    public void setSecurityAssessment(boolean enableFlag) {
+        enableSecurityAssessment = enableFlag;
     }
 
     @Nullable
