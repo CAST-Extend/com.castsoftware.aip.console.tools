@@ -11,10 +11,10 @@ import static java.util.stream.Collectors.joining;
 
 public enum VersionObjective {
     GLOBAL_RISK,
-    SECURITY,
+    SECURITY, //Security Assessment
     FUNCTIONAL_POINTS,
     BLUEPRINT,
-    DATA_SAFETY;
+    DATA_SAFETY; //DataFlow
 
     public static final String OBJECTIVES_DELIMITER = ",";
 

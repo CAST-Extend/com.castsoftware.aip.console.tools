@@ -341,13 +341,6 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         }
 
         String resolvedFilePath = vars.expand(filePath);
-        // inplace mode only allows the folders
-        if (inplaceMode && Files.isRegularFile(Paths.get(resolvedFilePath))) {
-            listener.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
-            run.setResult(Result.NOT_BUILT);
-            return;
-        }
-
         String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(resolvedFilePath);
         FilePath workspaceFile = null;
         if (StringUtils.equalsAnyIgnoreCase(fileExt, "zip", "tgz", "tar.gz")) {

@@ -197,9 +197,8 @@ public class AddVersionCommand implements Callable<Integer> {
             }
 
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
-            if (app.isInPlaceMode() && Files.isRegularFile(filePath.toPath())) {
-                log.error("The application is created in \"in-place\" mode, only folder path is allowed to deliver in this mode.");
-                return Constants.RETURN_INPLACE_MODE_ERROR;
+            if (app.isInPlaceMode()) {
+                log.info("The application '{}' is using the \"Simplified Delivery Mode\"", applicationName);
             }
 
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);

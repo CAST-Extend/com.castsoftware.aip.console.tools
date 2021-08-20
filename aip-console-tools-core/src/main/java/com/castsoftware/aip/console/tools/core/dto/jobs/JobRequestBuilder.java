@@ -142,6 +142,14 @@ public class JobRequestBuilder {
         objectives.add(objective.toString());
         return this;
     }
+    public JobRequestBuilder objectives(VersionObjective objective, boolean enable) {
+        if (!enable && objectives.contains(objective.toString())){
+            objectives.remove(objective.toString());
+        } else if (enable){ //enabling
+            objectives.add(objective.toString());
+        }
+        return this;
+    }
 
     public JobRequestBuilder releaseAndSnapshotDate(Date date) {
         if (date == null) {

@@ -1,6 +1,5 @@
 package io.jenkins.plugins.aipconsole;
 
-import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
@@ -50,7 +49,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -350,10 +348,10 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
         EnvVars vars = run.getEnvironment(listener);
         String expandedAppName = vars.expand(applicationName);
-        boolean inPlaceMode = false;
+        boolean inPlaceMode;
         try {
             ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
-            inPlaceMode = app == null ? false : app.isInPlaceMode();
+            inPlaceMode = app != null && app.isInPlaceMode();
             applicationGuid = app == null ? null : app.getGuid();
         } catch (ApplicationServiceException e) {
             listener.error(AddVersionBuilder_AddVersion_error_appCreateError(expandedAppName));
@@ -363,14 +361,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         }
 
         String resolvedFilePath = vars.expand(filePath);
-
-        // Simplified Delivery  Mode only allows the folders
-        if (inPlaceMode && Files.isRegularFile(Paths.get(resolvedFilePath))) {
-            listener.error("The application is created in \"Inplace\" mode, only folder path is allowed to deliver in this mode.");
-            run.setResult(Result.NOT_BUILT);
-            return;
-        }
-        
         String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(resolvedFilePath);
         FilePath workspaceFile = null;
         // Local file
@@ -449,7 +439,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
                 //call api to check if the folder exists
                 try {
-                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(resolvedFilePath).toString()).build();
+                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(resolvedFilePath)).build();
                     apiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
                 } catch (ApiCallException e) {
                     listener.error("Unable to find the file " + resolvedFilePath + " in the source.folder.location");
@@ -572,8 +562,10 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     /**
      * Download the DMT report to the jenkins workspace
      *
-     * @param workspace
-     * @param versionName
+     * @param workspace source file
+     * @param appGuid host application GUID
+     * @param versionName the version name
+     * @param taskListener log provider
      */
     private void downloadDeliveryReport(FilePath workspace, String appGuid, String versionName, TaskListener taskListener) throws ApplicationServiceException, ApiCallException {
         PrintStream log = taskListener.getLogger();
