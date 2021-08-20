@@ -5,12 +5,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
-import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.exceptions.*;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -141,6 +136,12 @@ public class DeliverVersionCommand implements Callable<Integer> {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", defaultValue = "false")
     private boolean blueprint;
 
+    @CommandLine.Option(names = {"-security-assessment", "--enable-security-assessment"},
+            description = "Enable/Disable Security Assessment for this version"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true", defaultValue = "false")
+    private boolean enableSecurityAssessment;
+
 
     public DeliverVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         this.restApiService = restApiService;
@@ -204,7 +205,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
-                    .securityObjective(enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
@@ -213,9 +214,8 @@ public class DeliverVersionCommand implements Callable<Integer> {
                 //should got up to "set as current" when in-place mode is operating
                 builder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
-            if (blueprint) {
-                builder.objectives(VersionObjective.BLUEPRINT);
-            }
+            builder.objectives(VersionObjective.BLUEPRINT, blueprint);
+            builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
 
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns, cloneVersion);
             log.info("delivery configuration guid " + deliveryConfigGuid);

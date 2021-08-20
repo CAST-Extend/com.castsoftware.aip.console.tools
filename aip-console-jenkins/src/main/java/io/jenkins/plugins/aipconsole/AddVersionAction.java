@@ -34,6 +34,7 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     private String domainName;
     private boolean processImaging = false;
     private boolean blueprint = false;
+    private boolean enableSecurityAssessment = false;
 
     @Nullable
     private String snapshotName;
@@ -162,6 +163,14 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     public void setBlueprint(boolean blueprint) {
         this.blueprint = blueprint;
+    }
+
+    public boolean isSecurityAssessmentEnabled() {
+        return enableSecurityAssessment;
+    }
+
+    public void setSecurityAssessment(boolean enableFlag) {
+        enableSecurityAssessment = enableFlag;
     }
 
 

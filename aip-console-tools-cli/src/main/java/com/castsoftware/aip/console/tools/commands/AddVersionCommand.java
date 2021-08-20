@@ -7,18 +7,8 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
-import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
-import com.castsoftware.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
-import com.castsoftware.aip.console.tools.core.services.DebugOptionsServiceImpl;
-import com.castsoftware.aip.console.tools.core.services.JobsService;
-import com.castsoftware.aip.console.tools.core.services.RestApiService;
-import com.castsoftware.aip.console.tools.core.services.UploadService;
+import com.castsoftware.aip.console.tools.core.exceptions.*;
+import com.castsoftware.aip.console.tools.core.services.*;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
@@ -129,6 +119,12 @@ public class AddVersionCommand implements Callable<Integer> {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", defaultValue = "false")
     private boolean blueprint;
 
+    @CommandLine.Option(names = {"-security-assessment", "--enable-security-assessment"},
+            description = "Enable/Disable Security Assessment for this version"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true", defaultValue = "false")
+    private boolean enableSecurityAssessment;
+
     /**
      * Name of the backup
      */
@@ -216,7 +212,7 @@ public class AddVersionCommand implements Callable<Integer> {
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
-                    .securityObjective(enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
@@ -224,9 +220,8 @@ public class AddVersionCommand implements Callable<Integer> {
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
             }
-            if (blueprint) {
-                builder.objectives(VersionObjective.BLUEPRINT);
-            }
+            builder.objectives(VersionObjective.BLUEPRINT, blueprint);
+            builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
 
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);

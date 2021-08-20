@@ -1,21 +1,13 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
-import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
-import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.LogsDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.*;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.LogUtils;
+import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +35,7 @@ public class JobsServiceImpl implements JobsService {
 
     public JobsServiceImpl(RestApiService restApiService) {
         this.restApiService = restApiService;
-        this.pollingSleepDuration = POLL_SLEEP_DURATION;
+        pollingSleepDuration = POLL_SLEEP_DURATION;
     }
 
     public JobsServiceImpl(RestApiService restApiService, long pollingSleepDuration) {
@@ -114,7 +106,7 @@ public class JobsServiceImpl implements JobsService {
         JobRequestBuilder builder = JobRequestBuilder.newInstance(appGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                 .versionName(versionName)
                 .releaseAndSnapshotDate(versionReleaseDate)
-                .securityObjective(enableSecurityDataflow);
+                .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow);
 
         return startAddVersionJob(builder);
     }

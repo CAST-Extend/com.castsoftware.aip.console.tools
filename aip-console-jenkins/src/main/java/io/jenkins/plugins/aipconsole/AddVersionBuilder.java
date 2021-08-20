@@ -3,17 +3,8 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
-import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
-import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.dto.jobs.*;
+import com.castsoftware.aip.console.tools.core.exceptions.*;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -58,24 +49,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appCreateError;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_fileNotFound;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_nodeNotFound;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_uploadFailed;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_noVersionAvailable;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_pollJobMessage;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startAddVersionJob;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startCloneVersionJob;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startUpload;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_DescriptorImpl_displayName;
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
-import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDenied;
-import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
+import static io.jenkins.plugins.aipconsole.Messages.*;
 
 public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildStep {
 
@@ -115,6 +89,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @Nullable
     private String snapshotName = "";
     private boolean blueprint = false;
+    private boolean enableSecurityAssessment = false;
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -167,6 +142,19 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
     public boolean isBlueprint() {
         return blueprint;
+    }
+
+    @DataBoundSetter
+    public void setEnableSecurityAssessment(boolean enableFlag) {
+        enableSecurityAssessment = enableFlag;
+    }
+
+    public boolean getEnableSecurityAssessment() {
+        return isSecurityAssessmentEnabled();
+    }
+
+    public boolean isSecurityAssessmentEnabled() {
+        return enableSecurityAssessment;
     }
 
     public boolean isCloneVersion() {
@@ -497,7 +485,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .versionName(resolvedVersionName)
-                    .securityObjective(enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
@@ -507,9 +495,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
             }
 
-            if (isBlueprint()) {
-                requestBuilder.objectives(VersionObjective.BLUEPRINT);
-            }
+            requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
+            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
             }

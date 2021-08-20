@@ -6,11 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JobRequestBuilder {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -135,6 +131,15 @@ public class JobRequestBuilder {
 
     public JobRequestBuilder objectives(VersionObjective objective) {
         objectives.add(objective.toString());
+        return this;
+    }
+
+    public JobRequestBuilder objectives(VersionObjective objective, boolean enable) {
+        if (!enable && objectives.contains(objective.toString())) {
+            objectives.remove(objective.toString());
+        } else if (enable) {
+            objectives.add(objective.toString());
+        }
         return this;
     }
 
