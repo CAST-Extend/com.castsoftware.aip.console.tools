@@ -82,7 +82,8 @@ To create an application, add the `Create application on AIP Console` Step to a 
 In that build step,
 
 * you *must* provide the application name.
-* You also optionally have the possibility to decide whether the application should keep the deliveries history or not.
+* You also optionally have the possibility to decide whether the application should keep the delivered version history
+  or not.
 
 ![Deliveries-history](./doc/images/Deliveries-history.png)
 

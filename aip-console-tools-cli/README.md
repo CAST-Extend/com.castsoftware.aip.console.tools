@@ -39,8 +39,9 @@ information or not.
 
 To **create a new application**,
 
-* You also optionally have the possibility to decide whether the application should keep the deliveries history or not:
-  set *--inplace-mode* argument to match your requirement.
+* You also optionally have the possibility to decide whether the application should keep the delivered version history
+  or not:
+  set *--no-version-history* argument to match your requirement.
 * Whether or not to display log information on screen by setting *--verbose* argument to either true or false.
 
 **Important note**
@@ -51,7 +52,7 @@ To **create a new application**,
 run the following :
 
 ```bash
-java -jar .\aip-console-tools-cli.jar new -n "my app" --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" --verbose=false --inplace-mode=false
+java -jar .\aip-console-tools-cli.jar new -n "my app" --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" --verbose=false --no-version-history=false
 ```
 
 This will create a new application "my app" on my AIP Console instance at `localhost:8081` using my API Key. The
