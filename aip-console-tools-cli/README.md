@@ -35,23 +35,27 @@ assessment** you will need to display the help for dedicated command for more de
 For any of the command line listed bellow, you can use *--verbose* argument to decide whether to display API log information or not.
 
 To **create a new application**, 
-* You also optionally have the possibility to decide whether the application should keep the deliveries history or not: set *--inplace-mode* argument to match your requirement.
+* You optionally have the possibility to decide whether the application should keep the delivered version history
+    or not:
+    set *--no-version-history* argument to match your requirement.
+
 * Whether or not to display log information on screen by setting *--verbose* argument to either true or false.
 * You can optionally choose on which CSS server you which to host created application' data. To do so just add either *
   --css-server* or *-css* argument with the name of the desired serve.
 
 **Important note**
 
-* When an application is created without the deliveries' history then the source code should be located the SFL
+* When an application is created without the delivered sources history then the source code should be located the SFL
   sub-folders. This meant no file will not be accepted, and the path provided for versions must be SFL relative path.
 
 run the following :
 
 ```bash
-java -jar .\aip-console-tools-cli.jar new -n "my app" --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" --verbose=false --inplace-mode=false -css="Server-Host:Server-Port"
+java -jar .\aip-console-tools-cli.jar new -n "my app" --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" --verbose=false --no-version-history=false -css="Server-Host:Server-Port"
 ```
 
-This will create a new application "my app" on my AIP Console instance at `localhost:8081` using my API Key. The complete deliveries history will be kept and the API log information will not be displayed.
+This will create a new application "my app" on my AIP Console instance at `localhost:8081` using my API Key. 
+The complete delivered version history will be kept and the API log information will not be displayed.
 
 ![create app CLI](doc/images/create_app.png)
 
