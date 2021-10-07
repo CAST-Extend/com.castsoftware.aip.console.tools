@@ -59,6 +59,18 @@ proceed as follows.
 * The value used for AIP Console URL and API Key is always coming from the Job itself when assigned.
 * If one field is not assigned then the one from the *Global Configuration* will be used.
 
+### Defining the Analysis Strategy using objectives options
+
+These options can be updated when on-boarding a version using either
+
+* Add Version job
+* Deliver Version job.
+
+The enabled options will be added to the existing default ones: **Global Assessment** and **
+Function Points measurement**. To Enable/Disable **Blueprint** and **Security assessment** you will need to expand
+the **Advanced Settings** of the dedicated job.
+![security-objective](./doc/images/security-objective.png)
+
 ### Quick Start
 
 #### Create Application
@@ -70,7 +82,8 @@ To create an application, add the `Create application on AIP Console` Step to a 
 In that build step,
 
 * you *must* provide the application name.
-* You also optionally have the possibility to decide whether the application should keep the deliveries history or not.
+* You also optionally have the possibility to decide whether the application should keep the delivered version history
+  or not.
 
 ![Deliveries-history](./doc/images/Deliveries-history.png)
 

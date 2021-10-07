@@ -63,8 +63,14 @@ public class CreateApplicationCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = "--inplace-mode",
             description = "If true then no history will be kept for delivered sources." + " if specified without parameter: ${FALLBACK-VALUE}",
-            fallbackValue = "true")
+            fallbackValue = "true",
+            hidden = true,
+            hideParamSyntax = true)
     private boolean inPlaceMode = false;
+    @CommandLine.Option(names = {"-no-history", "--no-version-history"},
+            description = "If true then no history will be kept for delivered sources." + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
+    private boolean noVersionHistory = false;
 
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
@@ -98,9 +104,11 @@ public class CreateApplicationCommand implements Callable<Integer> {
                     return Constants.RETURN_APPLICATION_NOT_FOUND;
                 }
             }
-            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName, inPlaceMode);
+            //For backward compatibility
+            boolean noHistory = noVersionHistory || inPlaceMode;
+            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName, noHistory);
             log.info("Started job to create new application.");
-            return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
+            return jobsService.pollAndWaitForJobFinished(jobGuid, ( jobDetails ) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {
                     log.error("Creation of the application failed with status '{}'", jobDetails.getState());
                     return Constants.RETURN_JOB_FAILED;

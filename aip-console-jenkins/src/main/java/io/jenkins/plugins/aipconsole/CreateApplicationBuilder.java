@@ -77,6 +77,7 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
     @Nullable
     private String domainName;
 
+    //no-delivery-history
     private boolean inPlaceMode;
 
     @DataBoundConstructor

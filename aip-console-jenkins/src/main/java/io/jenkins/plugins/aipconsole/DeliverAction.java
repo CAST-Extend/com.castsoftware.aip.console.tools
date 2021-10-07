@@ -37,6 +37,7 @@ public class DeliverAction extends BaseAction implements RunAction2 {
     private String domainName;
     private boolean setAsCurrent = false;
     private boolean blueprint = false;
+    private boolean enableSecurityAssessment = false;
 
     private transient Run run;
 
@@ -94,6 +95,14 @@ public class DeliverAction extends BaseAction implements RunAction2 {
 
     public void setBlueprint(boolean blueprint) {
         this.blueprint = blueprint;
+    }
+
+    public boolean isSecurityAssessmentEnabled() {
+        return enableSecurityAssessment;
+    }
+
+    public void setSecurityAssessment(boolean enableFlag) {
+        enableSecurityAssessment = enableFlag;
     }
 
     public boolean isCloneVersion() {

@@ -1,27 +1,24 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
-import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
-import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.LogsDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.*;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.LogUtils;
+import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +30,7 @@ import java.util.logging.Level;
 
 @Log
 public class JobsServiceImpl implements JobsService {
-    private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(10);
+    private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(15);
 
     private final RestApiService restApiService;
 
@@ -114,7 +111,7 @@ public class JobsServiceImpl implements JobsService {
         JobRequestBuilder builder = JobRequestBuilder.newInstance(appGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                 .versionName(versionName)
                 .releaseAndSnapshotDate(versionReleaseDate)
-                .securityObjective(enableSecurityDataflow);
+                .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow);
 
         return startAddVersionJob(builder);
     }
@@ -185,15 +182,19 @@ public class JobsServiceImpl implements JobsService {
         String previousStep = "";
         log.fine("Checking status of Job with GUID " + jobGuid);
         int retryCount = 0;
+        LocalDateTime loginTime = LocalDateTime.now();
         try {
             JobStatusWithSteps jobStatus;
             String logName = null;
             int startOffset = 0;
             while (true) {
                 Thread.sleep(pollingSleepDuration);
-                // Force login to keep session alive (jobs endpoint doesn't refresh session status)
-                restApiService.login();
-
+                // Force login to keep session alive (jobs endpoint doesn't refresh session status), if the last k
+                if (loginTime.plusMinutes(10L).isBefore(LocalDateTime.now())) {
+                    log.info("Refresh console session at " + LocalDateTime.now());
+                    restApiService.login();
+                    loginTime = LocalDateTime.now();
+                }
                 // Sometimes it takes more than 10 secs till the jobstatus is ready
                 jobStatus = getJobStatus(jobDetailsEndpoint);
                 if (jobStatus == null) {

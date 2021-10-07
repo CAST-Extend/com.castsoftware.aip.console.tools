@@ -13,30 +13,50 @@ Before using the CLI, you will need a JRE or JDK, version 8 or above. You can us
 You will also need the following :
 
 * An installation of AIP Console that is accessible and configured.
-* An API Token for the user that will run the CLI (check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
+* An API Token for the user that will run the CLI (
+  check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
 * Prepare your source code in one of the two following ways :
-    * As a zip or tar.gz archive that will be uploaded to AIP Console
-    * As a relative path, pointing to content in the Source Folder location **(SFL)** defined in AIP Console like below :
+  * As a zip or tar.gz archive that will be uploaded to AIP Console
+  * As a relative path, pointing to content in the Source Folder location **(SFL)** defined in AIP Console like below :
 
 ![source folder location](doc/images/source_folder_location_config.png)
 
-### Quick Start
-For any of the command line listed bellow, you can use *--verbose* argument to decide whether to display API log information or not.
+### Defining the Analysis Strategy using objectives options
 
-To **create a new application**, 
-* You also optionally have the possibility to decide whether the application should keep the deliveries history or not: set *--inplace-mode* argument to match your requirement.
+These options can be updated when on-boarding a version using either
+
+* Add Version command
+* Deliver Version command
+
+The enabled options will be added to the existing default ones: **Global Assessment** and **
+Function Points measurement**. To Enable/Disable **Data safety investigation** or **Blueprint** and **Security
+assessment** you will need to display the help for dedicated command for more details.
+
+### Quick Start
+
+For any of the command line listed bellow, you can use *--verbose* argument to decide whether to display API log
+information or not.
+
+To **create a new application**,
+
+* You also optionally have the possibility to decide whether the application should keep the delivered version history
+  or not:
+  set *--no-version-history* argument to match your requirement.
 * Whether or not to display log information on screen by setting *--verbose* argument to either true or false.
 
 **Important note**
-* When an application is created without the deliveries history then the source code should be located the SFL sub-folders. This meant no file will not be accepted, and the path provided for versions must be SFL relative path.
+
+* When an application is created without the deliveries history then the source code should be located the SFL
+  sub-folders. This meant no file will not be accepted, and the path provided for versions must be SFL relative path.
 
 run the following :
 
 ```bash
-java -jar .\aip-console-tools-cli.jar new -n "my app" --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" --verbose=false --inplace-mode=false
+java -jar .\aip-console-tools-cli.jar new -n "my app" --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" --verbose=false --no-version-history=false
 ```
 
-This will create a new application "my app" on my AIP Console instance at `localhost:8081` using my API Key. The complete deliveries history will be kept and the API log information will not be displayed.
+This will create a new application "my app" on my AIP Console instance at `localhost:8081` using my API Key. The
+complete deliveries history will be kept and the API log information will not be displayed.
 
 ![create app CLI](doc/images/create_app.png)
 
