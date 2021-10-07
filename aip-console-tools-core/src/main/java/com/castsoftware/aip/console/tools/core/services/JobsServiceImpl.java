@@ -14,6 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +30,7 @@ import java.util.logging.Level;
 
 @Log
 public class JobsServiceImpl implements JobsService {
-    private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(10);
+    private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(15);
 
     private final RestApiService restApiService;
 
@@ -35,7 +40,7 @@ public class JobsServiceImpl implements JobsService {
 
     public JobsServiceImpl(RestApiService restApiService) {
         this.restApiService = restApiService;
-        pollingSleepDuration = POLL_SLEEP_DURATION;
+        this.pollingSleepDuration = POLL_SLEEP_DURATION;
     }
 
     public JobsServiceImpl(RestApiService restApiService, long pollingSleepDuration) {
@@ -177,15 +182,19 @@ public class JobsServiceImpl implements JobsService {
         String previousStep = "";
         log.fine("Checking status of Job with GUID " + jobGuid);
         int retryCount = 0;
+        LocalDateTime loginTime = LocalDateTime.now();
         try {
             JobStatusWithSteps jobStatus;
             String logName = null;
             int startOffset = 0;
             while (true) {
                 Thread.sleep(pollingSleepDuration);
-                // Force login to keep session alive (jobs endpoint doesn't refresh session status)
-                restApiService.login();
-
+                // Force login to keep session alive (jobs endpoint doesn't refresh session status), if the last k
+                if (loginTime.plusMinutes(10L).isBefore(LocalDateTime.now())) {
+                    log.info("Refresh console session at " + LocalDateTime.now());
+                    restApiService.login();
+                    loginTime = LocalDateTime.now();
+                }
                 // Sometimes it takes more than 10 secs till the jobstatus is ready
                 jobStatus = getJobStatus(jobDetailsEndpoint);
                 if (jobStatus == null) {
