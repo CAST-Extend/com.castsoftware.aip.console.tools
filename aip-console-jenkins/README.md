@@ -82,7 +82,8 @@ To create an application, add the `Create application on AIP Console` Step to a 
 In that build step,
 
 * you *must* provide the application name.
-* You also optionally have the possibility to decide whether the application should keep the deliveries history or not.
+* You also optionally have the possibility to decide whether the application should keep the delivered version history
+  or not.
 
 ![Deliveries-history](./doc/images/Deliveries-history.png)
 
@@ -176,6 +177,19 @@ The Snapshot can then be found inside the `Snapshot` tab in AIP Console.
 ### Advanced Usage
 
 The quick start only covers the basic usage of each step of the plugin. The following sections provide greater details on what each parameters changes in the behavior of the AIP Console Tools plugin.
+#### A Note on variable expansion
+
+Variable expansion means replacing some variables in text fields to an environment variable value.
+
+For example, creating an application with name "${JOB_NAME} (jenkins)", the Plugin will replace '${JOB_NAME}' with the name of the current running job.
+You can use these environment variables on the following fields in each jobs (when defined):
+
+* Application name
+* Version name
+* Snapshot name
+* Node name
+
+You can manually add environment variables to a build or use global jenkins environment variables (see [the jenkins documentation](https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables))
 
 #### Create Application
 
@@ -233,7 +247,7 @@ The Deliver step provides similar parameters to the Add Version step :
 * *Make version current* (optional): When checked then the version is used as being the current, and it is made ready to
   analyze.  
   ![set-as-current](./doc/images/set-as-current.png)
-* *Copy configration from previous version*: Clone the previous version of the application (similar to
+* *Copy configuration from previous version*: Clone the previous version of the application (similar to
   the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no
   version exists, it will run an Add version job instead.
 * *Enable Security Dataflow*: Enabled the Security Objective for this version. Has no effect if `Rescan` is checked.

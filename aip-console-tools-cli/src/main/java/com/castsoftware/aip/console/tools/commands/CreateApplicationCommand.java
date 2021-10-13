@@ -65,8 +65,14 @@ public class CreateApplicationCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = "--inplace-mode",
             description = "If true then no history will be kept for delivered sources." + " if specified without parameter: ${FALLBACK-VALUE}",
-            fallbackValue = "true")
+            fallbackValue = "true",
+            hidden = true,
+            hideParamSyntax = true)
     private boolean inPlaceMode = false;
+    @CommandLine.Option(names = {"-no-history", "--no-version-history"},
+            description = "If true then no history will be kept for delivered sources." + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
+    private boolean noVersionHistory = false;
 
     @CommandLine.Option(names = {"-css","--css-server"}, description = "CSS Server name that will host the application data: format is host:port ")
     private String cssServerName;
@@ -88,8 +94,10 @@ public class CreateApplicationCommand implements Callable<Integer> {
         }
 
         log.info("Create application command has triggered with log output = '{}'", sharedOptions.isVerbose());
-        if (inPlaceMode){
-            log.info("The created application will have the \"Simplified Delivery Mode\" operating");
+        //For backward compatibility
+        boolean noHistory = noVersionHistory || inPlaceMode;
+        if (noHistory){
+            log.info("The created application will have \"No Version History\"");
         }
 
         String cssServerGuid = null;
@@ -123,7 +131,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
                 }
             }
 
-            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName, inPlaceMode, null, cssServerGuid);
+            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName, noHistory, null, cssServerGuid);
             log.info("Started job to create new application.");
             return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {
