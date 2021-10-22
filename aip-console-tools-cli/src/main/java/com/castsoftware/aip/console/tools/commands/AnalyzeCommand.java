@@ -14,7 +14,6 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
-import com.castsoftware.aip.console.tools.core.services.DebugOptionsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
@@ -90,6 +89,12 @@ public class AnalyzeCommand implements Callable<Integer> {
             , defaultValue = "false")
     private boolean amtProfiling;
 
+    @CommandLine.Option(names = {"--no-consolidation", "--no-upload-application"},
+            description = "When sets to true,  this prevents from consolidating snapshot or from publishing application to the Health dashboard"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            defaultValue = "false", fallbackValue = "true")
+    private boolean noConsolidation;
+
     @Autowired
     private DebugOptionsService debugOptionsService;
 
@@ -159,9 +164,16 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
+                boolean forcedConsolidation = processImaging || !noConsolidation;
                 builder.processImaging(processImaging)
                         .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
-                        .uploadApplication(true);
+                        .uploadApplication(forcedConsolidation);
+
+                //Snapshot required now see whether we upload application or not
+                if (!forcedConsolidation) {
+                    log.info("The snapshot {} for application will be taken but will not be published.", applicationName);
+                    builder.endStep(Constants.SNAPSHOT_INDICATOR);
+                }
             } else {
                 builder.endStep(Constants.ANALYZE);
             }

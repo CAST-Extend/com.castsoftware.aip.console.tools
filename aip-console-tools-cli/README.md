@@ -125,14 +125,18 @@ The available options are :
 
 - `-n` or `--name` (**required**) : specify the name of the application to create
 
-* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. *default* : Automatically selected by AIP Console
-* `--domain-name` (optional) : specify a domain name to associate with the application to create. *default*: No domain is set for the application.
-* `--inplace-mode` (optional):  If true then no history will be kept for delivered sources.
+* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. *default* :
+  Automatically selected by AIP Console
+* `--domain-name` (optional) : specify a domain name to associate with the application to create. *default*: No domain
+  is set for the application.
+* `--no-version-history` (optional):  If true then no history will be kept for delivered sources.
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--server-url` or `-s` : Specify the URL to your AIP Console server. *default* : localhost:8081
-* `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment
+  variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
-* `--user` (optional) (legacy) : Specify a username to log in. Requires passing the user's password in the `--apikey` parameter. *default* : none
+* `--user` (optional) (legacy) : Specify a username to log in. Requires passing the user's password in the `--apikey`
+  parameter. *default* : none
 
 #### AddVersion
 
@@ -145,21 +149,34 @@ The available options are :
 * `--app-name` or `-n` (**required**): The application name.
 * `--app-guid` or `-a` (optional): The application GUID. Can replace the application name parameter.
 * `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
-* `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
-* `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this new version. This is the default behaviour when no version exists for the given application.
-* `--version-name` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
+* `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given
+  name doesn't exists.
+* `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this
+  new version. This is the default behaviour when no version exists for the given application.
+* `--version-name` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date
+  and time.
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--snapshot-name` (option) The name of the snapshot to generate, default will be based on the date and time
-* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
+  when cloning a version</u>.
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
-* `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:
-* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
-* `--domain-name` (optional) : specify a domain name to associate with the application to create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default*: No domain is set for the application.
+* `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *
+  default*:
+* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect
+  if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by
+  AIP Console
+* `--domain-name` (optional) : specify a domain name to associate with the application to create. <u>Has no effect
+  if `--auto-create` is not passed or if application has already been created</u>. *default*: No domain is set for the
+  application.
 * `--server-url` or `-s` : Specify the URL to your AIP Console server. *default* : localhost:8081
-* `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment
+  variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
-* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
+  parameter</u>. *default* : none
+* `--no-consolidation` or `--no-upload-application` (optional)  : When sets to true, this prevents from consolidating
+  snapshot or from publishing application to the Health dashboard. *default* : false
 
 *NOTE*: When creating a version, if a previous version exists, it's configuration will be cloned to the new version, but the new source will be used for analysis.
 
@@ -202,7 +219,10 @@ The available options are :
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
-* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
+  parameter</u>. *default* : none
+* `--no-consolidation` or `--no-upload-application` (optional)  : When sets to true, this prevents from consolidating
+  snapshot or from publishing application to the Health dashboard. *default* : false
 
 #### Snapshot
 

@@ -96,5 +96,4 @@ public class AddVersionCommandTest extends AipCommandTest<AddVersionCommand> {
         assertEquals(true, aipCommand.isAutoCreate());
         assertEquals(false, aipCommand.isEnableSecurityDataflow());
     }
-
 }

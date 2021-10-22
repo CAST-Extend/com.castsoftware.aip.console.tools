@@ -159,6 +159,12 @@ public class AddVersionCommand implements Callable<Integer> {
             , defaultValue = "false")
     private boolean amtProfiling;
 
+    @CommandLine.Option(names = {"--no-consolidation", "--no-upload-application"},
+            description = "When sets to true,  this prevents from consolidating snapshot or from publishing application to the Health dashboard"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            defaultValue = "false", fallbackValue = "true")
+    private boolean noConsolidation;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -208,7 +214,7 @@ public class AddVersionCommand implements Callable<Integer> {
 
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
             if (app.isInPlaceMode()) {
-                log.info("The application '{}' is using the \"Simplified Delivery Mode\"", applicationName);
+                log.info("The application '{}' is using the \"Rapid Delivery Mode\"", applicationName);
             }
 
             String sourcePath = uploadService.uploadFileAndGetSourcePath(applicationName, applicationGuid, filePath);
@@ -232,6 +238,13 @@ public class AddVersionCommand implements Callable<Integer> {
 
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);
+                //Snapshot required now see whether we upload application or not
+                boolean forcedConsolidation = processImaging || !noConsolidation;
+                builder.uploadApplication(forcedConsolidation);
+                if (!forcedConsolidation) {
+                    log.info("The snapshot {} for application {} will be taken but will not be published.", snapshotName, applicationName);
+                    builder.endStep(Constants.SNAPSHOT_INDICATOR);
+                }
             }
 
             DebugOptionsDto oldDebugOptions = debugOptionsService.updateDebugOptions(applicationGuid,
