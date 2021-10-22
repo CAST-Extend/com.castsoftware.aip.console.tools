@@ -125,7 +125,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE
                 , "--process-imaging=false", "--snapshot-name", "SNAP-NAME"
-                , "--no-upload application"};
+                , "--no-upload-application"};
 
         // gives the existing application
         when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
@@ -156,12 +156,19 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
 
         List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
         Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), ARG_NO_CONSOLIDATE_LABEL, ARG_IMAGING_LABEL))
-                .collect(Collectors.toMap(CommandLine.Model.ArgSpec::paramLabel, a -> (Boolean) a.typedValues().get(0)));
+                .collect(Collectors.toMap(CommandLine.Model.ArgSpec::paramLabel, this::getBooleanArgValue));
 
         boolean forcedConsolidation = consolidateTags.get(ARG_IMAGING_LABEL) || !consolidateTags.get(ARG_NO_CONSOLIDATE_LABEL);
         assertThat(spec, is(notNullValue()));
         assertThat(forcedConsolidation, is(false));
         assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    private boolean getBooleanArgValue(CommandLine.Model.ArgSpec arg) {
+        if (arg.typedValues().isEmpty()) {
+            return (Boolean) arg.initialValue();
+        }
+        return (Boolean) arg.typedValues().get(0);
     }
 
     @Test
