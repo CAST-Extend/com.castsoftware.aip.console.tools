@@ -76,6 +76,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean withSnapshot = false;
     private boolean processImaging = false;
+    private boolean noConsolidation = false;
 
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
@@ -121,6 +122,15 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     public boolean isWithSnapshot() {
         return withSnapshot;
+    }
+
+    @DataBoundSetter
+    public void setNoConsolidation(boolean noConsolidation) {
+        this.noConsolidation = noConsolidation;
+    }
+
+    public boolean isNoConsolidation() {
+        return noConsolidation;
     }
 
     @DataBoundSetter
@@ -236,13 +246,18 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
 
 
             if (withSnapshot) {
+                boolean forcedConsolidation = processImaging || !noConsolidation;
                 requestBuilder.processImaging(processImaging)
                         .endStep(apiInfoDto.isLastStepConsolidateSnapshot() ?
                                 Constants.CONSOLIDATE_SNAPSHOT :
                                 Constants.UPLOAD_APP_SNAPSHOT)
                         .snapshotName(String.format("Snapshot-%s", new
                                 SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
-                        .uploadApplication(true);
+                        .uploadApplication(forcedConsolidation);
+
+                if (!forcedConsolidation) {
+                    requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);
+                }
             } else {
                 requestBuilder.endStep(Constants.ANALYZE);
             }

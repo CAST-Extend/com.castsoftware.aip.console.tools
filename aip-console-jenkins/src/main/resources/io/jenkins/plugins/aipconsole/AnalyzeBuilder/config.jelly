@@ -9,6 +9,9 @@
     <f:entry title="${%withSnapshot}" field="withSnapshot" description="${%withSnapshot.descr}">
         <f:checkbox default="false"/>
     </f:entry>
+    <f:entry title="${%noConsolidation}" field="noConsolidation" description="${%noConsolidation.descr}">
+        <f:checkbox default="false" />
+    </f:entry>
     <f:entry title="${%processImaging}" field="processImaging" description="${%processImaging.descr}">
         <f:checkbox default="false"/>
     </f:entry>
