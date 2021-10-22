@@ -108,13 +108,12 @@ if errorlevel 1 (
 @echo Retrieving version from main pom file
 @echo ===============================================
 set VERSION=
-for /f "delims=<> tokens=1-4" %%a in ('grep -A1 "<artifactId>aip-console-tools</artifactId>" %ACTOOLSDIR%\pom.xml ^| grep "<version>"') do set VERSION=%%c
+for /f "delims=<>- tokens=1-4" %%a in ('grep -A1 "<artifactId>aip-console-tools</artifactId>" %ACTOOLSDIR%\pom.xml ^| grep "<version>"') do set VERSION=%%c
 if not defined VERSION (
     @echo.
     @echo ERROR: Cannot retrieve version from pom file: %ACTOOLSDIR%\pom.xml
     goto endclean
 )
-set VERSION=%VERSION:-SNAPSHOT=%
 @echo Version is:%VERSION%
 set ID=com.castsoftware.aip.console.tools
 
