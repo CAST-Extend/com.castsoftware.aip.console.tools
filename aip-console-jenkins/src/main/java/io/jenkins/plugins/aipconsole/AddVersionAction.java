@@ -38,7 +38,7 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     @Nullable
     private String snapshotName;
-    private boolean noConsolidation = false;
+    private boolean noConsolidation = true;
 
     private transient Run run;
 

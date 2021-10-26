@@ -22,7 +22,7 @@ public class AnalyzeAction extends BaseAction implements RunAction2 {
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean processImaging = false;
-    private boolean noConsolidation = false;
+    private boolean noConsolidation = true;
 
     private transient Run run;
 

@@ -97,7 +97,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
-    private boolean noConsolidation = false;
+    private boolean noConsolidation = true;
     @Nullable
     private String versionName = "";
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -540,6 +540,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 requestBuilder.uploadApplication(forcedConsolidation);
                 if (!forcedConsolidation) {
                     requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);
+                    log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", resolvedSnapshotName, applicationName));
                 }
             }
 
