@@ -15,6 +15,9 @@
      <f:entry title="${%snapshotName}" field="snapshotName" description="${%snapshotName.descr}">
             <f:textbox/>
         </f:entry>
+    <f:entry title="${%consolidation}" field="consolidation" description="${%consolidation.descr}">
+        <f:checkbox default="true" />
+    </f:entry>
     <f:entry title="${%enableSecurity}" field="enableSecurityDataflow" description="${%enableSecurity.descr}">
         <f:checkbox/>
     </f:entry>

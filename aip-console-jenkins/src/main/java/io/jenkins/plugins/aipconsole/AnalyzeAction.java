@@ -22,6 +22,7 @@ public class AnalyzeAction extends BaseAction implements RunAction2 {
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean processImaging = false;
+    private boolean consolidation = true;
 
     private transient Run run;
 
@@ -70,6 +71,14 @@ public class AnalyzeAction extends BaseAction implements RunAction2 {
 
     public void setWithSnapshot(boolean withSnapshot) {
         this.withSnapshot = withSnapshot;
+    }
+
+    public boolean isConsolidation() {
+        return consolidation;
+    }
+
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
     }
 
     public boolean isProcessImaging() {

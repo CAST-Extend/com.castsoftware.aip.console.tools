@@ -41,8 +41,9 @@ public class Constants {
 
     public static final String DELETE_SNAPSHOT = "delete_snapshot";
     public static final String CONSOLIDATE_SNAPSHOT = "consolidate_snapshot";
+    public static final String SNAPSHOT_INDICATOR = "snapshot_indicator";
     public static final String UPLOAD_SNAPSHOTS = "upload_snapshots";
-    // New name for the last step in analysis (this consolidate snapshots and upload to central db)
+    // New name for the last step in analysis (this consolidates snapshots and upload to central db)
     public static final String UPLOAD_APP_SNAPSHOT = "upload_application";
     public static final String DECLARE_APPLICATION = "declare_application";
     public static final String DELETE_APPLICATION = "delete_application";
