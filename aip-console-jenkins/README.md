@@ -97,9 +97,14 @@ The application will be created on AIP Console after you've run the Jenkins Job.
 
 The `Add Application Version to AIP Console` will create a new version of an application, run an analysis and create a
 snapshot of that analysis.
-* You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
+* You can configure the step to optionally add the *blueprint objective* to the exising objectives.  
   To do so, check the following option checkbox in the "advanced settings" section
+
   ![blueprint_objective](./doc/images/blueprint_objective.png)
+* When a snapshot is available, you can optionally decide whether to publish the application to the Health Dashboard or
+  not.
+
+  ![no-consolidation](./doc/images/no-consolidation.png)
 
   This step requires the following :
 
