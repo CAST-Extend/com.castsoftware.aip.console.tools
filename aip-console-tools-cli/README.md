@@ -175,7 +175,7 @@ The available options are :
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
 * `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
   parameter</u>. *default* : none
-* `--no-consolidation` or `--no-upload-application` (optional)  : When sets to true, this prevents from consolidating
+* `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
   snapshot or from publishing application to the Health dashboard. *default* : false
 
 *NOTE*: When creating a version, if a previous version exists, it's configuration will be cloned to the new version, but the new source will be used for analysis.
@@ -221,7 +221,7 @@ The available options are :
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
 * `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
   parameter</u>. *default* : none
-* `--no-consolidation` or `--no-upload-application` (optional)  : When sets to true, this prevents from consolidating
+* `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
   snapshot or from publishing application to the Health dashboard. *default* : false
 
 #### Snapshot

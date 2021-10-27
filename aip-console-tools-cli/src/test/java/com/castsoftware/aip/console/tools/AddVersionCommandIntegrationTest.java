@@ -124,8 +124,8 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE
-                , "--process-imaging=false", "--snapshot-name", "SNAP-NAME"
-                , "--no-upload-application"};
+                , "--process-imaging=false", "--snapshot-name", "SNAP-NAME", "--upload-application=false"
+        };
 
         // gives the existing application
         when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
@@ -151,16 +151,70 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
 
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
 
-        String ARG_NO_CONSOLIDATE_LABEL = "<noConsolidation>";
+        String ARG_CONSOLIDATE_LABEL = "<consolidation>";
         String ARG_IMAGING_LABEL = "<processImaging>";
 
         List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
-        Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), ARG_NO_CONSOLIDATE_LABEL, ARG_IMAGING_LABEL))
+        Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), ARG_CONSOLIDATE_LABEL, ARG_IMAGING_LABEL))
                 .collect(Collectors.toMap(CommandLine.Model.ArgSpec::paramLabel, this::getBooleanArgValue));
 
-        boolean forcedConsolidation = consolidateTags.get(ARG_IMAGING_LABEL) || !consolidateTags.get(ARG_NO_CONSOLIDATE_LABEL);
+        boolean consolidationArgValue = consolidateTags.get(ARG_CONSOLIDATE_LABEL);
+        assertThat(consolidationArgValue, is(false));
+
+        boolean forcedConsolidation = consolidateTags.get(ARG_IMAGING_LABEL) || consolidationArgValue;
         assertThat(spec, is(notNullValue()));
         assertThat(forcedConsolidation, is(false));
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    @Test
+    public void testAddVersionCommand_DefaultConsolidationWithoutImaging() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "-f", zippedSourcesPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--domain-name", TestConstants.TEST_DOMAIN,
+                "--node-name", TestConstants.TEST_NODE
+                , "--process-imaging=false", "--snapshot-name", "SNAP-NAME"
+        };
+
+        // gives the existing application
+        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
+
+        when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
+        when(applicationService.applicationHasVersion(TestConstants.TEST_APP_GUID)).thenReturn(false);
+        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), null, false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
+        when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
+        DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
+        when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
+        when(debugOptionsService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
+
+        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(JobState.COMPLETED);
+        jobStatus.setCreated(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
+
+        runStringArgs(addVersionCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+
+        String ARG_CONSOLIDATE_LABEL = "<consolidation>";
+        String ARG_IMAGING_LABEL = "<processImaging>";
+
+        List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
+        Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), ARG_CONSOLIDATE_LABEL, ARG_IMAGING_LABEL))
+                .collect(Collectors.toMap(CommandLine.Model.ArgSpec::paramLabel, this::getBooleanArgValue));
+
+        boolean consolidationArgValue = consolidateTags.get(ARG_CONSOLIDATE_LABEL);
+        assertThat(consolidationArgValue, is(true));
+
+        boolean forcedConsolidation = consolidateTags.get(ARG_IMAGING_LABEL) || consolidationArgValue;
+        assertThat(spec, is(notNullValue()));
+        assertThat(forcedConsolidation, is(true));
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
 

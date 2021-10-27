@@ -89,11 +89,11 @@ public class AnalyzeCommand implements Callable<Integer> {
             , defaultValue = "false")
     private boolean amtProfiling;
 
-    @CommandLine.Option(names = {"--no-consolidation", "--no-upload-application"},
-            description = "When sets to true,  this prevents from consolidating snapshot or from publishing application to the Health dashboard"
+    @CommandLine.Option(names = {"--consolidation", "--upload-application"},
+            description = "When sets to false,  this prevents from consolidating snapshot or from publishing application to the Health dashboard"
                     + " if specified without parameter: ${FALLBACK-VALUE}",
-            defaultValue = "false", fallbackValue = "true")
-    private boolean noConsolidation;
+            defaultValue = "true", fallbackValue = "true")
+    private boolean consolidation = true;
 
     @Autowired
     private DebugOptionsService debugOptionsService;
@@ -164,7 +164,7 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
-                boolean forcedConsolidation = processImaging || !noConsolidation;
+                boolean forcedConsolidation = processImaging || consolidation;
                 builder.processImaging(processImaging)
                         .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
                         .uploadApplication(forcedConsolidation);

@@ -159,11 +159,11 @@ public class AddVersionCommand implements Callable<Integer> {
             , defaultValue = "false")
     private boolean amtProfiling;
 
-    @CommandLine.Option(names = {"--no-consolidation", "--no-upload-application"},
-            description = "When sets to true,  this prevents from consolidating snapshot or from publishing application to the Health dashboard"
+    @CommandLine.Option(names = {"--consolidation", "--upload-application"},
+            description = "When sets to false,  this prevents from consolidating snapshot or from publishing application to the Health dashboard"
                     + " if specified without parameter: ${FALLBACK-VALUE}",
-            defaultValue = "false", fallbackValue = "true")
-    private boolean noConsolidation;
+            defaultValue = "true", fallbackValue = "true")
+    private boolean consolidation = true;
 
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
@@ -239,7 +239,7 @@ public class AddVersionCommand implements Callable<Integer> {
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);
                 //Snapshot required now see whether we upload application or not
-                boolean forcedConsolidation = processImaging || !noConsolidation;
+                boolean forcedConsolidation = processImaging || consolidation;
                 builder.uploadApplication(forcedConsolidation);
                 if (!forcedConsolidation) {
                     log.info("The snapshot {} for application {} will be taken but will not be published.", snapshotName, applicationName);
