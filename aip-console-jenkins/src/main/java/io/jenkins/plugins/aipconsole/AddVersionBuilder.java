@@ -97,7 +97,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     private String filePath;
     private boolean autoCreate = false;
     private boolean cloneVersion = true;
-    private boolean noConsolidation = true;
+    private boolean consolidation = true;
     @Nullable
     private String versionName = "";
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -158,12 +158,12 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     }
 
     @DataBoundSetter
-    public void setNoConsolidation(boolean noConsolidation) {
-        this.noConsolidation = noConsolidation;
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
     }
 
-    public boolean isNoConsolidation() {
-        return noConsolidation;
+    public boolean isConsolidation() {
+        return consolidation;
     }
 
     @DataBoundSetter
@@ -536,7 +536,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
-                boolean forcedConsolidation = processImaging || !noConsolidation;
+                boolean forcedConsolidation = processImaging || consolidation;
                 requestBuilder.uploadApplication(forcedConsolidation);
                 if (!forcedConsolidation) {
                     requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);

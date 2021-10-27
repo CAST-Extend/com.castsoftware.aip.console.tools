@@ -38,7 +38,7 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     @Nullable
     private String snapshotName;
-    private boolean noConsolidation = true;
+    private boolean consolidation = true;
 
     private transient Run run;
 
@@ -91,12 +91,12 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
         this.autoCreate = autoCreate;
     }
 
-    public boolean isNoConsolidation() {
-        return noConsolidation;
+    public boolean isConsolidation() {
+        return consolidation;
     }
 
-    public void setNoConsolidation(boolean noConsolidation) {
-        this.noConsolidation = noConsolidation;
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
     }
 
     public boolean isCloneVersion() {
