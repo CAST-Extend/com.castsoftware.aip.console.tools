@@ -170,13 +170,16 @@ This step will perform the following actions :
 
 * Create a Snapshot
 * Generate Snapshot Indicators
-* Publish snapshot
+* Optionally decided whether to publish the application to the Health Dashboard or not.
+
+![snap-consolidation](./doc/images/snap-consolidation.png)
 
 The Snapshot can then be found inside the `Snapshot` tab in AIP Console.
 
 ### Advanced Usage
 
-The quick start only covers the basic usage of each step of the plugin. The following sections provide greater details on what each parameters changes in the behavior of the AIP Console Tools plugin.
+The quick start only covers the basic usage of each step of the plugin. The following sections provide greater details
+on what each parameters changes in the behavior of the AIP Console Tools plugin.
 
 #### A Note on variable expansion
 
