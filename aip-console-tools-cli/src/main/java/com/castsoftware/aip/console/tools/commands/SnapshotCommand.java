@@ -164,7 +164,7 @@ public class SnapshotCommand implements Callable<Integer> {
 
             //Snapshot required now see whether we upload application or not
             if (!forcedConsolidation) {
-                log.info("The snapshot {} for application will be taken but will not be published.", applicationName);
+                log.info("The snapshot for application {} will be taken but will not be published.", applicationName);
                 builder.endStep(Constants.SNAPSHOT_INDICATOR);
             }
 
