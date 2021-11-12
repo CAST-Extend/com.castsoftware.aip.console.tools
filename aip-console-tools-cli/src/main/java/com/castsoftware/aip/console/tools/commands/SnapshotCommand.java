@@ -74,6 +74,12 @@ public class SnapshotCommand implements Callable<Integer> {
             fallbackValue = "true")
     private boolean processImaging = false;
 
+    @CommandLine.Option(names = {"--consolidation", "--upload-application"},
+            description = "When sets to false,  this prevents from consolidating snapshot or from publishing application to the Health dashboard"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            defaultValue = "true", fallbackValue = "true")
+    private boolean consolidation = true;
+
     public SnapshotCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
@@ -144,20 +150,23 @@ public class SnapshotCommand implements Callable<Integer> {
             }
 
             // Run snapshot
+            boolean forcedConsolidation = processImaging || consolidation;
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE)
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
                     .versionGuid(foundVersion.getGuid())
                     .versionName(foundVersion.getName())
                     .snapshotName(snapshotName)
-                    .uploadApplication(true)
                     .releaseAndSnapshotDate(new Date())
                     .processImaging(processImaging)
-                    .endStep(
-                            SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                                    Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT)
-                    .uploadApplication(true)
+                    .uploadApplication(forcedConsolidation)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
                             Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT);
+
+            //Snapshot required now see whether we upload application or not
+            if (!forcedConsolidation) {
+                log.info("The snapshot {} for application will be taken but will not be published.", applicationName);
+                builder.endStep(Constants.SNAPSHOT_INDICATOR);
+            }
 
             log.info("Running Snapshot Job on application '{}' with Version '{}' (guid: '{}')", applicationName, foundVersion.getName(), foundVersion.getGuid());
             String jobGuid = jobsService.startJob(builder);

@@ -11,6 +11,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.internal.util.collections.Sets;
@@ -21,7 +22,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import picocli.CommandLine;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -35,6 +39,9 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {AipConsoleToolsCliIntegrationTest.class})
 @ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
 public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
+    private static String ARG_CONSOLIDATE_LABEL = "<consolidation>";
+    private static String ARG_IMAGING_LABEL = "<processImaging>";
+
     @Autowired
     private SnapshotCommand snapshotCommand;
 
@@ -133,4 +140,105 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_JOB_FAILED));
     }
+
+    private void prepareForJobStatus(JobState state) throws ApplicationServiceException, JobServiceException {
+        when(applicationService.getApplicationGuidFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP_GUID);
+        //Set<VersionDto> versions =
+        VersionDto versionDto = new VersionDto();
+        versionDto.setName(TestConstants.TEST_VERSION_NAME);
+        versionDto.setStatus(VersionStatus.ANALYSIS_DONE);
+        when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
+        when(jobsService.startJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
+
+        JobStatusWithSteps jobStatus = new JobStatusWithSteps();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(state);
+        jobStatus.setCreated(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
+    }
+
+    @Test
+    public void testSnapshotCommand_WithConsolidation() throws ApplicationServiceException, JobServiceException {
+        boolean verbose = true;
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--process-imaging=false", "--upload-application"};
+
+        prepareForJobStatus(JobState.COMPLETED);
+        runStringArgs(snapshotCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+
+        List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
+        Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), ARG_CONSOLIDATE_LABEL, ARG_IMAGING_LABEL))
+                .collect(Collectors.toMap(CommandLine.Model.ArgSpec::paramLabel, this::getBooleanArgValue));
+
+        boolean consolidationArgValue = consolidateTags.get(ARG_CONSOLIDATE_LABEL);
+        assertThat(consolidationArgValue, is(true));
+
+        boolean forcedConsolidation = consolidateTags.get(ARG_IMAGING_LABEL) || consolidationArgValue;
+        assertThat(spec, is(notNullValue()));
+        assertThat(forcedConsolidation, is(true));
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    @Test
+    public void testSnapshotCommand_WithoutConsolidation() throws ApplicationServiceException, JobServiceException {
+        boolean verbose = true;
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--process-imaging=false", "--consolidation=false"};
+
+        prepareForJobStatus(JobState.COMPLETED);
+        runStringArgs(snapshotCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+
+        List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
+        Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), ARG_CONSOLIDATE_LABEL, ARG_IMAGING_LABEL))
+                .collect(Collectors.toMap(CommandLine.Model.ArgSpec::paramLabel, this::getBooleanArgValue));
+
+        boolean consolidationArgValue = consolidateTags.get(ARG_CONSOLIDATE_LABEL);
+        assertThat(consolidationArgValue, is(false));
+        assertThat(consolidateTags.get(ARG_IMAGING_LABEL), is(false));
+
+        boolean forcedConsolidation = consolidateTags.get(ARG_IMAGING_LABEL) || consolidationArgValue;
+        assertThat(spec, is(notNullValue()));
+        assertThat(forcedConsolidation, is(false));
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    @Test
+    public void testSnapshotCommand_WithJustImaging() throws ApplicationServiceException, JobServiceException {
+        boolean verbose = true;
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--process-imaging", "--consolidation=false"};
+
+        prepareForJobStatus(JobState.COMPLETED);
+        runStringArgs(snapshotCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+
+        List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
+        Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), ARG_CONSOLIDATE_LABEL, ARG_IMAGING_LABEL))
+                .collect(Collectors.toMap(CommandLine.Model.ArgSpec::paramLabel, this::getBooleanArgValue));
+
+        boolean consolidationArgValue = consolidateTags.get(ARG_CONSOLIDATE_LABEL);
+        assertThat(consolidationArgValue, is(false));
+        assertThat(consolidateTags.get(ARG_IMAGING_LABEL), is(true));
+
+        boolean forcedConsolidation = consolidateTags.get(ARG_IMAGING_LABEL) || consolidationArgValue;
+        assertThat(spec, is(notNullValue()));
+        assertThat(forcedConsolidation, is(true));
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
 }

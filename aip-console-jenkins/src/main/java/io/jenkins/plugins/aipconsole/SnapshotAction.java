@@ -20,6 +20,7 @@ public class SnapshotAction extends BaseAction implements RunAction2 {
     @Nullable
     private String versionName;
     private boolean processImaging = false;
+    private boolean consolidation = true;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
@@ -61,6 +62,14 @@ public class SnapshotAction extends BaseAction implements RunAction2 {
 
     public boolean isProcessImaging() {
         return processImaging;
+    }
+
+    public boolean isConsolidation() {
+        return consolidation;
+    }
+
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
     }
 
     public void setProcessImaging(boolean processImaging) {

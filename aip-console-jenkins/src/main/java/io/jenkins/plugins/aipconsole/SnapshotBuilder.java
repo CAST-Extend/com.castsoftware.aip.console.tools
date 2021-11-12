@@ -74,6 +74,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
     @Nullable
     private String snapshotName;
     private boolean processImaging = false;
+    private boolean consolidation = true;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
@@ -121,6 +122,15 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
 
     public boolean isProcessImaging() {
         return processImaging;
+    }
+
+    @DataBoundSetter
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
+    }
+
+    public boolean isConsolidation() {
+        return consolidation;
     }
 
     @DataBoundSetter
