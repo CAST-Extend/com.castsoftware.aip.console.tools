@@ -222,7 +222,7 @@ The available options are :
 * `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
   parameter</u>. *default* : none
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
-  snapshot or from publishing application to the Health dashboard. *default* : false
+  snapshot or from publishing application to the Health dashboard. *default* : true
 
 #### Snapshot
 
@@ -238,7 +238,10 @@ The available options are :
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
-* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
+  parameter</u>. *default* : none
+* `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
+  snapshot or from publishing application to the Health dashboard. *default* : true
 
 ### Return Codes
 
