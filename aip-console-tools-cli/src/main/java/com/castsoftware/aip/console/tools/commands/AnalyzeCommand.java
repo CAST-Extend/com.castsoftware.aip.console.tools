@@ -88,6 +88,12 @@ public class AnalyzeCommand implements Callable<Integer> {
             , defaultValue = "false")
     private boolean amtProfiling;
 
+    @CommandLine.Option(names = {"--consolidation", "--upload-application"},
+            description = "When sets to false,  this prevents from consolidating snapshot or from publishing application to the Health dashboard"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            defaultValue = "true", fallbackValue = "true")
+    private boolean consolidation = true;
+
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
@@ -154,9 +160,15 @@ public class AnalyzeCommand implements Callable<Integer> {
                     .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
             if (withSnapshot) {
+                boolean forcedConsolidation = processImaging || consolidation;
                 builder.processImaging(processImaging)
                         .snapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
-                        .uploadApplication(true);
+                        .uploadApplication(forcedConsolidation);
+                //Snapshot required now see whether we upload application or not
+                if (!forcedConsolidation) {
+                    log.info("The snapshot {} for application will be taken but will not be published.", applicationName);
+                    builder.endStep(Constants.SNAPSHOT_INDICATOR);
+                }
             } else {
                 builder.endStep(Constants.ANALYZE);
             }
