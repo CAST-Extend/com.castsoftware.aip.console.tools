@@ -78,6 +78,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean withSnapshot = false;
     private boolean processImaging = false;
+    private boolean consolidation = true;
 
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
@@ -137,6 +138,14 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
     @DataBoundSetter
     public void setProcessImaging(boolean processImaging) {
         this.processImaging = processImaging;
+    }
+    @DataBoundSetter
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
+    }
+
+    public boolean isConsolidation() {
+        return consolidation;
     }
 
     public long getTimeout() {
@@ -241,11 +250,16 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
 
 
             if (withSnapshot) {
+                boolean forcedConsolidation = processImaging || consolidation;
+                String snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
                 requestBuilder.processImaging(processImaging)
                         .endStep(Constants.UPLOAD_APP_SNAPSHOT)
-                        .snapshotName(String.format("Snapshot-%s", new
-                                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())))
-                        .uploadApplication(true);
+                        .snapshotName(snapshotName)
+                        .uploadApplication(forcedConsolidation);
+                if (!forcedConsolidation) {
+                    requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);
+                    log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", snapshotName, applicationName));
+                }
             } else {
                 requestBuilder.endStep(Constants.ANALYZE);
             }

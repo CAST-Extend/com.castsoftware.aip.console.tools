@@ -22,6 +22,7 @@ public class SnapshotAction extends BaseAction implements RunAction2 {
     private boolean processImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+    private boolean consolidation = true;
 
     @CheckForNull
     public String getApplicationName() {
@@ -73,6 +74,13 @@ public class SnapshotAction extends BaseAction implements RunAction2 {
 
     public void setFailureIgnored(boolean failureIgnored) {
         this.failureIgnored = failureIgnored;
+    }
+    public boolean isConsolidation() {
+        return consolidation;
+    }
+
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
     }
 
     public long getTimeout() {
