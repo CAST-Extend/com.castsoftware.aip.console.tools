@@ -78,6 +78,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean withSnapshot = false;
     private boolean processImaging = false;
+    private boolean consolidation = true;
 
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
@@ -137,6 +138,14 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
     @DataBoundSetter
     public void setProcessImaging(boolean processImaging) {
         this.processImaging = processImaging;
+    }
+    @DataBoundSetter
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
+    }
+
+    public boolean isConsolidation() {
+        return consolidation;
     }
 
     public long getTimeout() {

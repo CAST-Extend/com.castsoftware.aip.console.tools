@@ -105,6 +105,10 @@ snapshot of that analysis.
 * You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
   To do so, check the following option checkbox in the "advanced settings" section
   ![blueprint_objective](./doc/images/blueprint_objective.png)
+* When a snapshot is available, you can optionally decide whether to publish the application to the Health Dashboard or
+  not.
+
+  ![snap-consolidation](./doc/images/snap-consolidation.png)
 
 This step requires the following :
 
@@ -171,6 +175,9 @@ This step will perform the following actions :
 * Create a Snapshot
 * Generate Snapshot Indicators
 * Publish snapshot
+* Optionally decided whether to publish the application to the Health Dashboard or not.
+
+![snap-consolidation](./doc/images/snap-consolidation.png)
 
 The Snapshot can then be found inside the `Snapshot` tab in AIP Console.
 
@@ -218,6 +225,8 @@ The Add Version step provides the following parameters :
   * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
 * *Rescan*: Clone the previous version of the application (similar to the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no version exists, it will run an Add version job instead.
 * *Enable Security Dataflow*: Enabled the Security Objective for this version. Has no effect if `Rescan` is checked.
+* *publish the application to the Health Dashboard* (optional): When sets to false, this prevents from consolidating
+  snapshot or from publishing application to the Health dashboard. *default* : true 
 
 Under `Advanced Settings` you will find the following parameters :
 
@@ -267,6 +276,8 @@ The Analyze step provides the following parameters :
 * *Application Name* (**required**): The name of the application for which the analysis will be run.
 * *Version Name* (optional): The name of the version to Analyze. <u>If left blank</u>, the analyzed version will <u>be the latest Delivered Version</u>. If no new Delivered Version Exists, <u>it will use the Current Version</u>.
 * *Snapshot*: Whether Snapshots should be created after Analysis.
+* *publish the application to the Health Dashboard* (optional): When sets to false, this prevents from consolidating
+  snapshot or from publishing application to the Health dashboard. *default* : true
 
 Under `Advanced Settings` you will find the following parameters :
 
@@ -279,6 +290,8 @@ The Snapshot step provides the following parameters :
 
 * *Application Name* (**required**): The name of the application for which the analysis will be run.
 * *Snapshot Name* (optional): The name of the Snapshot to create. If left blank, the snapshot will be named with the following pattern: `Snapshot-YYYY-MM-DDThh-mm-ss` depending on current date and time.
+* *publish the application to the Health Dashboard* (optional): When sets to false, this prevents from consolidating
+  snapshot or from publishing application to the Health dashboard. *default* : true
 
 Under `Advanced Settings` you will find the following parameters :
 

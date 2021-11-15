@@ -111,6 +111,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @Nullable
     private String domainName;
     private boolean processImaging = false;
+    private boolean consolidation = true;
 
     @Nullable
     private String snapshotName = "";
@@ -207,6 +208,14 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setFailureIgnored(boolean failureIgnored) {
         this.failureIgnored = failureIgnored;
+    }
+    @DataBoundSetter
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
+    }
+
+    public boolean isConsolidation() {
+        return consolidation;
     }
 
     public long getTimeout() {
