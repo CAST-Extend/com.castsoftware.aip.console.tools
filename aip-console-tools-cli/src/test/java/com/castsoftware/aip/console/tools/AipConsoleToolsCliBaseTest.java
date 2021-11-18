@@ -125,4 +125,11 @@ public abstract class AipConsoleToolsCliBaseTest {
             exitCode = Constants.UNKNOWN_ERROR;
         }
     }
+
+    protected boolean getBooleanArgValue(CommandLine.Model.ArgSpec arg) {
+        if (arg.typedValues().isEmpty()) {
+            return (Boolean) arg.initialValue();
+        }
+        return (Boolean) arg.typedValues().get(0);
+    }
 }

@@ -218,13 +218,6 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
 
-    private boolean getBooleanArgValue(CommandLine.Model.ArgSpec arg) {
-        if (arg.typedValues().isEmpty()) {
-            return (Boolean) arg.initialValue();
-        }
-        return (Boolean) arg.typedValues().get(0);
-    }
-
     @Test
     public void testAddVersionCommand_RunAddVersionJobCompleted() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
         boolean verbose = true;
