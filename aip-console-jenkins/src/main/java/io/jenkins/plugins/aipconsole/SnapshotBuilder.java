@@ -78,6 +78,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
     private boolean processImaging = false;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
+    private boolean consolidation = true;
 
     @DataBoundConstructor
     public SnapshotBuilder(String applicationName) {
@@ -123,6 +124,14 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
 
     public boolean isProcessImaging() {
         return processImaging;
+    }
+    @DataBoundSetter
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
+    }
+
+    public boolean isConsolidation() {
+        return consolidation;
     }
 
     @DataBoundSetter
@@ -225,16 +234,23 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
                 resolveSnapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
+            boolean forcedConsolidation = processImaging || consolidation;
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, caipVersion)
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
                     .versionGuid(versionToAnalyze.getGuid())
                     .versionName(versionToAnalyze.getName())
                     .snapshotName(resolveSnapshotName)
-                    .uploadApplication(true)
+                    .uploadApplication(forcedConsolidation)
                     .releaseAndSnapshotDate(new Date())
                     .processImaging(processImaging)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
                             Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT);
+
+            //Snapshot required now see whether we upload application or not
+            if (!forcedConsolidation) {
+                log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", resolveSnapshotName, applicationName));
+                requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);
+            }
 
             jobGuid = jobsService.startJob(requestBuilder);
             log.println(SnapshotBuilder_Snapshot_info_pollJobMessage());

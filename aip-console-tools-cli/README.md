@@ -159,6 +159,8 @@ The available options are :
 * `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
 * `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+* `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
+  snapshot or from publishing application to the Health dashboard. *default* : false
 
 *NOTE*: When creating a version, if a previous version exists, it's configuration will be cloned to the new version, but the new source will be used for analysis.
 
@@ -202,6 +204,8 @@ The available options are :
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
 * `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+* `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
+  snapshot or from publishing application to the Health dashboard. *default* : false
 
 #### Snapshot
 
@@ -218,6 +222,8 @@ The available options are :
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
 * `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+* `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
+  snapshot or from publishing application to the Health dashboard. *default* : false
 
 ### Return Codes
 

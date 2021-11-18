@@ -51,6 +51,8 @@ public abstract class AipConsoleToolsCliBaseTest {
     protected Path zippedSourcesPath;
     protected int exitCode;
     private List<String> unExpectedParameters;
+    protected static String ARG_CONSOLIDATE_LABEL = "<consolidation>";
+    protected static String ARG_IMAGING_LABEL = "<processImaging>";
 
     @Before
     public void startup() throws IOException {
@@ -124,5 +126,11 @@ public abstract class AipConsoleToolsCliBaseTest {
         } catch (Throwable t) {
             exitCode = Constants.UNKNOWN_ERROR;
         }
+    }
+    protected boolean getBooleanArgValue(CommandLine.Model.ArgSpec arg) {
+        if (arg.typedValues().isEmpty()) {
+            return (Boolean) arg.initialValue();
+        }
+        return (Boolean) arg.typedValues().get(0);
     }
 }

@@ -35,6 +35,7 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     @Nullable
     private String domainName;
     private boolean processImaging = false;
+    private boolean consolidation = true;
 
     @Nullable
     private String snapshotName;
@@ -88,6 +89,14 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     public void setAutoCreate(boolean autoCreate) {
         this.autoCreate = autoCreate;
+    }
+
+    public boolean isConsolidation() {
+        return consolidation;
+    }
+
+    public void setConsolidation(boolean consolidation) {
+        this.consolidation = consolidation;
     }
 
     public boolean isCloneVersion() {
