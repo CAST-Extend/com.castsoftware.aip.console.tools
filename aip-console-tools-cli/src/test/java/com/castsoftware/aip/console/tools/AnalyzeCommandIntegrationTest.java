@@ -72,7 +72,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(getUnExpectedParameters().size(), greaterThan(1));
-        assertThat(exitCode, is(1)); //no associated enum
+        assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
     }
 
     @Test
