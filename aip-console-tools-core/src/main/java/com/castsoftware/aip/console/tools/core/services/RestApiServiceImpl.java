@@ -29,10 +29,12 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.internal.http.HttpMethod;
+import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -191,6 +193,19 @@ public class RestApiServiceImpl implements RestApiService {
     }
 
     @Override
+    public <T> T exchangeMultipartForEntity(String method, String endpoint, Map<String, Map<String, String>> headers, File content, Class<T> responseClass) throws ApiCallException {
+        Request.Builder reqBuilder = getRequestBuilder(endpoint);
+        log.finer(String.format("Executing MULTIPART call based on a file content with method %s to endpoint %s", method, endpoint));
+
+        Map<String, String> contentHeaders = headers.get("content");
+        RequestBody body = RequestBody.create(MediaType.parse(contentHeaders.getOrDefault(FileUploadBase.CONTENT_TYPE, "application/octet-stream")), content);
+        MultipartBody.Part part = MultipartBody.Part.createFormData("file", content.getName(), body);
+        MultipartBody.Builder builder = new MultipartBody.Builder();
+        builder.addPart(part);
+        return sendMultipartBodyRequest(reqBuilder, method, endpoint, builder.build(), responseClass);
+    }
+
+    @Override
     public <T> T exchangeMultipartForEntity(String method, String endpoint, Map<String, Map<String, String>> headers, Map<String, Object> content, Class<T> responseClass) throws ApiCallException {
         Request.Builder reqBuilder = getRequestBuilder(endpoint);
         log.finer(String.format("Executing MULTIPART call with method %s to endpoint %s", method, endpoint));
@@ -214,8 +229,11 @@ public class RestApiServiceImpl implements RestApiService {
             builder.addPart(part);
         }
 
-        Request req = reqBuilder.method(method, builder.build())
-                .build();
+        return sendMultipartBodyRequest(reqBuilder, method, endpoint, builder.build(), responseClass);
+    }
+
+    private <T> T sendMultipartBodyRequest(Request.Builder reqBuilder, String method, String endpoint, MultipartBody multipartBody, Class<T> responseClass) throws ApiCallException {
+        Request req = reqBuilder.method(method, multipartBody).build();
 
         try (Response response = client.newCall(req).execute()) {
             if (ACCEPTED_HTTP_CODES.contains(response.code())) {
@@ -232,7 +250,7 @@ public class RestApiServiceImpl implements RestApiService {
             log.log(Level.SEVERE, "Response code from API was unexpected : " + response.code());
             log.log(Level.SEVERE, "Content was " + (response.body() == null ? "EMPTY" : response.body().string()));
             throw new ApiCallException(response.code(), "Unable to execute multipart form data with provided content");
-        } catch (IOException e) {
+        } catch (IOException | ApiCallException e) {
             log.log(Level.SEVERE, "IOException when calling endpoint " + endpoint, e);
             throw new ApiCallException(500, e);
         }

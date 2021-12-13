@@ -13,10 +13,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.FileCopyUtils;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -73,7 +71,7 @@ public class ImportSettingsCommand implements Callable<Integer> {
             log.error("The supplied file does not exist '" + filePath.getName() + "'");
             return Constants.RETURN_MISSING_FILE;
         }
-        
+
         Map<String, String> contentHeaderMap = new HashMap<>();
         contentHeaderMap.put(FileUploadBase.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         contentHeaderMap.put(FileUploadBase.CONTENT_DISPOSITION, "form-data; name=\"file\"; filename=\"" + filePath.getName() + "\"");
@@ -81,16 +79,8 @@ public class ImportSettingsCommand implements Callable<Integer> {
         Map<String, Map<String, String>> headers = new HashMap<>();
         headers.put("content", contentHeaderMap);
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("file", new ByteArrayResource(FileCopyUtils.copyToByteArray(filePath)) {
-            @Override
-            public String getFilename() {
-                return filePath.getName();
-            }
-        });
-
         try {
-            restApiService.exchangeMultipartForEntity("POST", "/api/import", headers, body, Void.class);
+            restApiService.exchangeMultipartForEntity("POST", "/api/import", headers, filePath, Void.class);
         } catch (ApiCallException e) {
             log.error("Unable to import settings file: '" + filePath.getName() + "'", e);
             return Constants.RETURN_IMPORT_SETTINGS_ERROR;
