@@ -24,6 +24,9 @@ public class Constants {
     // Keep ordinal to 9 fro backward compatibility
     public static final int RETURN_VERSION_WITH_ANALYSIS_DONE_NOT_FOUND = 9;
 
+    public static final int RETURN_FILE_ALREADY_EXISTS = 13;
+    public static final int RETURN_EXPORT_SETTINGS_ERROR = 14;
+
     public static final int UNKNOWN_ERROR = 1000;
 
     // Utils
