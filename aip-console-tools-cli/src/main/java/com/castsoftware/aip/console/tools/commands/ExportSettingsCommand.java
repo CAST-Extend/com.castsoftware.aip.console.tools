@@ -67,17 +67,22 @@ public class ExportSettingsCommand implements Callable<Integer> {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
+        if (!filePath.toPath().isAbsolute()) {
+            log.error("The file argument should be an absolute path.");
+            return Constants.RETURN_INVALID_PARAMETERS_ERROR;
+        }
         Path exportedSettingsPath = filePath.toPath();
         if (Files.isDirectory(filePath.toPath())) {
-            exportedSettingsPath = filePath.toPath().resolve("exported-settings.json");
+            exportedSettingsPath = filePath.toPath().resolve(Constants.DEFAULT_EXPORTED_SETTINGS_FILENAME);
         }
-        if (exportedSettingsPath.toFile().exists()) {
+
+        if (Files.exists(exportedSettingsPath)) {
             log.error("The supplied file already exists: " + exportedSettingsPath);
             return Constants.RETURN_FILE_ALREADY_EXISTS;
         }
 
         try {
-            log.info("Starting the export settings from {} ", sharedOptions.getFullServerRootUrl());
+            log.info("Starting export settings from {} ", sharedOptions.getFullServerRootUrl());
             ExportDto exportedSettings = restApiService.getForEntity("/api/export", ExportDto.class);
 
             log.info("Saving exported settings results to {} ", exportedSettingsPath);
