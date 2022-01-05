@@ -14,7 +14,7 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApplicationImportResultDto {
     private String appName;
-    private boolean imported = false;
+    private boolean imported;
     private ObjectErrorDto error;
 }
 

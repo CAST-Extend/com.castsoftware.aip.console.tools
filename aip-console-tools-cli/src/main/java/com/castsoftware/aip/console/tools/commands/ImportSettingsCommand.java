@@ -125,7 +125,8 @@ public class ImportSettingsCommand implements Callable<Integer> {
             if (app.isImported()) {
                 log.info("       Application {} imported successfully", app.getAppName());
             } else {
-                log.error("       Application {} failed to import. Reason {}.", app.getAppName(), app.getError().getDefaultMessage());
+                log.error("       Application {} failed to import. Reason {}.", app.getAppName()
+                        , app.getError() != null ? app.getError().getDefaultMessage() : "No details");
             }
         });
     }
