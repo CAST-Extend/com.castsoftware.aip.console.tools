@@ -88,7 +88,7 @@ public interface RestApiService {
      * @return the response of API with type T
      * @throws ApiCallException
      */
-    public <T> T exchangeMultipartForEntity(String method, String endpoint, Map<String, Map<String, String>> headers, Map<String, Object> content, Class<T> clazz) throws ApiCallException;
+    <T> T exchangeMultipartForEntity(String method, String endpoint, Map<String, Map<String, String>> headers, Map<String, Object> content, Class<T> clazz) throws ApiCallException;
 
-    public <T> T exchangeMultipartForEntity(String method, String endpoint, Map<String, Map<String, String>> headers, File content, Class<T> clazz) throws ApiCallException;
+    Response exchangeMultipartForResponse(String method, String endpoint, Map<String, Map<String, String>> headers, File content) throws ApiCallException;
 }

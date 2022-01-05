@@ -53,7 +53,7 @@ import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_CAIP
 @Log
 public class RestApiServiceImpl implements RestApiService {
     private static final List<Integer> ACCEPTED_HTTP_CODES = Arrays.asList(200, 201, 202, 204);
-    private static final String JSON_MEDIA_TYPE = "application/json";
+    public static final String JSON_MEDIA_TYPE = "application/json";
 
     private OkHttpClient client;
     private ObjectMapper mapper;
@@ -193,7 +193,7 @@ public class RestApiServiceImpl implements RestApiService {
     }
 
     @Override
-    public <T> T exchangeMultipartForEntity(String method, String endpoint, Map<String, Map<String, String>> headers, File content, Class<T> responseClass) throws ApiCallException {
+    public Response exchangeMultipartForResponse(String method, String endpoint, Map<String, Map<String, String>> headers, File content) throws ApiCallException {
         Request.Builder reqBuilder = getRequestBuilder(endpoint);
         log.finer(String.format("Executing MULTIPART call based on a file content with method %s to endpoint %s", method, endpoint));
 
@@ -202,7 +202,12 @@ public class RestApiServiceImpl implements RestApiService {
         MultipartBody.Part part = MultipartBody.Part.createFormData("file", content.getName(), body);
         MultipartBody.Builder builder = new MultipartBody.Builder();
         builder.addPart(part);
-        return sendMultipartBodyRequest(reqBuilder, method, endpoint, builder.build(), responseClass);
+        Request request = reqBuilder.method(method, builder.build()).build();
+        try {
+            return client.newCall(request).execute();
+        } catch (IOException e) {
+            throw new ApiCallException(500, e);
+        }
     }
 
     @Override
