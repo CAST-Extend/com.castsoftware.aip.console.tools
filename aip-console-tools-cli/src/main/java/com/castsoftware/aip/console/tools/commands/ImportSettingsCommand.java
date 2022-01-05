@@ -120,7 +120,7 @@ public class ImportSettingsCommand implements Callable<Integer> {
     }
 
     private void reportImported(DomainImportResultDto importedDomain) {
-        log.info("Domain: {}", importedDomain.getName());
+        log.info("Domain: {}", importedDomain.getName().equals(Constants.DEFAULT_DOMAIN) ? "Default" : importedDomain.getName());
         importedDomain.getApplications().stream().forEach(app -> {
             if (app.isImported()) {
                 log.info("       Application {} imported successfully", app.getAppName());

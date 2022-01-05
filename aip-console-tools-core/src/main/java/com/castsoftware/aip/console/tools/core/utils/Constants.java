@@ -27,6 +27,7 @@ public class Constants {
     public static final int RETURN_IMPORT_SETTINGS_ERROR = 15;
     public static final int RETURN_INVALID_PARAMETERS_ERROR = 16;
     public static final int RETURN_MISSING_FILE = 17;
+    public static final String DEFAULT_DOMAIN = "-";
 
     public static final int UNKNOWN_ERROR = 1000;
 
