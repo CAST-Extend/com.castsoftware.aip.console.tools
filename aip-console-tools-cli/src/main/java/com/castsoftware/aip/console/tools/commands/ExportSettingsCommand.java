@@ -42,6 +42,8 @@ public class ExportSettingsCommand implements Callable<Integer> {
     private JobsService jobsService;
     @Autowired
     private UploadService uploadService;
+    @Autowired
+    private ObjectMapper mapper;
 
     /**
      * A File that represents the v1 imported settings in Json format
@@ -86,7 +88,6 @@ public class ExportSettingsCommand implements Callable<Integer> {
             ExportDto exportedSettings = restApiService.getForEntity("/api/export", ExportDto.class);
 
             log.info("Saving exported settings results to {} ", exportedSettingsPath);
-            ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(exportedSettingsPath.toFile(), exportedSettings);
             log.info("Export settings completed.");
         } catch (ApiCallException e) {
