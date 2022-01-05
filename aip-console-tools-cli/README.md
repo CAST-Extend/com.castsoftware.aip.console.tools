@@ -21,6 +21,7 @@ settings file is located, do run the below command (to be updated to match your 
 ```bash
 java -jar .\aip-console-tools-cli.jar import --apikey="Valid.Api-Key" -s "http://HOST_V2.corp.castsoftware.com:8081" -f="C:/Some-where-on-the-node-machine/exported-test.json"
 
+A final report will be displayed to figure out what really happened.
 ```
 
 ### Requirements
