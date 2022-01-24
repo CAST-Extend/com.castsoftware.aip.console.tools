@@ -3,9 +3,9 @@ package com.castsoftware.aip.console.tools.core.services;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
 import okhttp3.Response;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -88,5 +88,7 @@ public interface RestApiService {
      * @return the response of API with type T
      * @throws ApiCallException
      */
-    public <T> T exchangeMultipartForEntity(String method, String endpoint, Map<String, Map<String, String>> headers, Map<String, Object> content, Class<T> clazz) throws ApiCallException;
+    <T> T exchangeMultipartForEntity(String method, String endpoint, Map<String, Map<String, String>> headers, Map<String, Object> content, Class<T> clazz) throws ApiCallException;
+
+    Response exchangeMultipartForResponse(String method, String endpoint, Map<String, Map<String, String>> headers, File content) throws ApiCallException;
 }

@@ -2,21 +2,42 @@
 
 ### Objectives
 
-The purpose of the AIP Console Tools CLI is to provide methods to start Application analysis without needing to interact directly with the AIP Console UI, by leveraging its REST API.
+The purpose of the AIP Console Tools CLI is to provide methods to start Application analysis without needing to interact
+directly with the AIP Console UI, by leveraging its REST API.
 
-The CLI can create new applications, deliver source code and run application analysis.
+The CLI can create new applications, deliver source code and run application analysis. You can also use this CLI to
+import settings file that was exported from the previous version of AIP Console (lower than 2.0.0). For that purpose, a
+new command *ImportSettings* with the alias *import* s available (see details below)
+
+### Import settings
+
+Before starting, ensure there is an AIP Console V2 running. From the node installation machine where the exported
+settings file is located, do run the below command (to be updated to match your requirements)
+
+- The target server should be the one from V2
+- Assume the host machine where AIP Console V2 is running is HOST_V2 and the domain name is *corp.castsoftware.com*
+- assume settings file (JSon format) to impoert is *C:/Some-where-on-the-node-machine/exported-test.json*
+
+```bash
+java -jar .\aip-console-tools-cli.jar import --apikey="Valid.Api-Key" -s "http://HOST_V2.corp.castsoftware.com:8081" -f="C:/Some-where-on-the-node-machine/exported-test.json"
+
+A final report will be displayed to figure out what really happened.
+```
 
 ### Requirements
 
-Before using the CLI, you will need a JRE or JDK, version 8 or above. You can use either a JVM provided by Oracle, AdoptOpenJDK or other validated JVMs (like Amazon Corretto, Azul Zulu, Eclipse OpenJ9, etc.)
+Before using the CLI, you will need a JRE or JDK, version 8 or above. You can use either a JVM provided by Oracle,
+AdoptOpenJDK or other validated JVMs (like Amazon Corretto, Azul Zulu, Eclipse OpenJ9, etc.)
 
 You will also need the following :
 
 * An installation of AIP Console that is accessible and configured.
-* An API Token for the user that will run the CLI (check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
+* An API Token for the user that will run the CLI (
+  check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
 * Prepare your source code in one of the two following ways :
     * As a zip or tar.gz archive that will be uploaded to AIP Console
-    * As a relative path, pointing to content in the Source Folder location **(SFL)** defined in AIP Console like below :
+    * As a relative path, pointing to content in the Source Folder location **(SFL)** defined in AIP Console like
+      below :
 
 ![source folder location](doc/images/source_folder_location_config.png)
 
