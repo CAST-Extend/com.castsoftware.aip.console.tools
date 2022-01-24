@@ -1,5 +1,7 @@
 package com.castsoftware.aip.console.tools;
 
+import com.castsoftware.aip.console.tools.core.dto.export.jackson.LocalDateTimeJsonDeserializer;
+import com.castsoftware.aip.console.tools.core.dto.export.jackson.LocalDateTimeJsonSerializer;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
@@ -21,6 +23,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.LocalDateTime;
+
 @Configuration
 @ComponentScan
 public class ApiIntegrationConfig {
@@ -33,7 +37,10 @@ public class ApiIntegrationConfig {
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeJsonDeserializer());
+        javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeJsonSerializer());
+        objectMapper.registerModule(javaTimeModule);
         objectMapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
         objectMapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);

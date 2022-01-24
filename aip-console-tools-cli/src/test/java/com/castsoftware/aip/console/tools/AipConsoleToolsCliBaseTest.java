@@ -119,7 +119,11 @@ public abstract class AipConsoleToolsCliBaseTest {
                 // Help message was shown
                 //Call to getUnmatchedArguments() seems to clear the content
                 unExpectedParameters = new ArrayList<>(cliToTest.getUnmatchedArguments());
-                exitCode = unExpectedParameters.isEmpty() ? 0 : 1;
+                if (cliToTest.getExecutionResult() == null) {
+                    exitCode = Constants.RETURN_INVALID_PARAMETERS_ERROR;
+                } else {
+                    exitCode = unExpectedParameters.isEmpty() ? 0 : 1;
+                }
             }
         } catch (Throwable t) {
             exitCode = Constants.UNKNOWN_ERROR;
