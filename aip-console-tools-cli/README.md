@@ -32,6 +32,24 @@ The enabled options will be added to the existing default ones: **Global Assessm
 Function Points measurement**. To Enable/Disable **Data safety investigation** or **Blueprint** and **Security
 assessment** you will need to display the help for dedicated command for more details.
 
+### Export the settings
+
+The Export command allows you to export items listed below to a dedicated file. When to use this command:
+
+* when you plan to import these settings to V2 AIP Console version.
+
+#### Command
+
+```bash
+java -jar .\aip-console-tools-cli.jar export --apikey="valid-Api-key" -s "server-url" -f="full path to the exported results file"
+```
+
+#### Items exported
+
+* All settings in the admin space
+* All domains with their contents (including applications)
+* All available exclusion patterns
+
 ### Quick Start
 
 For any of the command line listed bellow, you can use *--verbose* argument to decide whether to display API log
