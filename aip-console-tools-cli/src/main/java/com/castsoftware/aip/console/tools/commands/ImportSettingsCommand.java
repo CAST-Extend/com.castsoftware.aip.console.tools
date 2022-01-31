@@ -10,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,8 +24,10 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +50,8 @@ public class ImportSettingsCommand implements Callable<Integer> {
     private JobsService jobsService;
     @Autowired
     private UploadService uploadService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * A File that represents the v1 imported settings in Json format
@@ -102,6 +107,16 @@ public class ImportSettingsCommand implements Callable<Integer> {
                     }
                     Thread.sleep(5000);
                 }
+            } else { //other statuses
+                log.error("Some fields failed to be converted (see bellow)");
+                Set<FailedFieldsDto> failingFields = objectMapper.readValue(resp.body().string().getBytes(StandardCharsets.UTF_8), new TypeReference<Set<FailedFieldsDto>>() {
+                });
+                failingFields.stream().forEach(wrongField -> {
+                    Map<String, Object> args = wrongField.getArguments();
+                    args.keySet().stream().forEach(k -> {
+                        log.error("\t Field: {} reason {}", k, args.get(k));
+                    });
+                });
             }
 
             if (importReponse != null) {
@@ -117,6 +132,13 @@ public class ImportSettingsCommand implements Callable<Integer> {
         }
 
         return Constants.RETURN_OK;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    private static class FailedFieldsDto {
+        private Map<String, Object> arguments = new HashMap<>();
     }
 
     private void reportImported(DomainImportResultDto importedDomain) {
