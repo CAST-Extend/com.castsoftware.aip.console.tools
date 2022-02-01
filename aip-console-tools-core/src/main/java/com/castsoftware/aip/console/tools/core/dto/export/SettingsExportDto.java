@@ -38,4 +38,5 @@ public class SettingsExportDto {
     private boolean enableGlobalAssessmentModel;
     private Set<AssessmentModelRecordDto> assessmentModelRecord = new HashSet<>();
     private Set<SnapshotIndicatorSettingsDto> snapshotIndicatorSettings = new HashSet<>();
+    private Set<DlmFileDto> defaultDlmFiles = new HashSet<>();
 }
