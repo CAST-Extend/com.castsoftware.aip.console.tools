@@ -119,11 +119,16 @@ public class ImportSettingsCommand implements Callable<Integer> {
                 });
             }
 
+            boolean someThingImported = false;
             if (importReponse != null) {
                 ImportResultDto importedDomains = restApiService.mapResponse(importReponse, new TypeReference<ImportResultDto>() {
                 });
-                importedDomains.getDomains().stream().forEach(this::reportImported);
-            } else {
+                if (importedDomains.getDomains() != null) {
+                    importedDomains.getDomains().stream().forEach(this::reportImported);
+                    someThingImported = true;
+                }
+            }
+            if (!someThingImported) {
                 log.error("Nothing imported");
             }
         } catch (ApiCallException e) {
