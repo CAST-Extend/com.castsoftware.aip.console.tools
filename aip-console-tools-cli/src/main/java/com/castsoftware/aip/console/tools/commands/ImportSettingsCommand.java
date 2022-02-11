@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
+import com.castsoftware.aip.console.tools.core.dto.importsettings.ApplicationImportResultDto;
 import com.castsoftware.aip.console.tools.core.dto.importsettings.DomainImportResultDto;
 import com.castsoftware.aip.console.tools.core.dto.importsettings.ImportResultDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -9,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.FileUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -25,6 +27,8 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -63,26 +67,42 @@ public class ImportSettingsCommand implements Callable<Integer> {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
+    private StringBuffer logStringBuffer = new StringBuffer();
+
+    private String logMessage(String msg) {
+        logStringBuffer.append(msg);
+        logStringBuffer.append(System.lineSeparator());
+        return msg;
+    }
 
     @Override
     public Integer call() throws Exception {
-        log.info("Importing all settings an other resources from file: {}", filePath.getAbsolutePath());
+        log.info(logMessage(String.format("Importing all settings an other resources from file: %s", filePath.getAbsolutePath())));
+        Path importLogFilePath = Paths.get(filePath.getParent()).resolve(filePath.getName() + "-import-log.txt");
+        log.info(" You can find the associated log file here: {}", importLogFilePath);
+
         try {
             if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
             }
             restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
         } catch (ApiKeyMissingException e) {
+            logMessage("No password");
+            FileUtils.writeToFile(importLogFilePath, logStringBuffer.toString());
             return Constants.RETURN_NO_PASSWORD;
         } catch (ApiCallException e) {
+            logMessage("Login error");
+            FileUtils.writeToFile(importLogFilePath, logStringBuffer.toString());
             return Constants.RETURN_LOGIN_ERROR;
         }
 
         if (!filePath.exists()) {
-            log.error("The supplied file does not exist '" + filePath.getName() + "'");
+            log.error(logMessage("The supplied file does not exist '" + filePath.getName() + "'"));
+            FileUtils.writeToFile(importLogFilePath, logStringBuffer.toString());
             return Constants.RETURN_MISSING_FILE;
         }
 
+        Integer exitCode = Constants.RETURN_OK;
         Map<String, String> contentHeaderMap = new HashMap<>();
         contentHeaderMap.put(FileUploadBase.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         contentHeaderMap.put(FileUploadBase.CONTENT_DISPOSITION, "form-data; name=\"file\"; filename=\"" + filePath.getName() + "\"");
@@ -108,13 +128,13 @@ public class ImportSettingsCommand implements Callable<Integer> {
                     Thread.sleep(5000);
                 }
             } else { //other statuses
-                log.error("Some fields failed to be converted (see bellow)");
+                log.error(logMessage("Some fields failed to be converted (see bellow)"));
                 Set<FailedFieldsDto> failingFields = objectMapper.readValue(resp.body().string().getBytes(StandardCharsets.UTF_8), new TypeReference<Set<FailedFieldsDto>>() {
                 });
                 failingFields.stream().forEach(wrongField -> {
                     Map<String, Object> args = wrongField.getArguments();
                     args.keySet().stream().forEach(k -> {
-                        log.error("\t Field: {} reason {}", k, args.get(k));
+                        log.error(logMessage(String.format("\t Field: %s reason %s", k, args.get(k))));
                     });
                 });
             }
@@ -129,14 +149,16 @@ public class ImportSettingsCommand implements Callable<Integer> {
                 }
             }
             if (!someThingImported) {
-                log.error("Nothing imported");
+                log.error(logMessage("Nothing imported"));
             }
         } catch (ApiCallException e) {
-            log.error("Unable to import settings file: '" + filePath.getName() + "'", e);
-            return Constants.RETURN_IMPORT_SETTINGS_ERROR;
+            log.error(logMessage("Unable to import settings file: '" + filePath.getName() + "'"), e);
+            exitCode = Constants.RETURN_IMPORT_SETTINGS_ERROR;
         }
 
-        return Constants.RETURN_OK;
+
+        FileUtils.writeToFile(importLogFilePath, logStringBuffer.toString());
+        return exitCode;
     }
 
     @Getter
@@ -147,14 +169,20 @@ public class ImportSettingsCommand implements Callable<Integer> {
     }
 
     private void reportImported(DomainImportResultDto importedDomain) {
-        log.info("Domain: {}", importedDomain.getName().equals(Constants.DEFAULT_DOMAIN) ? "Default" : importedDomain.getName());
-        importedDomain.getApplications().stream().forEach(app -> {
-            if (app.isImported()) {
-                log.info("       Application {} imported successfully", app.getAppName());
-            } else {
-                log.error("       Application {} failed to import. Reason {}.", app.getAppName()
-                        , app.getError() != null ? app.getError().getDefaultMessage() : "No details");
-            }
-        });
+        log.info(logMessage(String.format("Domain: %s", importedDomain.getName().equals(Constants.DEFAULT_DOMAIN) ? "Default" : importedDomain.getName())));
+        importedDomain.getApplications().stream().forEach(this::printLogMessage);
+    }
+
+    private void printLogMessage(ApplicationImportResultDto app) {
+        String message;
+        if (app.isImported()) {
+            message = String.format("       Application %s imported successfully", app.getAppName());
+            log.info(message);
+        } else {
+            message = String.format("       Application %s failed to import. Reason %s.", app.getAppName()
+                    , app.getError() != null ? app.getError().getDefaultMessage() : "No details");
+            log.error(message);
+        }
+        logMessage(message);
     }
 }
