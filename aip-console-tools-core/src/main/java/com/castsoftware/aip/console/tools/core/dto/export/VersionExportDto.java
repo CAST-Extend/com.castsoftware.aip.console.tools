@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -16,5 +17,6 @@ public class VersionExportDto {
     private Set<String> exclusionRules = new HashSet<>();
     private Set<VersionObjective> objectives = new HashSet<>();
     private String sourcePath;
+    List<AnalysisReportItemDto> analysisReport;
 }
 
