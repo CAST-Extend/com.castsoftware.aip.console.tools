@@ -16,6 +16,8 @@ public class ApplicationExportDto {
 
     private String guid;
     private String name;
+    private String title;
+
     private List<String> resourceOwners = new ArrayList<>();
     private ConnectionProfileExportDto connectionProfile;
     private boolean emptyModulesIgnored = true;
@@ -24,5 +26,6 @@ public class ApplicationExportDto {
     private List<MavenRepositoryDto> mavenRepositories = new ArrayList<>();
     private DebugOptionsDto debugOptions;
     private Set<DlmFileDto> dlmFiles = new HashSet<>();
+    Set<JobExecutionDto> jobExecutions;
 }
 
