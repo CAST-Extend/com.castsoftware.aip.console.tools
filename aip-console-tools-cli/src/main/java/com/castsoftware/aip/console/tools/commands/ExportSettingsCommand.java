@@ -1,6 +1,5 @@
 package com.castsoftware.aip.console.tools.commands;
 
-import com.castsoftware.aip.console.tools.core.dto.export.ExportDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -85,7 +84,7 @@ public class ExportSettingsCommand implements Callable<Integer> {
 
         try {
             log.info("Starting export settings from {} ", sharedOptions.getFullServerRootUrl());
-            ExportDto exportedSettings = restApiService.getForEntity("/api/export", ExportDto.class);
+            String exportedSettings = restApiService.getForEntity("/api/export", String.class);
 
             log.info("Saving exported settings results to {} ", exportedSettingsPath);
             mapper.writeValue(exportedSettingsPath.toFile(), exportedSettings);
