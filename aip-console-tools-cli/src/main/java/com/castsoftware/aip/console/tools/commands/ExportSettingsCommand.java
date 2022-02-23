@@ -85,7 +85,7 @@ public class ExportSettingsCommand implements Callable<Integer> {
 
         try {
             log.info("Starting export settings from {} ", sharedOptions.getFullServerRootUrl());
-            //Using String here will require to deserialize thazt string before importing to V2
+            //Using String here will require deserializing that string before importing to V2
             ExportDto exportedSettings = restApiService.getForEntity("/api/export", ExportDto.class);
 
             log.info("Saving exported settings results to {} ", exportedSettingsPath);
