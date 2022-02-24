@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -66,6 +67,15 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationGuid, a.getGuid()))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Override
+    public Set<ApplicationDto> findApplicationsByNames(Set<String> applicationNames) throws ApplicationServiceException {
+        Set<String> appNames = applicationNames.stream().map(String::toLowerCase).collect(Collectors.toSet());
+        return getApplications()
+                .getApplications().stream()
+                .filter(Objects::nonNull)
+                .filter(app -> appNames.contains(app.getName().toLowerCase(Locale.ROOT))).collect(Collectors.toSet());
     }
 
     @Override
