@@ -2,7 +2,6 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.export.ExportApplicationsRequest;
-import com.castsoftware.aip.console.tools.core.dto.export.ExportDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
@@ -73,7 +72,7 @@ public class ExportSettingsCommand implements Callable<Integer> {
     private SharedOptions sharedOptions;
 
     private static final int EXPORT_SIZE_MAX = 5;
-    private static final String NAMES_SEPARATOR = "[\\s*;]";
+    private static final String NAMES_SEPARATOR = ";";
 
     @Override
     public Integer call() throws Exception {
@@ -124,9 +123,7 @@ public class ExportSettingsCommand implements Callable<Integer> {
         ExportApplicationsRequest requestBody = new ExportApplicationsRequest(Collections.unmodifiableSet(toExportedApps));
         try {
             log.info("Starting export settings from {} ", sharedOptions.getFullServerRootUrl());
-            //Using String here will require deserializing that string before importing to V2
-            //ExportDto exportedSettings = restApiService.getForEntity("/api/export", ExportDto.class);
-            ExportDto exportedSettings = restApiService.postForEntity("/api/export", requestBody, ExportDto.class);
+            String exportedSettings = restApiService.postForEntity("/api/export", requestBody, String.class);
 
             log.info("Saving exported settings results to {} ", exportedSettingsPath);
             mapper.writeValue(exportedSettingsPath.toFile(), exportedSettings);
