@@ -44,7 +44,59 @@ public class ExportSettingsCommandIntegrationTest extends AipConsoleToolsCliBase
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
     }
-    
+
+    @Test
+    public void testExportSettingsCommand_WithMissingAppList() throws IOException {
+        Path existingRootPath = sflPath.resolve(TEST_SRC_FOLDER);
+        Files.createDirectories(existingRootPath);
+        Path existingFilePath = existingRootPath.resolve("fake_file.json");
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY,
+                "-f", existingFilePath.toString()
+        };
+
+        runStringArgs(exportSettingsCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
+    }
+
+    @Test
+    public void testExportSettingsCommand_WithAppListExceedLimit() throws IOException {
+        Path existingRootPath = sflPath.resolve(TEST_SRC_FOLDER);
+        Files.createDirectories(existingRootPath);
+        Path existingFilePath = existingRootPath.resolve("fake_file.json");
+
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY,
+                "-f", existingFilePath.toString(),
+                "--appList", "A;B;C;D;E;F"
+        };
+
+        runStringArgs(exportSettingsCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
+    }
+
+    @Test
+    public void testExportSettingsCommand_WithAppListInWrongFormat() throws IOException {
+        Path existingRootPath = sflPath.resolve(TEST_SRC_FOLDER);
+        Files.createDirectories(existingRootPath);
+        Path existingFilePath = existingRootPath.resolve("fake_file.json");
+
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY,
+                "-f", existingFilePath.toString(),
+                "--appList", "A,B;C"
+        };
+
+        runStringArgs(exportSettingsCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
     @Test
     public void testExportSettingsCommand_WithAlreadyExistsFile() throws IOException {
         Path existingRootPath = sflPath.resolve(TEST_SRC_FOLDER);
@@ -54,7 +106,8 @@ public class ExportSettingsCommandIntegrationTest extends AipConsoleToolsCliBase
 
         String[] args = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY,
-                "-f", existingFilePath.toString()
+                "-f", existingFilePath.toString(),
+                "--appList", "A;B"
         };
 
         runStringArgs(exportSettingsCommand, args);
@@ -70,7 +123,8 @@ public class ExportSettingsCommandIntegrationTest extends AipConsoleToolsCliBase
 
         String[] args = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY,
-                "-f", existingRootPath.toString()
+                "-f", existingRootPath.toString(),
+                "-apps", "A;B;C"
         };
 
         Path expectedResultFilePath = existingRootPath.resolve(Constants.DEFAULT_EXPORTED_SETTINGS_FILENAME);
