@@ -41,9 +41,11 @@ The Export command allows you to export items listed below to a dedicated file. 
 #### Command
 
 ```bash
-java -jar .\aip-console-tools-cli.jar export --apikey="valid-Api-key" -s "server-url" -f="full path to the exported results file"
+java -jar .\aip-console-tools-cli.jar export --apikey="valid-Api-key" -s "server-url" --appList="Applications to be exported: semicolon-separated string list" -f="full path to the exported results file"
 ```
 
+This tool will report all the applications that can be exported compared to the list provided in the appList argument.
+The amount of applications to export in one command is limited to 5 at a time.
 #### Items exported
 
 * All settings in the admin space

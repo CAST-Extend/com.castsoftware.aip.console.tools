@@ -14,7 +14,8 @@ public class ExportSettingsCommandTest extends AipCommandTest<ExportSettingsComm
     public void testExportSettingsCommand_WithTypicalParams() {
         String[] sb = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY,
-                "-f", TEST_SRC_FOLDER
+                "-f", TEST_SRC_FOLDER,
+                "-apps", "A"
         };
 
         aipCommandLine.parseArgs(sb);
