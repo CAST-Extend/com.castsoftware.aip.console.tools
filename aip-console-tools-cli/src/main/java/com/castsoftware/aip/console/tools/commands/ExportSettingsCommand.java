@@ -102,7 +102,7 @@ public class ExportSettingsCommand implements Callable<Integer> {
             log.error(String.format("Applications list size must be between 1 and %d", EXPORT_SIZE_MAX));
             return Constants.RETURN_INVALID_PARAMETERS_ERROR;
         } else {
-            Set<String> candidates = Arrays.stream(applicationsToExport).collect(Collectors.toSet());
+            Set<String> candidates = Arrays.stream(applicationsToExport).map(String::trim).collect(Collectors.toSet());
             toExportedApps = applicationService.findApplicationsByNames(candidates).stream().map(ApplicationDto::getName).collect(Collectors.toSet());
 
             StringBuilder sb = new StringBuilder();
