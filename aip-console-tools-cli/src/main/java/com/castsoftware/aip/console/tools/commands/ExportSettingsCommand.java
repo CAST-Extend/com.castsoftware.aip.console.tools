@@ -103,11 +103,15 @@ public class ExportSettingsCommand implements Callable<Integer> {
             return Constants.RETURN_INVALID_PARAMETERS_ERROR;
         } else {
             Set<String> candidates = Arrays.stream(applicationsToExport).map(String::trim).collect(Collectors.toSet());
+            StringBuilder sbInput = new StringBuilder();
+            candidates.forEach(s -> sbInput.append(String.format("%n- %s", s)));
+            log.info("Selected applications to export: {}", sbInput);
+
             toExportedApps = applicationService.findApplicationsByNames(candidates).stream().map(ApplicationDto::getName).collect(Collectors.toSet());
 
             StringBuilder sb = new StringBuilder();
             toExportedApps.forEach(s -> sb.append(String.format("%n- %s", s)));
-            log.info("Existing applications to import: {}", sb.toString());
+            log.info("Existing applications to export: {}", sb);
         }
 
         Path exportedSettingsPath = filePath.toPath();
