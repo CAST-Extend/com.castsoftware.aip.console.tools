@@ -1,6 +1,8 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.ExportSettingsCommand;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,11 +15,15 @@ import picocli.CommandLine;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.castsoftware.aip.console.tools.TestConstants.TEST_SRC_FOLDER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {AipConsoleToolsCliIntegrationTest.class})
@@ -80,7 +86,7 @@ public class ExportSettingsCommandIntegrationTest extends AipConsoleToolsCliBase
     }
 
     @Test
-    public void testExportSettingsCommand_WithAppListInWrongFormat() throws IOException {
+    public void testExportSettingsCommand_WithAppListInWrongFormat() throws IOException, ApplicationServiceException {
         Path existingRootPath = sflPath.resolve(TEST_SRC_FOLDER);
         Files.createDirectories(existingRootPath);
         Path existingFilePath = existingRootPath.resolve("fake_file.json");
@@ -90,6 +96,7 @@ public class ExportSettingsCommandIntegrationTest extends AipConsoleToolsCliBase
                 "-f", existingFilePath.toString(),
                 "--appList", "A,B;C"
         };
+        when(applicationService.findApplicationsByNames(anySet())).thenReturn(getExistingApplication("A", "B"));
 
         runStringArgs(exportSettingsCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
@@ -98,7 +105,7 @@ public class ExportSettingsCommandIntegrationTest extends AipConsoleToolsCliBase
     }
 
     @Test
-    public void testExportSettingsCommand_WithAlreadyExistsFile() throws IOException {
+    public void testExportSettingsCommand_WithAlreadyExistsFile() throws IOException, ApplicationServiceException {
         Path existingRootPath = sflPath.resolve(TEST_SRC_FOLDER);
         Files.createDirectories(existingRootPath);
         Path existingFilePath = existingRootPath.resolve("fake_file.json");
@@ -109,6 +116,7 @@ public class ExportSettingsCommandIntegrationTest extends AipConsoleToolsCliBase
                 "-f", existingFilePath.toString(),
                 "--appList", "A;B"
         };
+        when(applicationService.findApplicationsByNames(anySet())).thenReturn(getExistingApplication("A", "B"));
 
         runStringArgs(exportSettingsCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
@@ -117,7 +125,7 @@ public class ExportSettingsCommandIntegrationTest extends AipConsoleToolsCliBase
     }
 
     @Test
-    public void testExportSettingsCommand_WithFilePathAsDirectory() throws IOException {
+    public void testExportSettingsCommand_WithFilePathAsDirectory() throws IOException, ApplicationServiceException {
         Path existingRootPath = sflPath.resolve(TEST_SRC_FOLDER);
         Files.createDirectories(existingRootPath);
 
@@ -126,6 +134,8 @@ public class ExportSettingsCommandIntegrationTest extends AipConsoleToolsCliBase
                 "-f", existingRootPath.toString(),
                 "-apps", "A;B;C"
         };
+
+        when(applicationService.findApplicationsByNames(anySet())).thenReturn(getExistingApplication("B", "C"));
 
         Path expectedResultFilePath = existingRootPath.resolve(Constants.DEFAULT_EXPORTED_SETTINGS_FILENAME);
         runStringArgs(exportSettingsCommand, args);
@@ -146,5 +156,13 @@ public class ExportSettingsCommandIntegrationTest extends AipConsoleToolsCliBase
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
+    }
+
+    private Set<ApplicationDto> getExistingApplication(String... candidates) {
+        Set<ApplicationDto> existing = new HashSet<>(candidates.length);
+        for (String name : candidates) {
+            existing.add(ApplicationDto.builder().name(name).build());
+        }
+        return existing;
     }
 }
