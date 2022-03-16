@@ -73,10 +73,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public Set<ApplicationDto> findApplicationsByNames(Set<String> applicationNames) throws ApplicationServiceException {
         Set<String> appNames = applicationNames.stream().map(String::toLowerCase).collect(Collectors.toSet());
-        return getApplications()
-                .getApplications().stream()
-                .filter(Objects::nonNull)
-                .filter(app -> appNames.contains(app.getName().toLowerCase(Locale.ROOT))).collect(Collectors.toSet());
+        return getApplications().getApplications().stream()
+                .filter(applicationDto -> appNames.contains(applicationDto.getName().toLowerCase(Locale.ROOT))).collect(Collectors.toSet());
     }
 
     @Override

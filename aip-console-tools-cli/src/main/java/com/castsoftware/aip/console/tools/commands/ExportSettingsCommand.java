@@ -112,6 +112,10 @@ public class ExportSettingsCommand implements Callable<Integer> {
             StringBuilder sb = new StringBuilder();
             toExportedApps.forEach(s -> sb.append(String.format("%n- %s", s)));
             log.info("Existing applications to export: {}", sb);
+            if (toExportedApps.isEmpty()) {
+                log.error("Unable to find the selected application on the server");
+                return Constants.RETURN_EXPORT_SETTINGS_ERROR;
+            }
         }
 
         Path exportedSettingsPath = filePath.toPath();
