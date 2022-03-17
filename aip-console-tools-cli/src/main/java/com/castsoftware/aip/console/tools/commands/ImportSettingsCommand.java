@@ -77,7 +77,7 @@ public class ImportSettingsCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        log.info(logMessage(String.format("Importing all settings an other resources from file: %s", filePath.getAbsolutePath())));
+        log.info(logMessage(String.format("Importing all settings and other resources from file: %s", filePath.getAbsolutePath())));
         Path importLogFilePath = Paths.get(filePath.getParent()).resolve(filePath.getName() + "-import-log.txt");
         log.info(" You can find the associated log file here: {}", importLogFilePath);
 
@@ -128,7 +128,7 @@ public class ImportSettingsCommand implements Callable<Integer> {
                     Thread.sleep(5000);
                 }
             } else { //other statuses
-                log.error(logMessage("Some fields failed to be converted (see bellow)"));
+                log.error(logMessage("Some fields failed to be converted (see below)"));
                 Set<FailedFieldsDto> failingFields = objectMapper.readValue(resp.body().string().getBytes(StandardCharsets.UTF_8), new TypeReference<Set<FailedFieldsDto>>() {
                 });
                 failingFields.stream().forEach(wrongField -> {
@@ -149,7 +149,7 @@ public class ImportSettingsCommand implements Callable<Integer> {
                 }
             }
             if (!someThingImported) {
-                log.error(logMessage("Nothing imported"));
+                log.error(logMessage("Nothing imported. For more details, please check the node log file."));
             }
         } catch (ApiCallException e) {
             log.error(logMessage("Unable to import settings file: '" + filePath.getName() + "'"), e);
