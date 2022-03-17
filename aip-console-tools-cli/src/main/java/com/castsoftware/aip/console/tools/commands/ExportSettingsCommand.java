@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.export.ExportApplicationsRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -87,6 +88,11 @@ public class ExportSettingsCommand implements Callable<Integer> {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
+        ApiInfoDto apiInfo = restApiService.getAipConsoleApiInfo();
+        log.info(String.format("Target AIP-Console version: %s", apiInfo.getApiVersion()));
+        if (StringUtils.isNotEmpty(apiInfo.getCastVersion())) {
+            log.info(String.format("Target CAIP version: %s", apiInfo.getCastVersion()));
+        }
         if (!filePath.toPath().isAbsolute()) {
             log.error("The file argument should be an absolute path.");
             return Constants.RETURN_INVALID_PARAMETERS_ERROR;
