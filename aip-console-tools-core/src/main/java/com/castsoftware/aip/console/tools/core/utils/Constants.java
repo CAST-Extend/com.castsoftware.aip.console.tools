@@ -24,6 +24,10 @@ public class Constants {
     // Keep ordinal to 9 fro backward compatibility
     public static final int RETURN_VERSION_WITH_ANALYSIS_DONE_NOT_FOUND = 9;
 
+    public static final int RETURN_FILE_ALREADY_EXISTS = 13;
+    public static final int RETURN_EXPORT_SETTINGS_ERROR = 14;
+    public static final int RETURN_INVALID_PARAMETERS_ERROR = 16;
+
     public static final int UNKNOWN_ERROR = 1000;
 
     // Utils
@@ -96,5 +100,6 @@ public class Constants {
     // Other constants
     public static final long DEFAULT_HTTP_TIMEOUT = 90L;
     public static final String EXECUTION_PROFILE_DEFAULT = "default";
+    public static final String DEFAULT_EXPORTED_SETTINGS_FILENAME = "exported-settings.json";
 }
 

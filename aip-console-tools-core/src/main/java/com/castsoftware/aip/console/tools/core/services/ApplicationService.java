@@ -102,4 +102,6 @@ public interface ApplicationService {
     void updateAmtProfileDebugOption(String appGuid, boolean amtProfile) throws ApplicationServiceException;
 
     void resetDebugOptions(String appGuid, DebugOptionsDto debugOptionsDto) throws ApplicationServiceException;
+
+    Set<ApplicationDto> findApplicationsByNames(Set<String> applicationNames) throws ApplicationServiceException;
 }

@@ -347,6 +347,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             return;
         }
         ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
+        if (!apiInfoDto.isEnablePackagePathCheck()) {
+            listener.getLogger().println("enable.package.path.check option is disabled");
+        }
         EnvVars vars = run.getEnvironment(listener);
         // Parse variables in application name
         String variableAppName = vars.expand(applicationName);

@@ -1,6 +1,8 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.export.jackson.LocalDateTimeJsonDeserializer;
+import com.castsoftware.aip.console.tools.core.dto.export.jackson.LocalDateTimeJsonSerializer;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
@@ -36,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -68,7 +71,11 @@ public class RestApiServiceImpl implements RestApiService {
                 .writeTimeout(Constants.DEFAULT_HTTP_TIMEOUT, TimeUnit.SECONDS)
                 .build();
         this.mapper = new ObjectMapper();
-        this.mapper.registerModule(new JavaTimeModule());
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeJsonDeserializer());
+        javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeJsonSerializer());
+
+        this.mapper.registerModule(javaTimeModule);
         this.mapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
         this.mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
         this.mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -409,10 +416,10 @@ public class RestApiServiceImpl implements RestApiService {
 
             // get xsrf cookie
             if (xsrfCookie != null) {
-                log.finest("Setting XSRF-TOKEN header to " + xsrfCookie.value());
+                RestApiServiceImpl.log.finest("Setting XSRF-TOKEN header to " + xsrfCookie.value());
                 reqBuilder.header("X-XSRF-TOKEN", xsrfCookie.value());
             } else {
-                log.finest("No xsrf cookie, next request should set it");
+                RestApiServiceImpl.log.finest("No xsrf cookie, next request should set it");
             }
 
             if (request.header("Authorization") != null ||

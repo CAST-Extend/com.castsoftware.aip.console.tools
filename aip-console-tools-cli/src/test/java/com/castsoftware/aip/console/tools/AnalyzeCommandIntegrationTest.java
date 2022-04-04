@@ -15,7 +15,6 @@ import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(getUnExpectedParameters().size(), greaterThan(1));
-        assertThat(exitCode, is(1)); //no associated enum
+        assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
     }
 
     @Test

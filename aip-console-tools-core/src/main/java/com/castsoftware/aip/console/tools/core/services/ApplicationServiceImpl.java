@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
@@ -28,6 +29,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -66,6 +68,13 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationGuid, a.getGuid()))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Override
+    public Set<ApplicationDto> findApplicationsByNames(Set<String> applicationNames) throws ApplicationServiceException {
+        Set<String> appNames = applicationNames.stream().map(String::toLowerCase).collect(Collectors.toSet());
+        return getApplications().getApplications().stream()
+                .filter(applicationDto -> appNames.contains(applicationDto.getName().toLowerCase(Locale.ROOT))).collect(Collectors.toSet());
     }
 
     @Override
@@ -202,6 +211,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns, boolean rescan) throws JobServiceException, PackagePathInvalidException {
+        ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
         try {
             Set<DeliveryPackageDto> packages = new HashSet<>();
             VersionDto previousVersion = getApplicationVersion(appGuid)
@@ -209,7 +219,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .filter(v -> v.getStatus().ordinal() >= VersionStatus.DELIVERED.ordinal())
                     .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
             Set<String> ignorePatterns = StringUtils.isEmpty(exclusionPatterns) ? Collections.emptySet() : Arrays.stream(exclusionPatterns.split(",")).collect(Collectors.toSet());
-            if (previousVersion != null && rescan) {
+            if (apiInfoDto.isEnablePackagePathCheck() && previousVersion != null && rescan) {
                 packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
                 if (StringUtils.isEmpty(exclusionPatterns) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
