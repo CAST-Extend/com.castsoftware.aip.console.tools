@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
@@ -343,6 +344,11 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             listener.error(GenericError_error_accessDenied(apiServerUrl));
             run.setResult(defaultResult);
             return;
+        }
+        
+        ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
+        if (!apiInfoDto.isEnablePackagePathCheck()) {
+            listener.getLogger().println("enable.package.path.check option is disabled");
         }
 
         EnvVars vars = run.getEnvironment(listener);
