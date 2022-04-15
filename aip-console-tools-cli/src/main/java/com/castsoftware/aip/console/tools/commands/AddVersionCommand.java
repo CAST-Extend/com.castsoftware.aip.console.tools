@@ -3,6 +3,7 @@ package com.castsoftware.aip.console.tools.commands;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -164,6 +165,9 @@ public class AddVersionCommand implements Callable<Integer> {
                     + " if specified without parameter: ${FALLBACK-VALUE}",
             defaultValue = "true", fallbackValue = "true")
     private boolean consolidation = true;
+    
+    @CommandLine.Option(names = "--module-option", description = "Sets the module option per technology or per analysis unit")
+    private String moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
 
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
@@ -190,6 +194,10 @@ public class AddVersionCommand implements Callable<Integer> {
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
 
+        if (!ModuleGenerationType.exists(moduleGenerationType)) {
+            log.error("This module-option could not be applied because it's unknown: " + moduleGenerationType);
+            return Constants.RETURN_INVALID_PARAMETERS_ERROR;
+        }
         if (StringUtils.isBlank(applicationName) && StringUtils.isBlank(applicationGuid)) {
             log.error("No application name or application guid provided. Exiting.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
@@ -226,6 +234,7 @@ public class AddVersionCommand implements Callable<Integer> {
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .moduleGenerationType(ModuleGenerationType.fromString(moduleGenerationType))
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);

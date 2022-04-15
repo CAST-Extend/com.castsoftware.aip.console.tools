@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -146,6 +147,8 @@ public class DeliverVersionCommand implements Callable<Integer> {
             fallbackValue = "true", defaultValue = "false")
     private boolean enableSecurityAssessment;
 
+    @CommandLine.Option(names = "--module-option", description = "Sets the module option per technology or per analysis unit")
+    private String moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
 
     public DeliverVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         this.restApiService = restApiService;
@@ -177,6 +180,10 @@ public class DeliverVersionCommand implements Callable<Integer> {
         }
 
         log.info("Deliver version command has triggered with log output = '{}'", sharedOptions.isVerbose());
+        if (!ModuleGenerationType.exists(moduleGenerationType)) {
+            log.error("This module-option could not be applied because it's unknown: " + moduleGenerationType);
+            return Constants.RETURN_INVALID_PARAMETERS_ERROR;
+        }
 
         String applicationGuid;
         Thread shutdownHook = null;
@@ -209,6 +216,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .moduleGenerationType(ModuleGenerationType.fromString(moduleGenerationType))
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);

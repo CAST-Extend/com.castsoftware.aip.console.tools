@@ -1,12 +1,17 @@
 package com.castsoftware.aip.console.tools.core.dto.jobs;
 
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class JobRequestBuilder {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -35,6 +40,7 @@ public class JobRequestBuilder {
     private boolean autoDiscover = true;
     private boolean uploadApplication = false;
     private boolean processImaging = false;
+    private String moduleGenerationType;
 
     private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType) {
         this.appGuid = appGuid;
@@ -50,6 +56,7 @@ public class JobRequestBuilder {
         String nowStr = RELEASE_DATE_FORMATTER.format(now);
         releaseDateStr = nowStr;
         snapshotDateStr = nowStr;
+        moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
     }
 
     public JobRequestBuilder nodeGuid(String nodeGuid) {
@@ -121,6 +128,12 @@ public class JobRequestBuilder {
             objectives.add(GLOBAL_RISK_OBJECTIVE);
             objectives.add(FUNCTIONAL_POINTS_OBJECTIVE);
         }
+        return this;
+    }
+
+    //"moduleGenerationType": "one_per_techno"|one_per_au|full_content
+    public JobRequestBuilder moduleGenerationType(ModuleGenerationType generationType) {
+        this.moduleGenerationType = generationType.toString();
         return this;
     }
 
