@@ -165,9 +165,9 @@ public class AddVersionCommand implements Callable<Integer> {
                     + " if specified without parameter: ${FALLBACK-VALUE}",
             defaultValue = "true", fallbackValue = "true")
     private boolean consolidation = true;
-    
-    @CommandLine.Option(names = "--module-option", description = "Sets the module option per technology or per analysis unit")
-    private String moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
+
+    @CommandLine.Option(names = "--module-option", description = "Generates a user defined module option forr either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno")
+    private String moduleGenerationType;
 
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
@@ -194,10 +194,15 @@ public class AddVersionCommand implements Callable<Integer> {
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
 
-        if (!ModuleGenerationType.exists(moduleGenerationType)) {
-            log.error("This module-option could not be applied because it's unknown: " + moduleGenerationType);
-            return Constants.RETURN_INVALID_PARAMETERS_ERROR;
+        ModuleGenerationType moduleType = null;
+        if (StringUtils.isNotEmpty(moduleGenerationType)) {
+            if (!ModuleGenerationType.exists(moduleGenerationType)) {
+                log.error("This module-option could not be applied because it's unknown: " + moduleGenerationType);
+                return Constants.RETURN_INVALID_PARAMETERS_ERROR;
+            }
+            moduleType = ModuleGenerationType.fromString(moduleGenerationType);
         }
+
         if (StringUtils.isBlank(applicationName) && StringUtils.isBlank(applicationGuid)) {
             log.error("No application name or application guid provided. Exiting.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
@@ -216,6 +221,10 @@ public class AddVersionCommand implements Callable<Integer> {
                 }
             }
 
+            if (applicationService.applicationHasVersion(applicationGuid) && moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
+                log.warn("The supplied module generation type not applicable: " + moduleType);
+                moduleType = null;
+            }
             if (StringUtils.isEmpty(applicationName) && StringUtils.isNotEmpty(applicationGuid)) {
                 applicationName = applicationService.getApplicationNameFromGuid(applicationGuid);
             }
@@ -234,7 +243,6 @@ public class AddVersionCommand implements Callable<Integer> {
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
-                    .moduleGenerationType(ModuleGenerationType.fromString(moduleGenerationType))
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
@@ -244,6 +252,12 @@ public class AddVersionCommand implements Callable<Integer> {
             }
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
             builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
+
+            //Only the first version sets the ONE_PER_TECHNO value
+            if (moduleType != null) {
+                log.info("Setting the Module generation type to: " + moduleType);
+                builder.moduleGenerationType(ModuleGenerationType.fromString(moduleGenerationType));
+            }
 
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);

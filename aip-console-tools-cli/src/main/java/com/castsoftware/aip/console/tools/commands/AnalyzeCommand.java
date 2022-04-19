@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -30,10 +31,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Run analysis for an application and a version on AIP Console
@@ -95,6 +98,9 @@ public class AnalyzeCommand implements Callable<Integer> {
             defaultValue = "true", fallbackValue = "true")
     private boolean consolidation = true;
 
+    @CommandLine.Option(names = "--module-option", description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno")
+    private String moduleGenerationType;
+
     @Autowired
     private DebugOptionsService debugOptionsService;
 
@@ -126,6 +132,20 @@ public class AnalyzeCommand implements Callable<Integer> {
 
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
+
+        ModuleGenerationType moduleType = null;
+        if (StringUtils.isNotEmpty(moduleGenerationType)) {
+            if (!ModuleGenerationType.exists(moduleGenerationType)) {
+                log.error("This module-option could not be applied because it's unknown: " + moduleGenerationType);
+                return Constants.RETURN_INVALID_PARAMETERS_ERROR;
+            }
+            moduleType = ModuleGenerationType.fromString(moduleGenerationType);
+            if (moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
+                String allowed = EnumSet.complementOf(EnumSet.of(ModuleGenerationType.ONE_PER_TECHNO)).stream().map(ModuleGenerationType::toString).collect(Collectors.joining("; "));
+                log.info("Only following Module generation type are allowed: " + allowed);
+                moduleType = null;
+            }
+        }
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
@@ -178,6 +198,9 @@ public class AnalyzeCommand implements Callable<Integer> {
                 builder.endStep(Constants.ANALYZE);
             }
 
+            if (moduleType != null) {
+                builder.moduleGenerationType(moduleType);
+            }
             builder.versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());

@@ -117,6 +117,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     private boolean blueprint = false;
     private boolean enableSecurityAssessment = false;
 
+    private String moduleGenerationType;
+
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
@@ -164,6 +166,15 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
     public boolean isConsolidation() {
         return consolidation;
+    }
+
+    @DataBoundSetter
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
     }
 
     @DataBoundSetter
@@ -333,6 +344,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         String username = getDescriptor().getAipConsoleUsername();
         // Job level timeout different from default ? use it, else use the global config level timeout
         long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());
+
+        listener.getLogger().println("Provided Module generation type is: " + getModuleGenerationType());
 
         try {
             // update timeout of HTTP Client if different from default
