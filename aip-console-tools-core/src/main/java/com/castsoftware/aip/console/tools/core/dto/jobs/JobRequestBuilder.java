@@ -228,6 +228,9 @@ public class JobRequestBuilder {
         }
         parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
 
+        if (StringUtils.isNotEmpty(moduleGenerationType)) {
+            parameters.put(Constants.PARAM_MODULE_GENERATION_TYPE, moduleGenerationType);
+        }
         return parameters;
     }
 
