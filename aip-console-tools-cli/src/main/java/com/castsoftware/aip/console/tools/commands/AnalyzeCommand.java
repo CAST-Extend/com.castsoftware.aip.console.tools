@@ -31,12 +31,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Run analysis for an application and a version on AIP Console
@@ -141,8 +139,7 @@ public class AnalyzeCommand implements Callable<Integer> {
             }
             moduleType = ModuleGenerationType.fromString(moduleGenerationType);
             if (moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
-                String allowed = EnumSet.complementOf(EnumSet.of(ModuleGenerationType.ONE_PER_TECHNO)).stream().map(ModuleGenerationType::toString).collect(Collectors.joining("; "));
-                log.info("Only following Module generation type are allowed: " + allowed);
+                log.info("Only following Module generation type are allowed: " + ModuleGenerationType.getAllowed(moduleType));
                 moduleType = null;
             }
         }

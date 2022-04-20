@@ -2,6 +2,10 @@ package com.castsoftware.aip.console.tools.core.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.EnumSet;
+import java.util.stream.Collectors;
 
 public enum ModuleGenerationType {
     ONE_PER_TECHNO,
@@ -10,7 +14,7 @@ public enum ModuleGenerationType {
 
     @JsonCreator
     public static ModuleGenerationType fromString(String value) {
-        return value == null ? null : ModuleGenerationType.valueOf(value.toUpperCase());
+        return value == null || StringUtils.equalsIgnoreCase(value, "USE_DEFAULT") ? null : ModuleGenerationType.valueOf(value.toUpperCase());
     }
 
     @Override
@@ -25,5 +29,9 @@ public enum ModuleGenerationType {
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    public static String getAllowed(ModuleGenerationType exceptThis) {
+        return EnumSet.complementOf(EnumSet.of(exceptThis)).stream().map(ModuleGenerationType::toString).collect(Collectors.joining("; "));
     }
 }

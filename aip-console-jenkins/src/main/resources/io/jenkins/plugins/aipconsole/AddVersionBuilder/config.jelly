@@ -23,7 +23,8 @@
     </f:entry>
     <f:entry title="${%moduleGenerationType}" field="moduleGenerationType" description="${%moduleGenerationType.descr}">
         <select name="moduleGenerationType">
-            <option value="full_content">Full content</option>, ,
+            <option value="use_default">Use default</option>
+            <option value="full_content">Full content</option>
             <option value="one_per_au">Analysis unit module</option>
             <option value="one_per_techno">Technology module</option>
         </select>

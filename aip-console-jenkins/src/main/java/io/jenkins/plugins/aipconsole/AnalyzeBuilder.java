@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -77,6 +78,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
     private boolean withSnapshot = false;
     private boolean processImaging = false;
     private boolean consolidation = true;
+    private String moduleGenerationType;
 
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
@@ -154,6 +156,15 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
     @DataBoundSetter
     public void setTimeout(long timeout) {
         this.timeout = timeout;
+    }
+
+    @DataBoundSetter
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
     }
 
     @Override
@@ -266,6 +277,13 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());
 
+            ModuleGenerationType moduleType = ModuleGenerationType.fromString(moduleGenerationType);
+            if (moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
+                listener.getLogger().println("Only following Module generation type are allowed: " + ModuleGenerationType.getAllowed(moduleType));
+            } else if (moduleType != null) {
+                listener.getLogger().println("Applying Module generation type of" + moduleType);
+                requestBuilder.moduleGenerationType(moduleType);
+            }
 
             jobGuid = jobsService.startJob(requestBuilder);
 
