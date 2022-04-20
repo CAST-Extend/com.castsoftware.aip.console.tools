@@ -21,8 +21,8 @@
     <f:entry title="${%enableSecurity}" field="enableSecurityDataflow" description="${%enableSecurity.descr}">
         <f:checkbox/>
     </f:entry>
-    <f:entry title="${%moduleGenerationType}" field="moduleGenerationType" description="${%moduleGenerationType.descr}">
-        <select name="moduleGenerationType">
+    <f:entry title="${%moduleGenerationType}" description="${%moduleGenerationType.descr}">
+        <select name="moduleGenerationType" field="moduleGenerationType">
             <option value="use_default">Use default</option>
             <option value="full_content">Full content</option>
             <option value="one_per_au">Analysis unit module</option>
