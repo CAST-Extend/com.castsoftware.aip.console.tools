@@ -204,6 +204,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns, boolean rescan) throws JobServiceException, PackagePathInvalidException {
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
+        String flag = apiInfoDto.isEnablePackagePathCheck() ? "enabled" : "disabled";
+        log.info("enable.package.path.check option is " + flag);
+
         try {
             Set<DeliveryPackageDto> packages = new HashSet<>();
             VersionDto previousVersion = getApplicationVersion(appGuid)

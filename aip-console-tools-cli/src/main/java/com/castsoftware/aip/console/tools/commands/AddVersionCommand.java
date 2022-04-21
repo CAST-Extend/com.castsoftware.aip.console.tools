@@ -183,9 +183,6 @@ public class AddVersionCommand implements Callable<Integer> {
         log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
-        if (!apiInfo.isEnablePackagePathCheck()) {
-            log.info("enable.package.path.check option is disabled");
-        }
 
         if (StringUtils.isBlank(applicationName) && StringUtils.isBlank(applicationGuid)) {
             log.error("No application name or application guid provided. Exiting.");

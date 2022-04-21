@@ -1,6 +1,5 @@
 package com.castsoftware.aip.console.tools.commands;
 
-import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -177,11 +176,6 @@ public class DeliverVersionCommand implements Callable<Integer> {
         }
 
         log.info("Deliver version command has triggered with log output = '{}'", sharedOptions.isVerbose());
-        ApiInfoDto apiInfo = restApiService.getAipConsoleApiInfo();
-        if (!apiInfo.isEnablePackagePathCheck()) {
-            log.info("enable.package.path.check option is disabled");
-        }
-
         String applicationGuid;
         Thread shutdownHook = null;
 
