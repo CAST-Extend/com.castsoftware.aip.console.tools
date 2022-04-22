@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -177,7 +176,6 @@ public class DeliverVersionCommand implements Callable<Integer> {
         }
 
         log.info("Deliver version command has triggered with log output = '{}'", sharedOptions.isVerbose());
-
         String applicationGuid;
         Thread shutdownHook = null;
 

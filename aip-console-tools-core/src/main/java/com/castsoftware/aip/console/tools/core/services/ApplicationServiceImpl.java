@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
@@ -202,6 +203,10 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns, boolean rescan) throws JobServiceException, PackagePathInvalidException {
+        ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
+        String flag = apiInfoDto.isEnablePackagePathCheck() ? "enabled" : "disabled";
+        log.info("enable.package.path.check option is " + flag);
+
         try {
             Set<DeliveryPackageDto> packages = new HashSet<>();
             VersionDto previousVersion = getApplicationVersion(appGuid)
@@ -209,7 +214,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .filter(v -> v.getStatus().ordinal() >= VersionStatus.DELIVERED.ordinal())
                     .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
             Set<String> ignorePatterns = StringUtils.isEmpty(exclusionPatterns) ? Collections.emptySet() : Arrays.stream(exclusionPatterns.split(",")).collect(Collectors.toSet());
-            if (previousVersion != null && rescan) {
+            if (apiInfoDto.isEnablePackagePathCheck() && previousVersion != null && rescan) {
                 packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
                 if (StringUtils.isEmpty(exclusionPatterns) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
