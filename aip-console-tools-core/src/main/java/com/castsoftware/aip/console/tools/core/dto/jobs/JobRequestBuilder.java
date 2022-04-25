@@ -40,7 +40,7 @@ public class JobRequestBuilder {
     private boolean autoDiscover = true;
     private boolean uploadApplication = false;
     private boolean processImaging = false;
-    private String moduleGenerationType;
+    private ModuleGenerationType moduleGenerationType;
 
     private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType) {
         this.appGuid = appGuid;
@@ -56,7 +56,7 @@ public class JobRequestBuilder {
         String nowStr = RELEASE_DATE_FORMATTER.format(now);
         releaseDateStr = nowStr;
         snapshotDateStr = nowStr;
-        moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
+        moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
     }
 
     public JobRequestBuilder nodeGuid(String nodeGuid) {
@@ -133,7 +133,7 @@ public class JobRequestBuilder {
 
     //"moduleGenerationType": "one_per_techno"|one_per_au|full_content
     public JobRequestBuilder moduleGenerationType(ModuleGenerationType generationType) {
-        this.moduleGenerationType = generationType.toString();
+        this.moduleGenerationType = generationType;
         return this;
     }
 
@@ -228,8 +228,8 @@ public class JobRequestBuilder {
         }
         parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
 
-        if (StringUtils.isNotEmpty(moduleGenerationType)) {
-            parameters.put(Constants.PARAM_MODULE_GENERATION_TYPE, moduleGenerationType);
+        if (moduleGenerationType != null) {
+            parameters.put(Constants.PARAM_MODULE_GENERATION_TYPE, moduleGenerationType.toString());
         }
         return parameters;
     }

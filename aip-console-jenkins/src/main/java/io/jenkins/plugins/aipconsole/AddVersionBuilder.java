@@ -117,7 +117,6 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     private String snapshotName = "";
     private boolean blueprint = false;
     private boolean enableSecurityAssessment = false;
-
     private String moduleGenerationType;
 
     @DataBoundConstructor
@@ -526,13 +525,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 resolvedVersionName = String.format("v%s", formatVersionName.format(new Date()));
             }
 
-            ModuleGenerationType moduleType = ModuleGenerationType.fromString(moduleGenerationType);
             if (cloneVersion) {
                 if (applicationHasVersion) {
-                    if (moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
-                        listener.getLogger().println("The Module type of " + moduleType + " is not applicable while cloning a version");
-                        moduleType = null; // not applicable
-                    }
                     log.println(AddVersionBuilder_AddVersion_info_startCloneVersionJob(variableAppName));
                 } else {
                     log.println(AddVersionBuilder_AddVersion_info_noVersionAvailable(variableAppName));
@@ -553,9 +547,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
             }
 
-            if (moduleType != null) {
-                listener.getLogger().println("Applying Module generation type of " + moduleType);
-                requestBuilder.moduleGenerationType(moduleType);
+            if (StringUtils.isNotEmpty(moduleGenerationType)) {
+                requestBuilder.moduleGenerationType(ModuleGenerationType.fromString(moduleGenerationType));
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());

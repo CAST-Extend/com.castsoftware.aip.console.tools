@@ -42,6 +42,7 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     private String moduleGenerationType;
 
+
     private transient Run run;
 
     public AddVersionAction(@CheckForNull String applicationName, @CheckForNull String filePath) {

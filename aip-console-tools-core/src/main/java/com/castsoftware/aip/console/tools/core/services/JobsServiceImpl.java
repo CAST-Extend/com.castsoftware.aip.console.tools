@@ -1,7 +1,17 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.*;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogsDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
@@ -14,12 +24,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -128,9 +135,23 @@ public class JobsServiceImpl implements JobsService {
         return startJob(builder);
     }
 
+    private CreateJobsRequest filterModuleGenerationType(CreateJobsRequest jobRequest) {
+        String moduleTypeKey = "moduleGenerationType";
+        String moduleTypeValue = jobRequest.getJobParameters().get(moduleTypeKey);
+        ModuleGenerationType moduleType = ModuleGenerationType.fromString(moduleTypeValue);
+        if (EnumSet.of(JobType.ANALYZE, JobType.CLONE_VERSION).contains(jobRequest.getJobType()) && moduleType != null && moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
+            log.warning("Only following Module generation type are allowed: " + ModuleGenerationType.getAllowed(moduleType));
+            jobRequest.getJobParameters().remove(moduleTypeKey);
+        } else if (moduleType != null) {
+            log.info("Applying Module generation type of " + moduleType);
+
+        }
+        return jobRequest;
+    }
+
     @Override
     public String startJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException {
-        CreateJobsRequest jobRequest = jobRequestBuilder.buildJobRequest();
+        CreateJobsRequest jobRequest = filterModuleGenerationType(jobRequestBuilder.buildJobRequest());
         ApiInfoDto apiInfoDto = getApiInfoDto();
 
         try {

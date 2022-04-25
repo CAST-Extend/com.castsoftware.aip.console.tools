@@ -97,7 +97,7 @@ public class AnalyzeCommand implements Callable<Integer> {
     private boolean consolidation = true;
 
     @CommandLine.Option(names = "--module-option", description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno")
-    private String moduleGenerationType;
+    private ModuleGenerationType moduleGenerationType;
 
     @Autowired
     private DebugOptionsService debugOptionsService;
@@ -130,19 +130,6 @@ public class AnalyzeCommand implements Callable<Integer> {
 
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
-
-        ModuleGenerationType moduleType = null;
-        if (StringUtils.isNotEmpty(moduleGenerationType)) {
-            if (!ModuleGenerationType.exists(moduleGenerationType)) {
-                log.error("This module-option could not be applied because it's unknown: " + moduleGenerationType);
-                return Constants.RETURN_INVALID_PARAMETERS_ERROR;
-            }
-            moduleType = ModuleGenerationType.fromString(moduleGenerationType);
-            if (moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
-                log.info("Only following Module generation type are allowed: " + ModuleGenerationType.getAllowed(moduleType));
-                moduleType = null;
-            }
-        }
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
@@ -195,8 +182,8 @@ public class AnalyzeCommand implements Callable<Integer> {
                 builder.endStep(Constants.ANALYZE);
             }
 
-            if (moduleType != null) {
-                builder.moduleGenerationType(moduleType);
+            if (moduleGenerationType != null) {
+                builder.moduleGenerationType(moduleGenerationType);
             }
             builder.versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())
