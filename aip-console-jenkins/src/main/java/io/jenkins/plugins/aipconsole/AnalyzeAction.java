@@ -25,6 +25,7 @@ public class AnalyzeAction extends BaseAction implements RunAction2 {
     private boolean consolidation = true;
 
     private transient Run run;
+    private String moduleGenerationType;
 
     public AnalyzeAction(@CheckForNull String applicationName) {
         this.applicationName = applicationName;
@@ -80,6 +81,15 @@ public class AnalyzeAction extends BaseAction implements RunAction2 {
     public void setProcessImaging(boolean processImaging) {
         this.processImaging = processImaging;
     }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
+    }
+
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
+    }
+
     public boolean isConsolidation() {
         return consolidation;
     }

@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
@@ -116,6 +117,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @Nullable
     private String snapshotName = "";
 
+    private String moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
+
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
@@ -209,6 +212,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     public void setFailureIgnored(boolean failureIgnored) {
         this.failureIgnored = failureIgnored;
     }
+
     @DataBoundSetter
     public void setConsolidation(boolean consolidation) {
         this.consolidation = consolidation;
@@ -216,6 +220,15 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
     public boolean isConsolidation() {
         return consolidation;
+    }
+
+    @DataBoundSetter
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
     }
 
     public long getTimeout() {
@@ -522,6 +535,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                     requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);
                     log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", resolvedSnapshotName, applicationName));
                 }
+            }
+            if (StringUtils.isNotEmpty(moduleGenerationType)) {
+                requestBuilder.moduleGenerationType(ModuleGenerationType.fromString(moduleGenerationType));
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());

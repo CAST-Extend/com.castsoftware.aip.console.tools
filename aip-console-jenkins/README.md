@@ -109,6 +109,10 @@ snapshot of that analysis.
   not.
 
   ![snap-consolidation](./doc/images/snap-consolidation.png)
+* You can choose the _Module generation type_ you would like to generate
+  ![module-generation-type-selector](./doc/images/module-generation-type-selector.png)
+* or just keep the default one that's available on _CAST Console_ (use default).
+  ![module-generation-type-default](./doc/images/module-generation-type-default.png)
 
 This step requires the following :
 
@@ -154,6 +158,13 @@ The version will be created and visible inside the `Versions` tab of the applica
 The step `Analyze Application on AIP Console` will only run an Application Analysis on AIP Console.
 
 It only <u>requires an Application Name</u>.
+
+But it stills some option that you can set
+
+* You can choose the _Module generation type_ you would like to generate
+  ![module-generation-type-selector](./doc/images/module-generation-type-selector.png)
+* or just keep the default one that's available on _CAST Console_ (use default).
+  ![module-generation-type-default](./doc/images/module-generation-type-default.png)
 
 However, note that you <u>need at least one Delivered version on AIP Console</u> for this step to work correctly.
 

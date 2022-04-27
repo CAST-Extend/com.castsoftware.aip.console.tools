@@ -3,6 +3,7 @@ package com.castsoftware.aip.console.tools.commands;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -162,6 +163,9 @@ public class AddVersionCommand implements Callable<Integer> {
             defaultValue = "true", fallbackValue = "true")
     private boolean consolidation = true;
 
+    @CommandLine.Option(names = "--module-option", description = "Generates a user defined module option forr either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno")
+    private ModuleGenerationType moduleGenerationType;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -231,6 +235,9 @@ public class AddVersionCommand implements Callable<Integer> {
 
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
             builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
+            if (moduleGenerationType != null) {
+                builder.moduleGenerationType(moduleGenerationType);
+            }
 
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);

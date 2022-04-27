@@ -1,7 +1,6 @@
 package com.castsoftware.aip.console.tools.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
