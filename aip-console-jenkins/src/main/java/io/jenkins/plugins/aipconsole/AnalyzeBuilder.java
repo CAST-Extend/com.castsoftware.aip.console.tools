@@ -281,6 +281,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
                 requestBuilder.moduleGenerationType(ModuleGenerationType.fromString(moduleGenerationType));
             }
 
+            log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startJob(requestBuilder);
 
             log.println(Messages.AnalyzeBuilder_Analyze_info_pollJobMessage());
