@@ -2,12 +2,12 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -79,6 +79,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
     private boolean withSnapshot = false;
     private boolean processImaging = false;
     private boolean consolidation = true;
+    private String moduleGenerationType;
 
     @DataBoundConstructor
     public AnalyzeBuilder(@CheckForNull String applicationName) {
@@ -155,6 +156,15 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
     @DataBoundSetter
     public void setTimeout(long timeout) {
         this.timeout = timeout;
+    }
+
+    @DataBoundSetter
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
     }
 
     @Override
@@ -267,7 +277,11 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());
 
+            if (StringUtils.isNotEmpty(moduleGenerationType)) {
+                requestBuilder.moduleGenerationType(ModuleGenerationType.fromString(moduleGenerationType));
+            }
 
+            log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startJob(requestBuilder);
 
             log.println(Messages.AnalyzeBuilder_Analyze_info_pollJobMessage());

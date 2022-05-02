@@ -5,12 +5,10 @@ import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
-import com.castsoftware.aip.console.tools.core.services.DebugOptionsService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -18,7 +16,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import picocli.CommandLine;
@@ -199,13 +196,13 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
 
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
-        Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), ARG_CONSOLIDATE_LABEL, ARG_IMAGING_LABEL))
+        Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), AipConsoleToolsCliBaseTest.ARG_CONSOLIDATE_LABEL, AipConsoleToolsCliBaseTest.ARG_IMAGING_LABEL))
                 .collect(Collectors.toMap(CommandLine.Model.ArgSpec::paramLabel, this::getBooleanArgValue));
 
-        boolean consolidationArgValue = consolidateTags.get(ARG_CONSOLIDATE_LABEL);
+        boolean consolidationArgValue = consolidateTags.get(AipConsoleToolsCliBaseTest.ARG_CONSOLIDATE_LABEL);
         assertThat(consolidationArgValue, is(false));
 
-        boolean forcedConsolidation = consolidateTags.get(ARG_IMAGING_LABEL) || consolidationArgValue;
+        boolean forcedConsolidation = consolidateTags.get(AipConsoleToolsCliBaseTest.ARG_IMAGING_LABEL) || consolidationArgValue;
         assertThat(spec, is(notNullValue()));
         assertThat(forcedConsolidation, is(false));
         assertThat(exitCode, is(Constants.RETURN_OK));
@@ -246,15 +243,34 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
 
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
-        Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), ARG_CONSOLIDATE_LABEL, ARG_IMAGING_LABEL))
+        Map<String, Boolean> consolidateTags = argsSpec.stream().filter(a -> StringUtils.equalsAny(a.paramLabel(), AipConsoleToolsCliBaseTest.ARG_CONSOLIDATE_LABEL, AipConsoleToolsCliBaseTest.ARG_IMAGING_LABEL))
                 .collect(Collectors.toMap(CommandLine.Model.ArgSpec::paramLabel, this::getBooleanArgValue));
 
-        boolean consolidationArgValue = consolidateTags.get(ARG_CONSOLIDATE_LABEL);
+        boolean consolidationArgValue = consolidateTags.get(AipConsoleToolsCliBaseTest.ARG_CONSOLIDATE_LABEL);
         assertThat(consolidationArgValue, is(true));
 
-        boolean forcedConsolidation = consolidateTags.get(ARG_IMAGING_LABEL) || consolidationArgValue;
+        boolean forcedConsolidation = consolidateTags.get(AipConsoleToolsCliBaseTest.ARG_IMAGING_LABEL) || consolidationArgValue;
         assertThat(spec, is(notNullValue()));
         assertThat(forcedConsolidation, is(true));
         assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    @Test
+    public void testAddVersionCommand_InvalidModuleType() throws ApplicationServiceException {
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "-f", zippedSourcesPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--domain-name", TestConstants.TEST_DOMAIN,
+                "--module-option", "Invalid",
+                "--node-name", TestConstants.TEST_NODE};
+        // No existing application
+        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyBoolean())).thenReturn(null);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
+
+        runStringArgs(addVersionCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
     }
 }

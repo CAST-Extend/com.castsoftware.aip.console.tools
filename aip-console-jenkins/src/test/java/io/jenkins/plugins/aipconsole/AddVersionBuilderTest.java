@@ -1,23 +1,18 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
-import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
-import com.castsoftware.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.aip.console.tools.core.services.JobsService;
-import com.castsoftware.aip.console.tools.core.services.RestApiService;
-import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
-import hudson.tasks.Builder;
 import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -27,13 +22,9 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -75,19 +66,20 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
     @Before
     public void setUp() throws Exception {
         super.startUp();
-        addVersionBuilder = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
+        addVersionBuilder = new AddVersionBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         MockitoAnnotations.initMocks(this);
         doReturn(ApiInfoDto.builder().apiVersion("1.12.0-DEV").build())
                 .when(restApiService).getAipConsoleApiInfo();
-        doReturn(TEST_APP).when(applicationService).getApplicationFromGuid(TEST_APP_NAME);
+        doReturn(BaseBuilderTest.TEST_APP).when(applicationService).getApplicationFromGuid(BaseBuilderTest.TEST_APP_NAME);
     }
 
     @Test
     public void testAddVersionStepToJob() throws Exception {
         FreeStyleProject project = getProjectWithDefaultAddVersion();
         project = jenkins.configRoundtrip(project);
-        AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
+        AddVersionBuilder job = new AddVersionBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         job.setDomainName("");
+        job.setModuleGenerationType(ModuleGenerationType.FULL_CONTENT.toString());
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
 
@@ -97,7 +89,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         project.getBuildersList().add(addVersionBuilder);
         addVersionBuilder.setApiKey(Secret.fromString("Z-Y-X"));
         //addVersionBuilder.setAipConsoleUrl("http://localhost:8083");
-        AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
+        AddVersionBuilder job = new AddVersionBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         job.setApiKey(Secret.fromString("Z-Y-X"));
         job.setAipConsoleUrl(addVersionBuilder.getDescriptor().getAipConsoleUrl());
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
@@ -105,20 +97,20 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
 
     @Test
     public void testBuildFreestyleDefaultOk() throws Exception {
-        FreeStyleProject project = getProjectWithDefaultAddVersionAndFile(TEST_ARCHIVE_NAME);
+        FreeStyleProject project = getProjectWithDefaultAddVersionAndFile(BaseBuilderTest.TEST_ARCHIVE_NAME);
 
         doNothing().
-                when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
-        doReturn(TEST_APP_NAME)
-                .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
-        doReturn(TEST_APP)
-                .when(applicationService).getApplicationFromName(TEST_APP_NAME);
+                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
+        doReturn(BaseBuilderTest.TEST_APP_NAME)
+                .when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
+        doReturn(BaseBuilderTest.TEST_APP)
+                .when(applicationService).getApplicationFromName(BaseBuilderTest.TEST_APP_NAME);
         doReturn(true)
-                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
-        doReturn(TEST_JOB_GUID)
+                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+        doReturn(BaseBuilderTest.TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any());
 
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_success_analysisComplete(), build);
@@ -128,23 +120,23 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
     @Ignore
     public void testBuildPipelineScriptOk() throws Exception {
         // Replace path separators with / for the groovy script
-        String filePath = StringUtils.replaceChars(createTempFileAndGetPath(TEST_ARCHIVE_NAME), File.separatorChar, '/');
+        String filePath = StringUtils.replaceChars(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME), File.separatorChar, '/');
         WorkflowJob job = jenkins.createProject(WorkflowJob.class);
         job.setDefinition(new CpsFlowDefinition("node {" +
-                "  aipAddVersion applicationName: '" + TEST_APP_NAME + "', filePath: '" + filePath + "'" +
+                "  aipAddVersion applicationName: '" + BaseBuilderTest.TEST_APP_NAME + "', filePath: '" + filePath + "'" +
                 "}", true)
         );
 
         doNothing().
-                when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
-        doReturn(TEST_APP_NAME)
-                .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
+                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
+        doReturn(BaseBuilderTest.TEST_APP_NAME)
+                .when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
         doReturn(true)
-                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
-        doReturn(TEST_JOB_GUID)
+                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+        doReturn(BaseBuilderTest.TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any());
 
         WorkflowRun workflowRun = jenkins.buildAndAssertSuccess(job);
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_success_analysisComplete(), workflowRun);
@@ -172,42 +164,42 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
 
     @Test
     public void testBuildAipConsoleAccessError() throws Exception {
-        FreeStyleProject project = getProjectWithDefaultAddVersionAndFile(TEST_ARCHIVE_NAME);
+        FreeStyleProject project = getProjectWithDefaultAddVersionAndFile(BaseBuilderTest.TEST_ARCHIVE_NAME);
         doThrow(new ApiCallException(500)).
-                when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
+                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
-        jenkins.assertLogContains(GenericError_error_accessDenied(TEST_URL), build);
+        jenkins.assertLogContains(GenericError_error_accessDenied(BaseBuilderTest.TEST_URL), build);
     }
 
     @Test
     public void testBuildApplicationNotFoundAndAutoCreateFalse() throws Exception {
         Assert.assertFalse("Auto create should be false. Some changes were persisted to the builder ?", addVersionBuilder.isAutoCreate());
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
-                when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
+                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
         doReturn(null)
-                .when(applicationService).getApplicationFromGuid(TEST_APP_NAME);
+                .when(applicationService).getApplicationFromGuid(BaseBuilderTest.TEST_APP_NAME);
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
-        jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_appNotFound(TEST_APP_NAME), build);
+        jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_appNotFound(BaseBuilderTest.TEST_APP_NAME), build);
     }
 
     @Test
     public void testBuildApplicationUploadFailure() throws Exception {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
-                when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
-        doReturn(TEST_APP)
-                .when(applicationService).getApplicationFromName(TEST_APP_NAME);
+                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
+        doReturn(BaseBuilderTest.TEST_APP)
+                .when(applicationService).getApplicationFromName(BaseBuilderTest.TEST_APP_NAME);
         doThrow(new UploadException("Fake error"))
-                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_uploadFailed(), build);
@@ -215,17 +207,17 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
 
     @Test
     public void testBuildErrorCreatingAnalyzeJob() throws Exception {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
-                when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
-        doReturn(TEST_APP_NAME)
-                .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
-        doReturn(TEST_APP)
-                .when(applicationService).getApplicationFromName(TEST_APP_NAME);
+                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
+        doReturn(BaseBuilderTest.TEST_APP_NAME)
+                .when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
+        doReturn(BaseBuilderTest.TEST_APP)
+                .when(applicationService).getApplicationFromName(BaseBuilderTest.TEST_APP_NAME);
         doReturn(true)
-                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
         doThrow(new JobServiceException("fake exception"))
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
 
@@ -236,19 +228,19 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
 
     @Test
     public void testBuildAnalyseResultCancelled() throws Exception {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
-                when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
-        doReturn(TEST_APP)
-                .when(applicationService).getApplicationFromName(TEST_APP_NAME);
+                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
+        doReturn(BaseBuilderTest.TEST_APP)
+                .when(applicationService).getApplicationFromName(BaseBuilderTest.TEST_APP_NAME);
         doReturn(true)
-                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
-        doReturn(TEST_JOB_GUID)
+                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+        doReturn(BaseBuilderTest.TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.CANCELED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any());
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
@@ -259,71 +251,71 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
     public void testBuildApplicationNotFoundCreateApplicationFails() throws Exception {
         Assert.assertTrue("Node name should be null/empty. Other test set it and it wasn't reset ?",
                 StringUtils.isBlank(addVersionBuilder.getNodeName()));
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
         addVersionBuilder.setAutoCreate(true);
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
-                when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
+                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
         doReturn(null)
-                .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
+                .when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
         doReturn(null)
-                .when(applicationService).getApplicationFromName(TEST_APP_NAME);
+                .when(applicationService).getApplicationFromName(BaseBuilderTest.TEST_APP_NAME);
         doThrow(new JobServiceException("cannot create application"))
-                .when(jobsService).startCreateApplication(eq(TEST_APP_NAME), anyString(), anyBoolean(), anyString());
+                .when(jobsService).startCreateApplication(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyBoolean(), anyString());
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
-        jenkins.assertLogContains(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(TEST_APP_NAME), build);
-        jenkins.assertLogContains(CreateApplicationBuilder_CreateApplication_error_jobServiceException(TEST_APP_NAME, TEST_URL), build);
+        jenkins.assertLogContains(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(BaseBuilderTest.TEST_APP_NAME), build);
+        jenkins.assertLogContains(CreateApplicationBuilder_CreateApplication_error_jobServiceException(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_URL), build);
     }
 
     @Test
     public void testBuildNodeNotFoundWhenCreatingApplication() throws Exception {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
         addVersionBuilder.setAutoCreate(true);
-        addVersionBuilder.setNodeName(TEST_NODE_NAME);
+        addVersionBuilder.setNodeName(BaseBuilderTest.TEST_NODE_NAME);
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
-                when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
+                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
         doReturn(null)
-                .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
+                .when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
         doReturn(new ArrayList<NodeDto>())
                 .when(restApiService).getForEntity(eq("/api/nodes"), isA(TypeReference.class));
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
-        jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_nodeNotFound(TEST_NODE_NAME), build);
+        jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_nodeNotFound(BaseBuilderTest.TEST_NODE_NAME), build);
     }
 
     @Test
     public void testBuildCreateAppOnNodeWithNameSuccess() throws Exception {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
         addVersionBuilder.setAutoCreate(true);
-        addVersionBuilder.setNodeName(TEST_NODE_NAME);
+        addVersionBuilder.setNodeName(BaseBuilderTest.TEST_NODE_NAME);
         addVersionBuilder.setDomainName(null);
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
-                when(restApiService).validateUrlAndKey(TEST_URL, null, TEST_KEY);
+                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
         doReturn(null)
-                .when(applicationService).getApplicationGuidFromName(TEST_APP_NAME);
-        doReturn(Collections.singletonList(new NodeDto(TEST_NODE_NAME, TEST_NODE_NAME, "http", "localhost", 8082)))
+                .when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
+        doReturn(Collections.singletonList(new NodeDto(BaseBuilderTest.TEST_NODE_NAME, BaseBuilderTest.TEST_NODE_NAME, "http", "localhost", 8082)))
                 .when(restApiService).getForEntity(eq("/api/nodes"), isA(TypeReference.class));
         doReturn("createAppGuid")
-                .when(jobsService).startCreateApplication(TEST_APP_NAME, TEST_NODE_NAME, null, false, null,null);
-        doReturn(TEST_APP_NAME)
+                .when(jobsService).startCreateApplication(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_NODE_NAME, null, false, null,null);
+        doReturn(BaseBuilderTest.TEST_APP_NAME)
                 .when(jobsService).pollAndWaitForJobFinished(eq("createAppGuid"), any(), any(), any());
         doReturn(true)
-                .when(uploadService).uploadInputStream(eq(TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
-        doReturn(TEST_JOB_GUID)
+                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+        doReturn(BaseBuilderTest.TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(TEST_JOB_GUID), any(), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any());
 
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
-        jenkins.assertLogContains(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(TEST_APP_NAME), build);
+        jenkins.assertLogContains(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(BaseBuilderTest.TEST_APP_NAME), build);
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_success_analysisComplete(), build);
     }
 
@@ -338,7 +330,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
 
     private String createTempFileAndGetPath(String fileName) throws IOException {
         File tempFile = temporaryFolder.newFile(fileName);
-        Files.write(tempFile.toPath(), Lists.newArrayList(TEST_CONTENT));
+        Files.write(tempFile.toPath(), Lists.newArrayList(BaseBuilderTest.TEST_CONTENT));
         return tempFile.getAbsolutePath();
     }
 }

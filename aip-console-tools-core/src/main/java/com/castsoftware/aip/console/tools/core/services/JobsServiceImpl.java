@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -116,7 +118,7 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public String startJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException {
-        CreateJobsRequest jobRequest = jobRequestBuilder.buildJobRequest();
+        CreateJobsRequest jobRequest = filterModuleGenerationType(jobRequestBuilder.buildJobRequest());
         ApiInfoDto apiInfoDto = getApiInfoDto();
 
         try {
@@ -259,5 +261,18 @@ public class JobsServiceImpl implements JobsService {
             apiInfoDto = restApiService.getAipConsoleApiInfo();
         }
         return apiInfoDto;
+    }
+
+    private CreateJobsRequest filterModuleGenerationType(CreateJobsRequest jobRequest) {
+        String moduleTypeKey = "moduleGenerationType";
+        String moduleTypeValue = (String) jobRequest.getJobParameters().get(moduleTypeKey);
+        ModuleGenerationType moduleType = ModuleGenerationType.fromString(moduleTypeValue);
+        if (moduleType != null && EnumSet.of(JobType.ANALYZE, JobType.CLONE_VERSION).contains(jobRequest.getJobType()) && moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
+            log.warning("Only following Module generation type are allowed: " + ModuleGenerationType.getAllowed(moduleType));
+            jobRequest.getJobParameters().remove(moduleTypeKey);
+        } else if (moduleType != null) {
+            log.info("Applying Module generation type of " + moduleType);
+        }
+        return jobRequest;
     }
 }

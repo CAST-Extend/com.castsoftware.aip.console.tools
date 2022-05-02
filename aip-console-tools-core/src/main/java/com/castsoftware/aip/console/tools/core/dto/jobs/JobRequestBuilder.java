@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.core.dto.jobs;
 
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +44,7 @@ public class JobRequestBuilder {
     private boolean uploadApplication = false;
     private boolean processImaging = false;
     private String caipVersion;
+    private ModuleGenerationType moduleGenerationType;
 
     private JobRequestBuilder(String appGuid, String sourcePath, JobType jobType, String caipVersion) {
         this.appGuid = appGuid;
@@ -59,6 +61,7 @@ public class JobRequestBuilder {
         String nowStr = RELEASE_DATE_FORMATTER.format(now);
         this.releaseDateStr = nowStr;
         this.snapshotDateStr = nowStr;
+        moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
     }
 
     public JobRequestBuilder nodeGuid(String nodeGuid) {
@@ -175,6 +178,11 @@ public class JobRequestBuilder {
         return this;
     }
 
+    public JobRequestBuilder moduleGenerationType(ModuleGenerationType generationType) {
+        this.moduleGenerationType = generationType;
+        return this;
+    }
+
     private Map<String, Object> getJobParameters() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(Constants.PARAM_APP_GUID, this.appGuid);
@@ -223,6 +231,9 @@ public class JobRequestBuilder {
             parameters.put(Constants.PARAM_BACKUP_NAME, backupName);
         }
         parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
+        if (moduleGenerationType != null) {
+            parameters.put(Constants.PARAM_MODULE_GENERATION_TYPE, moduleGenerationType.toString());
+        }
 
         return parameters;
     }
