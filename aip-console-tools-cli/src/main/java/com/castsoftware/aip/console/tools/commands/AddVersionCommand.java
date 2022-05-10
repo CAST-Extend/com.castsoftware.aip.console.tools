@@ -14,6 +14,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.services.AipConsoleService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -50,15 +51,17 @@ public class AddVersionCommand implements Callable<Integer> {
     private final JobsService jobsService;
     private final UploadService uploadService;
     private final ApplicationService applicationService;
+    private final AipConsoleService aipConsoleService;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
-    public AddVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+    public AddVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService, AipConsoleService aipConsoleService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
         this.uploadService = uploadService;
         this.applicationService = applicationService;
+        this.aipConsoleService = aipConsoleService;
     }
 
     /**
@@ -235,9 +238,8 @@ public class AddVersionCommand implements Callable<Integer> {
 
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
             builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
-            if (moduleGenerationType != null) {
-                builder.moduleGenerationType(moduleGenerationType);
-            }
+
+            aipConsoleService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType);
 
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);

@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -102,4 +103,6 @@ public interface ApplicationService {
     void updateAmtProfileDebugOption(String appGuid, boolean amtProfile);
 
     void resetDebugOptions(String appGuid, DebugOptionsDto debugOptionsDto);
+
+    void setModuleOptionsGenerationType(String appGuid, ModuleGenerationType generationType);
 }

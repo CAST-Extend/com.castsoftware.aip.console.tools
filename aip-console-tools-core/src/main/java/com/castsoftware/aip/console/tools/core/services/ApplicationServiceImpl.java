@@ -7,6 +7,7 @@ import com.castsoftware.aip.console.tools.core.dto.BaseDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.JsonDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
@@ -199,6 +200,18 @@ public class ApplicationServiceImpl implements ApplicationService {
     public void resetDebugOptions(String appGuid, DebugOptionsDto debugOptionsDto) {
         updateShowSqlDebugOption(appGuid, debugOptionsDto.isShowSql());
         updateAmtProfileDebugOption(appGuid, debugOptionsDto.isActivateAmtMemoryProfile());
+    }
+
+    @Override
+    public void setModuleOptionsGenerationType(String appGuid, ModuleGenerationType generationType) {
+        //This endpoint operates only with either "one_per_au" or "full_content"
+        if (generationType != null && generationType != ModuleGenerationType.ONE_PER_TECHNO) {
+            try {
+                restApiService.putForEntity(ApiEndpointHelper.getModuleOptionsGenerationTypePath(appGuid), JsonDto.of(generationType.toString()), String.class);
+            } catch (ApiCallException e) {
+                log.log(Level.WARNING, e.getMessage());
+            }
+        }
     }
 
     @Override
