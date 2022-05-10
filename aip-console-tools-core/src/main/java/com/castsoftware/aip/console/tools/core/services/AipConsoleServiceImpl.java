@@ -31,12 +31,12 @@ public class AipConsoleServiceImpl implements AipConsoleService {
     }
 
     @Override
-    public void updateModuleGenerationType(String applicationGuid, JobRequestBuilder builder, ModuleGenerationType moduleGenerationType) {
+    public void updateModuleGenerationType(String applicationGuid, JobRequestBuilder builder, ModuleGenerationType moduleGenerationType, boolean firstVersion) {
         if (moduleGenerationType != null) {
-            if (moduleGenerationType == ModuleGenerationType.FULL_CONTENT) {
+            if (!firstVersion && moduleGenerationType != ModuleGenerationType.ONE_PER_TECHNO) {
                 applicationService.setModuleOptionsGenerationType(applicationGuid, moduleGenerationType);
                 log.log(Level.INFO, "Module option has been set to FULL_CONTENT");
-            } else {
+            } else if (firstVersion && moduleGenerationType != ModuleGenerationType.FULL_CONTENT) {
                 //Job will handle it
                 builder.moduleGenerationType(moduleGenerationType);
             }

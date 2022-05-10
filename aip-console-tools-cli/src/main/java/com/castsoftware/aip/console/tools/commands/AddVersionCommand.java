@@ -239,7 +239,7 @@ public class AddVersionCommand implements Callable<Integer> {
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
             builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
 
-            aipConsoleService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType);
+            aipConsoleService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, !cloneVersion);
 
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);

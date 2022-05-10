@@ -9,5 +9,5 @@ public interface AipConsoleService {
 
     ApiInfoDto getAipConsoleApiInfo() throws AipConsoleException;
 
-    void updateModuleGenerationType(String applicationGuid, JobRequestBuilder builder, ModuleGenerationType generationType);
+    void updateModuleGenerationType(String applicationGuid, JobRequestBuilder builder, ModuleGenerationType generationType, boolean firstVersion);
 }

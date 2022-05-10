@@ -179,7 +179,8 @@ public class AnalyzeCommand implements Callable<Integer> {
             } else {
                 builder.endStep(Constants.ANALYZE);
             }
-            aipConsoleService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType);
+            aipConsoleService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, false
+            );
 
             builder.versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())

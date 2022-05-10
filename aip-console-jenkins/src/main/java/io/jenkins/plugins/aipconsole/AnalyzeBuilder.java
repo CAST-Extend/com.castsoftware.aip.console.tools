@@ -283,7 +283,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
                     .releaseAndSnapshotDate(new Date());
 
             if (StringUtils.isNotEmpty(moduleGenerationType)) {
-                aipConsoleService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType));
+                aipConsoleService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), false);
             }
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
