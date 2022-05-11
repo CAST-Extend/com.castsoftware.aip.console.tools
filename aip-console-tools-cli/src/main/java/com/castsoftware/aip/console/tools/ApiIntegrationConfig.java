@@ -62,7 +62,7 @@ public class ApiIntegrationConfig {
     }
 
     @Bean
-    public AipConsoleService aipConsoleService(@Autowired RestApiService restApiService, @Autowired ApplicationService applicationService) {
-        return new AipConsoleServiceImpl(restApiService, applicationService);
+    public AipConsoleService aipConsoleService(@Autowired RestApiService restApiService) {
+        return new AipConsoleServiceImpl(restApiService);
     }
 }

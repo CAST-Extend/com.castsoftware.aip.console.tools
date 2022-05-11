@@ -14,7 +14,6 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
-import com.castsoftware.aip.console.tools.core.services.AipConsoleService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -91,9 +90,6 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
     @Inject
     private ApplicationService applicationService;
-
-    @Inject
-    private AipConsoleService aipConsoleService;
 
     private String applicationName;
     private String applicationGuid;
@@ -341,7 +337,6 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             uploadService = injector.getInstance(UploadService.class);
             jobsService = injector.getInstance(JobsService.class);
             applicationService = injector.getInstance(ApplicationService.class);
-            aipConsoleService = injector.getInstance(AipConsoleService.class);
         }
 
         String apiServerUrl = getAipConsoleUrl();
@@ -542,7 +537,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 }
             }
             if (StringUtils.isNotEmpty(moduleGenerationType)) {
-                aipConsoleService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), !applicationHasVersion);
+                applicationService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), !applicationHasVersion);
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());

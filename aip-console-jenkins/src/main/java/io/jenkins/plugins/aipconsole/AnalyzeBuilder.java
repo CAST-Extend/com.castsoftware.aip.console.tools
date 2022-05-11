@@ -13,7 +13,6 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.aip.console.tools.core.services.AipConsoleService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -68,9 +67,6 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     @Inject
     private ApplicationService applicationService;
-
-    @Inject
-    private AipConsoleService aipConsoleService;
 
     @CheckForNull
     private String applicationName;
@@ -198,7 +194,6 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
             apiService = injector.getInstance(RestApiService.class);
             jobsService = injector.getInstance(JobsService.class);
             applicationService = injector.getInstance(ApplicationService.class);
-            aipConsoleService = injector.getInstance(AipConsoleService.class);
         }
 
         String apiServerUrl = getAipConsoleUrl();
@@ -283,7 +278,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
                     .releaseAndSnapshotDate(new Date());
 
             if (StringUtils.isNotEmpty(moduleGenerationType)) {
-                aipConsoleService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), false);
+                applicationService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), false);
             }
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());

@@ -14,7 +14,6 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.aip.console.tools.core.services.AipConsoleService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -54,7 +53,6 @@ public class AnalyzeCommand implements Callable<Integer> {
     private final RestApiService restApiService;
     private final JobsService jobsService;
     private final ApplicationService applicationService;
-    private final AipConsoleService aipConsoleService;
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
@@ -100,11 +98,10 @@ public class AnalyzeCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--module-option", description = "Generates a user defined module option forr either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno")
     private ModuleGenerationType moduleGenerationType;
 
-    public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService, AipConsoleService aipConsoleService) {
+    public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
         this.applicationService = applicationService;
-        this.aipConsoleService = aipConsoleService;
     }
 
     @Override
@@ -179,8 +176,7 @@ public class AnalyzeCommand implements Callable<Integer> {
             } else {
                 builder.endStep(Constants.ANALYZE);
             }
-            aipConsoleService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, false
-            );
+            applicationService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, false);
 
             builder.versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())

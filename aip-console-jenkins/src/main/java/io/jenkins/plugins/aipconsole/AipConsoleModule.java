@@ -43,8 +43,8 @@ public class AipConsoleModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public AipConsoleService getAipConsoleService(RestApiService restApiService, ApplicationService applicationService) {
-        return new AipConsoleServiceImpl(restApiService, applicationService);
+    public AipConsoleService getAipConsoleService(RestApiService restApiService) {
+        return new AipConsoleServiceImpl(restApiService);
     }
 
 }
