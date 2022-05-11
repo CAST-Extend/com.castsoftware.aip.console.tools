@@ -8,8 +8,6 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import lombok.extern.java.Log;
 
-import java.util.logging.Level;
-
 @Log
 public class AipConsoleServiceImpl implements AipConsoleService {
 
@@ -33,16 +31,20 @@ public class AipConsoleServiceImpl implements AipConsoleService {
     @Override
     public void updateModuleGenerationType(String applicationGuid, JobRequestBuilder builder, ModuleGenerationType moduleGenerationType, boolean firstVersion) {
         if (moduleGenerationType != null) {
-            if (!firstVersion) {
-                if (moduleGenerationType != ModuleGenerationType.ONE_PER_TECHNO) {
-                    applicationService.setModuleOptionsGenerationType(applicationGuid, moduleGenerationType);
-                    log.log(Level.INFO, "Module option has been set to FULL_CONTENT");
-                } else {
-                    builder.moduleGenerationType(moduleGenerationType);
-                }
-            } else if (moduleGenerationType != ModuleGenerationType.FULL_CONTENT) {
+            if (moduleGenerationType == ModuleGenerationType.FULL_CONTENT) {
+                applicationService.setModuleOptionsGenerationType(applicationGuid, moduleGenerationType);
+                log.info("Module option has been set to " + moduleGenerationType);
+            } else if (firstVersion) {
                 //Job will handle it
                 builder.moduleGenerationType(moduleGenerationType);
+            } else { //clone
+                if (moduleGenerationType == ModuleGenerationType.ONE_PER_AU) {
+                    applicationService.setModuleOptionsGenerationType(applicationGuid, moduleGenerationType);
+                    log.info("Module option has been set to " + moduleGenerationType);
+                } else {
+                    //delegated to the job that will issue the appropriate message in case of;
+                    builder.moduleGenerationType(moduleGenerationType);
+                }
             }
         }
     }
