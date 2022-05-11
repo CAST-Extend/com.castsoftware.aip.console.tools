@@ -27,6 +27,9 @@ public class ApiEndpointHelper {
     public static final String PURGE_VERSION_ENDPOINT = "/purge-version";
     public static final String CONSOLIDATE_SNAPSHOT_ENDPOINT = "/consolidate-snapshot";
     public static final String ANALYZE_ENDPOINT = "/analyze";
+    public static final String MODULE_OPTIONS_ENDPOINT = "/module-options";
+
+    public static final String MODULE_OPTIONS_GENERATION_TYPE_ENDPOINT = MODULE_OPTIONS_ENDPOINT + "/generation-type";
 
     public static String getRootPath() {
         return ROOT_PATH + "/";
@@ -74,6 +77,10 @@ public class ApiEndpointHelper {
 
     public static String getDebugOptionAmtProfilePath(String appGuid) {
         return getDebugOptionsPath(appGuid) + AMT_PROFILE_ENDPOINT;
+    }
+
+    public static String getModuleOptionsGenerationTypePath(String appGuid) {
+        return getApplicationPath(appGuid) + MODULE_OPTIONS_GENERATION_TYPE_ENDPOINT;
     }
 
     public static String getAmtProfilingDownloadUrl(String appGuid) {

@@ -1,7 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
-import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.services.AipConsoleService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -10,18 +10,12 @@ import hudson.model.FreeStyleProject;
 import hudson.tasks.Builder;
 import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
-
-import static org.mockito.Mockito.doReturn;
 
 public class BaseBuilderTest {
     protected static final String TEST_URL = "http://localhost:8081";
@@ -49,6 +43,8 @@ public class BaseBuilderTest {
 
     @Mock
     protected ApplicationService applicationService;
+    @Mock
+    protected AipConsoleService aipConsoleService;
 
     public void startUp() throws Exception {
         AipConsoleGlobalConfiguration config = AipConsoleGlobalConfiguration.get();

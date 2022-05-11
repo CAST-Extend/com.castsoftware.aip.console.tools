@@ -1,5 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.services.AipConsoleService;
+import com.castsoftware.aip.console.tools.core.services.AipConsoleServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -38,4 +40,11 @@ public class AipConsoleModule extends AbstractModule {
     public ApplicationService getApplicationService(RestApiService restApiService, JobsService jobsService) {
         return new ApplicationServiceImpl(restApiService, jobsService);
     }
+
+    @Provides
+    @Singleton
+    public AipConsoleService getAipConsoleService(RestApiService restApiService) {
+        return new AipConsoleServiceImpl(restApiService);
+    }
+
 }

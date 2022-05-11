@@ -61,7 +61,6 @@ public class JobRequestBuilder {
         String nowStr = RELEASE_DATE_FORMATTER.format(now);
         this.releaseDateStr = nowStr;
         this.snapshotDateStr = nowStr;
-        moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
     }
 
     public JobRequestBuilder nodeGuid(String nodeGuid) {
@@ -231,7 +230,8 @@ public class JobRequestBuilder {
             parameters.put(Constants.PARAM_BACKUP_NAME, backupName);
         }
         parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
-        if (moduleGenerationType != null) {
+        if (moduleGenerationType != null && moduleGenerationType != ModuleGenerationType.FULL_CONTENT) {
+            // Full_content manged by application service
             parameters.put(Constants.PARAM_MODULE_GENERATION_TYPE, moduleGenerationType.toString());
         }
 

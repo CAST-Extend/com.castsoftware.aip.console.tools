@@ -179,11 +179,16 @@ The available options are :
 * `--server-url` or `-s` : Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
-* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
+  parameter</u>. *default* : none
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
   snapshot or from publishing application to the Health dashboard. *default* : false
+* `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
+  module.
+  Possible value is one of: full_content, one_per_au, one_per_techno
 
-*NOTE*: When creating a version, if a previous version exists, it's configuration will be cloned to the new version, but the new source will be used for analysis.
+  *NOTE*: When creating a version, if a previous version exists, it's configuration will be cloned to the new version,
+  but the new source will be used for analysis.
 
 #### Deliver
 
@@ -219,14 +224,21 @@ The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot` or `-S` (optional): Also runs snapshot creation after analysis.
-* `--process-imaging` (optional): If snapshot option is provided, Sharing data with the configured Imaging instance linked to AIP Console.
+* `--process-imaging` (optional): If snapshot option is provided, Sharing data with the configured Imaging instance
+  linked to AIP Console.
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
-* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
+  variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
-* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
+  parameter</u>. *default* : none
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
-  snapshot or from publishing application to the Health dashboard. *default* : false
+* `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
+  module.
+  Possible value is one of: full_content, one_per_au, one_per_techno
+
+* snapshot or from publishing application to the Health dashboard. *default* : false
 
 #### Snapshot
 
