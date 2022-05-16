@@ -277,12 +277,9 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());
 
-            ModuleGenerationType moduleType = ModuleGenerationType.fromString(moduleGenerationType);
-            if (moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
-                listener.getLogger().println("Only following Module generation type are allowed: " + ModuleGenerationType.getAllowed(moduleType));
-            } else if (moduleType != null) {
-                listener.getLogger().println("Applying Module generation type of" + moduleType);
-                requestBuilder.moduleGenerationType(moduleType);
+            if (StringUtils.isNotEmpty(moduleGenerationType)) {
+                listener.getLogger().println("Selected Module generation type of" + moduleGenerationType);
+                applicationService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), false);
             }
 
             jobGuid = jobsService.startJob(requestBuilder);

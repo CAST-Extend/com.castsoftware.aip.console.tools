@@ -548,7 +548,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             }
 
             if (StringUtils.isNotEmpty(moduleGenerationType)) {
-                requestBuilder.moduleGenerationType(ModuleGenerationType.fromString(moduleGenerationType));
+                listener.getLogger().println("Selected Module generation type of" + moduleGenerationType);
+                applicationService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), !applicationHasVersion);
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());

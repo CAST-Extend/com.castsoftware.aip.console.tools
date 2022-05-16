@@ -240,10 +240,7 @@ public class AddVersionCommand implements Callable<Integer> {
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
             builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
 
-            //Only the first version sets the ONE_PER_TECHNO value
-            if (moduleGenerationType != null) {
-                builder.moduleGenerationType(moduleGenerationType);
-            }
+            applicationService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, !cloneVersion);
 
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);
