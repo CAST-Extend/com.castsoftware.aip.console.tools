@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.AddVersionCommand;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -90,7 +91,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
         when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
         when(applicationService.applicationHasVersion(TestConstants.TEST_APP_GUID)).thenReturn(false);
-        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), null, false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
+        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), Exclusions.builder().build(), false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
         when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
         DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
@@ -126,7 +127,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
         when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
         when(applicationService.applicationHasVersion(TestConstants.TEST_APP_GUID)).thenReturn(false);
-        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), null, false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
+        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), Exclusions.builder().build(), false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
         when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
         DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
@@ -179,7 +180,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
 
         when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
         when(applicationService.applicationHasVersion(TestConstants.TEST_APP_GUID)).thenReturn(false);
-        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), null, false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
+        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), Exclusions.builder().build(), false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
         when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
         DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
@@ -226,7 +227,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
 
         when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
         when(applicationService.applicationHasVersion(TestConstants.TEST_APP_GUID)).thenReturn(false);
-        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), null, false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
+        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), Exclusions.builder().build(), false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
         when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
         DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);

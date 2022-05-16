@@ -6,6 +6,8 @@ import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.JsonDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
@@ -237,7 +239,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns, boolean rescan) throws JobServiceException, PackagePathInvalidException {
+    public String createDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, boolean rescan) throws JobServiceException, PackagePathInvalidException {
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
         String flag = apiInfoDto.isEnablePackagePathCheck() ? "enabled" : "disabled";
         log.info("enable.package.path.check option is " + flag);
@@ -248,18 +250,23 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .stream()
                     .filter(v -> v.getStatus().ordinal() >= VersionStatus.DELIVERED.ordinal())
                     .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
-            Set<String> ignorePatterns = StringUtils.isEmpty(exclusionPatterns) ? Collections.emptySet() : Arrays.stream(exclusionPatterns.split(",")).collect(Collectors.toSet());
+            Set<String> ignorePatterns = StringUtils.isEmpty(exclusions.getExcludePatterns()) ?
+                    Exclusions.getDefaultIgnorePatterns() : Arrays.stream(exclusions.getExcludePatterns().split(",")).collect(Collectors.toSet());
             if (apiInfoDto.isEnablePackagePathCheck() && previousVersion != null && rescan) {
+                log.info("Copy configuration from previous version: " + previousVersion.getName());
                 packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
-                if (StringUtils.isEmpty(exclusionPatterns) && previousVersion.getDeliveryConfiguration() != null) {
+                if (StringUtils.isEmpty(exclusions.getExcludePatterns()) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
+                    exclusions.setExclusionRules(previousVersion.getDeliveryConfiguration().getExclusionRules());
                 }
             }
             DeliveryConfigurationDto deliveryConfigurationDto = DeliveryConfigurationDto.builder()
-                    .ignorePatterns(ignorePatterns)
+                    .ignorePatterns(ignorePatterns).exclusionRules(exclusions.getExclusionRules())
                     .packages(packages)
                     .build();
 
+            log.info("Exclusion patterns: " + deliveryConfigurationDto.getIgnorePatterns().stream().collect(Collectors.joining(", ")));
+            log.info("Project exclusion rules: " + deliveryConfigurationDto.getExclusionRules().stream().map(ExclusionRuleType::name).collect(Collectors.joining(", ")));
             BaseDto response = restApiService.postForEntity("/api/applications/" + appGuid + "/delivery-configuration", deliveryConfigurationDto, BaseDto.class);
             log.fine("Delivery configuration response " + response);
             return response != null ? response.getGuid() : null;

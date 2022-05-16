@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 import java.util.Set;
 
@@ -16,5 +15,6 @@ import java.util.Set;
 public class DeliveryConfigurationDto {
     private String guid;
     private Set<String> ignorePatterns;
+    private Set<ExclusionRuleType> exclusionRules;
     private Set<DeliveryPackageDto> packages;
 }
