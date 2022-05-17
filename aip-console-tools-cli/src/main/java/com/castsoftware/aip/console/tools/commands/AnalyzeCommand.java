@@ -182,6 +182,7 @@ public class AnalyzeCommand implements Callable<Integer> {
                 builder.endStep(Constants.ANALYZE);
             }
 
+            log.info("Selected Module generation type" + moduleGenerationType);
             applicationService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, false);
             builder.versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())
