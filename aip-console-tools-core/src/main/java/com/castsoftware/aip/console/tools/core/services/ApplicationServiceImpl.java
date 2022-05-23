@@ -261,7 +261,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                 }
             }
             DeliveryConfigurationDto deliveryConfigurationDto = DeliveryConfigurationDto.builder()
-                    .ignorePatterns(ignorePatterns).exclusionRules(exclusions.getExclusionRules())
+                    .ignorePatterns(ignorePatterns)
+                    .exclusionRules(exclusions.getExclusionRules())
                     .packages(packages)
                     .build();
 

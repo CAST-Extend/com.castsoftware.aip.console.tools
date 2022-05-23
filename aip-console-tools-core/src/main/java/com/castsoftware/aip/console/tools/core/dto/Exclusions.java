@@ -18,6 +18,6 @@ public class Exclusions {
     private Set<ExclusionRuleType> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
 
     public static Set<String> getDefaultIgnorePatterns() {
-        return Arrays.asList("tmp/", "temp/", "*test", "tests", "target/", ".svn/", ".git/", "_Macosx/").stream().collect(Collectors.toSet());
+        return Arrays.stream(new String[]{"tmp/", "temp/", "*test", "tests", "target/", ".svn/", ".git/", "_Macosx/"}).collect(Collectors.toSet());
     }
 }

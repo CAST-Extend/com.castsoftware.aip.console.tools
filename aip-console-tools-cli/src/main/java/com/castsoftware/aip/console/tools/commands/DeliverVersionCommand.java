@@ -137,7 +137,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-exclude", "--exclude-patterns"},
             description = "File patterns(glob pattern) to exclude in the delivery, separated with comma")
     private String exclusionPatterns;
-    @CommandLine.Option(names = {"-rules", "--exclusion-rules"}, split = ",", type = ExclusionRuleType.class
+    @CommandLine.Option(names = {"--exclusion-rules"}, split = ",", type = ExclusionRuleType.class
             , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
     private ExclusionRuleType[] exclusionRules;
 

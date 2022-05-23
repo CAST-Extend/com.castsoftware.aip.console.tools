@@ -207,9 +207,10 @@ The available options are :
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--exclude-patterns` or `-exclude`: File patterns to exclude in the delivery, the pattern needs to follow the syntax
   of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
-* `--exclusion-rules` or `-rules`: (Optional) case sensitive. Project's exclusion rules, separated with comma and no
+* `--exclusion-rules` : (Optional) case sensitive. Project's exclusion rules, separated with comma and no
   space.</br>
-  *example* `--rules` = "EXCLUDE_EMPTY_PROJECTS,PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB,EXCLUDE_TEST_CODE"</br>
+  *example* `--exclusion-rules`= "
+  EXCLUDE_EMPTY_PROJECTS,PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB,EXCLUDE_TEST_CODE"</br>
   To get the full list do run help on this command (*deliver* --help).
 * `--auto-discover`: will discover new technologies and install new extensions during rescan, to disable when run
   consistency check

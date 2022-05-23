@@ -53,7 +53,7 @@ public class DeliverVersionCommandTest extends AipCommandTest<DeliverVersionComm
                 "--backup",
                 "--backup-name", TEST_BACKUP_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
-                "-rules", rules
+                "--exclusion-rules", rules
         };
 
         aipCommandLine.parseArgs(sb);
@@ -84,7 +84,7 @@ public class DeliverVersionCommandTest extends AipCommandTest<DeliverVersionComm
                 "--backup",
                 "--backup-name", TEST_BACKUP_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
-                "-rules"
+                "--exclusion-rules"
         };
 
         aipCommandLine.parseArgs(sb);
