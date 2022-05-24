@@ -11,6 +11,9 @@ public class ApiEndpointHelper {
     private static final String DEBUG_OPTIONS_ENDPOINT = "/debug-options";
     private static final String SHOW_SQL_ENDPOINT = "/show-sql";
     private static final String AMT_PROFILE_ENDPOINT = "/activate-amt-memory-profile";
+    public static final String MODULE_OPTIONS_ENDPOINT = "/module-options";
+
+    public static final String MODULE_OPTIONS_GENERATION_TYPE_ENDPOINT = MODULE_OPTIONS_ENDPOINT + "/generation-type";
 
     public static String getRootPath() {
         return ROOT_PATH + "/";
@@ -72,5 +75,9 @@ public class ApiEndpointHelper {
         assert jobGuid != null && !jobGuid.isEmpty();
 
         return getJobsEndpoint() + "/" + jobGuid;
+    }
+
+    public static String getModuleOptionsGenerationTypePath(String appGuid) {
+        return getApplicationPath(appGuid) + MODULE_OPTIONS_GENERATION_TYPE_ENDPOINT;
     }
 }

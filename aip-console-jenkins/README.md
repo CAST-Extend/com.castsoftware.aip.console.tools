@@ -97,6 +97,7 @@ The application will be created on AIP Console after you've run the Jenkins Job.
 
 The `Add Application Version to AIP Console` will create a new version of an application, run an analysis and create a
 snapshot of that analysis.
+
 * You can configure the step to optionally add the *blueprint objective* to the exising objectives.  
   To do so, check the following option checkbox in the "advanced settings" section
 
@@ -106,7 +107,12 @@ snapshot of that analysis.
 
   ![no-consolidation](./doc/images/no-consolidation.png)
 
-  This step requires the following :
+* You can choose the _Module generation type_ you would like to generate
+  ![module-generation-type-selector](./doc/images/module-generation-type-selector.png)
+* or just keep the default one that's available on _CAST Console_ (use default).
+  ![module-generation-type-default](./doc/images/module-generation-type-default.png)
+
+This step requires the following :
 
 * An application name for which a new version will be created. <u>This application must exist in AIP Console</u>.
 * A path to a zip or tgz archive file to upload (**NOTE**: you can also provide a folder path; more details in the
@@ -150,6 +156,13 @@ The version will be created and visible inside the `Versions` tab of the applica
 The step `Analyze Application on AIP Console` will only run an Application Analysis on AIP Console.
 
 It only <u>requires an Application Name</u>.
+
+But it stills some option that you can set
+
+* You can choose the _Module generation type_ you would like to generate
+  ![module-generation-type-selector](./doc/images/module-generation-type-selector.png)
+* or just keep the default one that's available on _CAST Console_ (use default).
+  ![module-generation-type-default](./doc/images/module-generation-type-default.png)
 
 However, note that you <u>need at least one Delivered version on AIP Console</u> for this step to work correctly.
 

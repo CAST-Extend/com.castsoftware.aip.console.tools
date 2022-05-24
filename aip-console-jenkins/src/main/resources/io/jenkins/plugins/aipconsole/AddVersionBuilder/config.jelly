@@ -4,29 +4,36 @@
         <f:textbox />
     </f:entry>
     <f:entry title="${%filePath}" field="filePath" description="${%filePath.descr}">
-        <f:textbox />
+        <f:textbox/>
     </f:entry>
     <f:entry title="${%autoCreate}" field="autoCreate" description="${%autoCreate.descr}">
-        <f:checkbox default="false" />
+        <f:checkbox default="false"/>
     </f:entry>
     <f:entry title="${%versionName}" field="versionName" description="${%versionName.descr}">
         <f:textbox/>
     </f:entry>
-     <f:entry title="${%snapshotName}" field="snapshotName" description="${%snapshotName.descr}">
-            <f:textbox/>
-        </f:entry>
+    <f:entry title="${%snapshotName}" field="snapshotName" description="${%snapshotName.descr}">
+        <f:textbox/>
+    </f:entry>
     <f:entry title="${%consolidation}" field="consolidation" description="${%consolidation.descr}">
-        <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="${%enableSecurity}" field="enableSecurityDataflow" description="${%enableSecurity.descr}">
         <f:checkbox/>
     </f:entry>
+    <f:entry title="${%moduleGenerationType}" description="${%moduleGenerationType.descr}">
+        <select name="moduleGenerationType" field="moduleGenerationType">
+            <option value="full_content">Full content</option>
+            <option value="one_per_au">Analysis unit module</option>
+            <option value="one_per_techno">Technology module</option>
+        </select>
+    </f:entry>
     <f:advanced title="${%advancedSettings}">
         <f:entry title="${%aipConsoleUrl}" field="aipConsoleUrl" description="${%aipConsoleUrl.descr}">
-            <f:textbox field="aipConsoleUrl" value="${aipConsoleUrl}"  />
+            <f:textbox field="aipConsoleUrl" value="${aipConsoleUrl}"/>
         </f:entry>
         <f:entry title="${%apiKey}" field="apiKey" description="${%apiKey.descr}">
-            <f:password />
+            <f:password/>
         </f:entry>
         <f:entry title="${%cloneVersion}" field="cloneVersion" description="${%cloneVersion.descr}">
             <f:checkbox field="cloneVersion" value="${cloneVersion}" default="true"/>

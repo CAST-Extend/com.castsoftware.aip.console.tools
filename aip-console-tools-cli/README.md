@@ -197,6 +197,9 @@ The available options are :
   parameter</u>. *default* : none
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
   snapshot or from publishing application to the Health dashboard. *default* : false
+* `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
+  module.
+  Possible value is one of: full_content, one_per_au, one_per_techno
 
 *NOTE*: When creating a version, if a previous version exists, it's configuration will be cloned to the new version, but the new source will be used for analysis.
 
@@ -243,6 +246,9 @@ The available options are :
   parameter</u>. *default* : none
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
   snapshot or from publishing application to the Health dashboard. *default* : true
+* `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
+  module.
+  Possible value is one of: full_content, one_per_au, one_per_techno
 
 #### Snapshot
 

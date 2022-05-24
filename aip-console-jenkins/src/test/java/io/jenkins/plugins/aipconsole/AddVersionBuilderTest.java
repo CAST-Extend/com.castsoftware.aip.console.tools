@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -115,6 +116,7 @@ public class AddVersionBuilderTest {
         project = jenkins.configRoundtrip(project);
         AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
         job.setDomainName("");
+        job.setModuleGenerationType(ModuleGenerationType.FULL_CONTENT.toString());
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
 

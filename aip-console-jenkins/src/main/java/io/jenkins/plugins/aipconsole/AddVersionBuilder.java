@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -116,6 +117,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     private String snapshotName = "";
     private boolean blueprint = false;
     private boolean enableSecurityAssessment = false;
+    private String moduleGenerationType;
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -164,6 +166,15 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
     public boolean isConsolidation() {
         return consolidation;
+    }
+
+    @DataBoundSetter
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
     }
 
     @DataBoundSetter
@@ -333,6 +344,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         String username = getDescriptor().getAipConsoleUsername();
         // Job level timeout different from default ? use it, else use the global config level timeout
         long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());
+
+        listener.getLogger().println("Provided Module generation type is: " + getModuleGenerationType());
 
         try {
             // update timeout of HTTP Client if different from default
@@ -532,6 +545,11 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null, applicationHasVersion);
             if (StringUtils.isNotBlank(deliveryConfig)) {
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
+            }
+
+            if (StringUtils.isNotEmpty(moduleGenerationType)) {
+                listener.getLogger().println("Selected Module generation type of" + moduleGenerationType);
+                applicationService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), !applicationHasVersion);
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());

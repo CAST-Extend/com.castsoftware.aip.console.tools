@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -95,6 +96,9 @@ public class AnalyzeCommand implements Callable<Integer> {
             defaultValue = "true", fallbackValue = "true")
     private boolean consolidation = true;
 
+    @CommandLine.Option(names = "--module-option", description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno")
+    private ModuleGenerationType moduleGenerationType;
+
     @Autowired
     private DebugOptionsService debugOptionsService;
 
@@ -178,6 +182,8 @@ public class AnalyzeCommand implements Callable<Integer> {
                 builder.endStep(Constants.ANALYZE);
             }
 
+            log.info("Selected Module generation type" + moduleGenerationType);
+            applicationService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, false);
             builder.versionName(versionToAnalyze.getName())
                     .versionGuid(versionToAnalyze.getGuid())
                     .releaseAndSnapshotDate(new Date());

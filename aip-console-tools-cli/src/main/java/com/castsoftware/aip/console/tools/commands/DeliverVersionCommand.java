@@ -146,7 +146,6 @@ public class DeliverVersionCommand implements Callable<Integer> {
             fallbackValue = "true", defaultValue = "false")
     private boolean enableSecurityAssessment;
 
-
     public DeliverVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         this.restApiService = restApiService;
         this.jobsService = jobsService;
@@ -177,7 +176,6 @@ public class DeliverVersionCommand implements Callable<Integer> {
         }
 
         log.info("Deliver version command has triggered with log output = '{}'", sharedOptions.isVerbose());
-
         String applicationGuid;
         Thread shutdownHook = null;
 
