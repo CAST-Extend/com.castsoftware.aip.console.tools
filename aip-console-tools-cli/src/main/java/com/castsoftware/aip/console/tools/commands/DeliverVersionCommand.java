@@ -1,6 +1,8 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -25,10 +27,12 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Deliver an application version on AIP Console
@@ -133,6 +137,9 @@ public class DeliverVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-exclude", "--exclude-patterns"},
             description = "File patterns(glob pattern) to exclude in the delivery, separated with comma")
     private String exclusionPatterns;
+    @CommandLine.Option(names = {"--exclusion-rules"}, split = ",", type = ExclusionRuleType.class
+            , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
+    private ExclusionRuleType[] exclusionRules;
 
     @CommandLine.Option(names = {"-current", "--set-as-current"},
             description = "true or false depending on whether the version should be set as the current one or not."
@@ -218,8 +225,11 @@ public class DeliverVersionCommand implements Callable<Integer> {
 
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
             builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
-
-            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns, cloneVersion);
+            Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
+            if (exclusionRules != null && exclusionRules.length > 0) {
+                exclusions.setExclusionRules(Arrays.stream(exclusionRules).collect(Collectors.toSet()));
+            }
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusions, cloneVersion);
             log.info("delivery configuration guid " + deliveryConfigGuid);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
