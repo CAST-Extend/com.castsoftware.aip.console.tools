@@ -139,12 +139,11 @@ public class JobsServiceImpl implements JobsService {
         String moduleTypeKey = "moduleGenerationType";
         String moduleTypeValue = jobRequest.getJobParameters().get(moduleTypeKey);
         ModuleGenerationType moduleType = ModuleGenerationType.fromString(moduleTypeValue);
-        if (EnumSet.of(JobType.ANALYZE, JobType.CLONE_VERSION).contains(jobRequest.getJobType()) && moduleType != null && moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
+        if (EnumSet.of(JobType.ANALYZE, JobType.CLONE_VERSION).contains(jobRequest.getJobType()) && moduleType == ModuleGenerationType.ONE_PER_TECHNO) {
             log.warning("Only following Module generation type are allowed: " + ModuleGenerationType.getAllowed(moduleType));
             jobRequest.getJobParameters().remove(moduleTypeKey);
         } else if (moduleType != null) {
             log.info("Applying Module generation type of " + moduleType);
-
         }
         return jobRequest;
     }
