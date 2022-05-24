@@ -68,7 +68,7 @@ public class DeliverVersionCommandTest extends AipCommandTest<DeliverVersionComm
         assertEquals(true, aipCommand.isDisableClone());
         assertEquals(true, aipCommand.isAutoCreate());
 
-        String parsedRules = Arrays.asList(aipCommand.getExclusionRules()).stream().map(ExclusionRuleType::name).collect(Collectors.joining(","));
+        String parsedRules = Arrays.stream(aipCommand.getExclusionRules()).map(ExclusionRuleType::name).collect(Collectors.joining(","));
         assertEquals(rules, parsedRules);
     }
 
@@ -88,7 +88,7 @@ public class DeliverVersionCommandTest extends AipCommandTest<DeliverVersionComm
         };
 
         aipCommandLine.parseArgs(sb);
-        String parsedRules = Arrays.asList(aipCommand.getExclusionRules()).stream().map(ExclusionRuleType::name).collect(Collectors.joining(","));
+        String parsedRules = Arrays.stream(aipCommand.getExclusionRules()).map(ExclusionRuleType::name).collect(Collectors.joining(","));
         assertEquals(rules, parsedRules);
     }
 }

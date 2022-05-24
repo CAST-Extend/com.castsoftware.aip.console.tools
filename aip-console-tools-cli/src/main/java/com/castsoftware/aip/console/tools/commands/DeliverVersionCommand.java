@@ -227,7 +227,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
             builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
             Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
             if (exclusionRules != null && exclusionRules.length > 0) {
-                exclusions.setExclusionRules(Arrays.asList(exclusionRules).stream().collect(Collectors.toSet()));
+                exclusions.setExclusionRules(Arrays.stream(exclusionRules).collect(Collectors.toSet()));
             }
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusions, cloneVersion);
             log.info("delivery configuration guid " + deliveryConfigGuid);
