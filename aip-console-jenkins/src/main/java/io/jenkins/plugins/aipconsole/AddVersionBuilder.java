@@ -2,6 +2,8 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
@@ -55,6 +57,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -119,6 +122,26 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     private boolean enableSecurityAssessment = false;
     private String moduleGenerationType;
 
+    @Nullable
+    private String exclusionPatterns = "";
+    private boolean excludeEmptyProjects;
+    private boolean preferFullDotNetToBasicDotNetWeb;
+    private boolean preferDotNetWebToAsp;
+    private boolean preferFullJavaProjectsToBasicJsp;
+    private boolean preferMavenToEclipse;
+    private boolean preferEclipseToMaven;
+    private boolean excludeEmbeddedEclipseProjects;
+    private boolean excludeEclipseProjectWithDuplicatedName;
+    private boolean excludeDuplicateDotNetProjectInSameFolder;
+    private boolean excludeTestCode;
+    private boolean excludeJavaFilesWhenAFullJeeProjectExists;
+    private boolean excludeJavaFilesWithAnIncompletePackage;
+    private boolean excludeJavaFileswithAnUnnamedPackage;
+    private boolean excludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile;
+    private boolean excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject;
+
+    private Set<ExclusionRuleType> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
+
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
@@ -175,6 +198,169 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
     public String getModuleGenerationType() {
         return moduleGenerationType;
+    }
+
+    private void updateExclusionRules(boolean flag, ExclusionRuleType type) {
+        if (exclusionRules.contains(type)) {
+            exclusionRules.remove(type);
+        }
+        if (flag) {
+            exclusionRules.add(type);
+        }
+    }
+
+    @DataBoundSetter
+    public void setExclusionPatterns(String patterns) {
+        exclusionPatterns = patterns;
+    }
+
+    public String getExclusionPatterns() {
+        return exclusionPatterns;
+    }
+
+    @DataBoundSetter
+    public void setExcludeEmptyProjects(boolean flag) {
+        excludeEmptyProjects = flag;
+        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_EMPTY_PROJECTS);
+    }
+
+    public boolean getExcludeEmptyProjects() {
+        return excludeEmptyProjects;
+    }
+
+    @DataBoundSetter
+    public void setPreferFullDotNetToBasicDotNetWeb(boolean flag) {
+        preferFullDotNetToBasicDotNetWeb = flag;
+        updateExclusionRules(flag, ExclusionRuleType.PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB);
+    }
+
+    public boolean getPreferFullDotNetToBasicDotNetWeb() {
+        return preferFullDotNetToBasicDotNetWeb;
+    }
+
+    @DataBoundSetter
+    public void setPreferDotNetWebToAsp(boolean flag) {
+        preferDotNetWebToAsp = flag;
+        updateExclusionRules(flag, ExclusionRuleType.PREFER_DOT_NET_WEB_TO_ASP);
+    }
+
+    public boolean getPreferDotNetWebToAsp() {
+        return preferDotNetWebToAsp;
+    }
+
+    @DataBoundSetter
+    public void setPreferFullJavaProjectsToBasicJsp(boolean flag) {
+        preferFullJavaProjectsToBasicJsp = flag;
+        updateExclusionRules(flag, ExclusionRuleType.PREFER_FULL_JAVA_PROJECTS_TO_BASIC_JSP);
+    }
+
+    public boolean getPreferFullJavaProjectsToBasicJsp() {
+        return preferFullJavaProjectsToBasicJsp;
+    }
+
+    @DataBoundSetter
+    public void setPreferMavenToEclipse(boolean flag) {
+        preferMavenToEclipse = flag;
+        updateExclusionRules(flag, ExclusionRuleType.PREFER_MAVEN_TO_ECLIPSE);
+    }
+
+    public boolean getPreferMavenToEclipse() {
+        return preferMavenToEclipse;
+    }
+
+    @DataBoundSetter
+    public void setPreferEclipseToMaven(boolean flag) {
+        preferEclipseToMaven = flag;
+        updateExclusionRules(flag, ExclusionRuleType.PREFER_ECLIPSE_TO_MAVEN);
+    }
+
+    public boolean getPreferEclipseToMaven() {
+        return preferEclipseToMaven;
+    }
+
+    @DataBoundSetter
+    public void setExcludeEmbeddedEclipseProjects(boolean flag) {
+        excludeEmbeddedEclipseProjects = flag;
+        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_EMBEDDED_ECLIPSE_PROJECTS);
+    }
+
+    public boolean getExcludeEmbeddedEclipseProjects() {
+        return excludeEmbeddedEclipseProjects;
+    }
+
+    @DataBoundSetter
+    public void setExcludeEclipseProjectWithDuplicatedName(boolean flag) {
+        excludeEclipseProjectWithDuplicatedName = flag;
+        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_ECLIPSE_PROJECT_WITH_DUPLICATED_NAME);
+    }
+
+    public boolean getExcludeEclipseProjectWithDuplicatedName() {
+        return excludeEclipseProjectWithDuplicatedName;
+    }
+
+    @DataBoundSetter
+    public void setExcludeDuplicateDotNetProjectInSameFolder(boolean flag) {
+        excludeDuplicateDotNetProjectInSameFolder = flag;
+        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_DUPLICATE_DOT_NET_PROJECT_IN_SAME_FOLDER);
+    }
+
+    public boolean getExcludeDuplicateDotNetProjectInSameFolder() {
+        return excludeDuplicateDotNetProjectInSameFolder;
+    }
+
+    @DataBoundSetter
+    public void setExcludeTestCode(boolean flag) {
+        excludeTestCode = flag;
+        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_TEST_CODE);
+    }
+
+    public boolean getExcludeTestCode() {
+        return excludeTestCode;
+    }
+
+    public void setExcludeJavaFilesWhenAFullJeeProjectExists(boolean flag) {
+        excludeJavaFilesWhenAFullJeeProjectExists = flag;
+        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WHEN_A_FULL_JEE_PROJECT_EXISTS);
+    }
+
+    public void setExcludeJavaFilesWithAnIncompletePackage(boolean flag) {
+        excludeJavaFilesWithAnIncompletePackage = flag;
+        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WITH_AN_INCOMPLETE_PACKAGE);
+    }
+
+    public void setExcludeJavaFileswithAnUnnamedPackage(boolean flag) {
+        excludeJavaFileswithAnUnnamedPackage = flag;
+        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WITH_AN_UNNAMED_PACKAGE);
+    }
+
+    public void setExcludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile(boolean flag) {
+        excludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile = flag;
+        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_WEB_JSP_PROJECT_WHEN_JAVA_FILES_EXISTS_FOR_THE_SAME_WEB_XML_FILE);
+    }
+
+    public void setExcludeJavaFilesProjectLocatedInsideOtherJavaFilesProject(boolean flag) {
+        excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject = flag;
+        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_PROJECT_LOCATED_INSIDE_OTHER_JAVA_FILES_PROJECT);
+    }
+
+    public boolean getExcludeJavaFilesWhenAFullJeeProjectExists() {
+        return excludeJavaFilesWhenAFullJeeProjectExists;
+    }
+
+    public boolean getExcludeJavaFilesWithAnIncompletePackage() {
+        return excludeJavaFilesWithAnIncompletePackage;
+    }
+
+    public boolean getExcludeJavaFileswithAnUnnamedPackage() {
+        return excludeJavaFileswithAnUnnamedPackage;
+    }
+
+    public boolean getExcludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile() {
+        return excludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile;
+    }
+
+    public boolean getExcludeJavaFilesProjectLocatedInsideOtherJavaFilesProject() {
+        return excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject;
     }
 
     @DataBoundSetter
@@ -326,6 +512,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             return;
         }
 
+
         // Check the services have been properly initialized
         if (!ObjectUtils.allNotNull(apiService, uploadService, jobsService, applicationService)) {
             // Manually setup Guice Injector using Module (Didn't find any way to make this automatically)
@@ -337,6 +524,12 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             uploadService = injector.getInstance(UploadService.class);
             jobsService = injector.getInstance(JobsService.class);
             applicationService = injector.getInstance(ApplicationService.class);
+        }
+
+        Exclusions exclusions1 = applicationService.buildExclusions(exclusionPatterns, exclusionRules.toArray(new ExclusionRuleType[exclusionRules.size()]));
+        if (exclusions1 != null) {
+            String sb = exclusions1.toString();
+            listener.getLogger().println(sb);
         }
 
         String apiServerUrl = getAipConsoleUrl();
@@ -542,7 +735,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                     .backupName(backupName)
                     .processImaging(processImaging);
 
-            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null, applicationHasVersion);
+            Exclusions exclusions = applicationService.buildExclusions(exclusionPatterns, exclusionRules.toArray(new ExclusionRuleType[exclusionRules.size()]));
+            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion);
             if (StringUtils.isNotBlank(deliveryConfig)) {
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
             }

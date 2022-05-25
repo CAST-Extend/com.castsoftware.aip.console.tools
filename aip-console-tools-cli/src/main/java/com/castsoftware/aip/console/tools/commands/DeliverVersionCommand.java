@@ -1,6 +1,8 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
@@ -122,6 +124,9 @@ public class DeliverVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-exclude", "--exclude-patterns"},
             description = "File patterns(glob pattern) to exclude in the delivery, separated with comma")
     private String exclusionPatterns;
+    @CommandLine.Option(names = {"--exclusion-rules"}, split = ",", type = ExclusionRuleType.class
+            , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
+    private ExclusionRuleType[] exclusionRules;
 
     @CommandLine.Option(names = {"-current", "--set-as-current"},
             description = "true or false depending on whether the version should be set as the current one or not."
@@ -218,7 +223,8 @@ public class DeliverVersionCommand implements Callable<Integer> {
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
             builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
 
-            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusionPatterns, cloneVersion);
+            Exclusions selectedExclusions = applicationService.buildExclusions(exclusionPatterns, exclusionRules);
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, selectedExclusions, cloneVersion);
             log.info("delivery configuration guid " + deliveryConfigGuid);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
