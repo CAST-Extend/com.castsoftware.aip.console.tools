@@ -3,6 +3,7 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import hudson.model.Run;
 import jenkins.model.RunAction2;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,18 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     private String moduleGenerationType;
 
+    private boolean excludeEmptyProjects;
+    private boolean preferFullDotNetToBasicDotNetWeb;
+    private boolean preferDotNetWebToAsp;
+    private boolean preferFullJavaProjectsToBasicJsp;
+    private boolean preferMavenToEclipse;
+    private boolean preferEclipseToMaven;
+    private boolean excludeEmbeddedEclipseProjects;
+    private boolean excludeEclipseProjectWithDuplicatedName;
+    private boolean excludeDuplicateDotNetProjectInSameFolder;
+    private boolean excludeTestCode;
+    @Nullable
+    private String exclusionPatterns = "";
 
     private transient Run run;
 
@@ -229,5 +242,86 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
+    }
+
+    public void setPreferDotNetWebToAsp(boolean flag) {
+        preferDotNetWebToAsp = flag;
+    }
+
+    public boolean getPreferDotNetWebToAsp() {
+        return preferDotNetWebToAsp;
+    }
+
+    public void setPreferFullJavaProjectsToBasicJsp(boolean flag) {
+        preferFullJavaProjectsToBasicJsp = flag;
+    }
+
+    public boolean getPreferFullJavaProjectsToBasicJsp() {
+        return preferFullJavaProjectsToBasicJsp;
+    }
+
+    public void setPreferMavenToEclipse(boolean flag) {
+        preferMavenToEclipse = flag;
+    }
+
+    public boolean getPreferMavenToEclipse() {
+        return preferMavenToEclipse;
+    }
+
+    public void setPreferEclipseToMaven(boolean flag) {
+        preferEclipseToMaven = flag;
+    }
+
+    public boolean getPreferEclipseToMaven() {
+        return preferEclipseToMaven;
+    }
+
+    public void setExcludeEmbeddedEclipseProjects(boolean flag) {
+        excludeEmbeddedEclipseProjects = flag;
+    }
+
+    public boolean getExcludeEmbeddedEclipseProjects() {
+        return excludeEmbeddedEclipseProjects;
+    }
+
+    public void setExcludeEclipseProjectWithDuplicatedName(boolean flag) {
+        excludeEclipseProjectWithDuplicatedName = flag;
+    }
+
+    public boolean getExcludeEclipseProjectWithDuplicatedName() {
+        return excludeEclipseProjectWithDuplicatedName;
+    }
+
+    @DataBoundSetter
+    public void setExcludeDuplicateDotNetProjectInSameFolder(boolean flag) {
+        excludeDuplicateDotNetProjectInSameFolder = flag;
+    }
+
+    public boolean getExcludeDuplicateDotNetProjectInSameFolder() {
+        return excludeDuplicateDotNetProjectInSameFolder;
+    }
+
+    public void setExcludeTestCode(boolean flag) {
+        excludeTestCode = flag;
+    }
+
+    public boolean getExcludeTestCode() {
+        return excludeTestCode;
+    }
+
+    public void setExclusionPatterns(String patterns) {
+        exclusionPatterns = patterns;
+    }
+
+    public String getExclusionPatterns() {
+        return exclusionPatterns;
+    }
+
+    public boolean getExcludeEmptyProjects() {
+        return excludeEmptyProjects;
+    }
+
+    public void setExcludeEmptyProjects(boolean excludeEmptyProjects) {
+        this.excludeEmptyProjects = excludeEmptyProjects;
     }
 }
