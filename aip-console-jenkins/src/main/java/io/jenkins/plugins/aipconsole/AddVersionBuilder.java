@@ -200,15 +200,6 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         return moduleGenerationType;
     }
 
-    private void updateExclusionRules(boolean flag, ExclusionRuleType type) {
-        if (exclusionRules.contains(type)) {
-            exclusionRules.remove(type);
-        }
-        if (flag) {
-            exclusionRules.add(type);
-        }
-    }
-
     @DataBoundSetter
     public void setExclusionPatterns(String patterns) {
         exclusionPatterns = patterns;
@@ -221,7 +212,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setExcludeEmptyProjects(boolean flag) {
         excludeEmptyProjects = flag;
-        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_EMPTY_PROJECTS);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_EMPTY_PROJECTS);
     }
 
     public boolean getExcludeEmptyProjects() {
@@ -231,7 +222,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setPreferFullDotNetToBasicDotNetWeb(boolean flag) {
         preferFullDotNetToBasicDotNetWeb = flag;
-        updateExclusionRules(flag, ExclusionRuleType.PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB);
     }
 
     public boolean getPreferFullDotNetToBasicDotNetWeb() {
@@ -241,7 +232,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setPreferDotNetWebToAsp(boolean flag) {
         preferDotNetWebToAsp = flag;
-        updateExclusionRules(flag, ExclusionRuleType.PREFER_DOT_NET_WEB_TO_ASP);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.PREFER_DOT_NET_WEB_TO_ASP);
     }
 
     public boolean getPreferDotNetWebToAsp() {
@@ -251,7 +242,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setPreferFullJavaProjectsToBasicJsp(boolean flag) {
         preferFullJavaProjectsToBasicJsp = flag;
-        updateExclusionRules(flag, ExclusionRuleType.PREFER_FULL_JAVA_PROJECTS_TO_BASIC_JSP);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.PREFER_FULL_JAVA_PROJECTS_TO_BASIC_JSP);
     }
 
     public boolean getPreferFullJavaProjectsToBasicJsp() {
@@ -261,7 +252,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setPreferMavenToEclipse(boolean flag) {
         preferMavenToEclipse = flag;
-        updateExclusionRules(flag, ExclusionRuleType.PREFER_MAVEN_TO_ECLIPSE);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.PREFER_MAVEN_TO_ECLIPSE);
     }
 
     public boolean getPreferMavenToEclipse() {
@@ -271,7 +262,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setPreferEclipseToMaven(boolean flag) {
         preferEclipseToMaven = flag;
-        updateExclusionRules(flag, ExclusionRuleType.PREFER_ECLIPSE_TO_MAVEN);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.PREFER_ECLIPSE_TO_MAVEN);
     }
 
     public boolean getPreferEclipseToMaven() {
@@ -281,7 +272,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setExcludeEmbeddedEclipseProjects(boolean flag) {
         excludeEmbeddedEclipseProjects = flag;
-        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_EMBEDDED_ECLIPSE_PROJECTS);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_EMBEDDED_ECLIPSE_PROJECTS);
     }
 
     public boolean getExcludeEmbeddedEclipseProjects() {
@@ -291,7 +282,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setExcludeEclipseProjectWithDuplicatedName(boolean flag) {
         excludeEclipseProjectWithDuplicatedName = flag;
-        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_ECLIPSE_PROJECT_WITH_DUPLICATED_NAME);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_ECLIPSE_PROJECT_WITH_DUPLICATED_NAME);
     }
 
     public boolean getExcludeEclipseProjectWithDuplicatedName() {
@@ -301,7 +292,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setExcludeDuplicateDotNetProjectInSameFolder(boolean flag) {
         excludeDuplicateDotNetProjectInSameFolder = flag;
-        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_DUPLICATE_DOT_NET_PROJECT_IN_SAME_FOLDER);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_DUPLICATE_DOT_NET_PROJECT_IN_SAME_FOLDER);
     }
 
     public boolean getExcludeDuplicateDotNetProjectInSameFolder() {
@@ -311,7 +302,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setExcludeTestCode(boolean flag) {
         excludeTestCode = flag;
-        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_TEST_CODE);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_TEST_CODE);
     }
 
     public boolean getExcludeTestCode() {
@@ -321,31 +312,31 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @DataBoundSetter
     public void setExcludeJavaFilesWhenAFullJeeProjectExists(boolean flag) {
         excludeJavaFilesWhenAFullJeeProjectExists = flag;
-        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WHEN_A_FULL_JEE_PROJECT_EXISTS);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WHEN_A_FULL_JEE_PROJECT_EXISTS);
     }
 
     @DataBoundSetter
     public void setExcludeJavaFilesWithAnIncompletePackage(boolean flag) {
         excludeJavaFilesWithAnIncompletePackage = flag;
-        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WITH_AN_INCOMPLETE_PACKAGE);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WITH_AN_INCOMPLETE_PACKAGE);
     }
 
     @DataBoundSetter
     public void setExcludeJavaFileswithAnUnnamedPackage(boolean flag) {
         excludeJavaFileswithAnUnnamedPackage = flag;
-        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WITH_AN_UNNAMED_PACKAGE);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WITH_AN_UNNAMED_PACKAGE);
     }
 
     @DataBoundSetter
     public void setExcludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile(boolean flag) {
         excludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile = flag;
-        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_WEB_JSP_PROJECT_WHEN_JAVA_FILES_EXISTS_FOR_THE_SAME_WEB_XML_FILE);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_WEB_JSP_PROJECT_WHEN_JAVA_FILES_EXISTS_FOR_THE_SAME_WEB_XML_FILE);
     }
 
     @DataBoundSetter
     public void setExcludeJavaFilesProjectLocatedInsideOtherJavaFilesProject(boolean flag) {
         excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject = flag;
-        updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_PROJECT_LOCATED_INSIDE_OTHER_JAVA_FILES_PROJECT);
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_PROJECT_LOCATED_INSIDE_OTHER_JAVA_FILES_PROJECT);
     }
 
     public boolean getExcludeJavaFilesWhenAFullJeeProjectExists() {
@@ -529,12 +520,6 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             uploadService = injector.getInstance(UploadService.class);
             jobsService = injector.getInstance(JobsService.class);
             applicationService = injector.getInstance(ApplicationService.class);
-        }
-
-        Exclusions exclusions1 = applicationService.buildExclusions(exclusionPatterns, exclusionRules.toArray(new ExclusionRuleType[exclusionRules.size()]));
-        if (exclusions1 != null) {
-            String sb = exclusions1.toString();
-            listener.getLogger().println(sb);
         }
 
         String apiServerUrl = getAipConsoleUrl();

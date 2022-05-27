@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
@@ -59,6 +60,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -123,6 +125,24 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     private boolean setAsCurrent = false;
     private boolean blueprint = false;
     private boolean enableSecurityAssessment = false;
+
+    private boolean excludeEmptyProjects;
+    private boolean preferFullDotNetToBasicDotNetWeb;
+    private boolean preferDotNetWebToAsp;
+    private boolean preferFullJavaProjectsToBasicJsp;
+    private boolean preferMavenToEclipse;
+    private boolean preferEclipseToMaven;
+    private boolean excludeEmbeddedEclipseProjects;
+    private boolean excludeEclipseProjectWithDuplicatedName;
+    private boolean excludeDuplicateDotNetProjectInSameFolder;
+    private boolean excludeTestCode;
+    private boolean excludeJavaFilesWhenAFullJeeProjectExists;
+    private boolean excludeJavaFilesWithAnIncompletePackage;
+    private boolean excludeJavaFileswithAnUnnamedPackage;
+    private boolean excludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile;
+    private boolean excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject;
+
+    private Set<ExclusionRuleType> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
@@ -309,6 +329,156 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     @DataBoundSetter
     public void setDomainName(@Nullable String domainName) {
         this.domainName = domainName;
+    }
+
+    @DataBoundSetter
+    public void setExcludeEmptyProjects(boolean flag) {
+        excludeEmptyProjects = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_EMPTY_PROJECTS);
+    }
+
+    public boolean getExcludeEmptyProjects() {
+        return excludeEmptyProjects;
+    }
+
+    @DataBoundSetter
+    public void setPreferFullDotNetToBasicDotNetWeb(boolean flag) {
+        preferFullDotNetToBasicDotNetWeb = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB);
+    }
+
+    public boolean getPreferFullDotNetToBasicDotNetWeb() {
+        return preferFullDotNetToBasicDotNetWeb;
+    }
+
+    @DataBoundSetter
+    public void setPreferDotNetWebToAsp(boolean flag) {
+        preferDotNetWebToAsp = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.PREFER_DOT_NET_WEB_TO_ASP);
+    }
+
+    public boolean getPreferDotNetWebToAsp() {
+        return preferDotNetWebToAsp;
+    }
+
+    @DataBoundSetter
+    public void setPreferFullJavaProjectsToBasicJsp(boolean flag) {
+        preferFullJavaProjectsToBasicJsp = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.PREFER_FULL_JAVA_PROJECTS_TO_BASIC_JSP);
+    }
+
+    public boolean getPreferFullJavaProjectsToBasicJsp() {
+        return preferFullJavaProjectsToBasicJsp;
+    }
+
+    @DataBoundSetter
+    public void setPreferMavenToEclipse(boolean flag) {
+        preferMavenToEclipse = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.PREFER_MAVEN_TO_ECLIPSE);
+    }
+
+    public boolean getPreferMavenToEclipse() {
+        return preferMavenToEclipse;
+    }
+
+    @DataBoundSetter
+    public void setPreferEclipseToMaven(boolean flag) {
+        preferEclipseToMaven = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.PREFER_ECLIPSE_TO_MAVEN);
+    }
+
+    public boolean getPreferEclipseToMaven() {
+        return preferEclipseToMaven;
+    }
+
+    @DataBoundSetter
+    public void setExcludeEmbeddedEclipseProjects(boolean flag) {
+        excludeEmbeddedEclipseProjects = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_EMBEDDED_ECLIPSE_PROJECTS);
+    }
+
+    public boolean getExcludeEmbeddedEclipseProjects() {
+        return excludeEmbeddedEclipseProjects;
+    }
+
+    @DataBoundSetter
+    public void setExcludeEclipseProjectWithDuplicatedName(boolean flag) {
+        excludeEclipseProjectWithDuplicatedName = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_ECLIPSE_PROJECT_WITH_DUPLICATED_NAME);
+    }
+
+    public boolean getExcludeEclipseProjectWithDuplicatedName() {
+        return excludeEclipseProjectWithDuplicatedName;
+    }
+
+    @DataBoundSetter
+    public void setExcludeDuplicateDotNetProjectInSameFolder(boolean flag) {
+        excludeDuplicateDotNetProjectInSameFolder = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_DUPLICATE_DOT_NET_PROJECT_IN_SAME_FOLDER);
+    }
+
+    public boolean getExcludeDuplicateDotNetProjectInSameFolder() {
+        return excludeDuplicateDotNetProjectInSameFolder;
+    }
+
+    @DataBoundSetter
+    public void setExcludeTestCode(boolean flag) {
+        excludeTestCode = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_TEST_CODE);
+    }
+
+    public boolean getExcludeTestCode() {
+        return excludeTestCode;
+    }
+
+    @DataBoundSetter
+    public void setExcludeJavaFilesWhenAFullJeeProjectExists(boolean flag) {
+        excludeJavaFilesWhenAFullJeeProjectExists = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WHEN_A_FULL_JEE_PROJECT_EXISTS);
+    }
+
+    @DataBoundSetter
+    public void setExcludeJavaFilesWithAnIncompletePackage(boolean flag) {
+        excludeJavaFilesWithAnIncompletePackage = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WITH_AN_INCOMPLETE_PACKAGE);
+    }
+
+    @DataBoundSetter
+    public void setExcludeJavaFileswithAnUnnamedPackage(boolean flag) {
+        excludeJavaFileswithAnUnnamedPackage = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WITH_AN_UNNAMED_PACKAGE);
+    }
+
+    @DataBoundSetter
+    public void setExcludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile(boolean flag) {
+        excludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_WEB_JSP_PROJECT_WHEN_JAVA_FILES_EXISTS_FOR_THE_SAME_WEB_XML_FILE);
+    }
+
+    @DataBoundSetter
+    public void setExcludeJavaFilesProjectLocatedInsideOtherJavaFilesProject(boolean flag) {
+        excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject = flag;
+        ExclusionRuleType.updateExclusionRules(exclusionRules, flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_PROJECT_LOCATED_INSIDE_OTHER_JAVA_FILES_PROJECT);
+    }
+
+    public boolean getExcludeJavaFilesWhenAFullJeeProjectExists() {
+        return excludeJavaFilesWhenAFullJeeProjectExists;
+    }
+
+    public boolean getExcludeJavaFilesWithAnIncompletePackage() {
+        return excludeJavaFilesWithAnIncompletePackage;
+    }
+
+    public boolean getExcludeJavaFileswithAnUnnamedPackage() {
+        return excludeJavaFileswithAnUnnamedPackage;
+    }
+
+    public boolean getExcludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile() {
+        return excludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile;
+    }
+
+    public boolean getExcludeJavaFilesProjectLocatedInsideOtherJavaFilesProject() {
+        return excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject;
     }
 
     @Override

@@ -328,6 +328,14 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
         this.excludeEmptyProjects = excludeEmptyProjects;
     }
 
+    public void setPreferFullDotNetToBasicDotNetWeb(boolean flag) {
+        preferFullDotNetToBasicDotNetWeb = flag;
+    }
+
+    public boolean getPreferFullDotNetToBasicDotNetWeb() {
+        return preferFullDotNetToBasicDotNetWeb;
+    }
+
     public void setExcludeJavaFilesWhenAFullJeeProjectExists(boolean flag) {
         excludeJavaFilesWhenAFullJeeProjectExists = flag;
     }

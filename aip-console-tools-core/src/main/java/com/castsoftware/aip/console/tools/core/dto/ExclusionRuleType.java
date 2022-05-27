@@ -33,5 +33,15 @@ public enum ExclusionRuleType {
                 , EXCLUDE_JAVA_FILES_WITH_AN_UNNAMED_PACKAGE, EXCLUDE_WEB_JSP_PROJECT_WHEN_JAVA_FILES_EXISTS_FOR_THE_SAME_WEB_XML_FILE
                 , EXCLUDE_JAVA_FILES_PROJECT_LOCATED_INSIDE_OTHER_JAVA_FILES_PROJECT));
     }
+
+    public static void updateExclusionRules(Set<ExclusionRuleType> exclusionRules, boolean flag, ExclusionRuleType type) {
+        if (exclusionRules.contains(type)) {
+            exclusionRules.remove(type);
+        }
+        if (flag) {
+            exclusionRules.add(type);
+        }
+    }
+
 }
 
