@@ -3,7 +3,6 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import hudson.model.Run;
 import jenkins.model.RunAction2;
-import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -297,7 +296,6 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
         return excludeEclipseProjectWithDuplicatedName;
     }
 
-    @DataBoundSetter
     public void setExcludeDuplicateDotNetProjectInSameFolder(boolean flag) {
         excludeDuplicateDotNetProjectInSameFolder = flag;
     }
@@ -369,5 +367,4 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     public boolean getExcludeJavaFilesProjectLocatedInsideOtherJavaFilesProject() {
         return excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject;
     }
-
 }

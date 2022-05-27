@@ -318,26 +318,31 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         return excludeTestCode;
     }
 
+    @DataBoundSetter
     public void setExcludeJavaFilesWhenAFullJeeProjectExists(boolean flag) {
         excludeJavaFilesWhenAFullJeeProjectExists = flag;
         updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WHEN_A_FULL_JEE_PROJECT_EXISTS);
     }
 
+    @DataBoundSetter
     public void setExcludeJavaFilesWithAnIncompletePackage(boolean flag) {
         excludeJavaFilesWithAnIncompletePackage = flag;
         updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WITH_AN_INCOMPLETE_PACKAGE);
     }
 
+    @DataBoundSetter
     public void setExcludeJavaFileswithAnUnnamedPackage(boolean flag) {
         excludeJavaFileswithAnUnnamedPackage = flag;
         updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_WITH_AN_UNNAMED_PACKAGE);
     }
 
+    @DataBoundSetter
     public void setExcludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile(boolean flag) {
         excludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile = flag;
         updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_WEB_JSP_PROJECT_WHEN_JAVA_FILES_EXISTS_FOR_THE_SAME_WEB_XML_FILE);
     }
 
+    @DataBoundSetter
     public void setExcludeJavaFilesProjectLocatedInsideOtherJavaFilesProject(boolean flag) {
         excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject = flag;
         updateExclusionRules(flag, ExclusionRuleType.EXCLUDE_JAVA_FILES_PROJECT_LOCATED_INSIDE_OTHER_JAVA_FILES_PROJECT);

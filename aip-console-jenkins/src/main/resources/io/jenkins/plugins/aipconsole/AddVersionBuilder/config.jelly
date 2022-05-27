@@ -85,7 +85,7 @@
                                 checked="${excludeJavaFilesWhenAFullJeeProjectExists}" default="false"/>
                 </f:entry>
                 <f:entry
-                        title="Exclude all 'Java files per package folder' projects with an incomplete packagee"
+                        title="Exclude all 'Java files per package folder' projects with an incomplete package"
                         field="excludeJavaFilesWithAnIncompletePackage">
                     <f:checkbox field="excludeJavaFilesWithAnIncompletePackage"
                                 checked="${excludeJavaFilesWithAnIncompletePackage}" default="false"/>
