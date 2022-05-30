@@ -722,9 +722,11 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
             requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
 
-            log.println("Exclusion patterns : " + exclusionPatterns);
-            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName
-                    , Exclusions.builder().excludePatterns(exclusionPatterns).build(), applicationHasVersion));
+            Exclusions exclusions = applicationService.buildExclusions(exclusionPatterns, exclusionRules.toArray(new ExclusionRuleType[exclusionRules.size()]));
+            if (exclusions != null) {
+                log.println(exclusions.toString());
+            }
+            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion));
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);

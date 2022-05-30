@@ -726,6 +726,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                     .processImaging(processImaging);
 
             Exclusions exclusions = applicationService.buildExclusions(exclusionPatterns, exclusionRules.toArray(new ExclusionRuleType[exclusionRules.size()]));
+            if (exclusions != null) {
+                log.println(exclusions.toString());
+            }
             String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion);
             if (StringUtils.isNotBlank(deliveryConfig)) {
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
