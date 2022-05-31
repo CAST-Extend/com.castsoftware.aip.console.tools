@@ -1,6 +1,5 @@
 package com.castsoftware.aip.console.tools.commands;
 
-import com.castsoftware.aip.console.tools.core.dto.DatabaseConnectionSettingsDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -21,7 +20,6 @@ import picocli.CommandLine;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -96,26 +94,18 @@ public class CreateApplicationCommand implements Callable<Integer> {
         log.info("Create application command has triggered with log output = '{}'", sharedOptions.isVerbose());
         //For backward compatibility
         boolean noHistory = noVersionHistory || inPlaceMode;
-        if (noHistory){
+        if (noHistory) {
             log.info("The created application will have \"No Version History\"");
         }
 
         String cssServerGuid = null;
-        if(StringUtils.isNotEmpty(cssServerName)){
-            try {
-                DatabaseConnectionSettingsDto[] cssServers = restApiService.getForEntity("api/settings/css-settings",
-                        DatabaseConnectionSettingsDto[].class);
-                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db -> db.getServerName().equalsIgnoreCase(cssServerName)).findFirst();
-                if (targetCss.isPresent()) {
-                    cssServerGuid = targetCss.get().getGuid();
-                }
-            } catch (ApiCallException e) {
-                log.error("Call to AIP Console resulted in an error.", e);
-                return Constants.UNKNOWN_ERROR;
-            }
+        try {
+            cssServerGuid = jobsService.getCssGuid(cssServerName);
+            log.info("Application {} triplets will be hosted by CSS GUID {}", applicationName, cssServerGuid);
+        } catch (JobServiceException e) {
+            return Constants.UNKNOWN_ERROR;
         }
 
-        log.info("Application {} triplets will be hosted by CSS GUID {}", applicationName, cssServerGuid);
         try {
             String nodeGuid = null;
             if (StringUtils.isNotBlank(nodeName)) {

@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.DatabaseConnectionSettingsDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
@@ -23,8 +24,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -78,6 +81,24 @@ public class JobsServiceImpl implements JobsService {
             log.log(Level.SEVERE, "Unable to create new application '" + applicationName + "'", e);
             throw new JobServiceException("Creation of application failed", e);
         }
+    }
+
+    @Override
+    public String getCssGuid(String cssServerName) throws JobServiceException {
+        if (StringUtils.isNotEmpty(cssServerName)) {
+            try {
+                DatabaseConnectionSettingsDto[] cssServers = restApiService.getForEntity("api/settings/css-settings",
+                        DatabaseConnectionSettingsDto[].class);
+                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db -> db.getServerName().equalsIgnoreCase(cssServerName)).findFirst();
+                if (targetCss.isPresent()) {
+                    return targetCss.get().getGuid();
+                }
+            } catch (ApiCallException e) {
+                log.log(Level.SEVERE, "Call to CAST Console resulted in an error.", e);
+                throw new JobServiceException("Target CSS database with following name does not exist: " + cssServerName, e);
+            }
+        }
+        return null;
     }
 
     @Override

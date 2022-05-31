@@ -99,6 +99,9 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version"
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean autoCreate = false;
+    
+    @CommandLine.Option(names = {"-css", "--css-server"}, description = "CSS Server name that will host the application data: format is host:port ")
+    private String cssServerName;
 
     @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version"
             + " if specified without parameter: ${FALLBACK-VALUE}",
@@ -197,7 +200,7 @@ public class AddVersionCommand implements Callable<Integer> {
         try {
             if (StringUtils.isBlank(applicationGuid)) {
                 log.info("Searching for application '{}' on AIP Console", applicationName);
-                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, sharedOptions.isVerbose());
+                applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, cssServerName, sharedOptions.isVerbose());
                 if (StringUtils.isBlank(applicationGuid)) {
                     String message = autoCreate ?
                             "Creation of the application '{}' failed on AIP Console" :

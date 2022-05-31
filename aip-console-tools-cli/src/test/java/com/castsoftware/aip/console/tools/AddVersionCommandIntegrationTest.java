@@ -34,6 +34,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -61,13 +62,14 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         addVersionCommand.setFilePath(null);
         addVersionCommand.setNodeName(null);
         addVersionCommand.setVersionName(null);
+        addVersionCommand.setCssServerName(null);
     }
 
     @Test
     public void testAddVersionCommand_FailToCreateApplication() throws ApplicationServiceException {
         String[] args = defaultArgs;
         // No existing application
-        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyBoolean())).thenReturn(null);
+        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), eq(null), anyBoolean())).thenReturn(null);
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
 
         runStringArgs(addVersionCommand, args);
@@ -86,7 +88,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
                 "--node-name", TestConstants.TEST_NODE};
 
         // gives the existing application
-        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), eq(null), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
         when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
         when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
@@ -122,7 +124,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
                 "--node-name", TestConstants.TEST_NODE};
 
         // gives the existing application
-        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), eq(null), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
         when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
         when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
@@ -152,7 +154,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         String[] args = defaultArgs;
 
         // gives the existing application
-        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyBoolean()))
+        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), eq(null), anyBoolean()))
                 .thenReturn(TestConstants.TEST_APP_GUID);
         when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
 
@@ -174,7 +176,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         };
 
         // gives the existing application
-        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), eq(null), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
         when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
 
@@ -221,7 +223,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         };
 
         // gives the existing application
-        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), eq(null), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
         when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
 
@@ -266,7 +268,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
                 "--module-option", "Invalid",
                 "--node-name", TestConstants.TEST_NODE};
         // No existing application
-        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyBoolean())).thenReturn(null);
+        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(null);
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
 
         runStringArgs(addVersionCommand, args);

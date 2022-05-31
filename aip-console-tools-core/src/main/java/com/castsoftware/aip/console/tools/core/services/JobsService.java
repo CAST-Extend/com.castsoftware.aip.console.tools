@@ -47,6 +47,13 @@ public interface JobsService {
     String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion, String cssServerGuid) throws JobServiceException;
 
     /**
+     * @param cssServerName target CSS server name
+     * @return existing CSS Server Guid
+     * @throws JobServiceException Thrown when the supplied name not found
+     */
+    String getCssGuid(String cssServerName) throws JobServiceException;
+
+    /**
      * Start the "Create Version" job, which will create a new version for an application on AIP Console
      *
      * @param appGuid            The application GUID for which the version should be created

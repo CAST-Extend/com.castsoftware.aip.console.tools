@@ -74,6 +74,7 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startUpload;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_cssInfo;
 import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_Deliver_info_startDeliverCloneJob;
 import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDenied;
@@ -100,6 +101,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     private String applicationGuid;
     private String filePath;
     private boolean autoCreate = false;
+    private String cssServerName;
+
     private boolean cloneVersion = false;
     private boolean blueprint = false;
     private boolean enableSecurityAssessment = false;
@@ -310,6 +313,15 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         this.domainName = domainName;
     }
 
+    public String getCssServerName() {
+        return cssServerName;
+    }
+
+    @DataBoundSetter
+    public void setCssServerName(String cssServerName) {
+        this.cssServerName = cssServerName;
+    }
+
     @Override
     public DeliverDescriptorImpl getDescriptor() {
         return (DeliverDescriptorImpl) super.getDescriptor();
@@ -429,7 +441,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null,null);
+                log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(applicationName, cssServerName));
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null, cssServerName);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),

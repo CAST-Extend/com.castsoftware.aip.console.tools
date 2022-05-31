@@ -68,11 +68,13 @@ public interface ApplicationService {
      * @param autoCreate      Whether the application should be created if it couldn't be found
      * @param nodeName        The name of the node on which the application
      * @param domainName      The name of the domain to assign to the application
-     * @param logOutput whether the log is displa
+     * @param cssServerName   CSS database server hosting the application
+     * @param verbose         whether the log is displa
      * @return An application GUID or null if non was found
      * @throws ApplicationServiceException
      */
-    String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName, boolean logOutput) throws ApplicationServiceException;
+    String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName
+            , String cssServerName, boolean verbose) throws ApplicationServiceException;
 
     /**
      * Retrieve an application's version

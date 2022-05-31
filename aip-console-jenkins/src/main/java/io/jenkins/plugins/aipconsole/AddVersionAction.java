@@ -19,6 +19,8 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     @CheckForNull
     private String filePath;
     private boolean autoCreate = false;
+    @Nullable
+    private String cssServerName;
     private boolean cloneVersion = true;
     private boolean blueprint = false;
     private boolean enableSecurityAssessment = false;
@@ -225,5 +227,14 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
+    }
+
+    @Nullable
+    public String getCssServerName() {
+        return cssServerName;
+    }
+
+    public void setCssServerName(String cssServerName) {
+        this.cssServerName = cssServerName;
     }
 }
