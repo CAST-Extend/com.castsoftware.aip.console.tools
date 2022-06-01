@@ -66,7 +66,7 @@ public class CreateApplicationBuilderTest extends BaseBuilderTest {
         oneDb.setUserName("operator");
         when(restApiService.getForEntity("api/settings/css-settings", DatabaseConnectionSettingsDto[].class))
                 .thenReturn(new DatabaseConnectionSettingsDto[]{oneDb});
-        when(jobsService.startCreateApplication(any(String.class), eq(null), eq(null), anyBoolean(), eq(null), eq(TARGET_CSS_SERVER_GUID)))
+        when(jobsService.startCreateApplication(any(String.class), eq(null), eq(null), anyBoolean(), eq(null), eq(TARGET_CSS_SERVER_NAME)))
                 .thenReturn(TEST_JOB_GUID);
         when(jobsService.pollAndWaitForJobFinished(any(String.class), any(Consumer.class), any(Consumer.class), any(Function.class))).thenReturn(JobState.COMPLETED);
 
