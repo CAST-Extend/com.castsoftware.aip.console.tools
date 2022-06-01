@@ -98,14 +98,6 @@ public class CreateApplicationCommand implements Callable<Integer> {
             log.info("The created application will have \"No Version History\"");
         }
 
-        String cssServerGuid = null;
-        try {
-            cssServerGuid = jobsService.getCssGuid(cssServerName);
-            log.info("Application {} triplets will be hosted by CSS GUID {}", applicationName, cssServerGuid);
-        } catch (JobServiceException e) {
-            return Constants.UNKNOWN_ERROR;
-        }
-
         try {
             String nodeGuid = null;
             if (StringUtils.isNotBlank(nodeName)) {
@@ -121,7 +113,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
                 }
             }
 
-            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName, noHistory, null, cssServerGuid);
+            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName, noHistory, null, cssServerName);
             log.info("Started job to create new application.");
             return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {

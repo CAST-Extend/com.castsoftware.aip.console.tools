@@ -11,9 +11,10 @@
     </f:entry>
     <f:block>
         <table>
-            <f:optionalBlock title="${%autoCreate}" field="autoCreate">
+            <f:optionalBlock name="autoCreate" title="${%autoCreate}" field="autoCreate" checked="${autoCreate}"
+                             inline="true">
                 <f:entry title="CSS server name" field="cssServerName" description="${%cssServerName.descr}">
-                    <f:textbox/>
+                    <f:textbox name="cssServerName"/>
                 </f:entry>
             </f:optionalBlock>
         </table>

@@ -68,7 +68,10 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion, String cssServerGuid) throws JobServiceException {
+    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion, String cssServerName) throws JobServiceException {
+        String cssServerGuid = getCssGuid(cssServerName);
+        log.log(Level.INFO, "Application " + applicationName + " data repository will be hosted by CSS GUID " + cssServerGuid);
+
         try {
             CreateApplicationJobRequest.CreateApplicationJobRequestBuilder requestBuilder =
                     CreateApplicationJobRequest.builder().appName(applicationName).inPlaceMode(inplaceMode).caipVersion(caipVersion).cssGuid(cssServerGuid);

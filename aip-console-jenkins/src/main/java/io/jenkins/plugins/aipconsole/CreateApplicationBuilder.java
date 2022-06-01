@@ -1,6 +1,5 @@
 package io.jenkins.plugins.aipconsole;
 
-import com.castsoftware.aip.console.tools.core.dto.DatabaseConnectionSettingsDto;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
@@ -33,7 +32,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -206,20 +204,11 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
                         .orElse(null);
             }
 
-            String cssServerGuid = null;
             String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
-            if (StringUtils.isNotEmpty(expandedCssServerName)) {
-                DatabaseConnectionSettingsDto[] cssServers = apiService.getForEntity("api/settings/css-settings", DatabaseConnectionSettingsDto[].class);
-                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db -> db.getServerName().equalsIgnoreCase(expandedCssServerName)).findFirst();
-                if (targetCss.isPresent()) {
-                    cssServerGuid = targetCss.get().getGuid();
-                }
-            }
-
-            log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(applicationName, cssServerGuid));
+            log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(applicationName, expandedCssServerName));
 
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
-            String createJobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null, cssServerGuid);
+            String createJobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null, expandedCssServerName);
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
             Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
                     logContentDto -> {

@@ -436,9 +436,11 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 }
 
                 String expandedDomainName = vars.expand(domainName);
+                String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
+
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(variableAppName));
                 log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(applicationName, cssServerName));
-                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode, null, cssServerName);
+                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode, null, expandedCssServerName);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),

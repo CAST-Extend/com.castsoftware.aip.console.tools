@@ -40,11 +40,11 @@ public interface JobsService {
      * @param nodeGuid        The Node GUID on which the application should be created. Can be null.
      * @param domainName      The name of the domain to assign to this application
      * @param inplaceMode     indicate if the app will be in "inplace" mode
-     * @param cssServerGuid target CSS server if any (can be null when none supplied)
+     * @param cssServerName   target CSS server if any (can be null when none supplied)
      * @return The job GUID on AIP Console
      * @throws JobServiceException If an error occurs while starting the job
      */
-    String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion, String cssServerGuid) throws JobServiceException;
+    String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion, String cssServerName) throws JobServiceException;
 
     /**
      * @param cssServerName target CSS server name
