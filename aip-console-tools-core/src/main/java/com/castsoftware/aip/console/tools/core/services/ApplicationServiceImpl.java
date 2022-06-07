@@ -140,7 +140,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 String cssServerGuid = jobService.getCssGuid(cssServerName);
                 log.log(Level.INFO, "Application " + applicationName + " repository will be hosted by CSS GUID " + cssServerGuid != null ? cssServerGuid : "DEFAULT");
 
-                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false, null, null);
+                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false, null, cssServerName);
                 return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null, verbose);
             } catch (JobServiceException | ApiCallException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);

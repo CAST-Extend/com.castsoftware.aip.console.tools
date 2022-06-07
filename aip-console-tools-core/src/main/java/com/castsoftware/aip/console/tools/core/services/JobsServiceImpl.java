@@ -95,6 +95,8 @@ public class JobsServiceImpl implements JobsService {
                 Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db -> db.getServerName().equalsIgnoreCase(cssServerName)).findFirst();
                 if (targetCss.isPresent()) {
                     return targetCss.get().getGuid();
+                } else {
+                    throw new JobServiceException("Target CSS database with following name does not exist: " + cssServerName);
                 }
             } catch (ApiCallException e) {
                 log.log(Level.SEVERE, "Call to CAST Console resulted in an error.", e);
