@@ -96,6 +96,10 @@ public class DeliverVersionCommand implements Callable<Integer> {
             fallbackValue = "true")
     private boolean autoCreate = false;
 
+    @CommandLine.Option(names = {"-css", "--css-server"}
+            , description = "CSS Server name that will host the application data. Format will be host:port/databaseName and can be checked on AIP Console's Global Configuration page.")
+    private String cssServerName;
+
     @CommandLine.Option(names = "--enable-security-dataflow",
             description = "If defined, this will activate the security dataflow for this version"
                     + " if specified without parameter: ${FALLBACK-VALUE}",
@@ -188,7 +192,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
 
         try {
             log.info("Searching for application '{}' on AIP Console", applicationName);
-            applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, sharedOptions.isVerbose());
+            applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, cssServerName, sharedOptions.isVerbose());
             if (StringUtils.isBlank(applicationGuid)) {
                 String message = autoCreate ?
                         "Creation of the application '{}' failed on AIP Console" :

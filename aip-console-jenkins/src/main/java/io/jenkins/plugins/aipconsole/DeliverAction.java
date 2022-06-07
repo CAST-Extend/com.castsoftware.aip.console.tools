@@ -19,6 +19,8 @@ public class DeliverAction extends BaseAction implements RunAction2 {
     @CheckForNull
     private String filePath;
     private boolean autoCreate = false;
+    @Nullable
+    private String cssServerName;
     private boolean cloneVersion = false;
     private boolean blueprint = false;
     private boolean enableSecurityAssessment = false;
@@ -224,5 +226,14 @@ public class DeliverAction extends BaseAction implements RunAction2 {
 
     public void setDomainName(@Nullable String domainName) {
         this.domainName = domainName;
+    }
+
+    @Nullable
+    public String getCssServerName() {
+        return cssServerName;
+    }
+
+    public void setCssServerName(String cssServerName) {
+        this.cssServerName = cssServerName;
     }
 }

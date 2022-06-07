@@ -79,6 +79,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         project = jenkins.configRoundtrip(project);
         AddVersionBuilder job = new AddVersionBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         job.setDomainName("");
+        job.setCssServerName("");
         job.setModuleGenerationType(ModuleGenerationType.FULL_CONTENT.toString());
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }

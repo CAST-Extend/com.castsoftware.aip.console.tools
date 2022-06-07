@@ -55,6 +55,7 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
         deliverVersionCommand.setFilePath(null);
         deliverVersionCommand.setNodeName(null);
         deliverVersionCommand.setVersionName(null);
+        deliverVersionCommand.setCssServerName(null);
     }
 
     @Test
@@ -69,7 +70,7 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
                 "--domain-name", TestConstants.TEST_DOMAIN};
 
         // gives the existing application
-        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), eq(null), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), eq(null), any(String.class), eq(null), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
         when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
         when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
@@ -105,7 +106,44 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
                 "--domain-name", TestConstants.TEST_DOMAIN};
 
         // gives the existing application
-        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), eq(null), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
+        when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
+        when(applicationService.applicationHasVersion(TestConstants.TEST_APP_GUID)).thenReturn(false);
+        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), Exclusions.builder().build(), false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
+        when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
+
+        JobExecutionDto jobStatus = new JobExecutionDto();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(JobState.COMPLETED);
+        jobStatus.setCreatedDate(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
+
+        runStringArgs(deliverVersionCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    @Test
+    public void testDeliverVersionCommand_WithCssServerJobCompleted() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
+        boolean verbose = true;
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--file", sflPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--node-name", TestConstants.TEST_NODE,
+                "--no-clone", "--auto-create", "--enable-security-dataflow", "--backup",
+                "--backup-name", TestConstants.TEST_BACKUP_NAME,
+                "--css-server", "TARGET_CSS_SERVER_NAME",
+                "--domain-name", TestConstants.TEST_DOMAIN};
+
+        // gives the existing application
+        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
         when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
         when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());

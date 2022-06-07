@@ -102,6 +102,10 @@ The application will be created on AIP Console after you've run the Jenkins Job.
 
 The `Add Application Version to AIP Console` will create a new version of an application, run an analysis and create a
 snapshot of that analysis.
+* Checking the `Create Application if missing?` checkbox will automatically create the application AIP Console.
+  You can specify a CSS server name where the application's data will be stored.
+  ![Tareget-CSS-Server](./doc/images/Tareget-CSS-Server.png)
+
 * You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
   To do so, check the following option checkbox in the "advanced settings" section
   ![blueprint_objective](./doc/images/blueprint_objective.png)
@@ -135,6 +139,9 @@ This version and the snapshot can be found in the Application's page in AIP Cons
 
 The `Deliver Source Code to AIP Console` step is similar to the Add version step above.
 
+* Checking the `Create Application if missing?` checkbox will automatically create the application AIP Console.
+  You can specify a CSS server name where the application's data will be stored.
+  ![Tareget-CSS-Server](./doc/images/Tareget-CSS-Server.png)
 * You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
   To do so, check the following option checkbox in the "advanced settings" section
   ![blueprint_objective](./doc/images/blueprint_objective.png)

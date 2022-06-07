@@ -98,11 +98,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName) throws ApplicationServiceException {
-        return getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, null, true);
+        return getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, null, null, true);
     }
 
     @Override
-    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName, boolean logOutput) throws ApplicationServiceException {
+    public String getOrCreateApplicationFromName(String applicationName, boolean autoCreate, String nodeName, String domainName, String cssServerName, boolean verbose) throws ApplicationServiceException {
         if (StringUtils.isBlank(applicationName)) {
             throw new ApplicationServiceException("No application name provided.");
         }
@@ -137,8 +137,11 @@ public class ApplicationServiceImpl implements ApplicationService {
                 }
                 log.info(infoMessage);
 
-                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false, null,null);
-                return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null, logOutput);
+                String cssServerGuid = jobService.getCssGuid(cssServerName);
+                log.log(Level.INFO, "Application " + applicationName + " repository will be hosted by CSS GUID " + cssServerGuid != null ? cssServerGuid : "DEFAULT");
+
+                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false, null, cssServerName);
+                return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null, verbose);
             } catch (JobServiceException | ApiCallException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);
                 throw new ApplicationServiceException("Unable to create application automatically.", e);

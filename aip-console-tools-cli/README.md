@@ -145,14 +145,19 @@ The available options are :
 
 - `-n` or `--name` (**required**) : specify the name of the application to create
 
-* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. *default* : Automatically selected by AIP Console
-* `--domain-name` (optional) : specify a domain name to associate with the application to create. *default*: No domain is set for the application.
+* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. *default* :
+  Automatically selected by AIP Console
+* `--domain-name` (optional) : specify a domain name to associate with the application to create. *default*: No domain
+  is set for the application.
 * `--inplace-mode` (optional):  If true then no history will be kept for delivered sources.
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--server-url` or `-s` : Specify the URL to your AIP Console server. *default* : localhost:8081
-* `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment
+  variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
-* `--user` (optional) (legacy) : Specify a username to log in. Requires passing the user's password in the `--apikey` parameter. *default* : none
+* `--user` (optional) (legacy) : Specify a username to log in. Requires passing the user's password in the `--apikey`
+  parameter. *default* : none
+* `--css-server` or `-css` (optional): CSS server you which to host the created application' data.
 
 #### AddVersion
 
@@ -165,8 +170,11 @@ The available options are :
 * `--app-name` or `-n` (**required**): The application name.
 * `--app-guid` or `-a` (optional): The application GUID. Can replace the application name parameter.
 * `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
-* `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
-* `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this new version. This is the default behaviour when no version exists for the given application.
+* `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given
+  name doesn't exists.
+* `--css-server` or `-css` (optional): Server name where the application data will be stored.
+* `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this
+  new version. This is the default behaviour when no version exists for the given application.
 * `--version-name` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--snapshot-name` (option) The name of the snapshot to generate, default will be based on the date and time
@@ -200,6 +208,7 @@ The available options are :
 * `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
 * `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given
   name doesn't exists.
+* `--css-server` or `-css` (optional): Server name where the application data will be stored.
 * `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this
   new version. This is the default behaviour when no version exists for the given application.
 * `--version-name` or `-v` (optional): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current
