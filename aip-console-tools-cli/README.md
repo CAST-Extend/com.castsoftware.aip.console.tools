@@ -172,7 +172,7 @@ The available options are :
 * `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
 * `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given
   name doesn't exists.
-* `--css-server` or `-css` (optional): CSS server you which to host the created application' data.
+* `--css-server` or `-css` (optional): Server name where the application data will be stored.
 * `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this
   new version. This is the default behaviour when no version exists for the given application.
 * `--version-name` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
@@ -208,7 +208,7 @@ The available options are :
 * `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
 * `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given
   name doesn't exists.
-* `--css-server` or `-css` (optional): CSS server you which to host the created application' data.
+* `--css-server` or `-css` (optional): Server name where the application data will be stored.
 * `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this
   new version. This is the default behaviour when no version exists for the given application.
 * `--version-name` or `-v` (optional): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current

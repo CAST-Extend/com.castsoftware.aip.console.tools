@@ -100,7 +100,7 @@ public class AddVersionCommand implements Callable<Integer> {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean autoCreate = false;
     
-    @CommandLine.Option(names = {"-css", "--css-server"}, description = "CSS Server name that will host the application data: format is host:port ")
+    @CommandLine.Option(names = {"-css", "--css-server"}, description = "CSS Server name that will host the application data: Format will be host:port/databaseName and can be checked on AIP Console's Global Configuration page.")
     private String cssServerName;
 
     @CommandLine.Option(names = "--enable-security-dataflow", description = "If defined, this will activate the security dataflow for this version"
