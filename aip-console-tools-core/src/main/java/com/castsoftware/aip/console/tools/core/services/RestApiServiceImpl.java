@@ -19,6 +19,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.java.Log;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
+import okhttp3.Credentials;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
@@ -446,7 +447,11 @@ public class RestApiServiceImpl implements RestApiService {
         public Response intercept(Chain chain) throws IOException {
             Request request = chain.request();
             Request.Builder reqBuilder = request.newBuilder();
-            reqBuilder.header(Constants.API_KEY_HEADER, key);
+            if (StringUtils.isNotBlank(username)) {
+                reqBuilder.header("Authorization", Credentials.basic(username, key));
+            } else {
+                reqBuilder.header(Constants.API_KEY_HEADER, key);
+            }
             return chain.proceed(reqBuilder.build());
         }
     }

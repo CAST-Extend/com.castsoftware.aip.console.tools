@@ -44,6 +44,9 @@ public class ApiInfoDto {
     private boolean imagingFlat = false;
 
     private boolean acStudioAudienceCastsoftware = false;
+    private boolean isStandaloneMode = false;
+
+    private boolean isOnboardingEnabled = false;
 
     public SemVer getApiVersionSemVer() {
         return getSemVer();
