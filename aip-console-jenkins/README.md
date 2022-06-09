@@ -1,23 +1,18 @@
 ## AIP Console Tools Jenkins Plugin
 
-TODO
+This Jenkins Plugin for AIP Console allows users to automate application source code delivery and analysis directly within their CI systems. Most elements that can be configured through the AIP Console UI can also be configured when using this plugin in your build configurations.
 
-### Purpose
-
-This Jenkins Plugin allows you to automate some parts of using AIP Console, like delivering source code, running an application analysis or generating a snapshot through Jenkins.
-
-Pre-Requisites
+### Pre-Requisites
 
 This plugin requires the following :
 
 * Jenkins version 2.60.3 or above
-* An installation of AIP Console that is accessible and configured.
-* An API Token for the user that will run the CLI (
-  check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
-* For the Console Standalone server you must provide following two parameters
-  <br/> `--user`="login name here" `--apikey`="password here"
-* The ability to generate an archive for your source code OR a configured location in AIP Console where your source will
-  be saved/updated.
+* An installation of AIP Console 2.X that is accessible and configured.
+* A means of Authentication using :
+  * For Enterprise installations, an API Token for the user that will run the CLI (
+    check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
+  * For AIP Console Standalone, a username and password. Check the `Authentication with username (AIP Console Standalone)` section in Other Topics, towards the end of this document.
+* The ability to generate an archive for your source code OR a configured location in AIP Console where your source will be stored/updated.
 
 ### Installation (and Update)
 
@@ -25,7 +20,7 @@ To start using AIP Console Jenkins Plugin, you must first install the plugin in 
 
 To do this, you must go to Manage Plugins page of your Jenkins Server.
 
-<img src="./doc/images/image-20200612152656381.png" alt="image-20200612152656381" style="zoom:50%;" />
+<img src="doc/images/manage_plugins_menu_item.png" alt="manage plugin page location" style="zoom:50%;" />
 
 Then, in the "Advanced" tab, under "Upload Plugin", click "Browse" and select the `aip-console-jenkins.hpi` file.
 
@@ -33,11 +28,11 @@ Click on Upload and Jenkins should install the plugin.
 
 **Updating the plugin is the same process**, but it might require to restart your Jenkins server after installation for the changes to take effect.
 
-#### Configuration
+### Configuration
 
 To configure the AIP Console plugin, go to the "Configure System" page in the "Manage Jenkins" page.
 
-<img src="./doc/images/image-20200612153238086.png" alt="image-20200612153238086" style="zoom:50%;" />
+<img src="doc/images/configure_system_menu_item.png" alt="global configuration page location" style="zoom:50%;" />
 
 On this page, go to the **AIP Console global configuration** section and enter the following required elements :
 
@@ -45,95 +40,49 @@ On this page, go to the **AIP Console global configuration** section and enter t
   Jenkins Server and the Jenkins Node that might run the plugin as well.
 * *API Key* : The API key that will be used to authenticate to AIP Console.
 * *Timeout* : A global timeout setting in seconds before calls to AIP Console will be considered in error.
-* *verbose* : If it's checked then AIP Console log output will be display on screen. To hide major information keep this
-  unchecked.
+* *verbose* : When checked, the AIP Console logs will also be displayed on the build's log. Uncheck this to prevent displaying the entirety of the AIP Console job execution to be displayed during the build.
 
-![log-output](./doc/images/log-output.png)
+![Global configuration page](./doc/images/global_config_page.png)
 
-#### Using different AIP Console URL and API Key
+### Using different AIP Console URL and API Key
 
-In case the Job needs to target different AIP Console URL and use a different API Key, it's still possible. To do so,
-proceed as follows.
+Should you require to target a specific AIP Node instance that differs from the global configuration in Jenkins, you can specify the URL and an API Key by opening the "Advanced Settings" options. Note that you will have to manually set them for each build steps that require targeting a specific AIP Console Instance.
 
-* Create dedicated Job as describe in the next section
-* Expand the "Advanced Settings" section and fill fields with desired values.
-  ![custom_URL_ApiKey](./doc/images/custom_URL_ApiKey.png)
+![Step specific AIP Console URL and API Key configuration](./doc/images/custom_URL_ApiKey.png)
 
-##### Precedence rule
+The AIP Console URL and associated API Key specified in the step details will always be used when running a step. In case they are left empty, the global configuration will be used instead.
 
-* The value used for AIP Console URL and API Key is always coming from the Job itself when assigned.
-* If one field is not assigned then the one from the *Global Configuration* will be used.
-### Defining the Analysis Strategy using objectives options
+## Quick Start
 
-These options can be updated when on-boarding a version using either
-
-* Add Version job
-* Deliver Version job.
-
-The enabled options will be added to the existing default ones: **Global Assessment** and **
-Function Points measurement**. To Enable/Disable **Blueprint** and **Security assessment** you will need to expand
-the **Advanced Settings** of the dedicated job.
-![security-objective](./doc/images/security-objective.png)
-### Quick Start
+The following section will focus on running a job, with the basic required parameters. For more details on each options, please refer to each steps in [Advanced Usage](#advanced_usage)
 
 #### Create Application
 
 To create an application, add the `Create application on AIP Console` Step to a job.
 
-![image-20200612161540146](./doc/images/image-20200612161540146.png)
+![Menu item to add the create application step](doc/images/create_app_menu.png)
 
-In that build step,
-
+In that build step :
 * you *must* provide the application name.
-* You also optionally have the possibility to decide whether the application should keep the delivered version history
-  or not.
+* You can decide whether the application should keep the delivered version history or not.
 
-![Deliveries-history](./doc/images/Deliveries-history.png)
+Running this step will create the application and initialize the underlying systems in AIP Console.
 
-* By expanding the "Advanced Settings"
-  * You can target a different AIP Console gateway by providing the associated URL and Api Key.
-  * You can choose on which CSS Server you which to store your application' data
-    ![create-app-advanced_settings](./doc/images/create-app-advanced_settings.png)
-    <br/>Format will be *host:port/databaseName*
-    <br/>as shown in the Database connection of global-configurations page
-    ![target-css_settings](doc/images/target-css_settings.png)
-
-The application will be created on AIP Console after you've run the Jenkins Job.
-**Important note**
-
-* When an application is created without the deliveries history then the source code should be located in the Source
+<u>Important note</u>
+* When an application is created without the delivery history then the source code should be located in the Source
   Folder Path sub-folders. This meant no file will not be accepted.
-
+  
 #### Add Version
+
+![Menu item to add the add version step](doc/images/add_version_menu.png)
 
 The `Add Application Version to AIP Console` will create a new version of an application, run an analysis and create a
 snapshot of that analysis.
-* Checking the `Create Application if missing?` checkbox will automatically create the application AIP Console.
-  You can specify a CSS server name where the application's data will be stored.
-  ![Tareget-CSS-Server](./doc/images/Tareget-CSS-Server.png)
-  <br/>Format will be *host:port/databaseName*
-  <br/>as shown in the Database connection of global-configurations page
-  ![target-css_settings](doc/images/target-css_settings.png)
-
-* You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
-  To do so, check the following option checkbox in the "advanced settings" section
-  ![blueprint_objective](./doc/images/blueprint_objective.png)
-* When a snapshot is available, you can optionally decide whether to publish the application to the Health Dashboard or
-  not.
-
-  ![snap-consolidation](./doc/images/snap-consolidation.png)
-* You can choose the _Module generation type_ you would like to generate
-  ![module-generation-type-selector](./doc/images/module-generation-type-selector.png)
-* or just keep the default one that's available on _CAST Console_ (use default).
-  ![module-generation-type-default](./doc/images/module-generation-type-default.png)
-
+  
 This step requires the following :
 
 * An application name for which a new version will be created. <u>This application must exist in AIP Console</u>.
-* A path to a zip or tgz archive file to upload (**NOTE**: you can also provide a folder path; more details in the
-  Advanced Usage Section below).
-
-![image-20200612163542175](./doc/images/image-20200612163542175.png)
+* A path to a zip or tgz archive file to upload (**NOTE**: you can also provide a folder path; more details in the Advanced Usage Section below).
 
 This step will perform the following actions :
 
@@ -148,16 +97,7 @@ This version and the snapshot can be found in the Application's page in AIP Cons
 
 The `Deliver Source Code to AIP Console` step is similar to the Add version step above.
 
-* Checking the `Create Application if missing?` checkbox will automatically create the application AIP Console.
-  You can specify a CSS server name where the application's data will be stored.
-  ![Tareget-CSS-Server](./doc/images/Tareget-CSS-Server.png)
-  <br/>Format will be *host:port/databaseName*
-  <br/>as shown in the Database connection of global-configurations page
-  ![target-css_settings](doc/images/target-css_settings.png)
-
-* You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
-  To do so, check the following option checkbox in the "advanced settings" section
-  ![blueprint_objective](./doc/images/blueprint_objective.png)
+![Menu item to add the delvier source code step](deliver_menu.png)
 
 It requires the following :
 
@@ -178,13 +118,6 @@ The version will be created and visible inside the `Versions` tab of the applica
 The step `Analyze Application on AIP Console` will only run an Application Analysis on AIP Console.
 
 It only <u>requires an Application Name</u>.
-
-But it stills some option that you can set
-
-* You can choose the _Module generation type_ you would like to generate
-  ![module-generation-type-selector](./doc/images/module-generation-type-selector.png)
-* or just keep the default one that's available on _CAST Console_ (use default).
-  ![module-generation-type-default](./doc/images/module-generation-type-default.png)
 
 However, note that you <u>need at least one Delivered version on AIP Console</u> for this step to work correctly.
 
@@ -208,14 +141,13 @@ This step will perform the following actions :
 * Publish snapshot
 * Optionally decided whether to publish the application to the Health Dashboard or not.
 
-![snap-consolidation](./doc/images/snap-consolidation.png)
-
 The Snapshot can then be found inside the `Snapshot` tab in AIP Console.
 
-### Advanced Usage
+## Advanced Usage
 
-The quick start only covers the basic usage of each step of the plugin. The following sections provide greater details on what each parameters changes in the behavior of the AIP Console Tools plugin.
-#### A Note on variable expansion
+This section will provide a detailed look at each parameter available for each type of jobs.
+
+### A Note on variable expansion
 
 Variable expansion means replacing some variables in text fields to an environment variable value.
 
@@ -225,123 +157,167 @@ You can use these environment variables on the following fields in each jobs (wh
 * Application name
 * Version name
 * Snapshot name
-* Node name
+* Domain Name
+* Source File Path
 
 You can manually add environment variables to a build or use global jenkins environment variables (see [the jenkins documentation](https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables))
 
-#### Create Application
+### Create Application
 
-The create application provides the following parameters :
+![Create application step parameter details](doc/images/create_application_parameters.png)
 
-* Application name (**required**): The name of the application that will be created in AIP Console
-* Node Name (optional): The name of the AIP Node on which the application will be created. If none is specified, AIP Console will pick a node.
+The Create Application provides the following parameters :
+
+* *Application name* (**required**): The name of the application that will be created in AIP Console
+* *Node Name*: The name of the AIP Node on which the application will be created. If none is specified, AIP Console will pick a node.
+* * *Domain Name*: The name of the domain to assign for the application.
 
 Under `Advanced Settings` you will find the following parameters :
 
-* Connection Timeout: Timeout in seconds for each calls to AIP Console.
-* Ignore Failure: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+![Create Application advanced settings](doc/images/create_application_advanced.png)
 
-#### Add Version
+* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *CSS Server Name* : The URL to the CSS Server to use to store the application's data. Must have the format `host:port/dbName` as can be seen in the Admin Center, in Global Configurations under CSS and Measurement Settings
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
+* *Ignore Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+
+### Add Version
+
+![Add version step parameter details](doc/images/add_version_parameters.png)
 
 The Add Version step provides the following parameters :
 
 * *Application Name* (**required**): The name of the application for which a new version will be created.
+  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
 * *File/Folder path* (**required**): The source code that will be used to create the new version. You can provide either :
-  * A File path on the current Jenkins Node to a ZIP, TGZ or TAR.GZ file
+  * A File path on the Jenkins Node where the job will be run to a ZIP, TGZ or TAR.GZ file
   * A Folder Path on the AIP Node relative to the Source Folder Path defined inside AIP Console. For more information, [please see here under Source Folder Location](https://doc.castsoftware.com/display/AIPCONSOLE/Administration+Center+-+Settings) **Requires AIP Console 1.15.0 or above**
-* *Create Application if missing*: If checked and the application cannot be found on AIP Console, it will be created. Otherwise, the step will fail.
+  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${WORKSPACE}` will be replaced by the current jobs' workspace path.
+* *Create Application if missing*: If checked and the application cannot be found on AIP Console, it will be created.
+  * If checked, the option to specify a CSS server will appear. You can then specify which CSS server will store the application data. Format should ``host:port/dbName``. You can check the available CSS server in the Admin Section of AIP Console :
+<img src="./doc/images/target-css_settings.png" alt="css connection details in the aip console admin center" style="zoom:50%;" />
+
 * *Version Name* (optional): The name of the version that will be created. If left blank, the version will be named with the following pattern : `vYYMMDD.hhmmss` based on date and time.
   * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
 * *Snapshot Name* (optional): The name of the snapshot that will be created, if left blank, the snapshot will be named with date and time
   * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
-* *Rescan*: Clone the previous version of the application (similar to the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no version exists, it will run an Add version job instead.
-* *Enable Security Dataflow*: Enabled the Security Objective for this version. Has no effect if `Rescan` is checked.
-* *publish the application to the Health Dashboard* (optional): When sets to false, this prevents from consolidating
-  snapshot or from publishing application to the Health dashboard. *default* : true 
+* *Enable Security Dataflow*: Enables the Security Objective for this version. <u>Has no effect if `Rescan` is checked</u>.
+* *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "Analysis Unit module" or "Technology Module".
 
 Under `Advanced Settings` you will find the following parameters :
 
-* Enable backup: Whether a Backup should be created before creating a new version. **Requires AIP Console 1.16.0 or above**
-* Name of the backup: The name of the backup **if** Enabled Backup is checked. **Requires AIP Console 1.16.0 or above**
-* Ignore Analysis Failure: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
-* Node Name (optional): The name of the AIP Node on which the application will be created. If none is specified, AIP Console will pick a node. <u>Only used if `Create Application if missing` is Checked</u>
-* Connection Timeout: Timeout in seconds for each calls to AIP Console.
-* Publish to Imaging: Publish to Imaging if Imaging is configured with AIP Console
+![img.png](doc/images/add_application_advanced.png)
 
-#### Deliver
+* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *Copy Configuration*: Copy the configuration of the previous version (also known as rescan). Enabled by default.
+* *Blueprint Objective*: If checked, this will enable the Blueprint Objective during the application analysis.
+* *Security Assessment*: If checked, this will enable the Security Assessment during the application analysis.
+* *Enable backup*: Whether a Backup should be created before creating a new version. **Requires AIP Console 1.16.0 or above**
+* *Name of the backup*: The name of the backup **if** Enabled Backup is checked. **Requires AIP Console 1.16.0 or above**
+* *Publish to Imaging*: Publish to Imaging if Imaging is configured with AIP Console
+* *Publish to Health Dashboard*: Publish to Health Dashboards after analysis. Enabled by default.
+* *Ignore Analysis Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+* *Node Name* : The name of an AIP Node Instance on which the application will be created. If none is specified, AIP Console will pick a node. <u>Only used if `Create Application if missing` is Checked</u>
+* *Domain Name*: The name of the domain to assign for the application. <u>Only used if `Create Application if missing` is Checked</u>
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
 
-The Deliver step provides similar parameters to the Add Version step :
+### Deliver
+
+![Deliver source step parameters](doc/images/deliver_source_parameters.png)
+
+The Deliver Source step provides similar parameters to the Add Version step :
 
 * *Application Name* (**required**): The name of the application for which a new version will be created.
+  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
 * *File/Folder path* (**required**): The source code that will be used to create the new version. You can provide either :
-  * A File path on the current Jenkins Node to a ZIP, TGZ or TAR.GZ file
+  * A File path on the Jenkins Node where the job will be run to a ZIP, TGZ or TAR.GZ file
   * A Folder Path on the AIP Node relative to the Source Folder Path defined inside AIP Console. For more information, [please see here under Source Folder Location](https://doc.castsoftware.com/display/AIPCONSOLE/Administration+Center+-+Settings) **Requires AIP Console 1.15.0 or above**
+  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${WORKSPACE}` will be replaced by the current jobs' workspace path.
+* *Exclusion patterns* : List of file patterns to exclude in the delivery, separated by a comma. Each patterns needs to follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
 * *Create Application if missing*: If checked and the application cannot be found on AIP Console, it will be created. Otherwise, the step will fail.
-* *Automatic discovery* : will discover new technologies and install new extensions during rescan
-  * **NOTE**: Uncheck this option if run consistency check
-* *Exclusion patterns* : File patterns to exclude in the delivery, the pattern needs to follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
 * *Version Name* (optional): The name of the version that will be created. If left blank, the version will be named with
   the following pattern : `vYYMMDD.hhmmss` based on date and time.
   * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be
     replaced by the current jobs' build number.
-* *Make version current* (optional): When checked then the version is used as being the current, and it is made ready to
-  analyze.  
-  ![set-as-current](./doc/images/set-as-current.png)
+* *Make version current*: When checked then the version is used as being the current, and it is made ready to
+  analyze.
+* *Automatic discovery* : If checked, it will enable to discovery of new technologies and install the associated extensions. It is advised to disable this if you want to keep every analysis to use the same set of extensions.
 * *Copy configuration from previous version*: Clone the previous version of the application (similar to
   the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no
   version exists, it will run an Add version job instead.
-* *Enable Security Dataflow*: Enabled the Security Objective for this version. Has no effect if `Rescan` is checked.
+* *Enable Security Dataflow*: Enables the Security Objective for this version. Will be ignored if `Rescan` is checked.
 
 Under `Advanced Settings` you will find the following parameters :
 
-* Enable backup: Whether a Backup should be created before creating a new version. **Requires AIP Console 1.16.0 or above**
-* Name of the backup: The name of the backup **if** Enabled Backup is checked. **Requires AIP Console 1.16.0 or above**
-* Ignore Analysis Failure: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
-* Node Name (optional): The name of the AIP Node on which the application will be created. If none is specified, AIP Console will pick a node. <u>Only used if `Create Application if missing` is Checked</u>
-* Connection Timeout: Timeout in seconds for each calls to AIP Console.
+![deliver source code step advanced settings](doc/images/deliver_source_advanced.png)
 
-#### Analyze
+* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *Copy Configuration*: Copy the configuration of the previous version (also known as rescan). Enabled by default.
+* *Blueprint Objective*: If checked, this will enable the Blueprint Objective during the application analysis.
+* *Security Assessment*: If checked, this will enable the Security Assessment during the application analysis.
+* *Enable backup*: Whether a Backup should be created before creating a new version. **Requires AIP Console 1.16.0 or above**
+* *Name of the backup*: The name of the backup **if** Enabled Backup is checked. **Requires AIP Console 1.16.0 or above**
+* *Ignore Analysis Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+* *Node Name* : The name of an AIP Node Instance on which the application will be created. If none is specified, AIP Console will pick a node. <u>Only used if `Create Application if missing` is Checked</u>
+* *Domain Name*: The name of the domain to assign for the application. <u>Only used if `Create Application if missing` is Checked</u>
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
 
+### Analyze
+![analyze application step parameters](doc/images/analyze_parameters.png)
 The Analyze step provides the following parameters :
 
 * *Application Name* (**required**): The name of the application for which the analysis will be run.
-* *Version Name* (optional): The name of the version to Analyze. <u>If left blank</u>, the analyzed version will <u>be the latest Delivered Version</u>. If no new Delivered Version Exists, <u>it will use the Current Version</u>.
+* *Version Name*: The name of the version to Analyze. <u>If left blank</u>, the analyzed version will <u>be the latest Delivered Version</u>. If no new Delivered Version Exists, <u>it will use the Current Version</u>.
 * *Snapshot*: Whether Snapshots should be created after Analysis.
-* *publish the application to the Health Dashboard* (optional): When sets to false, this prevents from consolidating
-  snapshot or from publishing application to the Health dashboard. *default* : true
+* *Publish to Imaging*: Publish to Imaging if Imaging is configured with AIP Console
+* *Publish to the Health Dashboard* : When checked, consolidates snapshots and publishes data to the Health Dashboards. Checked by default.
+* *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "Analysis Unit module" or "Technology Module".
 
 Under `Advanced Settings` you will find the following parameters :
 
-* Ignore Failure: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
-* Connection Timeout: Timeout in seconds for each calls to AIP Console.
+![Analyze step advanced settings](doc/images/analyze_advanced.png)
 
-#### Snapshot
+* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *Ignore Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
+
+### Snapshot
+
+![Snapshot step parameters](doc/images/snapshot_parameters.png)
 
 The Snapshot step provides the following parameters :
 
-* *Application Name* (**required**): The name of the application for which the analysis will be run.
-* *Snapshot Name* (optional): The name of the Snapshot to create. If left blank, the snapshot will be named with the following pattern: `Snapshot-YYYY-MM-DDThh-mm-ss` depending on current date and time.
-* *publish the application to the Health Dashboard* (optional): When sets to false, this prevents from consolidating
-  snapshot or from publishing application to the Health dashboard. *default* : true
+* *Application Name* (**required**): The name of tshe application for which the analysis will be run.
+* *Snapshot Name* : The name of the Snapshot to create. If left blank, the snapshot will be named with the following pattern: `Snapshot-YYYY-MM-DDThh-mm-ss` depending on current date and time.
+* *Publish to Imaging*: Publish to Imaging if Imaging is configured with AIP Console
+* *Publish to the Health Dashboard* : When checked, consolidates snapshots and publishes data to the Health Dashboards. Checked by default.
 
 Under `Advanced Settings` you will find the following parameters :
 
-* Ignore Failure: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
-* Connection Timeout: Timeout in seconds for each calls to AIP Console.
+![snapshot step advanced settings](doc/images/snapshot_advanced.png)
 
-### Other Topics
+* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *Ignore Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
 
-#### Authentication with username
+## Other Topics
 
-If you cannot use an API Key for authentication to AIP Console, you can provide a username/password combo.
+#### Authentication with username (AIP Console Standalone)
+
+**This section only applies to AIP Console Standalone**
+
+In AIP Console Standalone, authentication doesn't use an API Key as it is not handled by the authentication mechanism. Instead, you will have to use username/password combo to interact with AIP Console Standalone.
 
 To do this, go to the **Configure System** page of Jenkins, under **AIP Console GLobal Configuration**, click on the Advanced Settings button.
 
-You should see a Username field. Enter the username there and it's password in the API Key field.
+You should see a Username field. Enter the username there and the password in the API Key field.
 
 Authentication will then be done using this username/password combo.
-
-**Note that this is not advised in production and the API Key should be used instead.**
 
 #### Issues and Logging
 
@@ -363,4 +339,49 @@ Next time you run a Build using the AIP Console Jenkins Plugin, log messages of 
 
 #### Pipeline Scripts
 
-TODO: Detail how to run the steps as Pipeline Script elements, and where to find the parameters.
+Every steps defined above mcan be used in a Pipeline Job or using a Jenkinsfile.
+
+Rather than detail every step here, you can quickly generate the required syntax using the integrated "Pipeline Syntax" command in Jenkins, to generate a snippet based on a selected step and associated parameters.
+
+![Example of generating a pipeline snippet from deliver step parameters](doc/images/pipeline_syntax_example.png)
+
+You can access this "Pipeline Syntax" page by opening an existing Pipeline job, and click on the "Pipeline SYntax" menu item (left side column)
+
+![Pipeline Syntax menu item in the left side column in a pipeline job page](doc/images/pipeline_syntax_menu_item.png)
+
+#### Pipeline Sample
+
+Here is an example Pipeline Script :
+
+```groovy
+node {
+  // Stages to display on the build page
+  stage('Preparation') {
+    // Get some code from a GitHub repository
+    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'sources']], userRemoteConfigs: [[url: 'https://github.com/jglick/simple-maven-project-with-tests.git']]]
+  }
+  stage('Build') {
+    dir('sources') {
+      sh "git archive -o ../source.zip HEAD"
+    }
+    aipAddVersion applicationName: 'my jenkins pipeline app', autoCreate: true, cssServerName: '', domainName: '', filePath: 'source.zip'
+  }
+}
+```
+
+This basic pipeline performs the following :
+* Initializes a 'Preparation' stage, a visual separator for the different sections of the build
+* In this stage, it will retrieve source code using Git from the url to a subdirectory called "sources"
+* Initialzes a 'Build' stage
+* In this stage:
+  * It will move to the "sources" folder where the source was checked out.
+  * Inside the "sources" folder, the build will call `git archive` to create an archive from the local git repository and save it to the file `source.zip` which it will store in the parent directory
+  * Moving back to the parent folder, the build will call `Add Version`, providing an application name, with auto create (`Create application if missing`) set to true and point to the created source.zip file
+
+![Stages of the build defined in the pipeline](doc/images/pipeline_build_stages.png)
+
+When running the build, it'll display the progess of each stages visually and show the time to run each stages.
+
+This can be used in existing Jenkinsfile or new pipeline jobs, to be included in your existing CI workflow.
+
+A more complex example can be found in [the examples folder's README file](examples/README.md)
