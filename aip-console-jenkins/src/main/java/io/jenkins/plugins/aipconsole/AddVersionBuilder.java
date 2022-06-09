@@ -399,6 +399,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
         String fileName = UUID.randomUUID().toString();
         String caipVersion = null;
+        ApplicationDto app = null;
         try {
 
             // Get the GUID from AIP Console
@@ -435,7 +436,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 applicationHasVersion = applicationService.applicationHasVersion(applicationGuid);
             }
 
-            ApplicationDto app = applicationService.getApplicationFromGuid(applicationGuid);
+            app = applicationService.getApplicationFromGuid(applicationGuid);
             caipVersion = app.getCaipVersion();
 
             if (!isUpload) {
@@ -504,8 +505,9 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             } else {
                 log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(variableAppName));
             }
-            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, caipVersion);
-            requestBuilder.releaseAndSnapshotDate(new Date())
+            JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, caipVersion)
+                    .nodeName(app.getTargetNode())
+                    .releaseAndSnapshotDate(new Date())
                     .versionName(resolvedVersionName)
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)

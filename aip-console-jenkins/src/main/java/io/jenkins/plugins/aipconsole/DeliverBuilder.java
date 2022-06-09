@@ -506,6 +506,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion());
             requestBuilder.releaseAndSnapshotDate(new Date())
+                    .nodeName(app.getTargetNode())
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)

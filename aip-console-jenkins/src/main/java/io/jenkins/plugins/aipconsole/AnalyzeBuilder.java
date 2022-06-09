@@ -232,7 +232,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
 
         try {
             String resolvedVersionName = vars.expand(versionName);
-            ApiInfoDto apiInfoDto = apiService.getAipConsoleApiInfo();
+            ApplicationDto app = applicationService.getApplicationFromGuid(applicationGuid);
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             // Get the version name
             VersionDto versionToAnalyze;
@@ -256,6 +256,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
             }
 
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, caipVersion)
+                    .nodeName(app.getTargetNode())
                     .startStep(versionToAnalyze.getStatus() == VersionStatus.DELIVERED ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
 
 

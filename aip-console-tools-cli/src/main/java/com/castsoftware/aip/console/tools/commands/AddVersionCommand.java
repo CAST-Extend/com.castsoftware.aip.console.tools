@@ -210,11 +210,8 @@ public class AddVersionCommand implements Callable<Integer> {
                 }
             }
 
-            if (StringUtils.isEmpty(applicationName) && StringUtils.isNotEmpty(applicationGuid)) {
-                applicationName = applicationService.getApplicationNameFromGuid(applicationGuid);
-            }
-
-            ApplicationDto app = applicationService.getApplicationFromName(applicationName);
+            ApplicationDto app = applicationService.getApplicationFromGuid(applicationGuid);
+            applicationName = app.getName();
             if (app.isInPlaceMode()) {
                 log.info("The application '{}' is using the \"Rapid Delivery Mode\"", applicationName);
             }
@@ -225,6 +222,7 @@ public class AddVersionCommand implements Callable<Integer> {
             boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion())
+                    .nodeName(app.getTargetNode())
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)

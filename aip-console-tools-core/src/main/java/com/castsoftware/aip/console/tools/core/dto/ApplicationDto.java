@@ -21,4 +21,5 @@ public class ApplicationDto {
     private String state;
     private boolean inPlaceMode;
     private String caipVersion;
+    private String targetNode;
 }

@@ -212,6 +212,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
         }
         String jobGuid = null;
         try {
+            ApplicationDto app = applicationService.getApplicationFromGuid(applicationGuid);
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             // Get the current version's guid
             VersionDto versionToAnalyze = versions.stream().filter(VersionDto::isCurrentVersion)
@@ -236,6 +237,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
 
             boolean forcedConsolidation = processImaging || consolidation;
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, caipVersion)
+                    .nodeName(app.getTargetNode())
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
                     .versionGuid(versionToAnalyze.getGuid())
                     .versionName(versionToAnalyze.getName())

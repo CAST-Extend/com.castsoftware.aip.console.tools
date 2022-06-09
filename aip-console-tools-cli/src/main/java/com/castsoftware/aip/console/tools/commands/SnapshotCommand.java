@@ -154,6 +154,7 @@ public class SnapshotCommand implements Callable<Integer> {
             // Run snapshot
             boolean forcedConsolidation = processImaging || consolidation;
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, app.getCaipVersion())
+                    .nodeName(app.getTargetNode())
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
                     .versionGuid(foundVersion.getGuid())
                     .versionName(foundVersion.getName())

@@ -161,7 +161,8 @@ public class AnalyzeCommand implements Callable<Integer> {
             boolean deployFirst = versionToAnalyze.getStatus() == VersionStatus.DELIVERED;
 
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, app.getCaipVersion())
-                    .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE);
+                    .startStep(deployFirst ? Constants.ACCEPTANCE_STEP_NAME : Constants.ANALYZE)
+                    .nodeName(app.getTargetNode());
 
             if (withSnapshot) {
                 boolean forcedConsolidation = processImaging || consolidation;
