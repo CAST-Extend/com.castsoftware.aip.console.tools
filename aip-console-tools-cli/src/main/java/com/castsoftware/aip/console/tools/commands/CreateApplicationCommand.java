@@ -72,7 +72,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
             fallbackValue = "true")
     private boolean noVersionHistory = false;
 
-    @CommandLine.Option(names = {"-css","--css-server"}, description = "CSS Server name that will host the application data: format is host:port ")
+    @CommandLine.Option(names = {"-css", "--css-server"}, description = "CSS Server name that will host the application data: Format will be host:port/databaseName ")
     private String cssServerName;
 
     @CommandLine.Unmatched

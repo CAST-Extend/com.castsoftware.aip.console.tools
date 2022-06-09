@@ -92,10 +92,11 @@ public class JobsServiceImpl implements JobsService {
             try {
                 DatabaseConnectionSettingsDto[] cssServers = restApiService.getForEntity("api/settings/css-settings",
                         DatabaseConnectionSettingsDto[].class);
-                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db -> db.getServerName().equalsIgnoreCase(cssServerName)).findFirst();
+                Optional<DatabaseConnectionSettingsDto> targetCss = Arrays.stream(cssServers).filter(db -> buildCssServerName(db).equalsIgnoreCase(cssServerName)).findFirst();
                 if (targetCss.isPresent()) {
                     return targetCss.get().getGuid();
                 } else {
+                    log.log(Level.SEVERE, "Target CSS database with following name does not exist or check the format: " + cssServerName);
                     throw new JobServiceException("Target CSS database with following name does not exist: " + cssServerName);
                 }
             } catch (ApiCallException e) {
@@ -104,6 +105,10 @@ public class JobsServiceImpl implements JobsService {
             }
         }
         return null;
+    }
+
+    private String buildCssServerName(DatabaseConnectionSettingsDto db) {
+        return db.getServerName() + "/" + db.getDatabaseName();
     }
 
     @Override
