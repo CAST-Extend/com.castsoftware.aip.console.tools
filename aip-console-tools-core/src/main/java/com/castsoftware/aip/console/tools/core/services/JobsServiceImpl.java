@@ -63,18 +63,31 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode, String caipVersion) throws JobServiceException {
-        return startCreateApplication(applicationName, nodeGuid, null, inplaceMode, caipVersion,null);
+    public String startCreateApplication(String applicationName, String nodeName, boolean inplaceMode, String caipVersion) throws JobServiceException {
+        return startCreateApplication(applicationName, nodeName, null, inplaceMode, caipVersion,null);
     }
 
     @Override
-    public String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion, String cssServerName) throws JobServiceException {
+    public String startCreateApplication(String applicationName, String nodeName, String domainName, boolean inplaceMode, String caipVersion, String cssServerName) throws JobServiceException {
         String cssServerGuid = getCssGuid(cssServerName);
-        log.log(Level.INFO, "Application " + applicationName + " data repository will be hosted by CSS GUID " + cssServerGuid);
+        if(cssServerGuid != null) {
+            log.log(Level.INFO,
+                "Application " + applicationName + " data repository will stored in CSS Server " + cssServerName + "(guid: " + cssServerGuid + ")");
+        } else {
+            log.log(Level.INFO,
+                "Application " + applicationName + " data repository will stored on default CSS server");
+        }
 
         try {
             CreateApplicationJobRequest.CreateApplicationJobRequestBuilder requestBuilder =
-                    CreateApplicationJobRequest.builder().appName(applicationName).inPlaceMode(inplaceMode).caipVersion(caipVersion).cssGuid(cssServerGuid);
+                    CreateApplicationJobRequest.builder()
+                        .appName(applicationName)
+                        .inPlaceMode(inplaceMode)
+                        .caipVersion(caipVersion)
+                        .cssGuid(cssServerGuid);
+            if(StringUtils.isNotBlank(nodeName)) {
+                requestBuilder.targetNode(nodeName);
+            }
             if (StringUtils.isNotBlank(domainName)) {
                 requestBuilder.domainName(domainName);
             }

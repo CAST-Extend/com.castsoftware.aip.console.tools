@@ -412,38 +412,13 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                     run.setResult(defaultResult);
                     return;
                 }
-                // Is there a node name
-                String nodeGuid = null;
-                if (StringUtils.isNotBlank(nodeName)) {
-                    try {
-                        nodeGuid = apiService.getForEntity("/api/nodes",
-                                new TypeReference<List<NodeDto>>() {
-                                }).stream()
-                                .filter(n -> StringUtils.equalsIgnoreCase(n.getName(), nodeName))
-                                .map(NodeDto::getGuid)
-                                .findFirst()
-                                .orElse(null);
-
-                        if (StringUtils.isBlank(nodeGuid)) {
-                            listener.error(AddVersionBuilder_AddVersion_error_nodeNotFound(nodeName));
-                            run.setResult(defaultResult);
-                            return;
-                        }
-                    } catch (ApiCallException e) {
-                        listener.error("Unable to retrieve the node guid from the given name");
-                        e.printStackTrace(log);
-                        run.setResult(defaultResult);
-                        return;
-                    }
-                }
-
                 // Parse domain name with potential variables
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
                 String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
                 log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(applicationName, expandedCssServerName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null, expandedCssServerName);
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeName, expandedDomainName, inPlaceMode, null, expandedCssServerName);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),

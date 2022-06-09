@@ -25,26 +25,26 @@ public interface JobsService {
      * Start the "Create application" job, which will create a new application on the target AIP Console instance
      *
      * @param applicationName The name of the application
-     * @param nodeGuid        The Node GUID on which the application should be created. Can be null.
+     * @param nodeName        The Node GUID on which the application should be created. Can be null.
      * @param inplaceMode     indicate if the app will be in "inplace" mode
      * @return The job GUID on AIP Console
      * @throws JobServiceException If an error occurs while starting the job
      */
-    String startCreateApplication(String applicationName, String nodeGuid, boolean inplaceMode, String caipVersion) throws JobServiceException;
+    String startCreateApplication(String applicationName, String nodeName, boolean inplaceMode, String caipVersion) throws JobServiceException;
 
     /**
      * Start the "Create application" job, which will create a new application on the target AIP Console instance
      * with the given domain name
      *
      * @param applicationName The name of the application
-     * @param nodeGuid        The Node GUID on which the application should be created. Can be null.
+     * @param nodeName        The Node GUID on which the application should be created. Can be null.
      * @param domainName      The name of the domain to assign to this application
      * @param inplaceMode     indicate if the app will be in "inplace" mode
      * @param cssServerName   target CSS server if any (can be null when none supplied)
      * @return The job GUID on AIP Console
      * @throws JobServiceException If an error occurs while starting the job
      */
-    String startCreateApplication(String applicationName, String nodeGuid, String domainName, boolean inplaceMode, String caipVersion, String cssServerName) throws JobServiceException;
+    String startCreateApplication(String applicationName, String nodeName, String domainName, boolean inplaceMode, String caipVersion, String cssServerName) throws JobServiceException;
 
     /**
      * @param cssServerName target CSS server name

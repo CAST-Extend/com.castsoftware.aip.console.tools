@@ -99,21 +99,8 @@ public class CreateApplicationCommand implements Callable<Integer> {
         }
 
         try {
-            String nodeGuid = null;
-            if (StringUtils.isNotBlank(nodeName)) {
-                NodeDto[] nodes = restApiService.getForEntity("/api/nodes", NodeDto[].class);
-                nodeGuid = Arrays.stream(nodes)
-                        .filter(node -> StringUtils.equalsIgnoreCase(nodeName, node.getName()))
-                        .map(NodeDto::getGuid)
-                        .findFirst()
-                        .orElse(null);
-                if (nodeGuid == null) {
-                    log.error("Node with name '%s' could not be found on AIP Console.");
-                    return Constants.RETURN_APPLICATION_NOT_FOUND;
-                }
-            }
 
-            String jobGuid = jobsService.startCreateApplication(applicationName, nodeGuid, domainName, noHistory, null, cssServerName);
+            String jobGuid = jobsService.startCreateApplication(applicationName, nodeName, domainName, noHistory, null, cssServerName);
             log.info("Started job to create new application.");
             return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {
@@ -125,9 +112,6 @@ public class CreateApplicationCommand implements Callable<Integer> {
             }, sharedOptions.isVerbose());
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_FAILED;
-        } catch (ApiCallException e) {
-            log.error("Call to AIP Console resulted in an error.", e);
-            return Constants.UNKNOWN_ERROR;
         }
     }
 }

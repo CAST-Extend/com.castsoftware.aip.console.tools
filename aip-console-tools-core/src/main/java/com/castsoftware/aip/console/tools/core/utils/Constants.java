@@ -65,7 +65,6 @@ public class Constants {
     // Job params
     public static final String PARAM_APP_NAME = "appName";
     public static final String PARAM_INPLACE_MODE = "inPlaceMode";
-    public static final String PARAM_NODE_GUID = "nodeGuid";
     public static final String PARAM_DOMAIN_NAME = "domainName";
     public static final String PARAM_VERSION_NAME = "versionName";
     public static final String PARAM_SNAPSHOT_CAPTURE_DATE = "snapshotCaptureDate";
@@ -89,6 +88,7 @@ public class Constants {
     public static final String PARAM_PROCESS_IMAGING = "processImaging";
     public static final String PARAM_UPLOAD_APPLICATION = "uploadApplication";
     public static final String PARAM_MODULE_GENERATION_TYPE = "moduleGenerationType";
+    public static final String PARAM_TARGET_NODE = "targetNode";
 
     // CAIP header name for console v2
     public static final String PARAM_CAIP_VERSION = "X-SC-LB-CAIP";

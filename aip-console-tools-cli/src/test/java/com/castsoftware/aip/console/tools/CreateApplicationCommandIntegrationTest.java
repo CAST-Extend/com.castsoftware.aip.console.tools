@@ -45,22 +45,6 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
     }
 
     @Test
-    public void testCreateApplicationCommand_badNodeName() throws ApiCallException {
-        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "-n", TestConstants.TEST_CREATRE_APP,
-                "--node-name", TestConstants.TEST_NODE};
-
-        NodeDto[] existingNodes = new NodeDto[]{new NodeDto("Unexisting_guid", "Unexisting_name", "Fake_scheme", "Unexisting_host", 000)};
-        when(restApiService.getForEntity("/api/nodes", NodeDto[].class)).thenReturn(existingNodes);
-
-        runStringArgs(createApplicationCommand, args);
-
-        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
-        assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_APPLICATION_NOT_FOUND));
-    }
-
-    @Test
     public void testCreateApplicationCommand_SimplifiedDeliveryMode_DefaultNode() throws JobServiceException {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "-n", TestConstants.TEST_CREATRE_APP,

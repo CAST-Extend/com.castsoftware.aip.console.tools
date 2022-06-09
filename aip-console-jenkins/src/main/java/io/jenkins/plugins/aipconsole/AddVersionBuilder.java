@@ -3,7 +3,6 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
-import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -21,7 +20,6 @@ import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import hudson.EnvVars;
@@ -410,37 +408,14 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                     run.setResult(defaultResult);
                     return;
                 }
-                // Is there a node name
-                String nodeGuid = null;
-                if (StringUtils.isNotBlank(nodeName)) {
-                    try {
-                        nodeGuid = apiService.getForEntity("/api/nodes",
-                                new TypeReference<List<NodeDto>>() {
-                                }).stream()
-                                .filter(n -> StringUtils.equalsIgnoreCase(n.getName(), nodeName))
-                                .map(NodeDto::getGuid)
-                                .findFirst()
-                                .orElse(null);
-
-                        if (StringUtils.isBlank(nodeGuid)) {
-                            listener.error(AddVersionBuilder_AddVersion_error_nodeNotFound(nodeName));
-                            run.setResult(defaultResult);
-                            return;
-                        }
-                    } catch (ApiCallException e) {
-                        listener.error("Unable to retrieve the node guid from the given name");
-                        e.printStackTrace(log);
-                        run.setResult(defaultResult);
-                        return;
-                    }
-                }
 
                 String expandedDomainName = vars.expand(domainName);
+                String expandedNodeName = vars.expand(nodeName);
                 String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
 
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(variableAppName));
                 log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(applicationName, cssServerName));
-                String jobGuid = jobsService.startCreateApplication(variableAppName, nodeGuid, expandedDomainName, inplaceMode, null, expandedCssServerName);
+                String jobGuid = jobsService.startCreateApplication(variableAppName, expandedNodeName, expandedDomainName, inplaceMode, null, expandedCssServerName);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),

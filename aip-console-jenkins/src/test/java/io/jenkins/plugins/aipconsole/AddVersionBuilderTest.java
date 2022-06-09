@@ -271,55 +271,6 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         jenkins.assertLogContains(CreateApplicationBuilder_CreateApplication_error_jobServiceException(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_URL), build);
     }
 
-    @Test
-    public void testBuildNodeNotFoundWhenCreatingApplication() throws Exception {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
-        addVersionBuilder.setAutoCreate(true);
-        addVersionBuilder.setNodeName(BaseBuilderTest.TEST_NODE_NAME);
-        FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
-
-        doNothing().
-                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
-        doReturn(null)
-                .when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
-        doReturn(new ArrayList<NodeDto>())
-                .when(restApiService).getForEntity(eq("/api/nodes"), isA(TypeReference.class));
-
-        Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
-        FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
-        jenkins.assertLogContains(AddVersionBuilder_AddVersion_error_nodeNotFound(BaseBuilderTest.TEST_NODE_NAME), build);
-    }
-
-    @Test
-    public void testBuildCreateAppOnNodeWithNameSuccess() throws Exception {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
-        addVersionBuilder.setAutoCreate(true);
-        addVersionBuilder.setNodeName(BaseBuilderTest.TEST_NODE_NAME);
-        addVersionBuilder.setDomainName(null);
-        FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
-
-        doNothing().
-                when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
-        doReturn(null)
-                .when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
-        doReturn(Collections.singletonList(new NodeDto(BaseBuilderTest.TEST_NODE_NAME, BaseBuilderTest.TEST_NODE_NAME, "http", "localhost", 8082)))
-                .when(restApiService).getForEntity(eq("/api/nodes"), isA(TypeReference.class));
-        doReturn("createAppGuid")
-                .when(jobsService).startCreateApplication(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_NODE_NAME, null, false, null,null);
-        doReturn(BaseBuilderTest.TEST_APP_NAME)
-                .when(jobsService).pollAndWaitForJobFinished(eq("createAppGuid"), any(), any(), any());
-        doReturn(true)
-                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
-        doReturn(BaseBuilderTest.TEST_JOB_GUID)
-                .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
-        doReturn(JobState.COMPLETED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any());
-
-        FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
-        jenkins.assertLogContains(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(BaseBuilderTest.TEST_APP_NAME), build);
-        jenkins.assertLogContains(AddVersionBuilder_AddVersion_success_analysisComplete(), build);
-    }
-
     private FreeStyleProject getProjectWithDefaultAddVersion() throws IOException {
         return getProjectWithBuilder(addVersionBuilder);
     }

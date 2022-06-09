@@ -19,4 +19,5 @@ public class CreateApplicationJobRequest {
     private boolean inPlaceMode = false;
     private String caipVersion;
     private String cssGuid;
+    private String targetNode;
 }

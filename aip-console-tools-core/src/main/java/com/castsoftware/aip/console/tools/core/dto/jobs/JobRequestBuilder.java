@@ -26,7 +26,7 @@ public class JobRequestBuilder {
     private String appGuid;
     private String fileName;
     private JobType jobType;
-    private String nodeGuid;
+    private String nodeName;
     private String versionName;
     private String versionGuid;
     private String startStep;
@@ -63,8 +63,8 @@ public class JobRequestBuilder {
         this.snapshotDateStr = nowStr;
     }
 
-    public JobRequestBuilder nodeGuid(String nodeGuid) {
-        this.nodeGuid = nodeGuid;
+    public JobRequestBuilder nodeName(String nodeName) {
+        this.nodeName = nodeName;
         return this;
     }
 
@@ -191,8 +191,8 @@ public class JobRequestBuilder {
             // for 1.12 compatibility
             parameters.put(Constants.PARAM_SOURCE_ARCHIVE, sourcePath);
         }
-        if (StringUtils.isNotBlank(nodeGuid)) {
-            parameters.put(Constants.PARAM_NODE_GUID, nodeGuid);
+        if (StringUtils.isNotBlank(nodeName)) {
+            parameters.put(Constants.PARAM_TARGET_NODE, nodeName);
         }
         if (StringUtils.isNotBlank(versionGuid)) {
             parameters.put(Constants.PARAM_VERSION_GUID, versionGuid);

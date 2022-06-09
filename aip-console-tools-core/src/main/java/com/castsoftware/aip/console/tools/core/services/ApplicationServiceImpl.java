@@ -119,30 +119,24 @@ public class ApplicationServiceImpl implements ApplicationService {
                 return null;
             }
             try {
-                String nodeGuid = null;
-                if (StringUtils.isNotBlank(nodeName)) {
-                    nodeGuid = restApiService.getForEntity("/api/nodes", new TypeReference<List<NodeDto>>() {
-                    }).stream()
-                            .filter(n -> StringUtils.equalsIgnoreCase(nodeName, n.getName()))
-                            .map(NodeDto::getGuid)
-                            .findFirst()
-                            .orElse(null);
-                    if (nodeGuid == null) {
-                        throw new ApplicationServiceException("Node with name " + nodeName + " could not be found on AIP Console to create the new application");
-                    }
-                }
                 String infoMessage = String.format("Application '%s' not found and 'auto create' enabled. Starting application creation", applicationName);
-                if (nodeGuid != null) {
+                if (nodeName != null) {
                     infoMessage += " on node " + nodeName;
                 }
                 log.info(infoMessage);
 
                 String cssServerGuid = jobService.getCssGuid(cssServerName);
-                log.log(Level.INFO, "Application " + applicationName + " repository will be hosted by CSS GUID " + cssServerGuid != null ? cssServerGuid : "DEFAULT");
+                if(cssServerGuid != null) {
+                    log.log(Level.INFO,
+                        "Application " + applicationName + " data repository will stored in CSS Server " + cssServerName + "(guid: " + cssServerGuid + ")");
+                } else {
+                    log.log(Level.INFO,
+                        "Application " + applicationName + " data repository will stored on default CSS server");
+                }
 
-                String jobGuid = jobService.startCreateApplication(applicationName, nodeGuid, domainName, false, null, cssServerName);
+                String jobGuid = jobService.startCreateApplication(applicationName, nodeName, domainName, false, null, cssServerName);
                 return jobService.pollAndWaitForJobFinished(jobGuid, (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null, verbose);
-            } catch (JobServiceException | ApiCallException e) {
+            } catch (JobServiceException e) {
                 log.log(Level.SEVERE, "Could not create the application due to the following error", e);
                 throw new ApplicationServiceException("Unable to create application automatically.", e);
             }

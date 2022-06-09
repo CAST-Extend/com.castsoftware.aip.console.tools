@@ -194,21 +194,11 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
                 apiService.validateUrlAndKey(apiServerUrl, apiKey);
             }
 
-            String nodeGuid = null;
-            if (StringUtils.isNotBlank(expandedNodeName)) {
-                NodeDto[] nodes = apiService.getForEntity("/api/nodes", NodeDto[].class);
-                nodeGuid = Arrays.stream(nodes)
-                        .filter(node -> StringUtils.equalsIgnoreCase(nodeName, node.getName()))
-                        .map(NodeDto::getGuid)
-                        .findFirst()
-                        .orElse(null);
-            }
-
             String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
             log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(applicationName, expandedCssServerName));
 
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
-            String createJobGuid = jobsService.startCreateApplication(expandedAppName, nodeGuid, expandedDomainName, inPlaceMode, null, expandedCssServerName);
+            String createJobGuid = jobsService.startCreateApplication(expandedAppName, expandedNodeName, expandedDomainName, inPlaceMode, null, expandedCssServerName);
             log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
             Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
                     logContentDto -> {

@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_CAIP_VERSION;
+import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_TARGET_NODE;
 
 @Log
 public class RestApiServiceImpl implements RestApiService {
@@ -284,11 +285,15 @@ public class RestApiServiceImpl implements RestApiService {
         RequestBody body = HttpMethod.requiresRequestBody(method) ? getRequestBodyForEntity(entity) : null;
         Request.Builder requestBuilder = getRequestBuilder(endpoint)
                 .method(method, body);
-        // for v2, need to add caip version in the header for job requests
+        // for v2, target node and caip version must be added as headers (if existing)
         if (entity instanceof CreateJobsRequest) {
             CreateJobsRequest jobsRequest = (CreateJobsRequest) entity;
-            if (StringUtils.isNotEmpty(jobsRequest.getParameterValueAsString(PARAM_CAIP_VERSION))) {
-                requestBuilder.addHeader(PARAM_CAIP_VERSION, jobsRequest.getParameterValueAsString(PARAM_CAIP_VERSION));
+            String caipVersion = jobsRequest.getParameterValueAsString(PARAM_CAIP_VERSION);
+            String targetNode = jobsRequest.getParameterValueAsString(PARAM_TARGET_NODE);
+            if(StringUtils.isNotEmpty(targetNode)) {
+                requestBuilder.addHeader(PARAM_CAIP_VERSION, "node:"+targetNode);
+            }else if (StringUtils.isNotEmpty(caipVersion)) {
+                requestBuilder.addHeader(PARAM_CAIP_VERSION, "caip:"+caipVersion);
             }
             requestBuilder.method(method, getRequestBodyForEntityV2(jobsRequest));
         }
