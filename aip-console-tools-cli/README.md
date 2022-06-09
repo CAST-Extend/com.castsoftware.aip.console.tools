@@ -34,10 +34,12 @@ You will also need the following :
 * An installation of AIP Console that is accessible and configured.
 * An API Token for the user that will run the CLI (
   check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
+* For the Console Standalone server you must provide following two parameters
+  <br/> `--user`="login name here" `--apikey`="password here"
 * Prepare your source code in one of the two following ways :
-    * As a zip or tar.gz archive that will be uploaded to AIP Console
-    * As a relative path, pointing to content in the Source Folder location **(SFL)** defined in AIP Console like
-      below :
+  * As a zip or tar.gz archive that will be uploaded to AIP Console
+  * As a relative path, pointing to content in the Source Folder location **(SFL)** defined in AIP Console like
+    below :
 
 ![source folder location](doc/images/source_folder_location_config.png)
 
@@ -63,8 +65,10 @@ To **create a new application**,
 * Whether or not to display log information on screen by setting *--verbose* argument to either true or false.
 * You can optionally choose on which CSS server you which to host created application' data. To do so just add either *
   --css-server* or *-css* argument with the name of the desired serve.
-
-**Important note**
+  <br/>Format will be *host:port/databaseName*
+  <br/>as shown in the Database connection of global-configurations page
+  ![target-css_settings](doc/images/target-css_settings.png)
+  **Important note**
 
 * When an application is created without the delivered sources history then the source code should be located the SFL
   sub-folders. This meant no file will not be accepted, and the path provided for versions must be SFL relative path.

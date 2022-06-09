@@ -12,9 +12,12 @@ This plugin requires the following :
 
 * Jenkins version 2.60.3 or above
 * An installation of AIP Console that is accessible and configured.
-* An API Token for the user that will run the CLI (check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
-
-* The ability to generate an archive for your source code OR a configured location in AIP Console where your source will be saved/updated.
+* An API Token for the user that will run the CLI (
+  check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
+* For the Console Standalone server you must provide following two parameters
+  <br/> `--user`="login name here" `--apikey`="password here"
+* The ability to generate an archive for your source code OR a configured location in AIP Console where your source will
+  be saved/updated.
 
 ### Installation (and Update)
 
@@ -91,6 +94,9 @@ In that build step,
   * You can target a different AIP Console gateway by providing the associated URL and Api Key.
   * You can choose on which CSS Server you which to store your application' data
     ![create-app-advanced_settings](./doc/images/create-app-advanced_settings.png)
+    <br/>Format will be *host:port/databaseName*
+    <br/>as shown in the Database connection of global-configurations page
+    ![target-css_settings](doc/images/target-css_settings.png)
 
 The application will be created on AIP Console after you've run the Jenkins Job.
 **Important note**
@@ -105,6 +111,9 @@ snapshot of that analysis.
 * Checking the `Create Application if missing?` checkbox will automatically create the application AIP Console.
   You can specify a CSS server name where the application's data will be stored.
   ![Tareget-CSS-Server](./doc/images/Tareget-CSS-Server.png)
+  <br/>Format will be *host:port/databaseName*
+  <br/>as shown in the Database connection of global-configurations page
+  ![target-css_settings](doc/images/target-css_settings.png)
 
 * You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
   To do so, check the following option checkbox in the "advanced settings" section
@@ -142,6 +151,10 @@ The `Deliver Source Code to AIP Console` step is similar to the Add version step
 * Checking the `Create Application if missing?` checkbox will automatically create the application AIP Console.
   You can specify a CSS server name where the application's data will be stored.
   ![Tareget-CSS-Server](./doc/images/Tareget-CSS-Server.png)
+  <br/>Format will be *host:port/databaseName*
+  <br/>as shown in the Database connection of global-configurations page
+  ![target-css_settings](doc/images/target-css_settings.png)
+
 * You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
   To do so, check the following option checkbox in the "advanced settings" section
   ![blueprint_objective](./doc/images/blueprint_objective.png)
