@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
@@ -285,18 +286,25 @@ public class RestApiServiceImpl implements RestApiService {
         RequestBody body = HttpMethod.requiresRequestBody(method) ? getRequestBodyForEntity(entity) : null;
         Request.Builder requestBuilder = getRequestBuilder(endpoint)
                 .method(method, body);
-        // for v2, target node and caip version must be added as headers (if existing)
+
+        String caipVersion = null;
+        String targetNode = null;
         if (entity instanceof CreateJobsRequest) {
             CreateJobsRequest jobsRequest = (CreateJobsRequest) entity;
-            String caipVersion = jobsRequest.getParameterValueAsString(PARAM_CAIP_VERSION);
-            String targetNode = jobsRequest.getParameterValueAsString(PARAM_TARGET_NODE);
-            if(StringUtils.isNotEmpty(targetNode)) {
-                requestBuilder.addHeader(PARAM_CAIP_VERSION, "node:"+targetNode);
-            }else if (StringUtils.isNotEmpty(caipVersion)) {
-                requestBuilder.addHeader(PARAM_CAIP_VERSION, "caip:"+caipVersion);
-            }
+            caipVersion = jobsRequest.getParameterValueAsString(PARAM_CAIP_VERSION);
+            targetNode = jobsRequest.getParameterValueAsString(PARAM_TARGET_NODE);
             requestBuilder.method(method, getRequestBodyForEntityV2(jobsRequest));
+        } else if (entity instanceof CreateApplicationJobRequest) {
+            CreateApplicationJobRequest req = (CreateApplicationJobRequest) entity;
+            caipVersion = req.getCaipVersion();
+            targetNode = req.getTargetNode();
         }
+        if(StringUtils.isNotEmpty(targetNode)) {
+            requestBuilder.addHeader(PARAM_CAIP_VERSION, "node:"+targetNode);
+        }else if (StringUtils.isNotEmpty(caipVersion)) {
+            requestBuilder.addHeader(PARAM_CAIP_VERSION, "caip:"+caipVersion);
+        }
+
         log.fine(String.format("Executing call with method %s to endpoint %s", method, endpoint));
         log.finest("Entity is " + entity);
 
