@@ -1,5 +1,8 @@
 # AIP Automation Tools
 
+This documentation is only up to date for AIP Console tools 1.X. For AIP Consoel Tools 2.X please check here :
+[📄Link to AIP Console Tools 2.X version and documentation](https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/tree/v2)
+
 The AIP Automation tools are a couple of components to ease the automation of application analysis on AIP Console.
 
 It offers 2 main methods of automation:
