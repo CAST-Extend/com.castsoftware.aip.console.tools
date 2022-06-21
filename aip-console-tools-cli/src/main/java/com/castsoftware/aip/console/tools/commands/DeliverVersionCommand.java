@@ -249,7 +249,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
                 return Constants.RETURN_OK;
             } else {
                 log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getCurrentStep());
-                return Constants.RETURN_JOB_FAILED;
+                return jobStatus.getState() == JobState.CANCELED ? Constants.RETURN_JOB_CANCELED : Constants.RETURN_JOB_FAILED;
             }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

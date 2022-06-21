@@ -1,6 +1,5 @@
 package com.castsoftware.aip.console.tools.commands;
 
-import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
@@ -13,12 +12,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -105,7 +102,7 @@ public class CreateApplicationCommand implements Callable<Integer> {
             return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {
                     log.error("Creation of the application failed with status '{}'", jobDetails.getState());
-                    return Constants.RETURN_JOB_FAILED;
+                    return jobDetails.getState() == JobState.CANCELED ? Constants.RETURN_JOB_CANCELED : Constants.RETURN_JOB_FAILED;
                 }
                 log.info("Application '{}' created successfully:  GUID is '{}'", jobDetails.getAppName(), jobDetails.getAppGuid());
                 return Constants.RETURN_OK;
