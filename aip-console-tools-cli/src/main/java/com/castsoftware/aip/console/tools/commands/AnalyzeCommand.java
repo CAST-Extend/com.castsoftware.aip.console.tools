@@ -214,7 +214,7 @@ public class AnalyzeCommand implements Callable<Integer> {
             }
 
             log.error("Analysis did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getCurrentStep());
-            return Constants.RETURN_JOB_FAILED;
+            return jobStatus.getState() == JobState.CANCELED ? Constants.RETURN_JOB_CANCELED : Constants.RETURN_JOB_FAILED;
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         } catch (JobServiceException e) {

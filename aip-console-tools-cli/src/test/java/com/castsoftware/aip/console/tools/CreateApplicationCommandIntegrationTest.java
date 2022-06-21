@@ -2,7 +2,6 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.CreateApplicationCommand;
 import com.castsoftware.aip.console.tools.core.dto.DatabaseConnectionSettingsDto;
-import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -90,6 +89,30 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
         when(restApiService.getForEntity("api/settings/css-settings",DatabaseConnectionSettingsDto[].class))
                 .thenReturn(Arrays.array(oneDb));
         when(jobsService.startCreateApplication(any(String.class), eq(null), any(String.class), anyBoolean(), any(String.class), eq("b6059ea8-cec9-4e62-86a6-065def8ebb69"))).thenReturn(TestConstants.TEST_JOB_GUID);
+        when(jobsService.pollAndWaitForJobFinished(any(String.class), any(Function.class), anyBoolean())).thenReturn(Constants.RETURN_OK);
+
+        runStringArgs(createApplicationCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    @Test
+    public void testCreateApplicationCommand_SimplifiedDeliveryMode_DefaultNodeCanceled() throws JobServiceException {
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "-n", TestConstants.TEST_CREATRE_APP,
+                "--inplace-mode",
+                "--domain-name", TestConstants.TEST_DOMAIN};
+
+        // gives the existing application
+        JobExecutionDto jobStatus = new JobExecutionDto();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(JobState.CANCELED);
+        jobStatus.setCreatedDate(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+
+        when(jobsService.startCreateApplication(any(String.class), eq(null), any(String.class), anyBoolean(), any(String.class), eq(null))).thenReturn(TestConstants.TEST_JOB_GUID);
         when(jobsService.pollAndWaitForJobFinished(any(String.class), any(Function.class), anyBoolean())).thenReturn(Constants.RETURN_OK);
 
         runStringArgs(createApplicationCommand, args);

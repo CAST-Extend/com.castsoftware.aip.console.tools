@@ -182,4 +182,37 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
+
+    @Test
+    public void testAnalyzeCommand_JobCanceled() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
+        boolean verbose = true;
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "-S", "--process-imaging"};
+
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        //Set<VersionDto> versions =
+        VersionDto versionDto = new VersionDto();
+        versionDto.setName(TestConstants.TEST_VERSION_NAME);
+        versionDto.setStatus(VersionStatus.DELIVERED);
+        when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
+        when(jobsService.startJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
+        DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
+        when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
+        when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
+
+        JobExecutionDto jobStatus = new JobExecutionDto();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(JobState.CANCELED);
+        jobStatus.setCreatedDate(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
+
+        runStringArgs(analyzeCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_JOB_CANCELED));
+    }
 }
