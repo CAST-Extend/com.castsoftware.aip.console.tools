@@ -102,6 +102,14 @@ snapshot of that analysis.
   To do so, check the following option checkbox in the "advanced settings" section
 
   ![blueprint_objective](./doc/images/blueprint_objective.png)
+* You can also configure the step to customize either the exclusion patterns or the project exclusion rules.  
+  ![exclusioon-patterns-and-rules](./doc/images/exclusioon-patterns-and-rules.png)
+  Please keep in mind that
+
+- The patterns list is comma separated items
+- When dealing with the following exclusion rules the jeeFileDiscoverer extension should be operating  
+  ![jee-file-dicoverer-exclusion-rules](./doc/images/jee-file-dicoverer-exclusion-rules.png)
+
 * When a snapshot is available, you can optionally decide whether to publish the application to the Health Dashboard or
   not.
 
@@ -136,7 +144,18 @@ The `Deliver Source Code to AIP Console` step is similar to the Add version step
 * You can configure the step to optionaly add the *blueprint objective* to the exising objectives.  
   To do so, check the following option checkbox in the "advanced settings" section
   ![blueprint_objective](./doc/images/blueprint_objective.png)
-  
+* You can configure the step to optionally add the *blueprint objective* to the exising objectives.  
+  To do so, check the following option checkbox in the "advanced settings" section
+
+  ![blueprint_objective](./doc/images/blueprint_objective.png)
+* You can also configure the step to customize either the exclusion patterns or the project exclusion rules.  
+  ![exclusioon-patterns-and-rules](./doc/images/exclusioon-patterns-and-rules.png)
+  Please keep in mind that
+
+- The patterns list is comma separated items
+- When dealing with the following exclusion rules the jeeFileDiscoverer extension should be operating  
+  ![jee-file-dicoverer-exclusion-rules](./doc/images/jee-file-dicoverer-exclusion-rules.png)
+
 It requires the following :
 
 * An application name for which a new version will be created. <u>This application must exist in AIP Console</u>.

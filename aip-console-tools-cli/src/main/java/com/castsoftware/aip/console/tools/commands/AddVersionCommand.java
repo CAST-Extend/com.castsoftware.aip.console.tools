@@ -3,6 +3,8 @@ package com.castsoftware.aip.console.tools.commands;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -169,6 +171,13 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--module-option", description = "Generates a user defined module option forr either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno")
     private ModuleGenerationType moduleGenerationType;
 
+    @CommandLine.Option(names = {"-exclude", "--exclude-patterns"},
+            description = "File patterns(glob pattern) to exclude in the delivery, separated with comma")
+    private String exclusionPatterns;
+    @CommandLine.Option(names = {"--exclusion-rules"}, split = ",", type = ExclusionRuleType.class
+            , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
+    private ExclusionRuleType[] exclusionRules;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -233,7 +242,9 @@ public class AddVersionCommand implements Callable<Integer> {
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
-            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, null, cloneVersion);
+
+            Exclusions selectedExclusions = applicationService.buildExclusions(exclusionPatterns, exclusionRules);
+            String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, selectedExclusions, cloneVersion);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
             }

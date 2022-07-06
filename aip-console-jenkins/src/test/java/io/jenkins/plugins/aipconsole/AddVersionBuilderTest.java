@@ -105,6 +105,9 @@ public class AddVersionBuilderTest {
         config.setAipConsoleUrl(TEST_URL);
         config.setApiKey(Secret.fromString(TEST_KEY));
         addVersionBuilder = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
+        addVersionBuilder.setExcludeEmptyProjects(true);
+        addVersionBuilder.setExcludeDuplicateDotNetProjectInSameFolder(true);
+        addVersionBuilder.setExclusionPatterns("tmp/, *test, _Macosx/");
         MockitoAnnotations.initMocks(this);
         doReturn(ApiInfoDto.builder().apiVersion("1.12.0-DEV").build())
                 .when(restApiService).getAipConsoleApiInfo();
@@ -116,6 +119,9 @@ public class AddVersionBuilderTest {
         project = jenkins.configRoundtrip(project);
         AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
         job.setDomainName("");
+        job.setExcludeEmptyProjects(true);
+        job.setExcludeDuplicateDotNetProjectInSameFolder(true);
+        job.setExclusionPatterns("tmp/, *test, _Macosx/");
         job.setModuleGenerationType(ModuleGenerationType.FULL_CONTENT.toString());
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
@@ -129,6 +135,9 @@ public class AddVersionBuilderTest {
         AddVersionBuilder job = new AddVersionBuilder(TEST_APP_NAME, TEST_ARCHIVE_NAME);
         job.setApiKey(Secret.fromString("Z-Y-X"));
         job.setAipConsoleUrl(addVersionBuilder.getDescriptor().getAipConsoleUrl());
+        job.setExcludeEmptyProjects(true);
+        job.setExcludeDuplicateDotNetProjectInSameFolder(true);
+        job.setExclusionPatterns("tmp/, *test, _Macosx/");
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
 
