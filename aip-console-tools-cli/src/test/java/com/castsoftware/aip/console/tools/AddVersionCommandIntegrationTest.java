@@ -285,6 +285,48 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         runStringArgs(addVersionCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
+        List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
         assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
+    }
+
+    @Test
+    public void testAddVersionCommand_WithVersionDate() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
+        String versionDateString = "2022-07-11T07:22:46";
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "-f", zippedSourcesPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--domain-name", TestConstants.TEST_DOMAIN,
+                "--node-name", TestConstants.TEST_NODE
+                , "--process-imaging=false", "--snapshot-name", "SNAP-NAME"
+                , "-date", versionDateString
+        };
+
+        // gives the existing application
+        when(applicationService.getOrCreateApplicationFromName(any(String.class), anyBoolean(), any(String.class), any(String.class), eq(null), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
+        when(applicationService.getApplicationFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
+
+        when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
+        when(applicationService.applicationHasVersion(TestConstants.TEST_APP_GUID)).thenReturn(false);
+        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), Exclusions.builder().build(), false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
+        when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
+        DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
+        when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
+        when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
+
+        JobExecutionDto jobStatus = new JobExecutionDto();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(JobState.COMPLETED);
+        jobStatus.setCreatedDate(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        when(applicationService.getVersionDate(versionDateString)).thenReturn(new Date(1657516966000L));
+        when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
+
+        runStringArgs(addVersionCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_OK));
     }
 }

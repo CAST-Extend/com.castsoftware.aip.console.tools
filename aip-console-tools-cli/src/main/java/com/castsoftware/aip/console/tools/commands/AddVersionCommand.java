@@ -83,6 +83,10 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION_NAME", description = "The name of the version to create")
     private String versionName;
 
+    @CommandLine.Option(names = {"-date", "--version-date"},
+            description = "The version date associated with the version to be create: the expected format is \"yyyy-MM-ddTHH:mm:ss\"")
+    private String versionDateString;
+
     @CommandLine.Option(names = "--snapshot-name", paramLabel = "SNAPSHOT_NAME", description = "The name of the snapshot to generate")
     private String snapshotName;
     /**
@@ -224,7 +228,8 @@ public class AddVersionCommand implements Callable<Integer> {
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion())
                     .nodeName(app.getTargetNode())
                     .versionName(versionName)
-                    .releaseAndSnapshotDate(new Date())
+                    .versionReleaseDate(applicationService.getVersionDate(versionDateString))
+                    .snapshotDate(new Date())
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)

@@ -73,6 +73,10 @@ public class DeliverVersionCommand implements Callable<Integer> {
             description = "The name of the version to create")
     private String versionName;
 
+    @CommandLine.Option(names = {"-date", "--version-date"},
+            description = "The version date associated with the version to be create: the expected format is \"yyyy-MM-ddTHH:mm:ss\"")
+    private String versionDateString;
+
     // Hiding this, to avoid breaking commands already using it
     // Analyze command will automatically set as current when starting so it's unnecessary
     @CommandLine.Option(names = {"-d", "--auto-deploy"},
@@ -216,7 +220,8 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion())
                     .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
                     .versionName(versionName)
-                    .releaseAndSnapshotDate(new Date())
+                    .versionReleaseDate(applicationService.getVersionDate(versionDateString))
+                    .snapshotDate(new Date())
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)

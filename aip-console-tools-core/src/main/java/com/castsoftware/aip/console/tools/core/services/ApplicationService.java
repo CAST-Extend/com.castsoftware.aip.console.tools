@@ -10,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 
+import java.util.Date;
 import java.util.Set;
 
 public interface ApplicationService {
@@ -21,6 +22,8 @@ public interface ApplicationService {
     ApplicationDto getApplicationFromGuid(String applicationGuid) throws ApplicationServiceException;
 
     ApplicationDto getApplicationFromName(String applicationName) throws ApplicationServiceException;
+
+    Date getVersionDate(String versionDateString) throws ApplicationServiceException;
 
     /**
      * Checks whether the application has any versions
