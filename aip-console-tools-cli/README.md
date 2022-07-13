@@ -179,12 +179,16 @@ The available options are :
 * `--css-server` or `-css` (optional): Server name where the application data will be stored.
 * `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this
   new version. This is the default behaviour when no version exists for the given application.
-* `--version-name` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date
+* `--version-name` or `-v` (option): The name of the version to be created. default: `vYYMMDD.hhmmss`, based on current
+  date
   and time when `--version-date` not provided.
 * `--version-date` or `-date` (option): The version date associated with the version to be create: default
   format `yyyy-MM-ddTHH:mm:ss`. <br>Depending on Console 's timezone, this can be displayed differently
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--snapshot-name` (option) The name of the snapshot to generate, default will be based on the date and time
+  when `--snapshot-date` not provided
+* `--snapshot-date` (option): The snapshot date associated with the snapshot to be created: default
+  format `yyyy-MM-ddTHH:mm:ss`. <br>Depending on Console 's timezone, this can be displayed differently
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
   when cloning a version</u>.
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.

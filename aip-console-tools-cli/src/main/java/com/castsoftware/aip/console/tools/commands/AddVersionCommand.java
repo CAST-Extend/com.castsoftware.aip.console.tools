@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -89,6 +88,9 @@ public class AddVersionCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = "--snapshot-name", paramLabel = "SNAPSHOT_NAME", description = "The name of the snapshot to generate")
     private String snapshotName;
+    @CommandLine.Option(names = {"--snapshot-date"},
+            description = "The snapshot date associated with the snapshot to be create: the expected format is \"yyyy-MM-ddTHH:mm:ss\"")
+    private String snapshotDateString;
     /**
      * Disable cloning previous version automatically.
      */
@@ -229,7 +231,7 @@ public class AddVersionCommand implements Callable<Integer> {
                     .nodeName(app.getTargetNode())
                     .versionName(versionName)
                     .versionReleaseDate(applicationService.getVersionDate(versionDateString))
-                    .snapshotDate(new Date())
+                    .snapshotDate(applicationService.getVersionDate(snapshotDateString))
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
