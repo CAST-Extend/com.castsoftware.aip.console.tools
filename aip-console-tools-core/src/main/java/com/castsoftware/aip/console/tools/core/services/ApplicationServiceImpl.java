@@ -10,7 +10,6 @@ import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.JsonDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
-import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
@@ -28,11 +27,12 @@ import lombok.extern.java.Log;
 import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -89,6 +89,20 @@ public class ApplicationServiceImpl implements ApplicationService {
         Set<VersionDto> appVersions = getApplicationVersion(applicationGuid);
         return appVersions != null &&
                 !appVersions.isEmpty();
+    }
+
+    @Override
+    public Date getVersionDate(String versionDateString) throws ApplicationServiceException {
+        if (StringUtils.isEmpty(versionDateString)) {
+            return new Date();
+        } else {
+            try {
+                return JobRequestBuilder.RELEASE_DATE_FORMATTER.parse(versionDateString + ".000Z");
+            } catch (ParseException e) {
+                log.log(Level.SEVERE, "Version release date doesn't match the expected date format");
+                throw new ApplicationServiceException("Version release date doesn't match the expected date format", e);
+            }
+        }
     }
 
     @Override

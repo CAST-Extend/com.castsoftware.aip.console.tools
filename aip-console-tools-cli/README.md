@@ -179,17 +179,33 @@ The available options are :
 * `--css-server` or `-css` (optional): Server name where the application data will be stored.
 * `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this
   new version. This is the default behaviour when no version exists for the given application.
-* `--version-name` or `-v` (option): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
+* `--version-name` or `-v` (option): The name of the version to be created. default: `vYYMMDD.hhmmss`, based on current
+  date
+  and time when `--version-date` not provided.
+* `--version-date` or `-date` (option): The version date associated with the version to be create: default
+  format `yyyy-MM-ddTHH:mm:ss` (example `2022-07-11T07:22:46`). <br>Depending on Console 's timezone, this can be
+  displayed differently
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--snapshot-name` (option) The name of the snapshot to generate, default will be based on the date and time
-* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
+  when `--snapshot-date` not provided
+* `--snapshot-date` (option): The snapshot date associated with the snapshot to be created: default
+  format `yyyy-MM-ddTHH:mm:ss` (example `2022-07-11T07:22:46`). <br>Depending on Console 's timezone, this can be
+  displayed differently
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
+  when cloning a version</u>.
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
-* `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:
-* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
-* `--domain-name` (optional) : specify a domain name to associate with the application to create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default*: No domain is set for the application.
+* `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *
+  default*:
+* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect
+  if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by
+  AIP Console
+* `--domain-name` (optional) : specify a domain name to associate with the application to create. <u>Has no effect
+  if `--auto-create` is not passed or if application has already been created</u>. *default*: No domain is set for the
+  application.
 * `--server-url` or `-s` : Specify the URL to your AIP Console server. *default* : localhost:8081
-* `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--apikey` or `--apikey:env` (either is required) : the API Key to log in to AIP Console **OR** the environment
+  variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
 * `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
   parameter</u>. *default* : none
@@ -216,7 +232,9 @@ The available options are :
 * `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this
   new version. This is the default behaviour when no version exists for the given application.
 * `--version-name` or `-v` (optional): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current
-  date and time.
+  date and time when `--version-date` not provided.
+* `--version-date` or `-date` (option): The version date associated with the version to be created: default
+  format `yyyy-MM-ddTHH:mm:ss`. <br>Depending on Console 's timezone, this can be displayed differently
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--exclude-patterns` or `-exclude`: File patterns to exclude in the delivery, the pattern needs to follow the syntax
   of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
@@ -279,7 +297,11 @@ The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
 * `--version-name` or `-v` (optional): The name of the version to create. *default*: The current version (version marked as current).
-* `--snapshot-name` or `-S` (optional): Used to specify the snapshot name. *default*: Defaults to `Snapshot-YYYY-MM-DDThh-mm-ss` (based on the current date and time)
+* `--snapshot-name` or `-S` (optional): Used to specify the snapshot name. *default*: Defaults
+  to `Snapshot-YYYY-MM-DDThh-mm-ss` (based on the current date and time)
+* `--snapshot-date` (option): The snapshot date associated with the snapshot to be created: default
+  format `yyyy-MM-ddTHH:mm:ss` (example `2022-07-11T07:22:46`). <br>Depending on Console 's timezone, this can be
+  displayed differently
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081

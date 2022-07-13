@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -83,8 +82,15 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-v", "--version-name"}, paramLabel = "VERSION_NAME", description = "The name of the version to create")
     private String versionName;
 
+    @CommandLine.Option(names = {"-date", "--version-date"},
+            description = "The version date associated with the version to be create: the expected format is \"yyyy-MM-ddTHH:mm:ss\"")
+    private String versionDateString;
+
     @CommandLine.Option(names = "--snapshot-name", paramLabel = "SNAPSHOT_NAME", description = "The name of the snapshot to generate")
     private String snapshotName;
+    @CommandLine.Option(names = {"--snapshot-date"},
+            description = "The snapshot date associated with the snapshot to be create: the expected format is \"yyyy-MM-ddTHH:mm:ss\"")
+    private String snapshotDateString;
     /**
      * Disable cloning previous version automatically.
      */
@@ -224,7 +230,8 @@ public class AddVersionCommand implements Callable<Integer> {
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion())
                     .nodeName(app.getTargetNode())
                     .versionName(versionName)
-                    .releaseAndSnapshotDate(new Date())
+                    .versionReleaseDate(applicationService.getVersionDate(versionDateString))
+                    .snapshotDate(applicationService.getVersionDate(snapshotDateString))
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)

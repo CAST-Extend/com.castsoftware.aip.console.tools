@@ -69,6 +69,9 @@ public class SnapshotCommand implements Callable<Integer> {
             paramLabel = "SNAPSHOT_NAME",
             description = "The name of the snapshot to create")
     private String snapshotName;
+    @CommandLine.Option(names = {"--snapshot-date"},
+            description = "The snapshot date associated with the snapshot to be create: the expected format is \"yyyy-MM-ddTHH:mm:ss\"")
+    private String snapshotDateString;
 
     @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging"
             + " if specified without parameter: ${FALLBACK-VALUE}",
@@ -160,7 +163,7 @@ public class SnapshotCommand implements Callable<Integer> {
                     .versionName(foundVersion.getName())
                     .snapshotName(snapshotName)
                     .uploadApplication(true)
-                    .releaseAndSnapshotDate(new Date())
+                    .snapshotDate(applicationService.getVersionDate(snapshotDateString))
                     .processImaging(processImaging)
                     .uploadApplication(forcedConsolidation)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
