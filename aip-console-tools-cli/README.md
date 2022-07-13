@@ -183,12 +183,14 @@ The available options are :
   date
   and time when `--version-date` not provided.
 * `--version-date` or `-date` (option): The version date associated with the version to be create: default
-  format `yyyy-MM-ddTHH:mm:ss`. <br>Depending on Console 's timezone, this can be displayed differently
+  format `yyyy-MM-ddTHH:mm:ss` (example `2022-07-11T07:22:46`). <br>Depending on Console 's timezone, this can be
+  displayed differently
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--snapshot-name` (option) The name of the snapshot to generate, default will be based on the date and time
   when `--snapshot-date` not provided
 * `--snapshot-date` (option): The snapshot date associated with the snapshot to be created: default
-  format `yyyy-MM-ddTHH:mm:ss`. <br>Depending on Console 's timezone, this can be displayed differently
+  format `yyyy-MM-ddTHH:mm:ss` (example `2022-07-11T07:22:46`). <br>Depending on Console 's timezone, this can be
+  displayed differently
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
   when cloning a version</u>.
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
