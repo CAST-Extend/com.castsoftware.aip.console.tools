@@ -233,7 +233,7 @@ The available options are :
   new version. This is the default behaviour when no version exists for the given application.
 * `--version-name` or `-v` (optional): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current
   date and time when `--version-date` not provided.
-* `--version-date` or `-date` (option): The version date associated with the version to be create: default
+* `--version-date` or `-date` (option): The version date associated with the version to be created: default
   format `yyyy-MM-ddTHH:mm:ss`. <br>Depending on Console 's timezone, this can be displayed differently
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--exclude-patterns` or `-exclude`: File patterns to exclude in the delivery, the pattern needs to follow the syntax
@@ -297,7 +297,11 @@ The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
 * `--version-name` or `-v` (optional): The name of the version to create. *default*: The current version (version marked as current).
-* `--snapshot-name` or `-S` (optional): Used to specify the snapshot name. *default*: Defaults to `Snapshot-YYYY-MM-DDThh-mm-ss` (based on the current date and time)
+* `--snapshot-name` or `-S` (optional): Used to specify the snapshot name. *default*: Defaults
+  to `Snapshot-YYYY-MM-DDThh-mm-ss` (based on the current date and time)
+* `--snapshot-date` (option): The snapshot date associated with the snapshot to be created: default
+  format `yyyy-MM-ddTHH:mm:ss` (example `2022-07-11T07:22:46`). <br>Depending on Console 's timezone, this can be
+  displayed differently
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
