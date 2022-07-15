@@ -83,13 +83,13 @@ public class AddVersionCommand implements Callable<Integer> {
     private String versionName;
 
     @CommandLine.Option(names = {"-date", "--version-date"},
-            description = "The version date associated with the version to be create: the expected format is \"yyyy-MM-ddTHH:mm:ss\"")
+            description = "The version date associated with the version to be create: the expected format is \"yyyy-MM-dd HH:mm:ss\"")
     private String versionDateString;
 
     @CommandLine.Option(names = "--snapshot-name", paramLabel = "SNAPSHOT_NAME", description = "The name of the snapshot to generate")
     private String snapshotName;
     @CommandLine.Option(names = {"--snapshot-date"},
-            description = "The snapshot date associated with the snapshot to be create: the expected format is \"yyyy-MM-ddTHH:mm:ss\"")
+            description = "The snapshot date associated with the snapshot to be create: the expected format is \"yyyy-MM-dd HH:mm:ss\"")
     private String snapshotDateString;
     /**
      * Disable cloning previous version automatically.

@@ -74,7 +74,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
     private String versionName;
 
     @CommandLine.Option(names = {"-date", "--version-date"},
-            description = "The version date associated with the version to be create: the expected format is \"yyyy-MM-ddTHH:mm:ss\"")
+            description = "The version date associated with the version to be create: the expected format is \"yyyy-MM-dd HH:mm:ss\"")
     private String versionDateString;
 
     // Hiding this, to avoid breaking commands already using it

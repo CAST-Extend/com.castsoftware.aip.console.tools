@@ -28,6 +28,8 @@ import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -97,7 +99,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             return new Date();
         } else {
             try {
-                return JobRequestBuilder.RELEASE_DATE_FORMATTER.parse(versionDateString + ".000Z");
+                Date cliDate = JobRequestBuilder.CLI_RELEASE_DATE_FORMATTER.parse(versionDateString);
+                Instant instant = cliDate.toInstant();
+                return JobRequestBuilder.RELEASE_DATE_FORMATTER.parse(instant.plus(1L, ChronoUnit.MILLIS).toString());
             } catch (ParseException e) {
                 log.log(Level.SEVERE, "Version release date doesn't match the expected date format");
                 throw new ApplicationServiceException("Version release date doesn't match the expected date format", e);
