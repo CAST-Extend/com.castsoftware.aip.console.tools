@@ -9,6 +9,7 @@ SET DOMAIN_NAME=%~6
 SET CSS=%~7
 set TOOLS_EXTENSION=com.castsoftware.aip.console.tools
 set EXTEND_URL=https://extend.castsoftware.com
+set PATH=C:\CAST-Caches\Win64;%PATH%
 
 REM EXAMPLE
 REM create-application-integ-test.bat "download folder" "http://machine.corp.castsoftware.com:8081" "LPZ5i8lJ.5dKr2Y4e39cVIJ70rJETgG0sY29C2ElH" "WEBITOOLS-102-Test-App" false "TOOLS-CLI-TEST_DOM"
@@ -41,6 +42,10 @@ echo.
 
 curl -X GET "%EXTEND_URL%/api/package/download/%TOOLS_EXTENSION%/%TOOLS_VERSION%" -H "x-nuget-apikey: %EXTEND_API_KEY%" --output %TOOLSDIR%\%TOOLS_EXTENSION%.zip
 if errorlevel 1 goto endclean
+
+pushd %TOOLSDIR%
+7z.exe x -y -o. %TOOLS_EXTENSION%.zip
+popd
 
 echo -- Create Application command --
 echo java -jar aip-console-tools-cli.jar CreateApplication --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
