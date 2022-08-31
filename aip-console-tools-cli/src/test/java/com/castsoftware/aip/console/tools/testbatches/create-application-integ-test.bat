@@ -44,7 +44,7 @@ curl -X GET "%EXTEND_URL%/api/package/download/%TOOLS_EXTENSION%/%TOOLS_VERSION%
 if errorlevel 1 goto endclean
 
 pushd %TOOLSDIR%
-7z.exe x -y -o. %TOOLS_EXTENSION%.zip
+7z.exe x "%TOOLS_EXTENSION%.zip" -y -o "%TOOLS_EXTENSION%"
 popd
 
 echo -- Create Application command --
