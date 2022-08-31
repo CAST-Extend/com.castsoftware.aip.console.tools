@@ -45,7 +45,7 @@ if errorlevel 1 goto endclean
 
 echo ----------------------------
 echo Unzip the downloaded extension
-echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o "%TOOLSDIR%\%TOOLS_EXTENSION%"
+echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o. "%TOOLSDIR%\%TOOLS_EXTENSION%"
 echo ----------------------------
 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o "%TOOLSDIR%\%TOOLS_EXTENSION%"
 
