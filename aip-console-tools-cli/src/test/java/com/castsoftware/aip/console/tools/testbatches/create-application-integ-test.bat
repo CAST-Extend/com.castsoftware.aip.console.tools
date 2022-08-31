@@ -47,7 +47,7 @@ echo ----------------------------
 echo Unzip the downloaded extension
 echo 7z.exe x -y -o. "%TOOLSDIR%\%TOOLS_EXTENSION%.zip"
 echo ----------------------------
-7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o. "%TOOLSDIR%\%TOOLS_EXTENSION%"
+7z.exe x -y -o. "%TOOLSDIR%\%TOOLS_EXTENSION%.zip"
 
 echo -- Create Application command --
 echo java -jar aip-console-tools-cli.jar CreateApplication --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
