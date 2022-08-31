@@ -43,6 +43,10 @@ echo.
 curl -X GET "%EXTEND_URL%/api/package/download/%TOOLS_EXTENSION%/%TOOLS_VERSION%" -H "x-nuget-apikey: %EXTEND_API_KEY%" --output %TOOLSDIR%\%TOOLS_EXTENSION%.zip
 if errorlevel 1 goto endclean
 
+echo ----------------------------
+echo Unzip the downloaded extension
+echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o "%TOOLSDIR%\%TOOLS_EXTENSION%"
+echo ----------------------------
 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o "%TOOLSDIR%\%TOOLS_EXTENSION%"
 
 echo -- Create Application command --
