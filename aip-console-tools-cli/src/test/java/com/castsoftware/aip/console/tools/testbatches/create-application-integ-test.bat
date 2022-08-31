@@ -1,12 +1,11 @@
 @echo off
 REM -- Create Application --
-SET TOOLS_CLI_PATH=%~1
-SET SERVER_URL=%~2
-SET API_KEY=%~3
-SET APP_NAME=%~4
-SET IN_PLACE_MODE=%~5
-SET DOMAIN_NAME=%~6
-SET CSS=%~7
+SET SERVER_URL=%~1
+SET API_KEY=%~2
+SET APP_NAME=%~3
+SET IN_PLACE_MODE=%~4
+SET DOMAIN_NAME=%~5
+SET CSS=%~6
 set TOOLS_EXTENSION=com.castsoftware.aip.console.tools
 set EXTEND_URL=https://extend.castsoftware.com
 set PATH=C:\CAST-Caches\Win64;%PATH%
@@ -49,6 +48,7 @@ echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSI
 echo ----------------------------
 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
 
+SET TOOLS_CLI_PATH=%TOOLSDIR%\%TOOLS_EXTENSION%
 echo -- Create Application command --
 echo java -jar aip-console-tools-cli.jar CreateApplication --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
 --app-name="%APP_NAME%" --verbose=false ^
