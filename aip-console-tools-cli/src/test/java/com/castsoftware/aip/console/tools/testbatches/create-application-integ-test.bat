@@ -43,9 +43,7 @@ echo.
 curl -X GET "%EXTEND_URL%/api/package/download/%TOOLS_EXTENSION%/%TOOLS_VERSION%" -H "x-nuget-apikey: %EXTEND_API_KEY%" --output %TOOLSDIR%\%TOOLS_EXTENSION%.zip
 if errorlevel 1 goto endclean
 
-pushd %TOOLSDIR%
-7z.exe x "%TOOLS_EXTENSION%.zip" -y -o "%TOOLS_EXTENSION%"
-popd
+7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o "%TOOLSDIR%\%TOOLS_EXTENSION%"
 
 echo -- Create Application command --
 echo java -jar aip-console-tools-cli.jar CreateApplication --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
