@@ -30,17 +30,13 @@ for %%a in (TOOLS_VERSION EXTEND_API_KEY) do (
 if not defined TOOLSDIR (
 	set TOOLSDIR=%WORKSPACE%\bin
 )
-echo -- Creating %TOOLSDIR% folder --
-if exist %TOOLSDIR% rmdir /S/Q %TOOLSDIR%
-mkdir %TOOLSDIR%
 
-echo ================================
-echo -------- Downloading extension from CAST Extend... -----------
-echo %TOOLS_EXTENSION% with version %TOOLS_VERSION%
-echo.
-
-curl -X GET "%EXTEND_URL%/api/package/download/%TOOLS_EXTENSION%/%TOOLS_VERSION%" -H "x-nuget-apikey: %EXTEND_API_KEY%" --output %TOOLSDIR%\%TOOLS_EXTENSION%.zip
-if errorlevel 1 goto endclean
+if not exist %TOOLSDIR%\%TOOLS_EXTENSION%.zip (
+    @echo.
+    @echo ERROR : %TOOLSDIR%\%TOOLS_EXTENSION%.zip file should be downloaded from DEV Build job ...
+    @echo.
+    exit /b -1
+)
 
 echo ----------------------------
 echo Unzip the downloaded extension
