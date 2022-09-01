@@ -18,15 +18,6 @@ if not "%DOMAIN_NAME%" == "" SET MORE_OPTIONS=--domain-name="%DOMAIN_NAME%"
 if not "%IN_PLACE_MODE%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --no-version-history=%IN_PLACE_MODE%
 if not "%CSS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --css-server=%CSS%
 
-for %%a in (TOOLS_VERSION EXTEND_API_KEY) do (
-	if not defined %%a (
-			@echo.
-			@echo ERROR : Environment variable %%a should exist as environment var...
-			@echo.
-			exit /b 1
-	)
-)
-
 if not defined TOOLSDIR (
 	set TOOLSDIR=%WORKSPACE%\bin
 )
