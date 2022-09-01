@@ -36,6 +36,7 @@ for %%a in ( SOURCES_ZIP TOOLSDIR ) do (
 )
 
 echo -- Delivers a new version to AIP Console --
+echo OPTIONS= %MORE_OPTIONS%
 echo --------------------------------
 SET TOOLS_CLI_PATH=%TOOLSDIR%\%TOOLS_EXTENSION%
 CD /d "%TOOLS_CLI_PATH%"
