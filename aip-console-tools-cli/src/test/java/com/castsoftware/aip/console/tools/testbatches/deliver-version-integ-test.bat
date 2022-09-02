@@ -22,9 +22,10 @@ if not "%CSS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --css-server=%CSS%
 
 REM Add all boolean
 if "%CLONE_VERSION%" == "false" SET MORE_OPTIONS=%MORE_OPTIONS% --create-new-version
+if "%CLONE_VERSION%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS%
 if "%SET_AS_CURRENT%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --set-as-current
 SET MORE_OPTIONS=%MORE_OPTIONS% --backup=%BACKUP% --enable-security-assessment=%SECURITY_ASSESSMENT% --enable-security-dataflow=%SECURITY_DATAFLOW%
-SET MORE_OPTIONS=%MORE_OPTIONS% --blueprint=%BLUEPRINT% --auto-create=%AUTO_CREATE% %CLONE_VERSION% --auto-discover=%AUTO_DISCOVER%
+SET MORE_OPTIONS=%MORE_OPTIONS% --blueprint=%BLUEPRINT% --auto-create=%AUTO_CREATE%  --auto-discover=%AUTO_DISCOVER%
 
 for %%a in ( SOURCES_ZIP TOOLSDIR ) do (
 	if not defined %%a (
@@ -34,9 +35,17 @@ for %%a in ( SOURCES_ZIP TOOLSDIR ) do (
 			exit /b 1
 	)
 )
+echo ----------------------------
+echo Unzip the downloaded build artifact
+echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
+echo ----------------------------
+7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
 
 echo -- Delivers a new version to AIP Console --
 echo OPTIONS= %MORE_OPTIONS%
+echo java -jar aip-console-tools-cli.jar deliver --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
+     	--app-name="%APP_NAME%" --file="%SOURCES_ZIP%" --verbose=false ^
+     	%MORE_OPTIONS%
 echo --------------------------------
 SET TOOLS_CLI_PATH=%TOOLSDIR%\%TOOLS_EXTENSION%
 CD /d "%TOOLS_CLI_PATH%"
