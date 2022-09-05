@@ -95,7 +95,7 @@ public class AnalyzeCommand implements Callable<Integer> {
             defaultValue = "true", fallbackValue = "true")
     private boolean consolidation = true;
 
-    @CommandLine.Option(names = "--module-option", description = "Generates a user defined module option forr either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno")
+    @CommandLine.Option(names = "--module-option", description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno")
     private ModuleGenerationType moduleGenerationType;
 
     public AnalyzeCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {

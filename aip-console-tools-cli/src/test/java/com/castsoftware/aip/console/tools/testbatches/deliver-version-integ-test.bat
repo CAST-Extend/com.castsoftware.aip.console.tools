@@ -1,5 +1,5 @@
 @echo off
-REM -- Create Application --
+REM -- deliver version to existing Application --
 SET SERVER_URL=%~1
 SET API_KEY=%~2
 SET APP_NAME=%~3
