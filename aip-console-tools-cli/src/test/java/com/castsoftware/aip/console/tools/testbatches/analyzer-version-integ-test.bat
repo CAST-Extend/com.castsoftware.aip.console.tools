@@ -4,6 +4,9 @@ SET SERVER_URL=%~1
 SET API_KEY=%~2
 SET APP_NAME=%~3
 SET VERSION_NAME=%~4
+set TOOLS_EXTENSION=com.castsoftware.aip.console.tools
+set EXTEND_URL=https://extend.castsoftware.com
+set PATH=C:\CAST-Caches\Win64;%PATH%
 
 REM EXAMPLE
 REM call "analyzer-version-integ-test.bat" "server-url" "api-key" "app-name" "version-name"
@@ -18,7 +21,7 @@ if "%PROCESS_IMAGING%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --process-imagi
 if "%WITH_SNAPSHOT%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --snapshot
 
 
-for %%a in ( VERSION_NAME APP_NAME ) do (
+for %%a in ( VERSION_NAME APP_NAME TOOLSDIR) do (
 	if not defined %%a (
 			@echo.
 			@echo ERROR : Environment variable %%a should exist as environment var...
