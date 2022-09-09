@@ -44,7 +44,7 @@ echo ----------------------------
 echo -- Delivers a new version to AIP Console --
 echo OPTIONS= %MORE_OPTIONS%
 echo java -jar aip-console-tools-cli.jar deliver --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
-     	--app-name="%APP_NAME%" --file="%SOURCES_ZIP%" --verbose=false ^
+     	--app-name="%APP_NAME%" --file="%SOURCES_ZIP%" --verbose=%VERBOSE% ^
      	%MORE_OPTIONS%
 echo --------------------------------
 SET TOOLS_CLI_PATH=%TOOLSDIR%\%TOOLS_EXTENSION%

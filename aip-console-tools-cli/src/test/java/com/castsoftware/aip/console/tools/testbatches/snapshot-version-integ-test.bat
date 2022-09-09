@@ -42,7 +42,7 @@ SET TOOLS_CLI_PATH=%TOOLSDIR%\%TOOLS_EXTENSION%
 CD /d "%TOOLS_CLI_PATH%"
 
 java -jar aip-console-tools-cli.jar snapshot --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
-	--app-name="%APP_NAME%" --version-name="%VERSION_NAME%" --snapshot-name="%SNAPSHOT_NAME%" --verbose=false ^
+	--app-name="%APP_NAME%" --version-name="%VERSION_NAME%" --snapshot-name="%SNAPSHOT_NAME%" --verbose=%VERBOSE% ^
 	%MORE_OPTIONS% 
 	
 echo exit code=%errorlevel%	
