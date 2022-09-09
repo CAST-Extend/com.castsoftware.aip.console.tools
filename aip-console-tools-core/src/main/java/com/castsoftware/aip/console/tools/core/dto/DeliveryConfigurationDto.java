@@ -15,6 +15,6 @@ import java.util.Set;
 public class DeliveryConfigurationDto {
     private String guid;
     private Set<String> ignorePatterns;
-    private Set<ExclusionRuleType> exclusionRules;
+    private Set<ExclusionRuleDto> exclusionRules;
     private Set<DeliveryPackageDto> packages;
 }

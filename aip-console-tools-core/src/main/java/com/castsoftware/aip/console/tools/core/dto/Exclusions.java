@@ -15,7 +15,11 @@ public class Exclusions {
     @Builder.Default
     private String excludePatterns = null;
     @Builder.Default
-    private Set<ExclusionRuleType> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
+    private Set<ExclusionRuleDto> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
+
+    public void setInitialExclusionRules(ExclusionRuleType[] rules) {
+        exclusionRules = Arrays.stream(rules).map(ExclusionRuleDto::new).collect(Collectors.toSet());
+    }
 
     public static Set<String> getDefaultIgnorePatterns() {
         return Arrays.stream(new String[]{"tmp/", "temp/", "*test", "tests", "target/", ".svn/", ".git/", "_Macosx/"}).collect(Collectors.toSet());
