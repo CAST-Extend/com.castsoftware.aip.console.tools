@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public enum ExclusionRuleType {
     EXCLUDE_EMPTY_PROJECTS,
@@ -17,13 +18,13 @@ public enum ExclusionRuleType {
     EXCLUDE_ECLIPSE_PROJECT_WITH_DUPLICATED_NAME,
     EXCLUDE_DUPLICATE_DOT_NET_PROJECT_IN_SAME_FOLDER,
     EXCLUDE_TEST_CODE;
-    
+
     @JsonCreator
     public static ExclusionRuleType fromString(String value) {
         return StringUtils.isEmpty(value) ? null : ExclusionRuleType.valueOf(value.toUpperCase());
     }
 
-    public static Set<ExclusionRuleType> getDefaultExclusionRules() {
-        return EnumSet.complementOf(EnumSet.of(ExclusionRuleType.PREFER_ECLIPSE_TO_MAVEN));
+    public static Set<ExclusionRuleDto> getDefaultExclusionRules() {
+        return EnumSet.complementOf(EnumSet.of(ExclusionRuleType.PREFER_ECLIPSE_TO_MAVEN)).stream().map(ExclusionRuleDto::new).collect(Collectors.toSet());
     }
 }
