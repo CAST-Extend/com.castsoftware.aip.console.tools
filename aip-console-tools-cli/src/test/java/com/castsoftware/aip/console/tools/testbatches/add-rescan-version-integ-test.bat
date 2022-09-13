@@ -23,8 +23,6 @@ if not "%CSS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --css-server=%CSS%
 if not "%SNAPSHOT_NAME%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --snapshot-name="%SNAPSHOT_NAME%"
 
 REM Add all boolean
-if "%CLONE_VERSION%" == "false" SET MORE_OPTIONS=%MORE_OPTIONS% --create-new-version
-if "%CLONE_VERSION%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS%
 SET MORE_OPTIONS=%MORE_OPTIONS% --backup=%BACKUP% --enable-security-assessment=%SECURITY_ASSESSMENT% --enable-security-dataflow=%SECURITY_DATAFLOW%
 SET MORE_OPTIONS=%MORE_OPTIONS% --blueprint=%BLUEPRINT% --auto-create=%AUTO_CREATE%
 if "%PROCESS_IMAGING%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --process-imaging
