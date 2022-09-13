@@ -18,10 +18,9 @@ if not "%VERSION_NAME%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --version-name="%V
 if "%SHOW_SQL%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --show-sql
 if "%AMT_PROFILING%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --amt-profiling"
 if not "%VERSION_DATE%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --version-date="%VERSION_DATE%"
-if not "%EXCLUSION_PATTERNS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclude-patterns="%EXCLUSION_PATTERNS%"
-if not "%EXCLUSION_RULES%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclusion-rules="%EXCLUSION_RULES%"
 if not "%BACKUP_NAME%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --backup-name="%BACKUP_NAME%"
 if not "%CSS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --css-server=%CSS%
+if not "%SNAPSHOT_NAME%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --snapshot-name="%SNAPSHOT_NAME%"
 
 REM Add all boolean
 if "%CLONE_VERSION%" == "false" SET MORE_OPTIONS=%MORE_OPTIONS% --create-new-version
