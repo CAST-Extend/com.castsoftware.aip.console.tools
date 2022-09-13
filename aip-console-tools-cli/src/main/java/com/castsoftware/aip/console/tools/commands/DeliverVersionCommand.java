@@ -27,12 +27,10 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Deliver an application version on AIP Console
@@ -236,7 +234,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
             builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
             Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
             if (exclusionRules != null && exclusionRules.length > 0) {
-                exclusions.setExclusionRules(Arrays.stream(exclusionRules).collect(Collectors.toSet()));
+                exclusions.setInitialExclusionRules(exclusionRules);
             }
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, exclusions, cloneVersion);
             log.info("delivery configuration guid " + deliveryConfigGuid);
