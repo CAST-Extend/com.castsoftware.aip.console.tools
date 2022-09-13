@@ -24,4 +24,12 @@ public class Exclusions {
     public static Set<String> getDefaultIgnorePatterns() {
         return Arrays.stream(new String[]{"tmp/", "temp/", "*test", "tests", "target/", ".svn/", ".git/", "_Macosx/"}).collect(Collectors.toSet());
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("Exclusion patterns: %s%n", getExcludePatterns()));
+        sb.append(String.format("Project exclusion rules: %s%n", getExclusionRules().stream().map(ExclusionRuleDto::getRule).collect(Collectors.joining(", "))));
+        return sb.toString();
+    }
 }
