@@ -25,9 +25,8 @@ if not "%SNAPSHOT_NAME%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --snapshot-name="
 REM Add all boolean
 if "%CLONE_VERSION%" == "false" SET MORE_OPTIONS=%MORE_OPTIONS% --create-new-version
 if "%CLONE_VERSION%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS%
-if "%SET_AS_CURRENT%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --set-as-current
 SET MORE_OPTIONS=%MORE_OPTIONS% --backup=%BACKUP% --enable-security-assessment=%SECURITY_ASSESSMENT% --enable-security-dataflow=%SECURITY_DATAFLOW%
-SET MORE_OPTIONS=%MORE_OPTIONS% --blueprint=%BLUEPRINT% --auto-create=%AUTO_CREATE%  --auto-discover=%AUTO_DISCOVER%
+SET MORE_OPTIONS=%MORE_OPTIONS% --blueprint=%BLUEPRINT% --auto-create=%AUTO_CREATE%
 if "%PROCESS_IMAGING%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --process-imaging
 if "%UPLOAD_APPLICATION%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --upload-application
 if not "%MODULE_OPTION%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --module-option="%MODULE_OPTION%"
