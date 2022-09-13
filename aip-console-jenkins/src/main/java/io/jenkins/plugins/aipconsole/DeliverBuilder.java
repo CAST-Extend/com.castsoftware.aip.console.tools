@@ -2,7 +2,6 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
-import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
@@ -21,7 +20,6 @@ import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import hudson.EnvVars;
@@ -56,7 +54,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -66,7 +63,6 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_fileNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_nodeNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_uploadFailed;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_noVersionAvailable;
@@ -465,7 +461,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                     if (!uploadService.uploadInputStream(applicationGuid, fileName, workspaceFile.length(), bufferedStream)) {
                         throw new UploadException("Uploading was not completed successfully.");
                     }
-                    fileName = "upload:" + applicationName + "/" + fileName;
+                    fileName = "upload:" + expandedAppName + "/" + fileName;
                 }
             }
         } catch (ApplicationServiceException e) {
@@ -520,8 +516,10 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
             requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
 
-            log.println("Exclusion patterns : " + exclusionPatterns);
-            Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
+            String expandedExclusionPatterns = vars.expand(exclusionPatterns);
+            log.println("Exclusion patterns : " + expandedExclusionPatterns);
+            log.println("target version : " + resolvedVersionName);
+            Exclusions exclusions = Exclusions.builder().excludePatterns(expandedExclusionPatterns).build();
             requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion));
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());

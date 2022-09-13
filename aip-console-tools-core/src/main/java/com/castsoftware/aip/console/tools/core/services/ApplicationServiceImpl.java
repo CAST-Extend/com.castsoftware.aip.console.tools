@@ -283,7 +283,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             log.fine("Delivery configuration response " + response);
             return response != null ? response.getGuid() : null;
         } catch (ApplicationServiceException | ApiCallException e) {
-            throw new JobServiceException("Error creating delivery config");
+            throw new JobServiceException("Error creating delivery config", e);
         }
     }
 

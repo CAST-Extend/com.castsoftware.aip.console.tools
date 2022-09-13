@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -269,5 +271,11 @@ public class JobsServiceImplTest {
 
         // update static value with new value
         staticSleepDuration.setLong(null, TimeUnit.SECONDS.toMillis(1));
+    }
+
+    @Test
+    public void testExclusionsSettings() {
+        Exclusions exclusions = Exclusions.builder().excludePatterns("tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/,test/").build();
+        assertNotNull(exclusions.getExclusionRules());
     }
 }
