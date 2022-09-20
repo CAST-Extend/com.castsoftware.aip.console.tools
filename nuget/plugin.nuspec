@@ -6,7 +6,7 @@
         <title>AIP Console automation tools</title>
         <authors>CAST Product</authors>
         <owners>CAST</owners>
-        <licenseUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/LICENSE</licenseUrl>
+        <licenseUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/v2/LICENSE</licenseUrl>
         <projectUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/wiki/2.3</projectUrl>
         <iconUrl>https://raw.githubusercontent.com/CAST-Extend/com.castsoftware.aip.console.tools/master/nuget/logo_console.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
