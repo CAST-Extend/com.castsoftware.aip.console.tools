@@ -7,7 +7,7 @@
         <authors>CAST Product</authors>
         <owners>CAST</owners>
         <licenseUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/LICENSE</licenseUrl>
-        <projectUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/wiki/1.1</projectUrl>
+        <projectUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/wiki/2.3</projectUrl>
         <iconUrl>https://raw.githubusercontent.com/CAST-Extend/com.castsoftware.aip.console.tools/master/nuget/logo_console.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Package containing the AIP Console Jenkins Plugin and AIP Console Tools CLI.
@@ -15,12 +15,12 @@
             These components aims to help automating application on-boarding and/or analysis in AIP Console.
 
             If you need more details about the AIP Console Jenkins Plugin, you can check the following page :
-            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/aip-console-jenkins/README.md
+            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/v2/aip-console-jenkins/README.md
 
             If you need details about the AIP Console Tools CLI, you can find them here :
-            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/aip-console-tools-cli/README.md
+            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/v2/aip-console-tools-cli/README.md
         </description>
-        <releaseNotes>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/master/RELEASE-NOTES.md</releaseNotes>
+        <releaseNotes>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/releases</releaseNotes>
 		<tags>aipconsole</tags>
 		<dependencies>
 			<dependency id="CAIP" version="8.3.0" />
