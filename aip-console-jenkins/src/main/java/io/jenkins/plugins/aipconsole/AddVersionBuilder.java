@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
@@ -140,7 +141,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     private boolean excludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile;
     private boolean excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject;
 
-    private Set<ExclusionRuleType> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
+    private Set<ExclusionRuleDto> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -725,7 +726,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                     .backupName(backupName)
                     .processImaging(processImaging);
 
-            Exclusions exclusions = applicationService.buildExclusions(exclusionPatterns, exclusionRules.toArray(new ExclusionRuleType[exclusionRules.size()]));
+            Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).exclusionRules(exclusionRules).build();
             if (exclusions != null) {
                 log.println(exclusions.toString());
             }

@@ -6,7 +6,7 @@ import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
-import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.JsonDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
@@ -214,15 +214,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public Exclusions buildExclusions(String exclusionPatterns, ExclusionRuleType[] exclusionRules) {
-        Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
-        if (exclusionRules != null && exclusionRules.length > 0) {
-            exclusions.setExclusionRules(Arrays.stream(exclusionRules).collect(Collectors.toSet()));
-        }
-        return exclusions;
-    }
-
-    @Override
     public String createDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, boolean rescan) throws JobServiceException, PackagePathInvalidException {
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
         try {
@@ -247,8 +238,16 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .packages(packages)
                     .build();
 
-            log.info("Exclusion patterns: " + deliveryConfigurationDto.getIgnorePatterns().stream().collect(Collectors.joining(", ")));
-            log.info("Project exclusion rules: " + deliveryConfigurationDto.getExclusionRules().stream().map(ExclusionRuleType::name).collect(Collectors.joining(", ")));
+            if (deliveryConfigurationDto.getIgnorePatterns() != null && !deliveryConfigurationDto.getIgnorePatterns().isEmpty()) {
+                String exlusionPatternsMsg = deliveryConfigurationDto.getIgnorePatterns().stream().collect(Collectors.joining(", "));
+                log.info("Exclusion patterns: " + exlusionPatternsMsg);
+            }
+
+            if (deliveryConfigurationDto.getExclusionRules() != null && !deliveryConfigurationDto.getExclusionRules().isEmpty()) {
+                String exclusionRulesMsg = deliveryConfigurationDto.getExclusionRules().stream().map(ExclusionRuleDto::getRule).collect(Collectors.joining(", "));
+                log.info("Project exclusion rules: " + exclusionRulesMsg);
+            }
+
             BaseDto response = restApiService.postForEntity("/api/applications/" + appGuid + "/delivery-configuration", deliveryConfigurationDto, BaseDto.class);
             log.fine("Delivery configuration response " + response);
             return response != null ? response.getGuid() : null;

@@ -15,21 +15,21 @@ public class Exclusions {
     @Builder.Default
     private String excludePatterns = null;
     @Builder.Default
-    private Set<ExclusionRuleType> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
+    private Set<ExclusionRuleDto> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
 
     public static Set<String> getDefaultIgnorePatterns() {
         return Arrays.stream(new String[]{"tmp/", "temp/", "*test", "tests", "target/", ".svn/", ".git/", "_Macosx/"}).collect(Collectors.toSet());
     }
 
+    public void setInitialExclusionRules(ExclusionRuleType[] rules) {
+        exclusionRules = ExclusionRuleType.toExclusionRuleDtos(rules);
+    }
+
     @Override
     public String toString() {
-        String CRLF = System.getProperty("line.separator");
         StringBuffer sb = new StringBuffer();
-        sb.append("Exclusion patterns: ");
-        sb.append(excludePatterns);
-        sb.append(CRLF);
-        sb.append("Project exclusion rules: ");
-        sb.append(getExclusionRules().stream().map(ExclusionRuleType::name).collect(Collectors.joining(", ")));
+        sb.append(String.format("Exclusion patterns: %s%n", getExcludePatterns()));
+        sb.append(String.format("Project exclusion rules: %s%n", getExclusionRules().stream().map(ExclusionRuleDto::getRule).collect(Collectors.joining(", "))));
         return sb.toString();
     }
 }

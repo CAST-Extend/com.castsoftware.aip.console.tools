@@ -1,10 +1,9 @@
 package com.castsoftware.aip.console.tools.core.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import org.apache.commons.lang3.StringUtils;
-
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public enum ExclusionRuleType {
     EXCLUDE_EMPTY_PROJECTS,
@@ -23,23 +22,29 @@ public enum ExclusionRuleType {
     EXCLUDE_WEB_JSP_PROJECT_WHEN_JAVA_FILES_EXISTS_FOR_THE_SAME_WEB_XML_FILE,
     EXCLUDE_JAVA_FILES_PROJECT_LOCATED_INSIDE_OTHER_JAVA_FILES_PROJECT;
 
-    @JsonCreator
-    public static ExclusionRuleType fromString(String value) {
-        return StringUtils.isEmpty(value) ? null : ExclusionRuleType.valueOf(value.toUpperCase());
+    public static Set<ExclusionRuleDto> toExclusionRuleDtos(ExclusionRuleType[] rules) {
+        if (rules != null && rules.length > 0) {
+            return Arrays.stream(rules).map(ExclusionRuleDto::new).collect(Collectors.toSet());
+        }
+        return getDefaultExclusionRules();
     }
 
-    public static Set<ExclusionRuleType> getDefaultExclusionRules() {
-        return EnumSet.complementOf(EnumSet.of(ExclusionRuleType.PREFER_ECLIPSE_TO_MAVEN, EXCLUDE_JAVA_FILES_WHEN_A_FULL_JEE_PROJECT_EXISTS, EXCLUDE_JAVA_FILES_WITH_AN_INCOMPLETE_PACKAGE
-                , EXCLUDE_JAVA_FILES_WITH_AN_UNNAMED_PACKAGE, EXCLUDE_WEB_JSP_PROJECT_WHEN_JAVA_FILES_EXISTS_FOR_THE_SAME_WEB_XML_FILE
-                , EXCLUDE_JAVA_FILES_PROJECT_LOCATED_INSIDE_OTHER_JAVA_FILES_PROJECT));
+    public static ExclusionRuleDto toExclusionRuleDto(ExclusionRuleType rule) {
+        return ExclusionRuleDto.builder().rule(rule.name()).build();
     }
 
-    public static void updateExclusionRules(Set<ExclusionRuleType> exclusionRules, boolean flag, ExclusionRuleType type) {
-        if (exclusionRules.contains(type)) {
-            exclusionRules.remove(type);
+    public static Set<ExclusionRuleDto> getDefaultExclusionRules() {
+        return EnumSet.complementOf(EnumSet.of(ExclusionRuleType.PREFER_ECLIPSE_TO_MAVEN)).stream()
+                .map(ExclusionRuleDto::new).collect(Collectors.toSet());
+    }
+
+    public static void updateExclusionRules(Set<ExclusionRuleDto> exclusionRules, boolean flag, ExclusionRuleType type) {
+        ExclusionRuleDto typeDto = ExclusionRuleDto.builder().rule(type.name()).build();
+        if (exclusionRules.contains(typeDto)) {
+            exclusionRules.remove(typeDto);
         }
         if (flag) {
-            exclusionRules.add(type);
+            exclusionRules.add(typeDto);
         }
     }
 
