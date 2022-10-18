@@ -243,7 +243,8 @@ public class AddVersionCommand implements Callable<Integer> {
                     .backupName(backupName)
                     .processImaging(processImaging);
 
-            Exclusions selectedExclusions = applicationService.buildExclusions(exclusionPatterns, exclusionRules);
+            Exclusions selectedExclusions = Exclusions.builder().excludePatterns(exclusionPatterns)
+                    .exclusionRules(ExclusionRuleType.toExclusionRuleDtos(exclusionRules)).build();
             String deliveryConfigGuid = applicationService.createDeliveryConfiguration(applicationGuid, sourcePath, selectedExclusions, cloneVersion);
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);

@@ -2,7 +2,6 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
-import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
@@ -91,9 +90,7 @@ public interface ApplicationService {
      * @return
      */
     String createDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, boolean rescan) throws JobServiceException, PackagePathInvalidException;
-
-    Exclusions buildExclusions(String exclusionPatterns, ExclusionRuleType[] exclusionRules);
-
+    
     /**
      * Get the existing {@code }debug options} settings
      *

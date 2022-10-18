@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
@@ -142,7 +143,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     private boolean excludeWebJspProjectWhenJavaFilesExistsForTheSameWebXmlFile;
     private boolean excludeJavaFilesProjectLocatedInsideOtherJavaFilesProject;
 
-    private Set<ExclusionRuleType> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
+    private Set<ExclusionRuleDto> exclusionRules = ExclusionRuleType.getDefaultExclusionRules();
 
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
@@ -722,10 +723,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
             requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
 
-            Exclusions exclusions = applicationService.buildExclusions(exclusionPatterns, exclusionRules.toArray(new ExclusionRuleType[exclusionRules.size()]));
-            if (exclusions != null) {
-                log.println(exclusions.toString());
-            }
+            Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).exclusionRules(exclusionRules).build();
             requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion));
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
