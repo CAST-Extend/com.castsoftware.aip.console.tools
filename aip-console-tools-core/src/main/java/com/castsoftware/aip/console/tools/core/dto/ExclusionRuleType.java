@@ -24,22 +24,22 @@ public enum ExclusionRuleType {
 
     public static Set<ExclusionRuleDto> toExclusionRuleDtos(ExclusionRuleType[] rules) {
         if (rules != null && rules.length > 0) {
-            return Arrays.stream(rules).map(ExclusionRuleDto::new).collect(Collectors.toSet());
+            return Arrays.stream(rules).map(ExclusionRuleType::toExclusionRuleDto).collect(Collectors.toSet());
         }
         return getDefaultExclusionRules();
     }
 
     public static ExclusionRuleDto toExclusionRuleDto(ExclusionRuleType rule) {
-        return ExclusionRuleDto.builder().rule(rule.name()).build();
+        return new ExclusionRuleDto(rule);
     }
 
     public static Set<ExclusionRuleDto> getDefaultExclusionRules() {
-        return EnumSet.complementOf(EnumSet.of(ExclusionRuleType.PREFER_ECLIPSE_TO_MAVEN)).stream()
-                .map(ExclusionRuleDto::new).collect(Collectors.toSet());
+        Set<ExclusionRuleType> defaultRules = EnumSet.complementOf(EnumSet.of(ExclusionRuleType.PREFER_ECLIPSE_TO_MAVEN));
+        return defaultRules.stream().map(ExclusionRuleType::toExclusionRuleDto).collect(Collectors.toSet());
     }
 
     public static void updateExclusionRules(Set<ExclusionRuleDto> exclusionRules, boolean flag, ExclusionRuleType type) {
-        ExclusionRuleDto typeDto = ExclusionRuleDto.builder().rule(type.name()).build();
+        ExclusionRuleDto typeDto = toExclusionRuleDto(type);
         if (exclusionRules.contains(typeDto)) {
             exclusionRules.remove(typeDto);
         }

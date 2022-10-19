@@ -239,10 +239,10 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .build();
 
             if (deliveryConfigurationDto.getIgnorePatterns() != null && !deliveryConfigurationDto.getIgnorePatterns().isEmpty()) {
-                String exlusionPatternsMsg = deliveryConfigurationDto.getIgnorePatterns().stream().collect(Collectors.joining(", "));
-                log.info("Exclusion patterns: " + exlusionPatternsMsg);
+                String exclusionPatternsMsg = deliveryConfigurationDto.getIgnorePatterns().stream().collect(Collectors.joining(", "));
+                log.info("Exclusion patterns: " + exclusionPatternsMsg);
             }
-
+            
             if (deliveryConfigurationDto.getExclusionRules() != null && !deliveryConfigurationDto.getExclusionRules().isEmpty()) {
                 String exclusionRulesMsg = deliveryConfigurationDto.getExclusionRules().stream().map(ExclusionRuleDto::getRule).collect(Collectors.joining(", "));
                 log.info("Project exclusion rules: " + exclusionRulesMsg);
