@@ -6,13 +6,17 @@ import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleDto;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.JsonDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverPackageRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
@@ -210,7 +214,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String createDeliveryConfiguration(String appGuid, String sourcePath, String exclusionPatterns, boolean rescan) throws JobServiceException, PackagePathInvalidException {
+    public String createDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, boolean rescan) throws JobServiceException, PackagePathInvalidException {
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
         try {
             Set<DeliveryPackageDto> packages = new HashSet<>();
@@ -218,17 +222,31 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .stream()
                     .filter(v -> v.getStatus().ordinal() >= VersionStatus.DELIVERED.ordinal())
                     .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
-            Set<String> ignorePatterns = StringUtils.isEmpty(exclusionPatterns) ? Collections.emptySet() : Arrays.stream(exclusionPatterns.split(",")).collect(Collectors.toSet());
+            Set<String> ignorePatterns = StringUtils.isEmpty(exclusions.getExcludePatterns()) ?
+                    Exclusions.getDefaultIgnorePatterns() : Arrays.stream(exclusions.getExcludePatterns().split(",")).collect(Collectors.toSet());
             if (apiInfoDto.isEnablePackagePathCheck() && previousVersion != null && rescan) {
+                log.info("Copy configuration from the previous version: " + previousVersion.getName());
                 packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
-                if (StringUtils.isEmpty(exclusionPatterns) && previousVersion.getDeliveryConfiguration() != null) {
+                if (StringUtils.isEmpty(exclusions.getExcludePatterns()) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
+                    exclusions.setExclusionRules(previousVersion.getDeliveryConfiguration().getExclusionRules());
                 }
             }
             DeliveryConfigurationDto deliveryConfigurationDto = DeliveryConfigurationDto.builder()
                     .ignorePatterns(ignorePatterns)
+                    .exclusionRules(exclusions.getExclusionRules())
                     .packages(packages)
                     .build();
+
+            if (deliveryConfigurationDto.getIgnorePatterns() != null && !deliveryConfigurationDto.getIgnorePatterns().isEmpty()) {
+                String exclusionPatternsMsg = deliveryConfigurationDto.getIgnorePatterns().stream().collect(Collectors.joining(", "));
+                log.info("Exclusion patterns: " + exclusionPatternsMsg);
+            }
+            
+            if (deliveryConfigurationDto.getExclusionRules() != null && !deliveryConfigurationDto.getExclusionRules().isEmpty()) {
+                String exclusionRulesMsg = deliveryConfigurationDto.getExclusionRules().stream().map(ExclusionRuleDto::getRule).collect(Collectors.joining(", "));
+                log.info("Project exclusion rules: " + exclusionRulesMsg);
+            }
 
             BaseDto response = restApiService.postForEntity("/api/applications/" + appGuid + "/delivery-configuration", deliveryConfigurationDto, BaseDto.class);
             log.fine("Delivery configuration response " + response);
@@ -273,6 +291,39 @@ public class ApplicationServiceImpl implements ApplicationService {
             return Collections.emptySet();
         } catch (ApiCallException | InterruptedException | ApplicationServiceException e) {
             throw new JobServiceException("Error discovering packages", e);
+        }
+    }
+
+    @Override
+    public void setModuleOptionsGenerationType(String appGuid, ModuleGenerationType generationType) {
+        //This endpoint operates only with either "one_per_au" or "full_content"
+        if (generationType != null && generationType != ModuleGenerationType.ONE_PER_TECHNO) {
+            try {
+                restApiService.putForEntity(ApiEndpointHelper.getModuleOptionsGenerationTypePath(appGuid), JsonDto.of(generationType.toString()), String.class);
+            } catch (ApiCallException e) {
+                log.log(Level.WARNING, e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void updateModuleGenerationType(String applicationGuid, JobRequestBuilder builder, ModuleGenerationType moduleGenerationType, boolean firstVersion) {
+        if (moduleGenerationType != null) {
+            if (moduleGenerationType == ModuleGenerationType.FULL_CONTENT) {
+                setModuleOptionsGenerationType(applicationGuid, moduleGenerationType);
+                log.info("Module option has been set to " + moduleGenerationType);
+            } else if (firstVersion) {
+                //Job will handle it
+                builder.moduleGenerationType(moduleGenerationType);
+            } else { //clone
+                if (moduleGenerationType == ModuleGenerationType.ONE_PER_AU) {
+                    setModuleOptionsGenerationType(applicationGuid, moduleGenerationType);
+                    log.info("Module option has been set to " + moduleGenerationType);
+                } else {
+                    //delegated to the job that will issue the appropriate message in case of;
+                    builder.moduleGenerationType(moduleGenerationType);
+                }
+            }
         }
     }
 }

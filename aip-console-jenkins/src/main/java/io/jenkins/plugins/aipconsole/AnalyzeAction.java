@@ -23,6 +23,7 @@ public class AnalyzeAction extends BaseAction implements RunAction2 {
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean processImaging = false;
     private boolean consolidation = true;
+    private String moduleGenerationType;
 
     private transient Run run;
 
@@ -79,6 +80,14 @@ public class AnalyzeAction extends BaseAction implements RunAction2 {
 
     public void setConsolidation(boolean consolidation) {
         this.consolidation = consolidation;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
+    }
+
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
     }
 
     public boolean isProcessImaging() {

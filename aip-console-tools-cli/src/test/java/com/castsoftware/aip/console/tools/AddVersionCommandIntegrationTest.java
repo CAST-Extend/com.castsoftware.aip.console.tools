@@ -81,6 +81,25 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     }
 
     @Test
+    public void testAddVersionCommand_InvalidModuleType() throws ApplicationServiceException {
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "-f", zippedSourcesPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--domain-name", TestConstants.TEST_DOMAIN,
+                "--module-option", "Invalid",
+                "--node-name", TestConstants.TEST_NODE};
+        // No existing application
+        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyBoolean())).thenReturn(null);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
+
+        runStringArgs(addVersionCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
+    }
+
+    @Test
     public void testAddVersionCommand_SimplifiedDeliveryWithFileProvided() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String[] args = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,

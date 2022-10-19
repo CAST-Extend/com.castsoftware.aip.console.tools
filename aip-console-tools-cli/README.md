@@ -197,32 +197,74 @@ The available options are :
   parameter</u>. *default* : none
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
   snapshot or from publishing application to the Health dashboard. *default* : false
+* `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
+  module.
+  Possible value is one of: full_content, one_per_au, one_per_techno
+* `--exclude-patterns` or `-exclude`: File patterns to exclude in the delivery, the pattern needs to follow the syntax
+  of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
+* `--exclusion-rules` : (Optional) case sensitive. Project's exclusion rules, separated with comma and no
+  space.</br>
+  *example* `--exclusion-rules`= "
+  EXCLUDE_EMPTY_PROJECTS,PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB,EXCLUDE_TEST_CODE"</br>
+  To get the full list do run help on this command (*deliver* --help).</br>
+  *REMARKS*: Following exclusion rules are to be used in collaboration with the *JeeFileDiscoverer* extension
+  EXCLUDE_JAVA_FILES_WHEN_A_FULL_JEE_PROJECT_EXISTS,
+  EXCLUDE_JAVA_FILES_WITH_AN_INCOMPLETE_PACKAGE,
+  EXCLUDE_JAVA_FILES_WITH_AN_UNNAMED_PACKAGE,
+  EXCLUDE_WEB_JSP_PROJECT_WHEN_JAVA_FILES_EXISTS_FOR_THE_SAME_WEB_XML_FILE,
+  EXCLUDE_JAVA_FILES_PROJECT_LOCATED_INSIDE_OTHER_JAVA_FILES_PROJECT;
 
-*NOTE*: When creating a version, if a previous version exists, it's configuration will be cloned to the new version, but the new source will be used for analysis.
+*NOTE*: When creating a version, if a previous version exists, it's configuration will be cloned to the new version,
+but the new source will be used for analysis.
 
 #### Deliver
 
-This command is used to deliver a new version of an application to AIP Console. It <u>doesn't</u> marks that version as current by default and won't run an analysis.
+This command is used to deliver a new version of an application to AIP Console. It <u>doesn't</u> marks that version as
+current by default and won't run an analysis.
 
 The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
 * `--file` or `-f` (**required**): The path to the source code archive (in ZIP or TAR.GZ format) to upload.
-* `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given name doesn't exists.
-* `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this new version. This is the default behaviour when no version exists for the given application.
-* `--version-name` or `-v` (optional): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current date and time.
+* `--auto-create` (optional): Enables automatic creation of application on AIP Console if the application with the given
+  name doesn't exists.
+* `--no-clone, `--no-rescan`, `--new-configuration` (optional): Disables cloning a previous version when creating this
+  new version. This is the default behaviour when no version exists for the given application.
+* `--version-name` or `-v` (optional): The name of the version to create. default: `vYYMMDD.hhmmss`, based on current
+  date and time.
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
-* `--exclude-patterns` or `-exclude`: File patterns to exclude in the delivery, the pattern needs to follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
-* `--auto-discover`: will discover new technologies and install new extensions during rescan, to disable when run consistency check
-* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact when cloning a version</u>.
+* `--exclude-patterns` or `-exclude`: File patterns to exclude in the delivery, the pattern needs to follow the syntax
+  of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
+* `--exclusion-rules` : (Optional) case sensitive. Project's exclusion rules, separated with comma and no
+  space.</br>
+  *example* `--exclusion-rules`= "
+  EXCLUDE_EMPTY_PROJECTS,PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB,EXCLUDE_TEST_CODE"</br>
+  To get the full list do run help on this command (*deliver* --help).
+  </br>*REMARKS*: Following exclusion rules are to be used in collaboration with the *JeeFileDiscoverer* extension
+  EXCLUDE_JAVA_FILES_WHEN_A_FULL_JEE_PROJECT_EXISTS,
+  EXCLUDE_JAVA_FILES_WITH_AN_INCOMPLETE_PACKAGE,
+  EXCLUDE_JAVA_FILES_WITH_AN_UNNAMED_PACKAGE,
+  EXCLUDE_WEB_JSP_PROJECT_WHEN_JAVA_FILES_EXISTS_FOR_THE_SAME_WEB_XML_FILE,
+  EXCLUDE_JAVA_FILES_PROJECT_LOCATED_INSIDE_OTHER_JAVA_FILES_PROJECT;
+* `--auto-discover`: will discover new technologies and install new extensions during rescan, to disable when run
+  consistency check
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
+  when cloning a version</u>.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
-* `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *default*:
-* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by AIP Console
-* `--domain-name` (optional) : specify a domain name to associate with the application to create. <u>Has no effect if `--auto-create` is not passed or if application has already been created</u>. *default*: No domain is set for the application.
+* `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *
+  default*:
+* `--node-name` (optional) : specify the name of an AIP Node on which the application will be create. <u>Has no effect
+  if `--auto-create` is not passed or if application has already been created</u>. *default* : Automatically selected by
+  AIP Console
+* `--domain-name` (optional) : specify a domain name to associate with the application to create. <u>Has no effect
+  if `--auto-create` is not passed or if application has already been created</u>. *default*: No domain is set for the
+  application.
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
-* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
+  variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
-* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
+  parameter</u>. *default* : none
 
 #### Analysis
 
@@ -243,6 +285,9 @@ The available options are :
   parameter</u>. *default* : none
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
   snapshot or from publishing application to the Health dashboard. *default* : true
+* `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
+  module.
+  Possible value is one of: full_content, one_per_au, one_per_techno
 
 #### Snapshot
 
