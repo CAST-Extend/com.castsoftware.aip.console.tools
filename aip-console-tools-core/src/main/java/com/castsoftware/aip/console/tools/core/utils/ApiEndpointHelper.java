@@ -30,6 +30,8 @@ public class ApiEndpointHelper {
     public static final String MODULE_OPTIONS_ENDPOINT = "/module-options";
 
     public static final String MODULE_OPTIONS_GENERATION_TYPE_ENDPOINT = MODULE_OPTIONS_ENDPOINT + "/generation-type";
+    public static final String URL_AIC_PATH = "/aic";
+    public static final String URL_AIC_DOMAINS_PATH = URL_AIC_PATH + "/domains";
 
     public static String getRootPath() {
         return ROOT_PATH + "/";
@@ -37,6 +39,10 @@ public class ApiEndpointHelper {
 
     public static String getApplicationsPath() {
         return ROOT_PATH + APPLICATIONS_ENDPOINT;
+    }
+
+    public static String getDomainsPath() {
+        return ROOT_PATH + URL_AIC_DOMAINS_PATH;
     }
 
     public static String getApplicationPath(String appGuid) {

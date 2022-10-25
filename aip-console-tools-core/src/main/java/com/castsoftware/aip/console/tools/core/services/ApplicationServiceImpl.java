@@ -6,6 +6,7 @@ import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
+import com.castsoftware.aip.console.tools.core.dto.DomainDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.JsonDto;
@@ -74,12 +75,32 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public ApplicationDto getApplicationDetails(String applicationGuid) throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getApplicationPath(applicationGuid), ApplicationDto.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to get an application with GUID: " + applicationGuid, e);
+        }
+    }
+
+    @Override
     public ApplicationDto getApplicationFromName(String applicationName) throws ApplicationServiceException {
+        Applications applications = getApplications();
         return getApplications()
                 .getApplications()
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationName, a.getName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public DomainDto getDomainFromName(String domainName) throws ApplicationServiceException {
+        return getDomains()
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(a -> StringUtils.equalsAnyIgnoreCase(domainName, a.getName()))
                 .findFirst()
                 .orElse(null);
     }
@@ -165,6 +186,16 @@ public class ApplicationServiceImpl implements ApplicationService {
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to get applications from AIP Console", e);
         }
+    }
+
+    private Set<DomainDto> getDomains() throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getDomainsPath(), new TypeReference<Set<DomainDto>>() {
+            });
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to get domains from CAST Imaging Console", e);
+        }
+
     }
 
     @Override

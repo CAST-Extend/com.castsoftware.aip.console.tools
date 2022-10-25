@@ -11,6 +11,7 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -31,6 +32,7 @@ public class VersionDto {
     private String previousVersion;
     private DeliveryConfigurationDto deliveryConfiguration;
 
+    private Set<String> objectives;
     @JsonInclude(JsonInclude.Include.NON_NULL)
 
     public String getPreviousVersion() {

@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.DomainDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
@@ -22,6 +23,10 @@ public interface ApplicationService {
     ApplicationDto getApplicationFromGuid(String applicationGuid) throws ApplicationServiceException;
 
     ApplicationDto getApplicationFromName(String applicationName) throws ApplicationServiceException;
+
+    ApplicationDto getApplicationDetails(String applicationGuid) throws ApplicationServiceException;
+
+    DomainDto getDomainFromName(String domainName) throws ApplicationServiceException;
 
     Date getVersionDate(String versionDateString) throws ApplicationServiceException;
 

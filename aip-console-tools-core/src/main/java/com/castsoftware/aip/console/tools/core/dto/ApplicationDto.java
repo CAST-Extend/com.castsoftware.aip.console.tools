@@ -22,4 +22,7 @@ public class ApplicationDto {
     private boolean inPlaceMode;
     private String caipVersion;
     private String targetNode;
+
+    private String imagingTenant;
+    private VersionDto version;
 }
