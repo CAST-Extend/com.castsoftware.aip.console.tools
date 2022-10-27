@@ -218,6 +218,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion())
                     .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
                     .versionName(versionName)
+                    .nodeName(app.getTargetNode())
                     .versionReleaseDate(applicationService.getVersionDate(versionDateString))
                     .snapshotDate(new Date())
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
