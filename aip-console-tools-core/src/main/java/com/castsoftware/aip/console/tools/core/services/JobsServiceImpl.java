@@ -81,7 +81,7 @@ public class JobsServiceImpl implements JobsService {
                 "Application " + applicationName + " data repository will stored on default CSS server");
         }
 
-        log.log(Level.INFO, "Starting job: Create Application on NODE: " + (StringUtils.isNotEmpty(nodeName) ? nodeName : "Default"));
+        log.log(Level.INFO, "Starting job: Create Application on NODE: " + (StringUtils.isNotEmpty(nodeName) ? nodeName : "Default (auto-selected)"));
         try {
             CreateApplicationJobRequest.CreateApplicationJobRequestBuilder requestBuilder =
                     CreateApplicationJobRequest.builder()
