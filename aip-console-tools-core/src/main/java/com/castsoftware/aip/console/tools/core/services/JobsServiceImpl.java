@@ -34,6 +34,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 
+import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_CAIP_VERSION;
+import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_TARGET_NODE;
+
 @Log
 public class JobsServiceImpl implements JobsService {
     private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(10);
@@ -78,6 +81,7 @@ public class JobsServiceImpl implements JobsService {
                 "Application " + applicationName + " data repository will stored on default CSS server");
         }
 
+        log.log(Level.INFO, "Starting job: Create Application on NODE: " + (StringUtils.isNotEmpty(nodeName) ? nodeName : "Default"));
         try {
             CreateApplicationJobRequest.CreateApplicationJobRequestBuilder requestBuilder =
                     CreateApplicationJobRequest.builder()
@@ -164,6 +168,12 @@ public class JobsServiceImpl implements JobsService {
     public String startJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException {
         CreateJobsRequest jobRequest = filterModuleGenerationType(jobRequestBuilder.buildJobRequest());
         ApiInfoDto apiInfoDto = getApiInfoDto();
+
+        String caipVersion = jobRequest.getParameterValueAsString(PARAM_CAIP_VERSION);
+        String targetNode = jobRequest.getParameterValueAsString(PARAM_TARGET_NODE);
+        String nodeMessage = (StringUtils.isEmpty(caipVersion) ? "Default (auto-selected)" : targetNode);
+        String message = "NODE: " + nodeMessage + " and AIP version: " + (StringUtils.isEmpty(caipVersion) ? "node default configured" : caipVersion);
+        log.info("Starting job on " + message);
 
         try {
             SuccessfulJobStartDto dto = restApiService.postForEntity(ApiEndpointHelper.getJobsEndpoint(jobRequest), jobRequest, SuccessfulJobStartDto.class);
