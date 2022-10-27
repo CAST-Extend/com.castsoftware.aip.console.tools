@@ -171,7 +171,7 @@ public class JobsServiceImpl implements JobsService {
 
         String caipVersion = jobRequest.getParameterValueAsString(PARAM_CAIP_VERSION);
         String targetNode = jobRequest.getParameterValueAsString(PARAM_TARGET_NODE);
-        String nodeMessage = (StringUtils.isEmpty(caipVersion) ? "Default (auto-selected)" : targetNode);
+        String nodeMessage = (StringUtils.isEmpty(targetNode) ? "Default (auto-selected)" : targetNode);
         String message = "NODE: " + nodeMessage + " and AIP version: " + (StringUtils.isEmpty(caipVersion) ? "node default configured" : caipVersion);
         log.info("Starting job on " + message);
 
