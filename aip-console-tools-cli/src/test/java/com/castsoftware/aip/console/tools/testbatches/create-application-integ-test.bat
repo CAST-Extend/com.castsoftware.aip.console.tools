@@ -6,6 +6,7 @@ SET APP_NAME=%~3
 SET IN_PLACE_MODE=%~4
 SET DOMAIN_NAME=%~5
 SET CSS=%~6
+SET NODE_NAME=%~7
 set TOOLS_EXTENSION=com.castsoftware.aip.console.tools
 set EXTEND_URL=https://extend.castsoftware.com
 set PATH=C:\CAST-Caches\Win64;%PATH%
@@ -14,6 +15,7 @@ REM EXAMPLE
 REM create-application-integ-test.bat "download folder" "http://machine.corp.castsoftware.com:8081" "LPZ5i8lJ.5dKr2Y4e39cVIJ70rJETgG0sY29C2ElH" "WEBITOOLS-102-Test-App" false "TOOLS-CLI-TEST_DOM"
 REM
 SET MORE_OPTIONS=
+if not "%NODE_NAME%" == "" SET MORE_OPTIONS=--node-name="%NODE_NAME%"
 if not "%DOMAIN_NAME%" == "" SET MORE_OPTIONS=--domain-name="%DOMAIN_NAME%"
 if not "%IN_PLACE_MODE%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --no-version-history=%IN_PLACE_MODE%
 if not "%CSS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --css-server=%CSS%

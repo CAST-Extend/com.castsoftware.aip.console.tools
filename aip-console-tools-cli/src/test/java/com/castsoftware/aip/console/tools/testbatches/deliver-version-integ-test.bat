@@ -6,6 +6,7 @@ SET APP_NAME=%~3
 SET IN_PLACE_MODE=%~4
 SET DOMAIN_NAME=%~5
 SET CSS=%~6
+SET NODE_NAME=%~7
 set TOOLS_EXTENSION=com.castsoftware.aip.console.tools
 set EXTEND_URL=https://extend.castsoftware.com
 set PATH=C:\CAST-Caches\Win64;%PATH%
@@ -13,6 +14,7 @@ set PATH=C:\CAST-Caches\Win64;%PATH%
 REM EXAMPLE
 REM
 SET MORE_OPTIONS=
+if not "%NODE_NAME%" == "" SET MORE_OPTIONS=--node-name="%NODE_NAME%"
 if not "%VERSION_NAME%" == "" SET MORE_OPTIONS=--version-name="%VERSION_NAME%"
 if not "%VERSION_DATE%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --version-date="%VERSION_DATE%"
 if not "%EXCLUSION_PATTERNS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclude-patterns="%EXCLUSION_PATTERNS%"
