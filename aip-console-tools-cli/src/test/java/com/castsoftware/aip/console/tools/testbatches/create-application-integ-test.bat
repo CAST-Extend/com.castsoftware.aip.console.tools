@@ -39,6 +39,8 @@ echo ----------------------------
 
 SET TOOLS_CLI_PATH=%TOOLSDIR%\%TOOLS_EXTENSION%
 echo -- Create Application command --
+echo NODE name= %NODE_NAME%
+echo OPTIONS= %MORE_OPTIONS%
 echo java -jar aip-console-tools-cli.jar CreateApplication --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
 --app-name="%APP_NAME%" --verbose=false ^
 %MORE_OPTIONS% 
