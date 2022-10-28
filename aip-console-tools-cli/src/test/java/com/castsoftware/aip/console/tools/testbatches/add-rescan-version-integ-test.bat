@@ -14,8 +14,8 @@ set PATH=C:\CAST-Caches\Win64;%PATH%
 REM EXAMPLE
 REM
 SET MORE_OPTIONS=
-if not "%NODE_NAME%" == "" SET MORE_OPTIONS=--node-name="%NODE_NAME%"
 if not "%DOMAIN_NAME%" == "" SET MORE_OPTIONS=--domain-name="%DOMAIN_NAME%"
+if not "%NODE_NAME%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --node-name="%NODE_NAME%"
 if not "%VERSION_NAME%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --version-name="%VERSION_NAME%"
 if "%SHOW_SQL%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --show-sql
 if "%AMT_PROFILING%" == "true" SET MORE_OPTIONS=%MORE_OPTIONS% --amt-profiling"

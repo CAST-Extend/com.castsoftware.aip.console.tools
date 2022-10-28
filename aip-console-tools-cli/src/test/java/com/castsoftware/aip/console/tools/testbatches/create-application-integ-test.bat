@@ -15,10 +15,10 @@ REM EXAMPLE
 REM create-application-integ-test.bat "download folder" "http://machine.corp.castsoftware.com:8081" "LPZ5i8lJ.5dKr2Y4e39cVIJ70rJETgG0sY29C2ElH" "WEBITOOLS-102-Test-App" false "TOOLS-CLI-TEST_DOM"
 REM
 SET MORE_OPTIONS=
-if not "%NODE_NAME%" == "" SET MORE_OPTIONS=--node-name="%NODE_NAME%"
 if not "%DOMAIN_NAME%" == "" SET MORE_OPTIONS=--domain-name="%DOMAIN_NAME%"
 if not "%IN_PLACE_MODE%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --no-version-history=%IN_PLACE_MODE%
 if not "%CSS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --css-server=%CSS%
+if not "%NODE_NAME%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --node-name="%NODE_NAME%"
 
 if not defined TOOLSDIR (
 	set TOOLSDIR=%WORKSPACE%\bin
