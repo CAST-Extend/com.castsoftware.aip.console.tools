@@ -47,6 +47,18 @@ public interface JobsService {
     String startCreateApplication(String applicationName, String nodeName, String domainName, boolean inplaceMode, String caipVersion, String cssServerName) throws JobServiceException;
 
     /**
+     * @param applicationName
+     * @param nodeName
+     * @param domainName
+     * @param caipVersion
+     * @return Application GUID
+     * @throws JobServiceException
+     */
+    String startOnboardApplication(String applicationName, String nodeName, String domainName, String caipVersion) throws JobServiceException;
+
+    String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName) throws JobServiceException;
+
+    /**
      * @param cssServerName target CSS server name
      * @return existing CSS Server Guid
      * @throws JobServiceException Thrown when the supplied name not found

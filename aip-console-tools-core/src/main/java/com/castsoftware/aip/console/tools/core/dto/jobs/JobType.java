@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum JobType {
 
     ANALYZE(Constants.ANALYZE, "Run analysis"),
+    UPDATE_ANALYSIS_DATA(Constants.UPDATE_ANALYSIS_DATA, "Update analysis data"),
+    PREPARE_ANALYSIS_DATA(Constants.UPDATE_ANALYSIS_DATA, "Update analysis data"),
 
     REJECT_VERSION(Constants.REJECT_VERSION, "Reject version"),
 
@@ -15,6 +17,7 @@ public enum JobType {
     PURGE_VERSION(Constants.PURGE_VERSION, "Purge version"),
 
     DELETE_SNAPSHOT(Constants.DELETE_SNAPSHOT, "Delete snapshot"),
+    DELETE_SELECTED_SNAPSHOTS(Constants.DELETE_SELECTED_SNAPSHOTS, "Delete selected snapshots"),
 
     UPLOAD_SNAPSHOTS(Constants.UPLOAD_SNAPSHOTS, "Upload snapshots"),
 
@@ -44,7 +47,74 @@ public enum JobType {
 
     CLONE_VERSION(Constants.CLONE_VERSION, "Clone an existing version's structure"),
 
-    DATAFLOW_SECURITY_ANALYZE(Constants.DATAFLOW_SECURITY_ANALYZE, "Run dataflow security analyzer");
+    DATAFLOW_SECURITY_ANALYZE(Constants.DATAFLOW_SECURITY_ANALYZE, "Run dataflow security analyzer"),
+
+    RENAME_SNAPSHOT(Constants.RENAME_SNAPSHOT, "Rename snapshot"),
+
+    PUBLISH_ALL(Constants.PUBLISH_ALL, "Publish all application snapshots"),
+
+    PUBLISH(Constants.PUBLISH, "Publish application snapshot"),
+
+    // V1 types for PUBLISH
+    UPLOAD_APPLICATION(Constants.UPLOAD_APPLICATION, "Publish application snapshot"),
+
+    PUBLISH_APPLICATION(Constants.PUBLISH_APPLICATION, "Publish application snapshot"),
+
+
+    DECLARE_APPLICATION(Constants.DECLARE_APPLICATION, "Create application"),
+
+    ONBOARD_APPLICATION(Constants.ONBOARD_APPLICATON, "Onboard Application"),
+
+    DISCOVER_APPLICATION(Constants.DISCOVER_APPLICATON, "Discover Application"),
+
+    REDISCOVER_APPLICATION(Constants.REDISCOVER_APPLICATON, "Re-Discover Application"),
+
+    FIRST_SCAN_APPLICATION(Constants.FIRST_SCAN_APPLICATION, "First time Scan Application"),
+
+    REFRESH_ONBOARDING_DELIVERY_CONFIGURATION(Constants.REFRESH_ONBOARDING_DELIVERY_CONFIGURATION, "Refresh Onboarding Delivery Configuration"),
+
+    BACKUP_MEASUREMENT(Constants.BACKUP_MEASUREMENT, "Backup measurement database"),
+
+
+    UPGRADE_APPLICATION(Constants.UPGRADE_APPLICATION, "Upgrade application"),
+
+    OPTIMIZE(Constants.OPTIMIZE, "Optimize"),
+
+    OPTIMIZE_MEASUREMENT(Constants.OPTIMIZE_MEASUREMENT, "Optimize Measurement"),
+
+
+    EDIT_VERSION(Constants.EDIT_VERSION, "Edit version"),
+
+    RESYNC_APPLICATION(Constants.RESYNC_APPLICATION, "Resync application"),
+
+    //V1 type
+    SYNC_APPLICATION(Constants.SYNC_APPLICATION, "Resync application"),
+
+    RENAME_APPLICATION(Constants.RENAME_APPLICATION, "Rename application"),
+
+    ANALYZE_SECURITY_DATAFLOW(Constants.ANALYZE_SECURITY_DATAFLOW, "Analyze security dataflow"),
+
+    ANALYZE_EXEC_GROUP(Constants.ANALYZE_EXEC_GROUP, "Analyze execution group"),
+
+    //V1 type
+    RUN_ANALYZE_UNITS(Constants.RUN_ANALYZE_UNITS, "Analyze execution group"),
+
+    INSTALL_EXTENSIONS(Constants.INSTALL_EXTENSIONS, "Install extensions"),
+
+    //V1 type
+    UPDATE_EXTENSIONS(Constants.UPDATE_EXTENSIONS, "Install extensions"),
+
+    UPDATE_ASSESSMENT_MODEL(Constants.UPDATE_ASSESSMENT_MODEL, "Update Assessment Model"),
+
+    CLEANUP_SNAPSHOTS(Constants.CLEANUP_SNAPSHOTS, "Cleanup snapshots"),
+
+    CLEANUP_VERSIONS(Constants.CLEANUP_VERSIONS, "Cleanup versions"),
+
+    RECOMPUTE_CHECKSUMS(Constants.RECOMPUTE_CHECKSUMS, "Recompute checksums"),
+
+    RECOMPUTE_SNAPSHOT_INDICATORS(Constants.RECOMPUTE_SNAPSHOT_INDICATORS, "Recompute snapshot indicators"),
+
+    REFERENCE_FINDER(Constants.REFERENCE_FINDER, "Run Reference Finder");
 
     private final String label;
     private final String displayName;

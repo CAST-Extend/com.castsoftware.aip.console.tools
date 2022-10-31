@@ -411,10 +411,12 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 // Parse domain name with potential variables
                 // check existence of domain first ?
                 String expandedDomainName = vars.expand(domainName);
+                String expandedNodeName = run.getEnvironment(listener).expand(nodeName);
                 String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(expandedAppName));
-                log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(applicationName, expandedCssServerName));
-                String jobGuid = jobsService.startCreateApplication(expandedAppName, nodeName, expandedDomainName, inPlaceMode, null, expandedCssServerName);
+                log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(expandedAppName, expandedCssServerName));
+
+                String jobGuid = jobsService.startCreateApplication(expandedAppName, expandedNodeName, expandedDomainName, inPlaceMode, null, expandedCssServerName);
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),

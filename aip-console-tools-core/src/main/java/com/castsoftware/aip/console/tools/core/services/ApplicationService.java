@@ -52,6 +52,8 @@ public interface ApplicationService {
      */
     String getOrCreateApplicationFromName(String applicationName, boolean autoCreate) throws ApplicationServiceException;
 
+    String onboardApplication(String applicationName, String domainName, boolean verbose, String sourcePath) throws ApplicationServiceException;
+
     /**
      * Retrieve an application's GUID from the given application name.
      * <p/>

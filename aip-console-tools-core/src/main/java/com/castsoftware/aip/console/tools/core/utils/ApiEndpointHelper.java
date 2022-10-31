@@ -32,6 +32,9 @@ public class ApiEndpointHelper {
     public static final String MODULE_OPTIONS_GENERATION_TYPE_ENDPOINT = MODULE_OPTIONS_ENDPOINT + "/generation-type";
     public static final String URL_AIC_PATH = "/aic";
     public static final String URL_AIC_DOMAINS_PATH = URL_AIC_PATH + "/domains";
+    public static final String URL_ONBOARDING_PATH = "/onboarding";
+    public static final String ONBOARD_APPLICATION_ENDPOINT = "/onboard-application";
+    public static final String DISCOVER_APPLICATION_ENDPOINT = "/discover-application";
 
     public static String getRootPath() {
         return ROOT_PATH + "/";
@@ -60,6 +63,23 @@ public class ApiEndpointHelper {
         assert appGuid != null && !appGuid.isEmpty();
 
         return getApplicationPath(appGuid) + UPLOAD_ENDPOINT;
+    }
+
+    public static String getApplicationOnboardingUploadPath() {
+        return getApplicationsPath() + URL_ONBOARDING_PATH + UPLOAD_ENDPOINT;
+    }
+
+    public static String getApplicationOnboardingUploadChunkPath(String uploadGuid) {
+        assert uploadGuid != null && !uploadGuid.isEmpty();
+        return getApplicationOnboardingUploadPath() + "/" + uploadGuid;
+    }
+
+    public static String getOnboardApplicationEndPoint() {
+        return getJobsEndpoint() + ONBOARD_APPLICATION_ENDPOINT;
+    }
+
+    public static String getDiscoverApplicationEndPoint() {
+        return getJobsEndpoint() + DISCOVER_APPLICATION_ENDPOINT;
     }
 
     public static String getApplicationUploadPath(String appGuid, String uploadGuid) {

@@ -6,12 +6,14 @@ import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogsDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.OnboardApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -33,6 +35,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
+
+import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_CAIP_VERSION;
+import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_TARGET_NODE;
 
 @Log
 public class JobsServiceImpl implements JobsService {
@@ -64,20 +69,57 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public String startCreateApplication(String applicationName, String nodeName, boolean inplaceMode, String caipVersion) throws JobServiceException {
-        return startCreateApplication(applicationName, nodeName, null, inplaceMode, caipVersion,null);
+        return startCreateApplication(applicationName, nodeName, null, inplaceMode, caipVersion, null);
+    }
+
+    @Override
+    public String startOnboardApplication(String applicationName, String nodeName, String domainName, String caipVersion) throws JobServiceException {
+        log.log(Level.INFO, "Onboarding Application on NODE: " + (StringUtils.isNotEmpty(nodeName) ? nodeName : "Default (auto-selected)"));
+        OnboardApplicationJobRequest.OnboardApplicationJobRequestBuilder requestBuilder = OnboardApplicationJobRequest.builder()
+                .appName(applicationName);
+        if (StringUtils.isNotEmpty(caipVersion)) {
+            requestBuilder.caipVersion(caipVersion);
+        }
+        if (StringUtils.isNotEmpty(domainName)) {
+            requestBuilder.domainName(domainName);
+        }
+
+        try {
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getOnboardApplicationEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            return jobStartDto.getJobGuid();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Unable to create new application '" + applicationName + "'", e);
+            throw new JobServiceException("Creation of application failed", e);
+        }
+    }
+
+    @Override
+    public String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName) throws JobServiceException {
+        DiscoverApplicationJobRequest request = DiscoverApplicationJobRequest.builder()
+                .appGuid(applicationGuid)
+                .sourcePath(sourcePath)
+                .versionName(versionName).build();
+        try {
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getDiscoverApplicationEndPoint(), request, SuccessfulJobStartDto.class);
+            return jobStartDto.getJobGuid();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Unable to discover application '" + applicationGuid + "' providing source path: " + sourcePath, e);
+            throw new JobServiceException("Creation of application failed", e);
+        }
     }
 
     @Override
     public String startCreateApplication(String applicationName, String nodeName, String domainName, boolean inplaceMode, String caipVersion, String cssServerName) throws JobServiceException {
         String cssServerGuid = getCssGuid(cssServerName);
-        if(cssServerGuid != null) {
+        if (cssServerGuid != null) {
             log.log(Level.INFO,
-                "Application " + applicationName + " data repository will stored in CSS Server " + cssServerName + "(guid: " + cssServerGuid + ")");
+                    "Application " + applicationName + " data repository will stored in CSS Server " + cssServerName + "(guid: " + cssServerGuid + ")");
         } else {
             log.log(Level.INFO,
-                "Application " + applicationName + " data repository will stored on default CSS server");
+                    "Application " + applicationName + " data repository will stored on default CSS server");
         }
 
+        log.log(Level.INFO, "Starting job: Create Application on NODE: " + (StringUtils.isNotEmpty(nodeName) ? nodeName : "Default (auto-selected)"));
         try {
             CreateApplicationJobRequest.CreateApplicationJobRequestBuilder requestBuilder =
                     CreateApplicationJobRequest.builder()
@@ -164,6 +206,12 @@ public class JobsServiceImpl implements JobsService {
     public String startJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException {
         CreateJobsRequest jobRequest = filterModuleGenerationType(jobRequestBuilder.buildJobRequest());
         ApiInfoDto apiInfoDto = getApiInfoDto();
+
+        String caipVersion = jobRequest.getParameterValueAsString(PARAM_CAIP_VERSION);
+        String targetNode = jobRequest.getParameterValueAsString(PARAM_TARGET_NODE);
+        String nodeMessage = (StringUtils.isEmpty(targetNode) ? "Default (auto-selected)" : targetNode);
+        String message = "NODE: " + nodeMessage + " and AIP version: " + (StringUtils.isEmpty(caipVersion) ? "node default configured" : caipVersion);
+        log.info("Starting job on " + message);
 
         try {
             SuccessfulJobStartDto dto = restApiService.postForEntity(ApiEndpointHelper.getJobsEndpoint(jobRequest), jobRequest, SuccessfulJobStartDto.class);

@@ -39,6 +39,41 @@ public class Constants {
 
     // Job names
     public static final String ANALYZE = "analyze";
+    public static final String ONBOARD_APPLICATON = "onboard-application";
+    public static final String DISCOVER_APPLICATON = "discover-application";
+    public static final String REDISCOVER_APPLICATON = "rediscover-application";
+    public static final String UPDATE_ANALYSIS_DATA = "update-analysis-data";
+    public static final String CLEANUP_VERSIONS = "cleanup-versions";
+    public static final String CLEANUP_SNAPSHOTS = "cleanup-snapshots";
+    public static final String DELETE_SELECTED_SNAPSHOTS = "delete-selected-snapshots";
+    public static final String EDIT_VERSION = "edit-version";
+    public static final String OPTIMIZE = "optimize";
+    public static final String OPTIMIZE_MEASUREMENT = "optimize-measurement";
+    public static final String BACKUP_MEASUREMENT = "backup-measurement";
+    public static final String UPGRADE_APPLICATION = "upgrade-application";
+    public static final String FIRST_SCAN_APPLICATION = "first-scan-application";
+    public static final String RESCAN_APPLICATON = "rescan-application";
+    public static final String REFRESH_ONBOARDING_DELIVERY_CONFIGURATION = "refresh-onboarding-delivery-configuration";
+
+    public static final String RENAME_SNAPSHOT = "rename-snapshot";
+    public static final String REFERENCE_FINDER = "reference_finder";
+    public static final String RECOMPUTE_SNAPSHOT_INDICATORS = "recompute-snapshot-indicators";
+    public static final String RECOMPUTE_CHECKSUMS = "recompute-checksums";
+    public static final String ANALYZE_EXEC_GROUP = "analyze-exec-group";
+    public static final String RUN_ANALYZE_UNITS = ANALYZE_EXEC_GROUP;
+    public static final String ANALYZE_SECURITY_DATAFLOW = "analyze-security-dataflow";
+    public static final String RESYNC_APPLICATION = "resync-application";
+    public static final String SYNC_APPLICATION = RESYNC_APPLICATION;
+    public static final String RENAME_APPLICATION = "rename-application";
+
+    public static final String PUBLISH_ALL = "publish-all";
+    public static final String PUBLISH = "publish";
+    public static final String PUBLISH_APPLICATION = PUBLISH;
+    public static final String UPLOAD_APPLICATION = PUBLISH;
+    public static final String UPDATE_ASSESSMENT_MODEL = "update-assessment-model";
+    public static final String INSTALL_EXTENSIONS = "install-extensions";
+    public static final String UPDATE_EXTENSIONS = INSTALL_EXTENSIONS;
+
     public static final String REJECT_VERSION = "reject_version";
     public static final String DELETE_VERSION = "delete_version";
     public static final String PURGE_VERSION = "purge_version";
@@ -52,6 +87,8 @@ public class Constants {
     // New name for the last step in analysis (this consolidate snapshots and upload to central db)
     public static final String UPLOAD_APP_SNAPSHOT = "upload_application";
     public static final String CREATE_APPLICATION = "create-application";
+    public static final String DECLARE_APPLICATION = CREATE_APPLICATION;
+
     public static final String DELETE_APPLICATION = "delete_application";
     public static final String FUNCTION_POINTS = "function_points";
     public static final String BACKUP = "BACKUP";

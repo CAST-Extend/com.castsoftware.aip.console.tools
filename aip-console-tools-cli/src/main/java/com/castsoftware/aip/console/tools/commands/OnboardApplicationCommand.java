@@ -89,7 +89,12 @@ public class OnboardApplicationCommand extends BasicCollable {
             log.info("About to trigger on-boarding workflow for: '{}' application", firstScan ? "First-scan/Refresh" : "Rescan");
 
             //on-boarding
-            
+            if (firstScan) {
+                String sourcePath = uploadService.uploadFileForOnboarding(filePath);
+                log.info("Prepare to onboard Application " + applicationName + " with sources: " + sourcePath);
+                applicationGuid = applicationService.onboardApplication(applicationName, domainName, sharedOptions.isVerbose(), sourcePath);
+                log.info("Application " + applicationName + " onboarded successfully: GUID= " + applicationGuid);
+            }
 /*
             applicationGuid = applicationService.getOrCreateApplicationFromName(applicationName, autoCreate, nodeName, domainName, cssServerName, sharedOptions.isVerbose());
             if (StringUtils.isBlank(applicationGuid)) {

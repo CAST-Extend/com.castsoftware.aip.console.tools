@@ -179,6 +179,28 @@ public class ApplicationServiceImpl implements ApplicationService {
         return appDto.get().getGuid();
     }
 
+    @Override
+    public String onboardApplication(String applicationName, String domainName, boolean verbose, String sourcePath) throws ApplicationServiceException {
+        if (StringUtils.isBlank(applicationName)) {
+            throw new ApplicationServiceException("No application name provided.");
+        }
+        log.log(Level.INFO, "Starting job to onboard Application: " + applicationName);
+        try {
+            String appGuid = jobService.startOnboardApplication(applicationName, null, domainName, null);
+            log.log(Level.INFO, "Onboard Application job has started: application GUID= " + appGuid);
+
+            String jobGuid = jobService.startDiscoverApplication(appGuid, sourcePath, "My version");
+            log.log(Level.INFO, "Onboard Application running job GUID= " + jobGuid);
+
+            return jobService.pollAndWaitForJobFinished(jobGuid,
+                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
+                    verbose);
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not create the application due to the following error", e);
+            throw new ApplicationServiceException("Unable to create application automatically.", e);
+        }
+    }
+
     private Applications getApplications() throws ApplicationServiceException {
         try {
             Applications result = restApiService.getForEntity(ApiEndpointHelper.getApplicationsPath(), Applications.class);
