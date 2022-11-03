@@ -198,9 +198,10 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public String discoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion, String targetNode, boolean verbose) throws ApplicationServiceException {
         try {
-            log.log(Level.INFO, "Starting Discover Application job" + (StringUtils.isNotEmpty(applicationGuid) ? "for application GUID= " + applicationGuid : ""));
+            String discoverAction = StringUtils.isNotEmpty(applicationGuid) ? "Refresh" : "Onboard";
+            log.log(Level.INFO, "Starting Discover Application job" + (StringUtils.isNotEmpty(applicationGuid) ? " for application GUID= " + applicationGuid : ""));
             String jobGuid = jobService.startDiscoverApplication(applicationGuid, sourcePath, versionName, caipVersion, targetNode);
-            log.log(Level.INFO, "Onboard Application running job GUID= " + jobGuid);
+            log.log(Level.INFO, discoverAction + " Application running job GUID= " + jobGuid);
             return jobService.pollAndWaitForJobFinished(jobGuid,
                     (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
                     verbose);
@@ -212,7 +213,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose) throws ApplicationServiceException {
-        log.log(Level.INFO, "Starting job to perform Application First-Scan action (Run Analysis ");
+        log.log(Level.INFO, "Starting job to perform Application First-Scan action (Run Analysis) ");
         try {
             String jobGuid = jobService.startRunFirstScanApplication(applicationGuid, targetNode, caipVersion);
             log.log(Level.INFO, "First-Scan Application running job GUID= " + jobGuid);

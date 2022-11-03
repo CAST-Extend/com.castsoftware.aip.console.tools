@@ -132,7 +132,7 @@ public class JobsServiceImpl implements JobsService {
             SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getFirstScanEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
             return jobStartDto.getJobGuid();
         } catch (ApiCallException e) {
-            log.log(Level.SEVERE, "Unable to perform application First-Scan action'", e);
+            log.log(Level.SEVERE, "Unable to perform application First-Scan action (Run Analysis)", e);
             throw new JobServiceException("The First-Scan of application failed", e);
         }
     }
