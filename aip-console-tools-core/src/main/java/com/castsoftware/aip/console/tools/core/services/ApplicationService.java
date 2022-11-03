@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DomainDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
@@ -53,6 +54,19 @@ public interface ApplicationService {
     String getOrCreateApplicationFromName(String applicationName, boolean autoCreate) throws ApplicationServiceException;
 
     String onboardApplication(String applicationName, String domainName, boolean verbose, String sourcePath) throws ApplicationServiceException;
+
+    String discoverApplication(String applicationGuid, String sourcePath, String versionName,
+                               String caipVersion, String targetNode, boolean verbose) throws ApplicationServiceException;
+
+    ApplicationOnboardingDto getApplicationOnboarding(String applicationGuid) throws ApplicationServiceException;
+
+    boolean isOnboardingSettingsEnabled() throws ApplicationServiceException;
+
+    void setEnableOnboarding(boolean enabled) throws ApplicationServiceException;
+
+    boolean isImagingAvailable() throws ApplicationServiceException;
+
+    String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose) throws ApplicationServiceException;
 
     /**
      * Retrieve an application's GUID from the given application name.

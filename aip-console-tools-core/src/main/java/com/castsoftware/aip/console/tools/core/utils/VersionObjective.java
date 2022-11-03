@@ -14,6 +14,8 @@ public enum VersionObjective {
     SECURITY, //Security Assessment
     FUNCTIONAL_POINTS,
     BLUEPRINT,
+    DATA_SAFETY_CHECKS_GDPR,
+    DATA_SAFETY_CHECKS_PCI,
     DATA_SAFETY; //DataFlow
 
     public static final String OBJECTIVES_DELIMITER = ",";

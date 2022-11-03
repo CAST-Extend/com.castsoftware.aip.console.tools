@@ -79,7 +79,7 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public String uploadFileForOnboarding(File filePath) throws UploadException {
+    public String uploadFileForOnboarding(File filePath, String applicationGuid) throws UploadException {
         String sourcePath;
         final String[] uploadedFilePath = new String[1];
         String archiveExtension = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath.getName());
@@ -87,7 +87,7 @@ public class UploadServiceImpl implements UploadService {
             sourcePath = UUID.randomUUID().toString() + "." + archiveExtension;
             try (InputStream stream = Files.newInputStream(filePath.toPath())) {
                 long fileSize = filePath.length();
-                if (!uploadInputStreamForOnboarding(sourcePath, fileSize, stream, (targetPath) -> uploadedFilePath[0] = targetPath)) {
+                if (!uploadInputStreamForOnboarding(applicationGuid, sourcePath, fileSize, stream, (targetPath) -> uploadedFilePath[0] = targetPath)) {
                     throw new UploadIncompleteException("Local file fully uploaded, but AIP Console expects more content (fileSize on AIP Console not reached). Check the file you provided wasn't modified since the start of the CLI");
                 }
                 return uploadedFilePath[0];
@@ -244,9 +244,12 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public boolean uploadInputStreamForOnboarding(String fileName, long fileSize, InputStream content, Consumer<String> consumer) throws UploadException {
-        ChunkedUploadDto dto = createUpload(ApiEndpointHelper.getApplicationOnboardingUploadPath(), fileName, fileSize);
-        dto = uploadChunk(ApiEndpointHelper.getApplicationOnboardingUploadChunkPath(dto.getGuid()), fileSize, content);
+    public boolean uploadInputStreamForOnboarding(String applicationGuid, String fileName, long fileSize, InputStream content, Consumer<String> consumer) throws UploadException {
+        ChunkedUploadDto dto = StringUtils.isEmpty(applicationGuid) ?
+                createUpload(ApiEndpointHelper.getApplicationOnboardingUploadPath(), fileName, fileSize)
+                : createUpload(ApiEndpointHelper.getRefreshContentsUploadPath(applicationGuid), fileName, fileSize);
+
+        dto = uploadChunk(ApiEndpointHelper.getApplicationOnboardingUploadChunkPath(applicationGuid, dto.getGuid()), fileSize, content);
         if (dto != null) {
             consumer.accept(dto.getTargetUploadFile());
         }

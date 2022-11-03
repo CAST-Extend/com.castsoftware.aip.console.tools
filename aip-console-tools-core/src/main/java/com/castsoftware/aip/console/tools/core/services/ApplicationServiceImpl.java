@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
@@ -9,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.DomainDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
+import com.castsoftware.aip.console.tools.core.dto.ImagingSettingsDto;
 import com.castsoftware.aip.console.tools.core.dto.JsonDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
@@ -186,18 +188,77 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
         log.log(Level.INFO, "Starting job to onboard Application: " + applicationName);
         try {
-            String appGuid = jobService.startOnboardApplication(applicationName, null, domainName, null);
-            log.log(Level.INFO, "Onboard Application job has started: application GUID= " + appGuid);
+            return jobService.startOnboardApplication(applicationName, null, domainName, null);
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not create the application due to the following error", e);
+            throw new ApplicationServiceException("Unable to create application automatically.", e);
+        }
+    }
 
-            String jobGuid = jobService.startDiscoverApplication(appGuid, sourcePath, "My version");
+    @Override
+    public String discoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion, String targetNode, boolean verbose) throws ApplicationServiceException {
+        try {
+            log.log(Level.INFO, "Starting Discover Application job" + (StringUtils.isNotEmpty(applicationGuid) ? "for application GUID= " + applicationGuid : ""));
+            String jobGuid = jobService.startDiscoverApplication(applicationGuid, sourcePath, versionName, caipVersion, targetNode);
             log.log(Level.INFO, "Onboard Application running job GUID= " + jobGuid);
-
             return jobService.pollAndWaitForJobFinished(jobGuid,
                     (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
                     verbose);
         } catch (JobServiceException e) {
-            log.log(Level.SEVERE, "Could not create the application due to the following error", e);
-            throw new ApplicationServiceException("Unable to create application automatically.", e);
+            log.log(Level.SEVERE, "Could not discover application contents due to following error", e);
+            throw new ApplicationServiceException("Unable to discover application contents automatically.", e);
+        }
+    }
+
+    @Override
+    public String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose) throws ApplicationServiceException {
+        log.log(Level.INFO, "Starting job to perform Application First-Scan action (Run Analysis ");
+        try {
+            String jobGuid = jobService.startRunFirstScanApplication(applicationGuid, targetNode, caipVersion);
+            log.log(Level.INFO, "First-Scan Application running job GUID= " + jobGuid);
+            return jobService.pollAndWaitForJobFinished(jobGuid,
+                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
+                    verbose);
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not perform the First-Scan application due to the following error", e);
+            throw new ApplicationServiceException("Unable to Run Analysis automatically.", e);
+        }
+    }
+
+    @Override
+    public boolean isOnboardingSettingsEnabled() throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to retrieve the onboarding mode settings", e);
+        }
+    }
+
+    @Override
+    public boolean isImagingAvailable() throws ApplicationServiceException {
+        try {
+            ImagingSettingsDto imagingDto = restApiService.getForEntity(ApiEndpointHelper.getImagingSettingsEndPoint(), ImagingSettingsDto.class);
+            return imagingDto.isValid();
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to retrieve the onboarding mode settings", e);
+        }
+    }
+
+    @Override
+    public void setEnableOnboarding(boolean enabled) throws ApplicationServiceException {
+        try {
+            restApiService.putForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), JsonDto.of(enabled), String.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to update the 'On-boarding mode' settings", e);
+        }
+    }
+
+    @Override
+    public ApplicationOnboardingDto getApplicationOnboarding(String applicationGuid) throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getApplicationOnboardingPath(applicationGuid), ApplicationOnboardingDto.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to get onboarded application with GUID: " + applicationGuid, e);
         }
     }
 

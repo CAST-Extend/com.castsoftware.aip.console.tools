@@ -56,7 +56,9 @@ public interface JobsService {
      */
     String startOnboardApplication(String applicationName, String nodeName, String domainName, String caipVersion) throws JobServiceException;
 
-    String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName) throws JobServiceException;
+    String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion, String targetNode) throws JobServiceException;
+
+    String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
 
     /**
      * @param cssServerName target CSS server name

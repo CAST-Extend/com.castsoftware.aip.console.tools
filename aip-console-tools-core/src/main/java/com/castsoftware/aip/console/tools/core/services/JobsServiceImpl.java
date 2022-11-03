@@ -7,6 +7,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverApplicationJobRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.FirstScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -94,17 +95,45 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName) throws JobServiceException {
-        DiscoverApplicationJobRequest request = DiscoverApplicationJobRequest.builder()
+    public String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion, String targetNode) throws JobServiceException {
+        DiscoverApplicationJobRequest.DiscoverApplicationJobRequestBuilder requestBuilder = DiscoverApplicationJobRequest.builder()
                 .appGuid(applicationGuid)
-                .sourcePath(sourcePath)
-                .versionName(versionName).build();
+                .sourcePath(sourcePath);
+        if (StringUtils.isNotEmpty(caipVersion)) {
+            requestBuilder.caipVersion(caipVersion);
+        }
+        if (StringUtils.isNotEmpty(targetNode)) {
+            requestBuilder.targetNode(targetNode);
+        }
+        if (StringUtils.isNotEmpty(versionName)) {
+            requestBuilder.versionName(versionName);
+        }
         try {
-            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getDiscoverApplicationEndPoint(), request, SuccessfulJobStartDto.class);
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getDiscoverApplicationEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
             return jobStartDto.getJobGuid();
         } catch (ApiCallException e) {
             log.log(Level.SEVERE, "Unable to discover application '" + applicationGuid + "' providing source path: " + sourcePath, e);
             throw new JobServiceException("Creation of application failed", e);
+        }
+    }
+
+    @Override
+    public String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException {
+        FirstScanApplicationJobRequest.FirstScanApplicationJobRequestBuilder requestBuilder = FirstScanApplicationJobRequest.builder();
+        requestBuilder.appGuid(applicationGuid);
+        if (StringUtils.isNotEmpty(nodeName)) {
+            requestBuilder.targetNode(nodeName);
+        }
+        if (StringUtils.isNotEmpty(caipVersion)) {
+            requestBuilder.caipVersion(caipVersion);
+        }
+
+        try {
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getFirstScanEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            return jobStartDto.getJobGuid();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Unable to perform application First-Scan action'", e);
+            throw new JobServiceException("The First-Scan of application failed", e);
         }
     }
 

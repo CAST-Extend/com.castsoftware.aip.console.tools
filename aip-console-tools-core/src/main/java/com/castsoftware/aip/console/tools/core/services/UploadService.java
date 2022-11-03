@@ -64,7 +64,7 @@ public interface UploadService {
     boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content, boolean extract)
             throws UploadException;
 
-    boolean uploadInputStreamForOnboarding(String fileName, long fileSize, InputStream content, Consumer<String> consumer) throws UploadException;
+    boolean uploadInputStreamForOnboarding(String applicationGuid, String fileName, long fileSize, InputStream content, Consumer<String> consumer) throws UploadException;
 
-    public String uploadFileForOnboarding(File filePath) throws UploadException;
+    public String uploadFileForOnboarding(File filePath, String applicationGuid) throws UploadException;
 }

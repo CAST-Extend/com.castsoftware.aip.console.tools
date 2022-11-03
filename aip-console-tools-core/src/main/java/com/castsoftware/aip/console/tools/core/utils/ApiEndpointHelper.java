@@ -2,10 +2,12 @@ package com.castsoftware.aip.console.tools.core.utils;
 
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import org.apache.commons.lang3.StringUtils;
 
 public class ApiEndpointHelper {
 
     private static final String ROOT_PATH = "/api";
+    private static final String URL_SETTINGS_PATH = ROOT_PATH + "/settings";
     private static final String APPLICATIONS_ENDPOINT = "/applications";
     private static final String JOBS_ENDPOINT = "/jobs";
     private static final String UPLOAD_ENDPOINT = "/upload";
@@ -35,6 +37,9 @@ public class ApiEndpointHelper {
     public static final String URL_ONBOARDING_PATH = "/onboarding";
     public static final String ONBOARD_APPLICATION_ENDPOINT = "/onboard-application";
     public static final String DISCOVER_APPLICATION_ENDPOINT = "/discover-application";
+    public static final String ENABLE_ONBOARDING_PATH = "/enable-onboarding";
+    public static final String IMAGING_SETTINGS_PATH = "/imaging-settings";
+    public static final String FIRST_SCAN_PATH = "/first-scan-application";
 
     public static String getRootPath() {
         return ROOT_PATH + "/";
@@ -69,17 +74,37 @@ public class ApiEndpointHelper {
         return getApplicationsPath() + URL_ONBOARDING_PATH + UPLOAD_ENDPOINT;
     }
 
-    public static String getApplicationOnboardingUploadChunkPath(String uploadGuid) {
+    public static String getRefreshContentsUploadPath(String appGuid) {
+        return getApplicationsPath() + "/" + appGuid + UPLOAD_ENDPOINT;
+    }
+
+    public static String getApplicationOnboardingPath(String appGuid) {
+        return getApplicationPath(appGuid) + URL_ONBOARDING_PATH;
+    }
+
+    public static String getApplicationOnboardingUploadChunkPath(String applicationGuid, String uploadGuid) {
         assert uploadGuid != null && !uploadGuid.isEmpty();
-        return getApplicationOnboardingUploadPath() + "/" + uploadGuid;
+        return (StringUtils.isNotEmpty(applicationGuid) ? getApplicationCreateUploadPath(applicationGuid) : getApplicationOnboardingUploadPath()) + "/" + uploadGuid;
     }
 
     public static String getOnboardApplicationEndPoint() {
         return getJobsEndpoint() + ONBOARD_APPLICATION_ENDPOINT;
     }
 
+    public static String getFirstScanEndPoint() {
+        return getJobsEndpoint() + FIRST_SCAN_PATH;
+    }
+
     public static String getDiscoverApplicationEndPoint() {
         return getJobsEndpoint() + DISCOVER_APPLICATION_ENDPOINT;
+    }
+
+    public static String getEnableOnboardingSettingsEndPoint() {
+        return URL_SETTINGS_PATH + ENABLE_ONBOARDING_PATH;
+    }
+
+    public static String getImagingSettingsEndPoint() {
+        return URL_SETTINGS_PATH + IMAGING_SETTINGS_PATH;
     }
 
     public static String getApplicationUploadPath(String appGuid, String uploadGuid) {

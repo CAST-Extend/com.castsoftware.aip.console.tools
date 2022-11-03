@@ -8,19 +8,21 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
 
-@Builder
 @Getter
 @Setter
+@Builder
 public class DiscoverApplicationJobRequest {
-    private String appGuid;
-    private String sourcePath;
-    private String deliveryConfigGuid;
-    private String onboardGuid;
-    
+    private final String appGuid;
+    private final String sourcePath;
+    private final String deliveryConfigGuid;
+    private final String onboardGuid;
+
     @Builder.Default
     private Set<String> ignorePatterns = new HashSet<>();
     @Builder.Default
     private Set<ExclusionRuleDto> exclusionRules = new HashSet<>();
-    private String versionName;
-    private boolean deleteVersion;
+    private final String versionName;
+    private final boolean deleteVersion;
+    private String caipVersion;
+    private String targetNode;
 }
