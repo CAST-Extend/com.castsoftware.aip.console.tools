@@ -31,10 +31,11 @@ public class VersionDto {
     private boolean configurationChanged;
     private String previousVersion;
     private DeliveryConfigurationDto deliveryConfiguration;
-
+    private String sourcePath;
+    private boolean imagingDone;
     private Set<String> objectives;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public String getPreviousVersion() {
         return previousVersion;
     }

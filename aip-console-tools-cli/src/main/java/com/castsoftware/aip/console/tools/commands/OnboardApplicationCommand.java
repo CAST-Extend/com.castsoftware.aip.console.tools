@@ -2,6 +2,10 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
+import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
+import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
+import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
@@ -51,6 +55,13 @@ public class OnboardApplicationCommand extends BasicCollable {
             description = "A domain is a group of applications. You may use domain to sort/filter applications. Will be created if it doesn't exists. No domain will be assigned if left empty.")
     private String domainName;
 
+    @CommandLine.Option(names = {"-exclude", "--exclude-patterns"},
+            description = "File patterns(glob pattern) to exclude in the delivery, separated with comma")
+    private String exclusionPatterns;
+    @CommandLine.Option(names = {"--exclusion-rules"}, split = ",", type = ExclusionRuleType.class
+            , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
+    private ExclusionRuleType[] exclusionRules;
+
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
@@ -94,7 +105,8 @@ public class OnboardApplicationCommand extends BasicCollable {
             if (app != null) {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
-                firstScan = app.getVersion() == null || StringUtils.isAnyEmpty(app.getImagingTenant(), app.getVersion().getGuid());
+                firstScan = app.getVersion() == null || StringUtils.isAnyEmpty(app.getImagingTenant(), app.getVersion().getGuid())
+                        || !app.getVersion().isImagingDone();
             } else {
                 onboardApplication = true;
             }
@@ -104,12 +116,14 @@ public class OnboardApplicationCommand extends BasicCollable {
             ApplicationOnboardingDto applicationOnboardingDto;
             String caipVersion;
             String targetNode;
-            if (firstScan) {
-                String uploadAction = StringUtils.isNotEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
-                log.info("Prepare to " + uploadAction + " for Application " + applicationName);
-                String sourcePath = uploadService.uploadFileForOnboarding(filePath, existingAppGuid);
-                log.info("Prepare to onboard Application " + applicationName + " with sources: " + sourcePath);
+            String sourcePath;
 
+            String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
+            log.info("Prepare to " + uploadAction + " for Application " + applicationName);
+            sourcePath = uploadService.uploadFileForOnboarding(filePath, existingAppGuid);
+            log.info(uploadAction + "uploaded successfully: " + sourcePath);
+
+            if (firstScan) {
                 applicationGuid = existingAppGuid;
                 if (onboardApplication) {
                     applicationGuid = applicationService.onboardApplication(applicationName, domainName, sharedOptions.isVerbose(), sourcePath);
@@ -130,8 +144,27 @@ public class OnboardApplicationCommand extends BasicCollable {
                 targetNode = applicationOnboardingDto.getTargetNode();
                 existingAppGuid = applicationGuid;
             } else {
+                //For RESCAN PROCESS: re-discover
+                sourcePath = app.getVersion().getSourcePath();
                 caipVersion = app.getCaipVersion();
                 targetNode = app.getTargetNode();
+                Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
+                if (exclusionRules != null && exclusionRules.length > 0) {
+                    exclusions.setInitialExclusionRules(exclusionRules);
+                }
+
+                //discover-packages
+                log.info("Preparing the Application Delivery Configuration");
+                final DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
+                String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(existingAppGuid, sourcePath, exclusions,
+                        VersionStatus.IMAGING_PROCESSED, true, (config) -> deliveryConfig[0] = config);
+                DeliveryConfigurationDto deliveryConfiguration = deliveryConfig[0];
+                log.info("Application Delivery Configuration done: GUID=" + deliveryConfigurationGuid);
+
+                //rediscover-application
+                log.info("Preparing for Rediscover Application action");
+                applicationService.reDiscoverApplication(existingAppGuid, sourcePath, "", deliveryConfiguration, caipVersion, targetNode, sharedOptions.isVerbose());
+                log.info("Rediscover Application done successfully");
             }
 
             //Run Analysis
@@ -139,8 +172,11 @@ public class OnboardApplicationCommand extends BasicCollable {
                 log.info("The 'Run-Analysis' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging.");
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
-            applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose());
-
+            if (firstScan) {
+                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose());
+            } else {
+                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose());
+            }
         } catch (
                 ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

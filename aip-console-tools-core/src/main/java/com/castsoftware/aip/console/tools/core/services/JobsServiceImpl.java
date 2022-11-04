@@ -2,12 +2,12 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.DatabaseConnectionSettingsDto;
+import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverApplicationJobRequest;
-import com.castsoftware.aip.console.tools.core.dto.jobs.FirstScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -15,6 +15,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.OnboardApplicationJobRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -118,8 +119,35 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
+    public String startReDiscoverApplication(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode) throws JobServiceException {
+        DiscoverApplicationJobRequest.DiscoverApplicationJobRequestBuilder requestBuilder = DiscoverApplicationJobRequest.builder()
+                .appGuid(applicationGuid)
+                .sourcePath(sourcePath)
+                .deliveryConfigGuid(deliveryConfig.getGuid())
+                .ignorePatterns(deliveryConfig.getIgnorePatterns())
+                .exclusionRules(deliveryConfig.getExclusionRules());
+
+        if (StringUtils.isNotEmpty(caipVersion)) {
+            requestBuilder.caipVersion(caipVersion);
+        }
+        if (StringUtils.isNotEmpty(targetNode)) {
+            requestBuilder.targetNode(targetNode);
+        }
+        if (StringUtils.isNotEmpty(versionName)) {
+            requestBuilder.versionName(versionName);
+        }
+        try {
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getReDiscoverApplicationEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            return jobStartDto.getJobGuid();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Unable to ReDiscover application '" + applicationGuid + "' providing sources path: " + sourcePath, e);
+            throw new JobServiceException("ReDiscover application failed", e);
+        }
+    }
+
+    @Override
     public String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException {
-        FirstScanApplicationJobRequest.FirstScanApplicationJobRequestBuilder requestBuilder = FirstScanApplicationJobRequest.builder();
+        ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder();
         requestBuilder.appGuid(applicationGuid);
         if (StringUtils.isNotEmpty(nodeName)) {
             requestBuilder.targetNode(nodeName);
@@ -138,6 +166,27 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
+    public String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException {
+        ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
+                .appGuid(applicationGuid);
+        if (StringUtils.isNotEmpty(nodeName)) {
+            requestBuilder.targetNode(nodeName);
+        }
+        if (StringUtils.isNotEmpty(caipVersion)) {
+            requestBuilder.caipVersion(caipVersion);
+        }
+
+        try {
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getReScanApplicationEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            return jobStartDto.getJobGuid();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Unable to perform ReScan application action (Run Analysis)", e);
+            throw new JobServiceException("ReScan application job failed", e);
+        }
+
+    }
+
+    @Override
     public String startCreateApplication(String applicationName, String nodeName, String domainName, boolean inplaceMode, String caipVersion, String cssServerName) throws JobServiceException {
         String cssServerGuid = getCssGuid(cssServerName);
         if (cssServerGuid != null) {
@@ -152,10 +201,10 @@ public class JobsServiceImpl implements JobsService {
         try {
             CreateApplicationJobRequest.CreateApplicationJobRequestBuilder requestBuilder =
                     CreateApplicationJobRequest.builder()
-                        .appName(applicationName)
-                        .inPlaceMode(inplaceMode)
-                        .caipVersion(caipVersion)
-                        .cssGuid(cssServerGuid);
+                            .appName(applicationName)
+                            .inPlaceMode(inplaceMode)
+                            .caipVersion(caipVersion)
+                            .cssGuid(cssServerGuid);
             if(StringUtils.isNotBlank(nodeName)) {
                 requestBuilder.targetNode(nodeName);
             }

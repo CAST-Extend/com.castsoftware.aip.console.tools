@@ -24,5 +24,7 @@ public class ApplicationDto {
     private String targetNode;
 
     private String imagingTenant;
+    private boolean onboarded;
+    private boolean onboardedNotAnalyzed;
     private VersionDto version;
 }

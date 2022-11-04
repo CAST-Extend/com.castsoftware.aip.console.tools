@@ -7,8 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class FirstScanApplicationJobRequest {
-    private final String appGuid;
-    private String targetNode;
-    private String caipVersion;
+public class ScanAndReScanApplicationJobRequest {
+    protected String appGuid;
+    protected String targetNode;
+    protected String caipVersion;
 }

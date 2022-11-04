@@ -25,4 +25,10 @@ public class DiscoverApplicationJobRequest {
     private final boolean deleteVersion;
     private String caipVersion;
     private String targetNode;
+
+    //For ReDiscovery
+    private String fromVersionGuid;
+    private boolean backup = false;
+    @Builder.Default
+    private boolean saveSourceFolderZip = true;
 }

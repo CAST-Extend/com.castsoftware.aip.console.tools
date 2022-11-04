@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -227,6 +228,21 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose) throws ApplicationServiceException {
+        log.log(Level.INFO, "Starting job to perform Rescan Application action (Run Analysis) ");
+        try {
+            String jobGuid = jobService.startRunReScanApplication(applicationGuid, targetNode, caipVersion);
+            log.log(Level.INFO, "Rescan Application running job GUID= " + jobGuid);
+            return jobService.pollAndWaitForJobFinished(jobGuid,
+                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
+                    verbose);
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not perform the Rescan application due to the following error", e);
+            throw new ApplicationServiceException("Unable to Run Rescan application automatically.", e);
+        }
+    }
+
+    @Override
     public boolean isOnboardingSettingsEnabled() throws ApplicationServiceException {
         try {
             return restApiService.getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class);
@@ -365,7 +381,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String createDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, boolean rescan) throws JobServiceException, PackagePathInvalidException {
+    public String discoverPackagesAndCreateDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions,
+                                                                 VersionStatus status, boolean rescan, Consumer<DeliveryConfigurationDto> deliveryConfigConsumer) throws JobServiceException, PackagePathInvalidException {
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
         String flag = apiInfoDto.isEnablePackagePathCheck() ? "enabled" : "disabled";
         log.info("enable.package.path.check option is " + flag);
@@ -374,12 +391,12 @@ public class ApplicationServiceImpl implements ApplicationService {
             Set<DeliveryPackageDto> packages = new HashSet<>();
             VersionDto previousVersion = getApplicationVersion(appGuid)
                     .stream()
-                    .filter(v -> v.getStatus().ordinal() >= VersionStatus.DELIVERED.ordinal())
+                    .filter(v -> v.getStatus().ordinal() >= status.ordinal())
                     .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
             Set<String> ignorePatterns = StringUtils.isEmpty(exclusions.getExcludePatterns()) ?
                     Exclusions.getDefaultIgnorePatterns() : Arrays.stream(exclusions.getExcludePatterns().split(",")).collect(Collectors.toSet());
             if (apiInfoDto.isEnablePackagePathCheck() && previousVersion != null && rescan) {
-                log.info("Copy configuration from previous version: " + previousVersion.getName());
+                log.info("Copy configuration from the previous version: " + previousVersion.getName());
                 packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
                 if (StringUtils.isEmpty(exclusions.getExcludePatterns()) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
@@ -391,7 +408,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .exclusionRules(exclusions.getExclusionRules())
                     .packages(packages)
                     .build();
-
+            if (deliveryConfigConsumer != null) {
+                deliveryConfigConsumer.accept(deliveryConfigurationDto);
+            }
             log.info("Exclusion patterns: " + deliveryConfigurationDto.getIgnorePatterns().stream().collect(Collectors.joining(", ")));
             log.info("Project exclusion rules: " + deliveryConfigurationDto.getExclusionRules().stream().map(ExclusionRuleDto::getRule).collect(Collectors.joining(", ")));
             BaseDto response = restApiService.postForEntity("/api/applications/" + appGuid + "/delivery-configuration", deliveryConfigurationDto, BaseDto.class);
@@ -400,6 +419,26 @@ public class ApplicationServiceImpl implements ApplicationService {
         } catch (ApplicationServiceException | ApiCallException e) {
             throw new JobServiceException("Error creating delivery config", e);
         }
+    }
+
+    @Override
+    public String reDiscoverApplication(String appGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode, boolean verbose) throws ApplicationServiceException {
+        try {
+            log.log(Level.INFO, "Starting ReDiscover Application job for application GUID= " + appGuid);
+            String jobGuid = jobService.startReDiscoverApplication(appGuid, sourcePath, versionName, deliveryConfig, caipVersion, targetNode);
+            log.log(Level.INFO, "ReDiscover Application running job GUID= " + jobGuid);
+            return jobService.pollAndWaitForJobFinished(jobGuid,
+                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
+                    verbose);
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not re-discover application contents due to following error", e);
+            throw new ApplicationServiceException("Unable to re-discover application contents automatically.", e);
+        }
+    }
+
+    @Override
+    public String createDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, boolean rescan) throws JobServiceException, PackagePathInvalidException {
+        return discoverPackagesAndCreateDeliveryConfiguration(appGuid, sourcePath, exclusions, VersionStatus.DELIVERED, rescan, null);
     }
 
     private Set<DeliveryPackageDto> discoverPackages(String appGuid, String sourcePath, String previousVersionGuid) throws PackagePathInvalidException, JobServiceException {
