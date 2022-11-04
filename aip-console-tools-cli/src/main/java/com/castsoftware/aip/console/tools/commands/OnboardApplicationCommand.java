@@ -121,7 +121,7 @@ public class OnboardApplicationCommand extends BasicCollable {
             String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
             log.info("Prepare to " + uploadAction + " for Application " + applicationName);
             sourcePath = uploadService.uploadFileForOnboarding(filePath, existingAppGuid);
-            log.info(uploadAction + "uploaded successfully: " + sourcePath);
+            log.info(uploadAction + " uploaded successfully: " + sourcePath);
 
             if (firstScan) {
                 applicationGuid = existingAppGuid;
@@ -177,18 +177,9 @@ public class OnboardApplicationCommand extends BasicCollable {
             } else {
                 applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose());
             }
-        } catch (
-                ApplicationServiceException e) {
+        } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
-        } /*catch (                UploadException e) {
-            log.error("Error occurred while attempting to upload the given file.", e);
-            return Constants.RETURN_UPLOAD_ERROR;
-        } catch (         JobServiceException e) {
-            return Constants.RETURN_JOB_POLL_ERROR;
-        } catch (                PackagePathInvalidException e) {
-            log.error("Provided Path is invalid", e);
-            return Constants.RETURN_JOB_FAILED;
-        }*/ finally {
+        } finally {
             if (!OnBoardingModeWasOn) {
                 log.info("Setting the 'On-boarding mode OFF' on CAST Imaging Console");
                 applicationService.setEnableOnboarding(false);
@@ -200,6 +191,6 @@ public class OnboardApplicationCommand extends BasicCollable {
             }
         }
 
-        return null;
+        return Constants.RETURN_OK;
     }
 }
