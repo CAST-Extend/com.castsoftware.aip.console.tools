@@ -10,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
@@ -59,7 +60,7 @@ public interface ApplicationService {
     String onboardApplication(String applicationName, String domainName, boolean verbose, String sourcePath) throws ApplicationServiceException;
 
     String discoverApplication(String applicationGuid, String sourcePath, String versionName,
-                               String caipVersion, String targetNode, boolean verbose) throws ApplicationServiceException;
+                               String caipVersion, String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
     ApplicationOnboardingDto getApplicationOnboarding(String applicationGuid) throws ApplicationServiceException;
 
@@ -69,9 +70,9 @@ public interface ApplicationService {
 
     boolean isImagingAvailable() throws ApplicationServiceException;
 
-    String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose) throws ApplicationServiceException;
+    String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
-    String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose) throws ApplicationServiceException;
+    String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
     /**
      * Retrieve an application's GUID from the given application name.
@@ -124,7 +125,8 @@ public interface ApplicationService {
 
     String discoverPackagesAndCreateDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, VersionStatus status, boolean rescan, Consumer<DeliveryConfigurationDto> deliveryConfigConsumer) throws JobServiceException, PackagePathInvalidException;
 
-    String reDiscoverApplication(String appGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode, boolean verbose) throws ApplicationServiceException;
+    String reDiscoverApplication(String appGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig,
+                                 String caipVersion, String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
     /**
      * Get the existing {@code }debug options} settings

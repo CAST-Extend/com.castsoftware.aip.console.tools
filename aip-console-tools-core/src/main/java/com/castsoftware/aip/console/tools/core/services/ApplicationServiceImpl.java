@@ -20,6 +20,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverPackageRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -197,15 +198,14 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String discoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion, String targetNode, boolean verbose) throws ApplicationServiceException {
+    public String discoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion,
+                                      String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         try {
             String discoverAction = StringUtils.isNotEmpty(applicationGuid) ? "Refresh" : "Onboard";
             log.log(Level.INFO, "Starting Discover Application job" + (StringUtils.isNotEmpty(applicationGuid) ? " for application GUID= " + applicationGuid : ""));
             String jobGuid = jobService.startDiscoverApplication(applicationGuid, sourcePath, versionName, caipVersion, targetNode);
             log.log(Level.INFO, discoverAction + " Application running job GUID= " + jobGuid);
-            return jobService.pollAndWaitForJobFinished(jobGuid,
-                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
-                    verbose);
+            return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
         } catch (JobServiceException e) {
             log.log(Level.SEVERE, "Could not discover application contents due to following error", e);
             throw new ApplicationServiceException("Unable to discover application contents automatically.", e);
@@ -213,14 +213,12 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose) throws ApplicationServiceException {
+    public String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         log.log(Level.INFO, "Starting job to perform Application First-Scan action (Run Analysis) ");
         try {
             String jobGuid = jobService.startRunFirstScanApplication(applicationGuid, targetNode, caipVersion);
             log.log(Level.INFO, "First-Scan Application running job GUID= " + jobGuid);
-            return jobService.pollAndWaitForJobFinished(jobGuid,
-                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
-                    verbose);
+            return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
         } catch (JobServiceException e) {
             log.log(Level.SEVERE, "Could not perform the First-Scan application due to the following error", e);
             throw new ApplicationServiceException("Unable to Run Analysis automatically.", e);
@@ -228,14 +226,12 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose) throws ApplicationServiceException {
+    public String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         log.log(Level.INFO, "Starting job to perform Rescan Application action (Run Analysis) ");
         try {
             String jobGuid = jobService.startRunReScanApplication(applicationGuid, targetNode, caipVersion);
             log.log(Level.INFO, "Rescan Application running job GUID= " + jobGuid);
-            return jobService.pollAndWaitForJobFinished(jobGuid,
-                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
-                    verbose);
+            return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
         } catch (JobServiceException e) {
             log.log(Level.SEVERE, "Could not perform the Rescan application due to the following error", e);
             throw new ApplicationServiceException("Unable to Run Rescan application automatically.", e);
@@ -422,14 +418,18 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String reDiscoverApplication(String appGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode, boolean verbose) throws ApplicationServiceException {
+    public String reDiscoverApplication(String appGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig,
+                                        String caipVersion, String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         try {
             log.log(Level.INFO, "Starting ReDiscover Application job for application GUID= " + appGuid);
             String jobGuid = jobService.startReDiscoverApplication(appGuid, sourcePath, versionName, deliveryConfig, caipVersion, targetNode);
             log.log(Level.INFO, "ReDiscover Application running job GUID= " + jobGuid);
-            return jobService.pollAndWaitForJobFinished(jobGuid,
-                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
-                    verbose);
+            return logPollingProvider.pollJobLog(jobGuid);
+            /**
+             return jobService.pollAndWaitForJobFinished(jobGuid,
+             (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
+             verbose);
+             **/
         } catch (JobServiceException e) {
             log.log(Level.SEVERE, "Could not re-discover application contents due to following error", e);
             throw new ApplicationServiceException("Unable to re-discover application contents automatically.", e);

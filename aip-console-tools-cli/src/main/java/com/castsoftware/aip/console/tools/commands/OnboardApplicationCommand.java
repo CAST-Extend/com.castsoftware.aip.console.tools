@@ -6,9 +6,12 @@ import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -65,6 +68,21 @@ public class OnboardApplicationCommand extends BasicCollable {
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
+    class CliLogPollingProviderImpl implements LogPollingProvider {
+        private final boolean verbose;
+
+        CliLogPollingProviderImpl(boolean verbose) {
+            this.verbose = verbose;
+        }
+
+        @Override
+        public String pollJobLog(String jobGuid) throws JobServiceException {
+            return jobsService.pollAndWaitForJobFinished(jobGuid,
+                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
+                    verbose);
+        }
+    }
+
     public OnboardApplicationCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
     }
@@ -117,6 +135,7 @@ public class OnboardApplicationCommand extends BasicCollable {
             String caipVersion;
             String targetNode;
             String sourcePath;
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(sharedOptions.isVerbose());
 
             String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
             log.info("Prepare to " + uploadAction + " for Application " + applicationName);
@@ -136,7 +155,7 @@ public class OnboardApplicationCommand extends BasicCollable {
                 targetNode = app.getTargetNode();
 
                 applicationService.discoverApplication(applicationGuid, sourcePath,
-                        StringUtils.isNotEmpty(applicationGuid) ? "" : "My version", caipVersion, targetNode, sharedOptions.isVerbose());
+                        StringUtils.isNotEmpty(applicationGuid) ? "" : "My version", caipVersion, targetNode, sharedOptions.isVerbose(), cliLogPolling);
                 log.info("Application " + applicationName + " onboarded/refreshed successfully: GUID= " + applicationGuid);
 
                 applicationOnboardingDto = applicationService.getApplicationOnboarding(applicationGuid);
@@ -163,7 +182,8 @@ public class OnboardApplicationCommand extends BasicCollable {
 
                 //rediscover-application
                 log.info("Preparing for Rediscover Application action");
-                applicationService.reDiscoverApplication(existingAppGuid, sourcePath, "", deliveryConfiguration, caipVersion, targetNode, sharedOptions.isVerbose());
+                applicationService.reDiscoverApplication(existingAppGuid, sourcePath, "", deliveryConfiguration,
+                        caipVersion, targetNode, sharedOptions.isVerbose(), cliLogPolling);
                 log.info("Rediscover Application done successfully");
             }
 
@@ -173,9 +193,9 @@ public class OnboardApplicationCommand extends BasicCollable {
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
             if (firstScan) {
-                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose());
+                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose(), cliLogPolling);
             } else {
-                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose());
+                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose(), cliLogPolling);
             }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
