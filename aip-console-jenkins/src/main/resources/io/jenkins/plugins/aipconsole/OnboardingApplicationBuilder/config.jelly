@@ -12,6 +12,9 @@
     <f:entry title="${%domainName}" field="domainName" description="${%domainName.descr}">
         <f:textbox/>
     </f:entry>
+    <f:entry title="${%runAnalysis}" field="runAnalysis" description="${%runAnalysis.descr}">
+        <f:checkbox/>
+    </f:entry>
     <f:advanced title="${%advancedSettings}">
         <f:entry title="${%aipConsoleUrl}" field="aipConsoleUrl" description="${%aipConsoleUrl.descr}">
             <f:textbox field="aipConsoleUrl" value="${aipConsoleUrl}"/>

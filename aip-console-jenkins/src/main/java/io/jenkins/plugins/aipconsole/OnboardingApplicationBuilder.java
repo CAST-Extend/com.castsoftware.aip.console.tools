@@ -47,6 +47,7 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_mode;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_scanMode;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload;
@@ -56,6 +57,7 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 public class OnboardingApplicationBuilder extends CommonActionBuilder {
     private String applicationGuid;
     private String exclusionPatterns = "";
+    private boolean runAnalysis;
 
     class JnksLogPollingProviderImpl implements LogPollingProvider {
         private final PrintStream log;
@@ -191,14 +193,16 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
             }
 
             //Run Analysis
-            if (applicationService.isImagingAvailable()) {
+            if (!isRunAnalysis() || !applicationService.isImagingAvailable()) {
+                String message = !isRunAnalysis() ? OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled()
+                        : OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled();
+                logger.println(message);
+            } else {
                 if (firstScan) {
                     applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
                 } else {
                     applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
                 }
-            } else {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled());
             }
         } catch (ApplicationServiceException | JobServiceException e) {
             e.printStackTrace(logger);
@@ -226,6 +230,19 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
     @DataBoundSetter
     public void setExclusionPatterns(@Nullable String exclusionPatterns) {
         this.exclusionPatterns = exclusionPatterns;
+    }
+
+    @DataBoundSetter
+    public void setRunAnalysis(boolean runAnalysis) {
+        this.runAnalysis = runAnalysis;
+    }
+
+    public boolean getRunAnalysis() {
+        return isRunAnalysis();
+    }
+
+    public boolean isRunAnalysis() {
+        return runAnalysis;
     }
 
     @Override

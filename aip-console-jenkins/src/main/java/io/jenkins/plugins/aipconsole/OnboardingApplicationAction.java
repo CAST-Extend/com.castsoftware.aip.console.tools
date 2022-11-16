@@ -21,6 +21,7 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
     private String nodeName;
     @Nullable
     private String domainName;
+    private boolean runAnalysis = true;
 
     @Nullable
     private String exclusionPatterns = "";
@@ -121,5 +122,17 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
 
     public void setDomainName(@Nullable String domainName) {
         this.domainName = domainName;
+    }
+
+    public void setRunAnalysis(boolean runAnalysis) {
+        this.runAnalysis = runAnalysis;
+    }
+
+    public boolean getRunAnalysis() {
+        return isRunAnalysis();
+    }
+
+    public boolean isRunAnalysis() {
+        return runAnalysis;
     }
 }

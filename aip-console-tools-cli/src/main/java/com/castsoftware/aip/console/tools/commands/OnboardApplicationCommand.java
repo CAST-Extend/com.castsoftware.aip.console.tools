@@ -65,6 +65,12 @@ public class OnboardApplicationCommand extends BasicCollable {
             , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
     private ExclusionRuleType[] exclusionRules;
 
+    @CommandLine.Option(names = {"--run-analysis", "-analyze"},
+            description = "Set this option to false when you plan to only  perform either a first-scan action or a refresh operation"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
+    private boolean runAnalysis = true;
+
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
@@ -188,8 +194,11 @@ public class OnboardApplicationCommand extends BasicCollable {
             }
 
             //Run Analysis
-            if (!applicationService.isImagingAvailable()) {
-                log.info("The 'Run-Analysis' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging.");
+            if (!runAnalysis || !applicationService.isImagingAvailable()) {
+                String message = runAnalysis ?
+                        "The 'Run-Analysis' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging."
+                        : "The 'Run-Analysis' step has been disabled by user. To perform this step do set \"--run-analysis\" option to true";
+                log.info(message);
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
             if (firstScan) {
