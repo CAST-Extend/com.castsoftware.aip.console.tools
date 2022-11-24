@@ -22,4 +22,9 @@ public class ApplicationDto {
     private boolean inPlaceMode;
     private String caipVersion;
     private String targetNode;
+
+    private String imagingTenant;
+    private boolean onboarded;
+    private boolean onboardedNotAnalyzed;
+    private VersionDto version;
 }

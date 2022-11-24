@@ -2,12 +2,15 @@ package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
+import com.castsoftware.aip.console.tools.core.dto.DomainDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
+import com.castsoftware.aip.console.tools.core.dto.ImagingSettingsDto;
 import com.castsoftware.aip.console.tools.core.dto.JsonDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.PendingResultDto;
@@ -17,6 +20,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverPackageRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -36,6 +40,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -74,12 +79,32 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public ApplicationDto getApplicationDetails(String applicationGuid) throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getApplicationPath(applicationGuid), ApplicationDto.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to get an application with GUID: " + applicationGuid, e);
+        }
+    }
+
+    @Override
     public ApplicationDto getApplicationFromName(String applicationName) throws ApplicationServiceException {
+        Applications applications = getApplications();
         return getApplications()
                 .getApplications()
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationName, a.getName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public DomainDto getDomainFromName(String domainName) throws ApplicationServiceException {
+        return getDomains()
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(a -> StringUtils.equalsAnyIgnoreCase(domainName, a.getName()))
                 .findFirst()
                 .orElse(null);
     }
@@ -158,6 +183,98 @@ public class ApplicationServiceImpl implements ApplicationService {
         return appDto.get().getGuid();
     }
 
+    @Override
+    public String onboardApplication(String applicationName, String domainName, boolean verbose, String sourcePath) throws ApplicationServiceException {
+        if (StringUtils.isBlank(applicationName)) {
+            throw new ApplicationServiceException("No application name provided.");
+        }
+        log.log(Level.INFO, "Starting job to onboard Application: " + applicationName);
+        try {
+            return jobService.startOnboardApplication(applicationName, null, domainName, null);
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not create the application due to the following error", e);
+            throw new ApplicationServiceException("Unable to create application automatically.", e);
+        }
+    }
+
+    @Override
+    public String discoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion,
+                                      String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+        try {
+            String discoverAction = StringUtils.isNotEmpty(applicationGuid) ? "Refresh" : "Onboard";
+            log.log(Level.INFO, "Starting Discover Application job" + (StringUtils.isNotEmpty(applicationGuid) ? " for application GUID= " + applicationGuid : ""));
+            String jobGuid = jobService.startDiscoverApplication(applicationGuid, sourcePath, versionName, caipVersion, targetNode);
+            log.log(Level.INFO, discoverAction + " Application running job GUID= " + jobGuid);
+            return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not discover application contents due to following error", e);
+            throw new ApplicationServiceException("Unable to discover application contents automatically.", e);
+        }
+    }
+
+    @Override
+    public String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+        log.log(Level.INFO, "Starting job to perform Application First-Scan action (Run Analysis) ");
+        try {
+            String jobGuid = jobService.startRunFirstScanApplication(applicationGuid, targetNode, caipVersion);
+            log.log(Level.INFO, "First-Scan Application running job GUID= " + jobGuid);
+            return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not perform the First-Scan application due to the following error", e);
+            throw new ApplicationServiceException("Unable to Run Analysis automatically.", e);
+        }
+    }
+
+    @Override
+    public String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+        log.log(Level.INFO, "Starting job to perform Rescan Application action (Run Analysis) ");
+        try {
+            String jobGuid = jobService.startRunReScanApplication(applicationGuid, targetNode, caipVersion);
+            log.log(Level.INFO, "Rescan Application running job GUID= " + jobGuid);
+            return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not perform the Rescan application due to the following error", e);
+            throw new ApplicationServiceException("Unable to Run Rescan application automatically.", e);
+        }
+    }
+
+    @Override
+    public boolean isOnboardingSettingsEnabled() throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to retrieve the onboarding mode settings", e);
+        }
+    }
+
+    @Override
+    public boolean isImagingAvailable() throws ApplicationServiceException {
+        try {
+            ImagingSettingsDto imagingDto = restApiService.getForEntity(ApiEndpointHelper.getImagingSettingsEndPoint(), ImagingSettingsDto.class);
+            return imagingDto.isValid();
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to retrieve the onboarding mode settings", e);
+        }
+    }
+
+    @Override
+    public void setEnableOnboarding(boolean enabled) throws ApplicationServiceException {
+        try {
+            restApiService.putForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), JsonDto.of(enabled), String.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to update the 'On-boarding mode' settings", e);
+        }
+    }
+
+    @Override
+    public ApplicationOnboardingDto getApplicationOnboarding(String applicationGuid) throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getApplicationOnboardingPath(applicationGuid), ApplicationOnboardingDto.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to get onboarded application with GUID: " + applicationGuid, e);
+        }
+    }
+
     private Applications getApplications() throws ApplicationServiceException {
         try {
             Applications result = restApiService.getForEntity(ApiEndpointHelper.getApplicationsPath(), Applications.class);
@@ -165,6 +282,16 @@ public class ApplicationServiceImpl implements ApplicationService {
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to get applications from AIP Console", e);
         }
+    }
+
+    private Set<DomainDto> getDomains() throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity(ApiEndpointHelper.getDomainsPath(), new TypeReference<Set<DomainDto>>() {
+            });
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to get domains from CAST Imaging Console", e);
+        }
+
     }
 
     @Override
@@ -250,7 +377,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String createDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, boolean rescan) throws JobServiceException, PackagePathInvalidException {
+    public String discoverPackagesAndCreateDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions,
+                                                                 VersionStatus status, boolean rescan, Consumer<DeliveryConfigurationDto> deliveryConfigConsumer) throws JobServiceException, PackagePathInvalidException {
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
         String flag = apiInfoDto.isEnablePackagePathCheck() ? "enabled" : "disabled";
         log.info("enable.package.path.check option is " + flag);
@@ -259,12 +387,12 @@ public class ApplicationServiceImpl implements ApplicationService {
             Set<DeliveryPackageDto> packages = new HashSet<>();
             VersionDto previousVersion = getApplicationVersion(appGuid)
                     .stream()
-                    .filter(v -> v.getStatus().ordinal() >= VersionStatus.DELIVERED.ordinal())
+                    .filter(v -> v.getStatus().ordinal() >= status.ordinal())
                     .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
             Set<String> ignorePatterns = StringUtils.isEmpty(exclusions.getExcludePatterns()) ?
                     Exclusions.getDefaultIgnorePatterns() : Arrays.stream(exclusions.getExcludePatterns().split(",")).collect(Collectors.toSet());
             if (apiInfoDto.isEnablePackagePathCheck() && previousVersion != null && rescan) {
-                log.info("Copy configuration from previous version: " + previousVersion.getName());
+                log.info("Copy configuration from the previous version: " + previousVersion.getName());
                 packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
                 if (StringUtils.isEmpty(exclusions.getExcludePatterns()) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
@@ -276,7 +404,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .exclusionRules(exclusions.getExclusionRules())
                     .packages(packages)
                     .build();
-
+            if (deliveryConfigConsumer != null) {
+                deliveryConfigConsumer.accept(deliveryConfigurationDto);
+            }
             log.info("Exclusion patterns: " + deliveryConfigurationDto.getIgnorePatterns().stream().collect(Collectors.joining(", ")));
             log.info("Project exclusion rules: " + deliveryConfigurationDto.getExclusionRules().stream().map(ExclusionRuleDto::getRule).collect(Collectors.joining(", ")));
             BaseDto response = restApiService.postForEntity("/api/applications/" + appGuid + "/delivery-configuration", deliveryConfigurationDto, BaseDto.class);
@@ -285,6 +415,30 @@ public class ApplicationServiceImpl implements ApplicationService {
         } catch (ApplicationServiceException | ApiCallException e) {
             throw new JobServiceException("Error creating delivery config", e);
         }
+    }
+
+    @Override
+    public String reDiscoverApplication(String appGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig,
+                                        String caipVersion, String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+        try {
+            log.log(Level.INFO, "Starting ReDiscover Application job for application GUID= " + appGuid);
+            String jobGuid = jobService.startReDiscoverApplication(appGuid, sourcePath, versionName, deliveryConfig, caipVersion, targetNode);
+            log.log(Level.INFO, "ReDiscover Application running job GUID= " + jobGuid);
+            return logPollingProvider.pollJobLog(jobGuid);
+            /**
+             return jobService.pollAndWaitForJobFinished(jobGuid,
+             (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
+             verbose);
+             **/
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not re-discover application contents due to following error", e);
+            throw new ApplicationServiceException("Unable to re-discover application contents automatically.", e);
+        }
+    }
+
+    @Override
+    public String createDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, boolean rescan) throws JobServiceException, PackagePathInvalidException {
+        return discoverPackagesAndCreateDeliveryConfiguration(appGuid, sourcePath, exclusions, VersionStatus.DELIVERED, rescan, null);
     }
 
     private Set<DeliveryPackageDto> discoverPackages(String appGuid, String sourcePath, String previousVersionGuid) throws PackagePathInvalidException, JobServiceException {

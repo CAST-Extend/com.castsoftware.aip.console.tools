@@ -8,7 +8,9 @@ public enum VersionStatus {
     PURGED,
     DELIVERING,
     DELIVERED,
+    DISCOVERED,
     ACCEPTED,
+    UPDATING_EXTENSIONS,
     ANALYSING,
     ANALYSIS_ONGOING,
     ANALYSIS_DONE,
@@ -20,7 +22,8 @@ public enum VersionStatus {
     SNAPSHOT_ONGOING,
     SNAPSHOT_TAKEN,
     SNAPSHOT_DONE,
-    VALIDATED;
+    VALIDATED,
+    PUBLISHING;
 
     @JsonCreator
     public static VersionStatus fromString(String value) {

@@ -1,0 +1,32 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:entry title="${%applicationName}" field="applicationName" description="${%appName.descr}">
+        <f:textbox/>
+    </f:entry>
+    <f:entry title="${%filePath}" field="filePath" description="${%filePath.descr}">
+        <f:textbox/>
+    </f:entry>
+    <f:entry title="${%exclusionPatterns}" field="exclusionPatterns" description="${%exclusionPatterns.descr}">
+        <f:textbox/>
+    </f:entry>
+    <f:entry title="${%domainName}" field="domainName" description="${%domainName.descr}">
+        <f:textbox/>
+    </f:entry>
+    <f:entry title="${%runAnalysis}" field="runAnalysis" description="${%runAnalysis.descr}">
+        <f:checkbox/>
+    </f:entry>
+    <f:advanced title="${%advancedSettings}">
+        <f:entry title="${%aipConsoleUrl}" field="aipConsoleUrl" description="${%aipConsoleUrl.descr}">
+            <f:textbox field="aipConsoleUrl" value="${aipConsoleUrl}"/>
+        </f:entry>
+        <f:entry title="${%apiKey}" field="apiKey" description="${%apiKey.descr}">
+            <f:password/>
+        </f:entry>
+        <f:entry title="${%nodeName}" field="nodeName" description="${%nodeName.descr}">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="${%timeout}" field="timeout" description="${%timeout.descr}">
+            <f:number default="90"/>
+        </f:entry>
+    </f:advanced>
+</j:jelly>

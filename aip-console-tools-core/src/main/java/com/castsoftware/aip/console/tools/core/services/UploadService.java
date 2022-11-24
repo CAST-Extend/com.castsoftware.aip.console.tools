@@ -4,6 +4,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 public interface UploadService {
 
@@ -62,4 +63,8 @@ public interface UploadService {
      */
     boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content, boolean extract)
             throws UploadException;
+
+    boolean uploadInputStreamForOnboarding(String applicationGuid, String fileName, long fileSize, InputStream content, Consumer<String> consumer) throws UploadException;
+
+    public String uploadFileForOnboarding(File filePath, String applicationGuid) throws UploadException;
 }

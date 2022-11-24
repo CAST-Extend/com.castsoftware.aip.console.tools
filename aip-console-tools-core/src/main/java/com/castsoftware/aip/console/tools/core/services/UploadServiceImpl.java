@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 @Log
@@ -67,13 +68,35 @@ public class UploadServiceImpl implements UploadService {
         this.extractPollSleep = extractPollSleep;
     }
 
-    public String getSourcesFolder(){
+    @Override
+    public String getSourcesFolder() {
         try {
-            return restApiService.getForEntity("/api/settings/sources-folder",  AbsolutePathDto.class).getData();
+            return restApiService.getForEntity("/api/settings/sources-folder", AbsolutePathDto.class).getData();
         } catch (ApiCallException e) {
-            log.log(Level.SEVERE,"Unable to check remote location of provided folder.", e);
+            log.log(Level.SEVERE, "Unable to check remote location of provided folder.", e);
         }
         return null;
+    }
+
+    @Override
+    public String uploadFileForOnboarding(File filePath, String applicationGuid) throws UploadException {
+        String sourcePath;
+        final String[] uploadedFilePath = new String[1];
+        String archiveExtension = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath.getName());
+        if (StringUtils.equalsAnyIgnoreCase(archiveExtension, Constants.ALLOWED_ARCHIVE_EXTENSIONS)) {
+            sourcePath = UUID.randomUUID().toString() + "." + archiveExtension;
+            try (InputStream stream = Files.newInputStream(filePath.toPath())) {
+                long fileSize = filePath.length();
+                if (!uploadInputStreamForOnboarding(applicationGuid, sourcePath, fileSize, stream, (targetPath) -> uploadedFilePath[0] = targetPath)) {
+                    throw new UploadIncompleteException("Local file fully uploaded, but AIP Console expects more content (fileSize on AIP Console not reached). Check the file you provided wasn't modified since the start of the CLI");
+                }
+                return uploadedFilePath[0];
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "Unable to read archive content to be uploaded.", e);
+                throw new UploadException(e);
+            }
+        }
+        return uploadedFilePath[0];
     }
 
     @Override
@@ -134,10 +157,7 @@ public class UploadServiceImpl implements UploadService {
         return uploadInputStream(appGuid, fileName, fileSize, content, false);
     }
 
-    @Override
-    public boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content, boolean extract)
-            throws UploadException {
-        String createUploadEndpoint = ApiEndpointHelper.getApplicationCreateUploadPath(appGuid);
+    private ChunkedUploadDto createUpload(String createUploadEndpoint, String fileName, long fileSize) throws UploadException {
         CreateUploadRequest request = new CreateUploadRequest();
         request.setFileName(fileName);
         request.setFileSize(fileSize);
@@ -151,11 +171,14 @@ public class UploadServiceImpl implements UploadService {
             log.log(Level.SEVERE, "Error while trying to create upload", e);
             throw new UploadException("Unable to create upload", e);
         }
-
         if (dto == null || StringUtils.isBlank(dto.getGuid())) {
-            throw new UploadException("Upload was not created on AIP Console");
+            throw new UploadException("Upload was not created on AIP Imaging Console");
         }
-        String uploadChunkEndpoint = ApiEndpointHelper.getApplicationUploadPath(appGuid, dto.getGuid());
+        return dto;
+    }
+
+    private ChunkedUploadDto uploadChunk(String uploadChunkEndpoint, long fileSize, InputStream content) throws UploadException {
+        ChunkedUploadDto dto = null;
         int currentChunk = 1;
         try {
             long currentOffset = 0;
@@ -206,7 +229,6 @@ public class UploadServiceImpl implements UploadService {
                 assert dto != null;
                 assert dto.getCurrentOffset() == currentOffset;
             }
-
         } catch (ApiCallException | IOException e) {
             log.info("Error occurred during upload. Trying to delete before failing.");
             try {
@@ -218,8 +240,32 @@ public class UploadServiceImpl implements UploadService {
             }
             throw new UploadException("Error occurred while uploading chunk number " + currentChunk, e);
         }
+        return dto;
+    }
 
-        boolean uploadComplete = StringUtils.equalsAnyIgnoreCase(dto.getStatus(), ChunkedUploadStatus.UPLOADED.name(), "completed");
+    @Override
+    public boolean uploadInputStreamForOnboarding(String applicationGuid, String fileName, long fileSize, InputStream content, Consumer<String> consumer) throws UploadException {
+        ChunkedUploadDto dto = StringUtils.isEmpty(applicationGuid) ?
+                createUpload(ApiEndpointHelper.getApplicationOnboardingUploadPath(), fileName, fileSize)
+                : createUpload(ApiEndpointHelper.getRefreshContentsUploadPath(applicationGuid), fileName, fileSize);
+
+        dto = uploadChunk(ApiEndpointHelper.getApplicationOnboardingUploadChunkPath(applicationGuid, dto.getGuid()), fileSize, content);
+        if (dto != null) {
+            consumer.accept(dto.getTargetUploadFile());
+        }
+        return dto != null && StringUtils.equalsAnyIgnoreCase(dto.getStatus(), ChunkedUploadStatus.UPLOADED.name(), "uploaded");
+    }
+
+    @Override
+    public boolean uploadInputStream(String appGuid, String fileName, long fileSize, InputStream content, boolean extract)
+            throws UploadException {
+        String createUploadEndpoint = ApiEndpointHelper.getApplicationCreateUploadPath(appGuid);
+        ChunkedUploadDto dto = createUpload(createUploadEndpoint, fileName, fileSize);
+
+        String uploadChunkEndpoint = ApiEndpointHelper.getApplicationUploadPath(appGuid, dto.getGuid());
+        dto = uploadChunk(uploadChunkEndpoint, fileSize, content);
+
+        boolean uploadComplete = dto != null && StringUtils.equalsAnyIgnoreCase(dto.getStatus(), ChunkedUploadStatus.UPLOADED.name(), "completed");
         // return if enablePackagePath is false or the upload was not complete
         if (!uploadComplete || !extract) {
             return uploadComplete;

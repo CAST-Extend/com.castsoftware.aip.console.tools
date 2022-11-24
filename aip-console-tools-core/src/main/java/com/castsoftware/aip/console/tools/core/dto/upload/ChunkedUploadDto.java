@@ -28,7 +28,7 @@ public class ChunkedUploadDto {
     private boolean resumable;
     private Date expirationDate;
     private String status;
-
+    private String targetUploadFile;
     @Override
     public boolean equals(Object o) {
         if (this == o) {
