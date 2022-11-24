@@ -51,7 +51,6 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -61,7 +60,6 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_fileNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_nodeNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_uploadFailed;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_noVersionAvailable;
@@ -466,7 +464,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                         throw new UploadException("Uploading was not completed successfully.");
                     }
 
-                    fileName = "upload:" + applicationName + "/" + fileName;
+                    fileName = "upload:" + variableAppName + "/" + fileName;
                 }
             }
         } catch (ApplicationServiceException e) {

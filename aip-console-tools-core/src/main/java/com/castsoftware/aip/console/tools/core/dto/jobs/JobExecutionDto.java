@@ -1,6 +1,5 @@
 package com.castsoftware.aip.console.tools.core.dto.jobs;
 
-import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
@@ -24,6 +23,7 @@ public class JobExecutionDto {
     private Date modifiedDate;
     private JobType jobType;
     private String currentStep;
+    private String currentPhase;
     private String startedBy;
     private Map<String, String> jobParameters = new HashMap<>();
     private List<JobStepExecutionDto> jobStepExecutions = new ArrayList<>();

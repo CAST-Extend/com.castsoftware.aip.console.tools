@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -45,6 +46,24 @@ public interface JobsService {
      * @throws JobServiceException If an error occurs while starting the job
      */
     String startCreateApplication(String applicationName, String nodeName, String domainName, boolean inplaceMode, String caipVersion, String cssServerName) throws JobServiceException;
+
+    /**
+     * @param applicationName
+     * @param nodeName
+     * @param domainName
+     * @param caipVersion
+     * @return Application GUID
+     * @throws JobServiceException
+     */
+    String startOnboardApplication(String applicationName, String nodeName, String domainName, String caipVersion) throws JobServiceException;
+
+    String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion, String targetNode) throws JobServiceException;
+
+    String startReDiscoverApplication(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode) throws JobServiceException;
+
+    String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
+
+    String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
 
     /**
      * @param cssServerName target CSS server name

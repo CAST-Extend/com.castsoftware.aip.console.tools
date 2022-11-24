@@ -7,7 +7,6 @@ import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -253,6 +252,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
                 log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", resolveSnapshotName, applicationName));
                 requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);
             }
+            log.println("Job request : " + requestBuilder.buildJobRequest().toString());
 
             jobGuid = jobsService.startJob(requestBuilder);
             log.println(SnapshotBuilder_Snapshot_info_pollJobMessage());
