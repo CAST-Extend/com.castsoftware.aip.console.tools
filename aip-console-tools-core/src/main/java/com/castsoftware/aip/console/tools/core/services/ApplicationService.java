@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.core.services;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public interface ApplicationService {
+    ApiInfoDto getAipConsoleApiInfo();
 
     String getApplicationGuidFromName(String applicationName) throws ApplicationServiceException;
 

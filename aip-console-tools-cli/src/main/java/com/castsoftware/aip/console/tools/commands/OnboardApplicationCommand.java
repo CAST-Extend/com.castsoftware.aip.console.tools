@@ -17,6 +17,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,9 @@ public class OnboardApplicationCommand extends BasicCollable {
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
+    //This version can be null if failed to convert from string
+    private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
+
     class CliLogPollingProviderImpl implements LogPollingProvider {
         private final boolean verbose;
 
@@ -95,6 +99,16 @@ public class OnboardApplicationCommand extends BasicCollable {
 
     @Override
     public Integer call() throws Exception {
+        String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
+        if (MIN_VERSION != null && StringUtils.isNotEmpty(apiVersion)) {
+            VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
+            if (serverApiVersion != null && MIN_VERSION.isHigherThan(serverApiVersion)) {
+                log.error("This feature {} is not compatible with the CAST Imaging Console version {}. Please upgrade to minimum {} version."
+                        , "Onboard Application", apiVersion, MIN_VERSION.toString());
+                return Constants.RETURN_SERVER_VERSION_NOT_COMPATIBLE;
+            }
+        }
+
         if (StringUtils.isBlank(applicationName)) {
             log.error("Application name should not be empty.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;

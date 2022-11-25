@@ -62,6 +62,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public ApiInfoDto getAipConsoleApiInfo() {
+        return restApiService.getAipConsoleApiInfo();
+    }
+
+    @Override
     public String getApplicationNameFromGuid(String applicationGuid) throws ApplicationServiceException {
         ApplicationDto app = getApplicationFromGuid(applicationGuid);
         return app == null ? null : app.getName();

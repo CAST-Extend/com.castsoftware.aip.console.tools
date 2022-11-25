@@ -16,6 +16,7 @@ public class OnboardingApplicationBuilderTest extends BaseBuilderTest {
     @Before
     public void setUp() throws Exception {
         super.startUp();
+        onboardingApplicationBuilder = new OnboardingApplicationBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         MockitoAnnotations.initMocks(this);
     }
 
