@@ -2,10 +2,12 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.OnboardApplicationCommand;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
+import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -14,15 +16,22 @@ import picocli.CommandLine;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {AipConsoleToolsCliIntegrationTest.class})
 @ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
 public class OnboardingApplicationCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
-    @Autowired
+    @InjectMocks
     private OnboardApplicationCommand onboardApplicationCommand;
+
+    @Override
+    protected void initializePrivateMocks() {
+        assignMockedBeans(onboardApplicationCommand);
+    }
 
     @Override
     protected void cleanupTestCommand() {
@@ -49,7 +58,6 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
 
-
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.4.9-funcrel").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
@@ -63,8 +71,8 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
 
     @Test
     public void testOnboardingApplication_WithCompatibleVersion() throws Exception {
-        String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY,
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
@@ -73,6 +81,8 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
+        doThrow(ApiCallException.class).when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
+        doThrow(ApplicationServiceException.class).when(applicationService).isOnboardingSettingsEnabled();
 
         runStringArgs(onboardApplicationCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
