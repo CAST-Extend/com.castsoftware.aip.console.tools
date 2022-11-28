@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools;
 
+import com.castsoftware.aip.console.tools.commands.BasicCollable;
 import com.castsoftware.aip.console.tools.commands.SharedOptions;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
@@ -15,9 +16,11 @@ import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.util.ReflectionUtils;
 import picocli.CommandLine;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -71,9 +74,14 @@ public abstract class AipConsoleToolsCliBaseTest {
                 "--process-imaging", "--backup",
                 "--backup-name", TestConstants.TEST_BACKUP_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN};
+
+        initializePrivateMocks();
     }
 
     protected abstract void cleanupTestCommand();
+
+    protected void initializePrivateMocks() {
+    }
 
     protected List<String> getUnExpectedParameters() {
         return unExpectedParameters;
@@ -104,6 +112,21 @@ public abstract class AipConsoleToolsCliBaseTest {
         // ===================================
         cleanupTestCommand();
         folder.delete();
+    }
+
+    protected void assignMockedBeans(BasicCollable command) {
+        Class<? extends BasicCollable> commandClass = command.getClass();
+        Field jobsServiceField = ReflectionUtils.findField(commandClass, "jobsService");
+        ReflectionUtils.makeAccessible(jobsServiceField);
+        ReflectionUtils.setField(jobsServiceField, command, jobsService);
+
+        Field restApiServiceField = ReflectionUtils.findField(commandClass, "restApiService");
+        ReflectionUtils.makeAccessible(restApiServiceField);
+        ReflectionUtils.setField(restApiServiceField, command, restApiService);
+
+        Field applicationServiceField = ReflectionUtils.findField(commandClass, "applicationService");
+        ReflectionUtils.makeAccessible(applicationServiceField);
+        ReflectionUtils.setField(applicationServiceField, command, applicationService);
     }
 
     protected void runStringArgs(Callable<Integer> command, String[] args) {

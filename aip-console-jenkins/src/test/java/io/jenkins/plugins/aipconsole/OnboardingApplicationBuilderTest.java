@@ -16,6 +16,7 @@ public class OnboardingApplicationBuilderTest extends BaseBuilderTest {
     @Before
     public void setUp() throws Exception {
         super.startUp();
+        onboardingApplicationBuilder = new OnboardingApplicationBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         MockitoAnnotations.initMocks(this);
     }
 
@@ -24,8 +25,9 @@ public class OnboardingApplicationBuilderTest extends BaseBuilderTest {
         FreeStyleProject project = getProjectWithBuilder(onboardingApplicationBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
-        OnboardingApplicationBuilder expectedResults = new OnboardingApplicationBuilder("", "");
+        OnboardingApplicationBuilder expectedResults = new OnboardingApplicationBuilder("", "archive.zip");
         expectedResults.setDomainName("");
+        expectedResults.setApplicationName(TEST_APP_NAME);
         jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
     }
 }
