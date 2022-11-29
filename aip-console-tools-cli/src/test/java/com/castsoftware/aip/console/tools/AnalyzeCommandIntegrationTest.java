@@ -12,7 +12,6 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -23,7 +22,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import picocli.CommandLine;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.function.Function;
@@ -62,13 +60,6 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         resetSharedOptions(analyzeCommand.getSharedOptions());
         analyzeCommand.setApplicationName(null);
         analyzeCommand.setVersionName(null);
-    }
-
-    @Override
-    @Before
-    public void startup() throws IOException {
-        super.startup();
-        // Add others stub below
     }
 
     @Test

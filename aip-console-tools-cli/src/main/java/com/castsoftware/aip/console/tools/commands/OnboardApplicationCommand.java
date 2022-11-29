@@ -8,8 +8,6 @@ import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
@@ -26,7 +24,6 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @CommandLine.Command(
@@ -104,17 +101,6 @@ public class OnboardApplicationCommand extends BasicCollable {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
 
-        try {
-            if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
-                restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
-            }
-            restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
-        } catch (ApiKeyMissingException e) {
-            return Constants.RETURN_NO_PASSWORD;
-        } catch (ApiCallException e) {
-            return Constants.RETURN_LOGIN_ERROR;
-        }
-
         String applicationGuid;
         Thread shutdownHook = null;
         boolean firstScan = true;
@@ -145,7 +131,7 @@ public class OnboardApplicationCommand extends BasicCollable {
             String caipVersion;
             String targetNode;
             String sourcePath;
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(sharedOptions.isVerbose());
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(getSharedOptions().isVerbose());
 
             String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
             log.info("Prepare to " + uploadAction + " for Application " + applicationName);
@@ -155,7 +141,7 @@ public class OnboardApplicationCommand extends BasicCollable {
             if (firstScan) {
                 applicationGuid = existingAppGuid;
                 if (onboardApplication) {
-                    applicationGuid = applicationService.onboardApplication(applicationName, domainName, sharedOptions.isVerbose(), sourcePath);
+                    applicationGuid = applicationService.onboardApplication(applicationName, domainName, getSharedOptions().isVerbose(), sourcePath);
                     log.info("Onboard Application job has started: application GUID= " + applicationGuid);
                 }
 
@@ -165,7 +151,7 @@ public class OnboardApplicationCommand extends BasicCollable {
                 targetNode = app.getTargetNode();
 
                 applicationService.discoverApplication(applicationGuid, sourcePath,
-                        StringUtils.isNotEmpty(applicationGuid) ? "" : "My version", caipVersion, targetNode, sharedOptions.isVerbose(), cliLogPolling);
+                        StringUtils.isNotEmpty(applicationGuid) ? "" : "My version", caipVersion, targetNode, getSharedOptions().isVerbose(), cliLogPolling);
                 log.info("Application " + applicationName + " onboarded/refreshed successfully: GUID= " + applicationGuid);
 
                 applicationOnboardingDto = applicationService.getApplicationOnboarding(applicationGuid);
@@ -193,7 +179,7 @@ public class OnboardApplicationCommand extends BasicCollable {
                 //rediscover-application
                 log.info("Preparing for Rediscover Application action");
                 applicationService.reDiscoverApplication(existingAppGuid, sourcePath, "", deliveryConfiguration,
-                        caipVersion, targetNode, sharedOptions.isVerbose(), cliLogPolling);
+                        caipVersion, targetNode, getSharedOptions().isVerbose(), cliLogPolling);
                 log.info("Rediscover Application done successfully");
             }
 
@@ -206,9 +192,9 @@ public class OnboardApplicationCommand extends BasicCollable {
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
             if (firstScan) {
-                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose(), cliLogPolling);
+                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, getSharedOptions().isVerbose(), cliLogPolling);
             } else {
-                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose(), cliLogPolling);
+                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, getSharedOptions().isVerbose(), cliLogPolling);
             }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

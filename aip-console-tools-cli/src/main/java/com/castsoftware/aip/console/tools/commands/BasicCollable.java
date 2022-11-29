@@ -1,6 +1,8 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 @Setter
@@ -53,8 +56,21 @@ public abstract class BasicCollable implements Callable<Integer> {
         return null;
     }
 
+    public abstract SharedOptions getSharedOptions();
+
     @Override
     public Integer call() throws Exception {
+        try {
+            if (getSharedOptions().getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
+                restApiService.setTimeout(getSharedOptions().getTimeout(), TimeUnit.SECONDS);
+            }
+            restApiService.validateUrlAndKey(getSharedOptions().getFullServerRootUrl(), getSharedOptions().getUsername(), getSharedOptions().getApiKeyValue());
+        } catch (ApiKeyMissingException e) {
+            return Constants.RETURN_NO_PASSWORD;
+        } catch (ApiCallException e) {
+            return Constants.RETURN_LOGIN_ERROR;
+        }
+
         ApiInfoDto apiInfoDto = applicationService.getAipConsoleApiInfo();
         String apiVersion = apiInfoDto.getApiVersion();
         if (getMinVersion() != null && StringUtils.isNotEmpty(apiVersion)) {

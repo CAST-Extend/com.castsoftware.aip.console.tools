@@ -79,6 +79,12 @@ public abstract class AipConsoleToolsCliBaseTest {
                 "--backup-name", TestConstants.TEST_BACKUP_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN};
 
+        //Others startup stubbing
+        additionalStartup();
+    }
+
+    protected void additionalStartup() {
+        // Add others stub below
     }
 
     protected abstract void cleanupTestCommand();
