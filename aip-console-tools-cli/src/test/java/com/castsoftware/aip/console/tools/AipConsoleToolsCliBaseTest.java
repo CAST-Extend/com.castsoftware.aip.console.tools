@@ -59,11 +59,15 @@ public abstract class AipConsoleToolsCliBaseTest {
 
     @Before
     public void startup() throws IOException {
+        initializePrivateMocks();
+
         sflPath = folder.getRoot().toPath().resolve("SFL");
         Files.createDirectories(sflPath);
         zippedSourcesPath = sflPath.resolve("fake_sources.zip");
         zippedSourcesPath.toFile().createNewFile();
-        when(restApiService.getAipConsoleApiInfo()).thenReturn(ApiInfoDto.builder().apiVersion("1.23.0").build());
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("1.23.0").build();
+        when(restApiService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
+        when(applicationService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
         defaultArgs = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY,
                 "--app-name=" + TestConstants.TEST_CREATRE_APP,
@@ -75,7 +79,6 @@ public abstract class AipConsoleToolsCliBaseTest {
                 "--backup-name", TestConstants.TEST_BACKUP_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN};
 
-        initializePrivateMocks();
     }
 
     protected abstract void cleanupTestCommand();

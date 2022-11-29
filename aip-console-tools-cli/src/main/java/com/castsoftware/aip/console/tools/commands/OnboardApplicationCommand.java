@@ -98,17 +98,7 @@ public class OnboardApplicationCommand extends BasicCollable {
     }
 
     @Override
-    public Integer call() throws Exception {
-        String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
-        if (MIN_VERSION != null && StringUtils.isNotEmpty(apiVersion)) {
-            VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
-            if (serverApiVersion != null && MIN_VERSION.isHigherThan(serverApiVersion)) {
-                log.error("This feature {} is not compatible with the CAST Imaging Console version {}. Please upgrade to minimum {} version."
-                        , "Onboard Application", apiVersion, MIN_VERSION.toString());
-                return Constants.RETURN_SERVER_VERSION_NOT_COMPATIBLE;
-            }
-        }
-
+    public Integer processCallCommand() throws Exception {
         if (StringUtils.isBlank(applicationName)) {
             log.error("Application name should not be empty.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
@@ -235,5 +225,10 @@ public class OnboardApplicationCommand extends BasicCollable {
         }
 
         return Constants.RETURN_OK;
+    }
+
+    @Override
+    protected VersionInformation getMinVersion() {
+        return MIN_VERSION;
     }
 }
