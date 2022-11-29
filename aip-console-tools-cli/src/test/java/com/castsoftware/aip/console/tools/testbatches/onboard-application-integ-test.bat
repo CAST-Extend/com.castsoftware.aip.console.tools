@@ -9,8 +9,8 @@ set EXTEND_URL=https://extend.castsoftware.com
 set PATH=C:\CAST-Caches\Win64;%PATH%
 
 REM
-SET MORE_OPTIONS=
-if not "%RUN_ANALYSIS%" == "true" SET MORE_OPTIONS=--run-analysis
+SET MORE_OPTIONS=""
+if "%RUN_ANALYSIS%" == "true" SET MORE_OPTIONS=--run-analysis
 if not "%EXCLUSION_PATTERNS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclude-patterns="%EXCLUSION_PATTERNS%"
 if not "%EXCLUSION_RULES%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclusion-rules="%EXCLUSION_RULES%"
 
