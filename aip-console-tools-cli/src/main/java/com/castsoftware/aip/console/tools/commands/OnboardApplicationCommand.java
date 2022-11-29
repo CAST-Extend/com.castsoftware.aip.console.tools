@@ -99,6 +99,17 @@ public class OnboardApplicationCommand extends BasicCollable {
 
     @Override
     public Integer call() throws Exception {
+        try {
+            if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
+                restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
+            }
+            restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
+        } catch (ApiKeyMissingException e) {
+            return Constants.RETURN_NO_PASSWORD;
+        } catch (ApiCallException e) {
+            return Constants.RETURN_LOGIN_ERROR;
+        }
+
         String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
         if (MIN_VERSION != null && StringUtils.isNotEmpty(apiVersion)) {
             VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
@@ -112,17 +123,6 @@ public class OnboardApplicationCommand extends BasicCollable {
         if (StringUtils.isBlank(applicationName)) {
             log.error("Application name should not be empty.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
-        }
-
-        try {
-            if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
-                restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
-            }
-            restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
-        } catch (ApiKeyMissingException e) {
-            return Constants.RETURN_NO_PASSWORD;
-        } catch (ApiCallException e) {
-            return Constants.RETURN_LOGIN_ERROR;
         }
 
         String applicationGuid;
