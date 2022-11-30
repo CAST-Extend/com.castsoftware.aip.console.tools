@@ -29,6 +29,8 @@ public class Constants {
     public static final int RETURN_MISSING_FILE = 17;
     public static final int RETURN_JOB_CANCELED = 18;
     public static final int RETURN_RUN_ANALYSIS_DISABLED = 19;
+    public static final int RETURN_SERVER_VERSION_NOT_COMPATIBLE = 20;
+    public static final int RETURN_ONBOARD_APPLICATION__DISABLED = 21;
     public static final String DEFAULT_DOMAIN = "-";
 
     public static final int UNKNOWN_ERROR = 1000;

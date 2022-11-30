@@ -143,6 +143,21 @@ This step will perform the following actions :
 
 The Snapshot can then be found inside the `Snapshot` tab in AIP Console.
 
+#### Onboard Application
+
+Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST
+Imaging Console.
+
+This command is used to perform the *first scan* or to *refresh* the sources contents before optionally run the
+analysis.
+
+**build step**
+
+![build-step-onboard-application](doc/images/build-step-onboard-application.png)
+
+**run with parameters**
+![onboard-application](doc/images/onboard-application.png)
+
 ## Advanced Usage
 
 This section will provide a detailed look at each parameter available for each type of jobs.
@@ -151,7 +166,8 @@ This section will provide a detailed look at each parameter available for each t
 
 Variable expansion means replacing some variables in text fields to an environment variable value.
 
-For example, creating an application with name "${JOB_NAME} (jenkins)", the Plugin will replace '${JOB_NAME}' with the name of the current running job.
+For example, creating an application with name "${JOB_NAME} (jenkins)", the Plugin will replace '${JOB_NAME}' with the
+name of the current running job.
 You can use these environment variables on the following fields in each jobs (when defined):
 
 * Application name

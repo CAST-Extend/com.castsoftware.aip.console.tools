@@ -13,6 +13,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -41,6 +42,7 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_displayName;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionCompleted;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionDone;
@@ -58,6 +60,9 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
     private String applicationGuid;
     private String exclusionPatterns = "";
     private boolean runAnalysis;
+
+    //This version can be null if failed to convert from string
+    private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
 
     class JnksLogPollingProviderImpl implements LogPollingProvider {
         private final PrintStream log;
@@ -109,6 +114,16 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         super.perform(run, filePath, launcher, listener);
 
+        String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
+        if (MIN_VERSION != null && StringUtils.isNotEmpty(apiVersion)) {
+            VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
+            if (serverApiVersion != null && MIN_VERSION.isHigherThan(serverApiVersion)) {
+                listener.error(OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible("Onboard Application", apiVersion, MIN_VERSION.toString()));
+                run.setResult(Result.FAILURE);
+                return;
+            }
+        }
+
         String expandedAppName = environmentVariables.expand(getApplicationName());
         String expandedFilePath = environmentVariables.expand(getFilePath());
         String expandedDomainName = environmentVariables.expand(getDomainName());
@@ -118,8 +133,10 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
         try {
             OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
             if (!OnBoardingModeWasOn) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_mode("ON"));
-                applicationService.setEnableOnboarding(true);
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_mode("OFF"));
+                //applicationService.setEnableOnboarding(true);
+                run.setResult(getDefaultResult());
+                return;
             }
 
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup(expandedAppName));
