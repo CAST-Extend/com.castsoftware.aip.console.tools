@@ -137,6 +137,16 @@ To perform that action you can inspire from the following command:
 java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
 ```
 
+To **Publish To Imaging**
+
+- application should exist
+
+To perform *Publish-Imaging* action you can use following command
+
+```bash
+java -jar .\aip-console-tools-cli.jar Publish-Imaging --apikey="valid.key" -n "my app" --verbose"
+```
+
 ### Advanced Usage
 
 When running the CLI, you must specify a command to be run. The list of commands is :
@@ -345,6 +355,14 @@ The available options are :
 * `--exclusion-rules`  (**optional**): Project's exclusion rules, separated with comma.
 * `--run-analysis` or `-analyze` (**optional**): Set this option to false when you plan to only perform either a
   first-scan action or a refresh operation
+
+### Publish-Imaging
+
+Publish or upload an existing application data to CAST Imaging
+
+The available options are :
+
+* `--app-name` or `-n` (**required**): The application name.
 
 When AIP Console finishes execution, it will return a specific return code, based on the execution.
 
