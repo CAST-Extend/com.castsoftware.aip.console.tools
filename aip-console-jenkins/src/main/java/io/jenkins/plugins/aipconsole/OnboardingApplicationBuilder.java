@@ -133,8 +133,10 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
         try {
             OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
             if (!OnBoardingModeWasOn) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_mode("ON"));
-                applicationService.setEnableOnboarding(true);
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_mode("OFF"));
+                //applicationService.setEnableOnboarding(true);
+                run.setResult(getDefaultResult());
+                return;
             }
 
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup(expandedAppName));

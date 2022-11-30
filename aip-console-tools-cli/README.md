@@ -118,13 +118,24 @@ It will retrieve the latest version of the application "my app", mark that versi
 
 ![image-20200611113145335](doc/images/analyze.png)
 
-To **deliver a new version** using a **relative folder path**, with source code already updated on the AIP Node server, you can use the following command :
+To **deliver a new version** using a **relative folder path**, with source code already updated on the AIP Node server,
+you can use the following command :
 
 ```bash
 java -jar .\aip-console-tools-cli.jar deliver --apikey="BYxRnywP.TNSS0gXt8GB2v7oVZCRHzMspITeoiT1Q" -n "my app" -f "my_app_sources/"
 ```
 
-It will not upload source code, but it will use the source on AIP Node inside the `SourceFolderLocation/my_app_sources` to create a new Version.
+It will not upload source code, but it will use the source on AIP Node inside the `SourceFolderLocation/my_app_sources`
+to create a new Version.
+
+To **Onboard Application** using a **file full path**, the process will upload sources on the CAST Imaging server. The
+file should be
+accessible from the machine where the batch is executed.
+To perform that action you can inspire from the following command:
+
+```bash
+java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+```
 
 ### Advanced Usage
 
@@ -134,6 +145,7 @@ When running the CLI, you must specify a command to be run. The list of commands
 * `AddVersion` or `add` to create a new version and analyze it
 * `Deliver` to create a new version **without** running an analysis
 * `Analysis` or `analyze` to run an analysis on the current version
+* `Onboard-Application` to perform the *first-scan/refresh* the sources contents and optionally run the analysis.
 
 Each commands has a `--help` parameter, providing a list of all parameters available.
 
@@ -305,21 +317,44 @@ The available options are :
 * `--verbose` (optional): Whether the command log should be output to the console or not, defaulted to true
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
-* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment variable containing the key
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
+  variable containing the key
 * `--timeout` (optional) : Time in seconds before calls to AIP Console time out. *default* : 90
-* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey` parameter</u>. *default* : none
+* `--user` (optional) (legacy) : Specify a username to log in. <u>Requires passing the user's password in the `--apikey`
+  parameter</u>. *default* : none
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
   snapshot or from publishing application to the Health dashboard. *default* : false
 
-### Return Codes
+#### Onboard Application
+
+Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST
+Imaging Console.
+
+This command is used to perform the *first scan* or to *refresh* the sources contents before optionally run the
+analysis.
+
+The available options are :
+
+* `--app-name` or `-n` (**required**): The application name.
+* `--file` or `-f` (**required**): A local zip or tar.gz file full path to the sources
+* `--node-name`  (**optional**): The name of the node on which the application will be created
+* `--domain-name`  (**optional**): A domain is a group of applications. You may use domain to sort/filter applications.
+  Will be created if it doesn't exists. No domain will be assigned if left empty
+* `--exclude-patterns` or `-exclude` (**optional**): File patterns(glob pattern) to exclude in the delivery, separated
+  with comma
+* `--exclusion-rules`  (**optional**): Project's exclusion rules, separated with comma.
+* `--run-analysis` or `-analyze` (**optional**): Set this option to false when you plan to only perform either a
+  first-scan action or a refresh operation
 
 When AIP Console finishes execution, it will return a specific return code, based on the execution.
 
 Here is a detailed list of all error codes that can be returned by the CLI :
 
-* 0 : No errors, processing was completed correctly. This is also the return code for`--help` and `--version` parameters.
+* 0 : No errors, processing was completed correctly. This is also the return code for`--help` and `--version`
+  parameters.
 * 1 : API key missing. No API key was provided either in the prompt or in the environment variable.
-* 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper value.
+* 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper
+  value.
 * 3 : Upload Error. An error occurred during upload to AIP Console. Check the standard output to see more details.
 * 4 : Add Version Job Error. Creation of the Add Version job failed, or AIP CLI is unable to get the status of the running job. Please see the standard output for more details regarding this error.
 * 5 : Job terminated. The Add Version job did not finish in an expected state. Check the standard output or AIP Console for more details about the state of the job.
