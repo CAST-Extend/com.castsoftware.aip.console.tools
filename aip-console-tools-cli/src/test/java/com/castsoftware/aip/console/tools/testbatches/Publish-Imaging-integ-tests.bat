@@ -15,6 +15,11 @@ for %%a in ( TOOLSDIR ) do (
 			exit /b 1
 	)
 )
+echo ----------------------------
+echo Unziping the downloaded build artifact
+echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
+echo ----------------------------
+7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
 
 echo -- Publish existing application data to Imaging --
 echo java -jar aip-console-tools-cli.jar Publish-Imaging --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
