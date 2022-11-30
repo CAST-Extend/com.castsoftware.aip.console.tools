@@ -92,8 +92,9 @@ public class OnboardApplicationCommand extends BasicCollable {
         try {
             OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
             if (!OnBoardingModeWasOn) {
-                log.info("Setting the 'On-boarding mode ON' on CAST Imaging Console");
-                applicationService.setEnableOnboarding(true);
+                log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
+                //applicationService.setEnableOnboarding(true);
+                return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
             }
 
             log.info("Searching for application '{}' on CAST Imaging Console", applicationName);

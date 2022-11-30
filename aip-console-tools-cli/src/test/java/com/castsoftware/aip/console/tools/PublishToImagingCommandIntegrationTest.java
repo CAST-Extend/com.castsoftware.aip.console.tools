@@ -15,12 +15,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {AipConsoleToolsCliIntegrationTest.class})
 @ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
-
 public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     @InjectMocks
     private PublishToImagingCommand publishToImagingCommand;
@@ -37,19 +35,51 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
     }
 
     @Test
-    public void testPublishToImagingCommand_ApplicationNotExists() throws Exception {
+    public void testPublishToImagingCommand_invalidParameter() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
-                "-f", zippedSourcesPath.toString()};
+                "-f", zippedSourcesPath.toString()}; //not expected
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.4.9-funcrel").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-funcrel").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(null);
+        doReturn(getTestApplicationMock()).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATRE_APP);
 
         runStringArgs(publishToImagingCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_SERVER_VERSION_NOT_COMPATIBLE));
+        assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
+    }
+
+    @Test
+    public void testPublishToImagingCommand_OnboarApplicationSettingsOFF() throws Exception {
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name", TestConstants.TEST_CREATRE_APP
+        };
+
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.1-funcrel").build();
+        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
+        doReturn(getTestApplicationMock()).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATRE_APP);
+        doReturn(false).when(applicationService).isOnboardingSettingsEnabled();
+
+        runStringArgs(publishToImagingCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_ONBOARD_APPLICATION_DISABLED));
+    }
+
+    @Test
+    public void testPublishToImagingCommand_ApplicationNotExists() throws Exception {
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name", TestConstants.TEST_CREATRE_APP};
+
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.1-funcrel").build();
+        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
+        doReturn(null).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATRE_APP);
+
+        runStringArgs(publishToImagingCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_APPLICATION_NOT_FOUND));
     }
 }

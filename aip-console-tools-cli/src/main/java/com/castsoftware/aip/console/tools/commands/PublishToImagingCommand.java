@@ -51,6 +51,13 @@ public class PublishToImagingCommand extends BasicCollable {
                 log.error("No action to perform: application '{}' does not exist.", getApplicationName());
                 return Constants.RETURN_APPLICATION_NOT_FOUND;
             }
+
+            if (!applicationService.isOnboardingSettingsEnabled()) {
+                log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
+                //applicationService.setEnableOnboarding(true);
+                return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
+            }
+
             CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
             applicationService.publishToImaging(applicationDto.getGuid(), cliLogPolling);
 

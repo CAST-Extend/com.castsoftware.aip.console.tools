@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.util.ReflectionUtils;
@@ -65,7 +66,7 @@ public abstract class AipConsoleToolsCliBaseTest {
         Files.createDirectories(sflPath);
         zippedSourcesPath = sflPath.resolve("fake_sources.zip");
         zippedSourcesPath.toFile().createNewFile();
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("1.23.0").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.4.9-funcrel").build();
         when(restApiService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
         when(applicationService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
         defaultArgs = new String[]{"--apikey",
@@ -136,6 +137,13 @@ public abstract class AipConsoleToolsCliBaseTest {
         Field applicationServiceField = ReflectionUtils.findField(commandClass, "applicationService");
         ReflectionUtils.makeAccessible(applicationServiceField);
         ReflectionUtils.setField(applicationServiceField, command, applicationService);
+    }
+
+    protected ApplicationDto getTestApplicationMock() {
+        ApplicationDto applicationDto = Mockito.mock(ApplicationDto.class);
+        when(applicationDto.getName()).thenReturn(TestConstants.TEST_CREATRE_APP);
+        when(applicationDto.getGuid()).thenReturn(TestConstants.TEST_APP_GUID);
+        return applicationDto;
     }
 
     protected void runStringArgs(Callable<Integer> command, String[] args) {
