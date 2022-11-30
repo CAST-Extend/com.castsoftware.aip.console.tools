@@ -15,6 +15,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.OnboardApplicationJobRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.PublishApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -183,7 +184,18 @@ public class JobsServiceImpl implements JobsService {
             log.log(Level.SEVERE, "Unable to perform ReScan application action (Run Analysis)", e);
             throw new JobServiceException("ReScan application job failed", e);
         }
+    }
 
+    @Override
+    public String startPublishToImaging(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException {
+        PublishApplicationJobRequest request = PublishApplicationJobRequest.builder().appGuid(applicationGuid).build();
+        try {
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getPublishToImagingEndPoint(), request, SuccessfulJobStartDto.class);
+            return jobStartDto.getJobGuid();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Unable to perform ReScan application action (Run Analysis)", e);
+            throw new JobServiceException("ReScan application job failed", e);
+        }
     }
 
     @Override

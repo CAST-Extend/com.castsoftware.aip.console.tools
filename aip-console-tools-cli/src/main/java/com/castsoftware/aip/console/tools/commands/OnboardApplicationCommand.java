@@ -6,16 +6,14 @@ import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
+import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -75,20 +73,6 @@ public class OnboardApplicationCommand extends BasicCollable {
     //This version can be null if failed to convert from string
     private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
 
-    class CliLogPollingProviderImpl implements LogPollingProvider {
-        private final boolean verbose;
-
-        CliLogPollingProviderImpl(boolean verbose) {
-            this.verbose = verbose;
-        }
-
-        @Override
-        public String pollJobLog(String jobGuid) throws JobServiceException {
-            return jobsService.pollAndWaitForJobFinished(jobGuid,
-                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
-                    verbose);
-        }
-    }
 
     public OnboardApplicationCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
@@ -131,7 +115,7 @@ public class OnboardApplicationCommand extends BasicCollable {
             String caipVersion;
             String targetNode;
             String sourcePath;
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(getSharedOptions().isVerbose());
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
 
             String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
             log.info("Prepare to " + uploadAction + " for Application " + applicationName);
