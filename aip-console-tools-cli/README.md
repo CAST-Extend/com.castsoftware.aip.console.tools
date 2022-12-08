@@ -156,6 +156,7 @@ When running the CLI, you must specify a command to be run. The list of commands
 * `Deliver` to create a new version **without** running an analysis
 * `Analysis` or `analyze` to run an analysis on the current version
 * `Onboard-Application` to perform the *first-scan/refresh* the sources contents and optionally run the analysis.
+* `Publish-Imaging` Publish an existing application data to CAST Imaging.
 
 Each commands has a `--help` parameter, providing a list of all parameters available.
 
