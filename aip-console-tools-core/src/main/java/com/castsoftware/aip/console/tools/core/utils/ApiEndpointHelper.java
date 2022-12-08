@@ -42,6 +42,7 @@ public class ApiEndpointHelper {
     public static final String FIRST_SCAN_PATH = "/first-scan-application";
     public static final String RE_DISCOVER_APPLICATION_PATH = "/rediscover-application";
     public static final String RE_SCAN_APPLICATION_PATH = "/rescan-application";
+    public static final String PUBLISH_PATH = "/publish";
 
     public static String getRootPath() {
         return ROOT_PATH + "/";
@@ -107,6 +108,10 @@ public class ApiEndpointHelper {
 
     public static String getReScanApplicationEndPoint() {
         return getJobsEndpoint() + RE_SCAN_APPLICATION_PATH;
+    }
+
+    public static String getPublishToImagingEndPoint() {
+        return getJobsEndpoint() + PUBLISH_PATH;
     }
 
     public static String getEnableOnboardingSettingsEndPoint() {

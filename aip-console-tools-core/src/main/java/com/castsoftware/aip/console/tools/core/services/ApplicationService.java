@@ -130,6 +130,8 @@ public interface ApplicationService {
     String reDiscoverApplication(String appGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig,
                                  String caipVersion, String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
+    String publishToImaging(String appGuid, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
+
     /**
      * Get the existing {@code }debug options} settings
      *

@@ -65,6 +65,8 @@ public interface JobsService {
 
     String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
 
+    String startPublishToImaging(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
+
     /**
      * @param cssServerName target CSS server name
      * @return existing CSS Server Guid
