@@ -1,6 +1,8 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -13,7 +15,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import picocli.CommandLine;
+
+import java.util.EnumSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @CommandLine.Command(
@@ -57,10 +64,27 @@ public class PublishToImagingCommand extends BasicCollable {
                 //applicationService.setEnableOnboarding(true);
                 return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
             }
+            Set<VersionDto> versions = applicationService.getApplicationVersion(applicationDto.getGuid());
+            if (versions.isEmpty()) {
+                log.error("No version for the given application. Make sure at least one version has been delivered");
+                return Constants.RETURN_APPLICATION_NO_VERSION;
+            }
+
+            applicationDto = applicationService.getApplicationDetails(applicationDto.getGuid());
+            Set<String> statuses = EnumSet.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED, VersionStatus.SNAPSHOT_DONE).stream()
+                    .map(VersionStatus::toString).collect(Collectors.toSet());
+            VersionDto versionDto = applicationDto.getVersion();
+            if (!statuses.contains(versionDto.getStatus().toString())) {
+                log.error("Application version not in the status that allows application data to be published to CAST Imaging: actual status is " + versionDto.getStatus().toString());
+                return Constants.RETURN_ONBOARD_VERSION_STATUS_INVALID;
+            }
 
             CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
-            applicationService.publishToImaging(applicationDto.getGuid(), cliLogPolling);
+            String appGuid = applicationService.publishToImaging(applicationDto.getGuid(), cliLogPolling);
 
+            if (StringUtils.isEmpty(appGuid)) {
+                return Constants.RETURN_ONBOARD_OPERATION_FAILED;
+            }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         } finally {

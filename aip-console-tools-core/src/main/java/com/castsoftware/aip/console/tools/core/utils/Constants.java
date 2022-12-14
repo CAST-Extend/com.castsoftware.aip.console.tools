@@ -31,6 +31,8 @@ public class Constants {
     public static final int RETURN_RUN_ANALYSIS_DISABLED = 19;
     public static final int RETURN_SERVER_VERSION_NOT_COMPATIBLE = 20;
     public static final int RETURN_ONBOARD_APPLICATION_DISABLED = 21;
+    public static final int RETURN_ONBOARD_VERSION_STATUS_INVALID = 22;
+    public static final int RETURN_ONBOARD_OPERATION_FAILED = 23;
     public static final String DEFAULT_DOMAIN = "-";
 
     public static final int UNKNOWN_ERROR = 1000;
