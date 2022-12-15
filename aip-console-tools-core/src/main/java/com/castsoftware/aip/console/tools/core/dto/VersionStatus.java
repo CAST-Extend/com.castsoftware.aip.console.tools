@@ -23,7 +23,11 @@ public enum VersionStatus {
     SNAPSHOT_TAKEN,
     SNAPSHOT_DONE,
     VALIDATED,
-    PUBLISHING;
+    PUBLISHING,
+    UNKNOWN,
+    SCANNED,
+    ANALYZED,
+    FULLY_ANALYZED;
 
     @JsonCreator
     public static VersionStatus fromString(String value) {
