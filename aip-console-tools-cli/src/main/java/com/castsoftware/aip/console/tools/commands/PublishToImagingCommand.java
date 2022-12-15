@@ -65,13 +65,14 @@ public class PublishToImagingCommand extends BasicCollable {
                 return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
             }
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationDto.getGuid());
-            if (versions.isEmpty()) {
+            if (versions == null || versions.isEmpty()) {
                 log.error("No version for the given application. Make sure at least one version has been delivered");
                 return Constants.RETURN_APPLICATION_NO_VERSION;
             }
 
             applicationDto = applicationService.getApplicationDetails(applicationDto.getGuid());
-            Set<String> statuses = EnumSet.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED, VersionStatus.SNAPSHOT_DONE).stream()
+            Set<String> statuses = EnumSet.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED,
+                            VersionStatus.SNAPSHOT_DONE, VersionStatus.FULLY_ANALYZED, VersionStatus.ANALYZED).stream()
                     .map(VersionStatus::toString).collect(Collectors.toSet());
             VersionDto versionDto = applicationDto.getVersion();
             if (!statuses.contains(versionDto.getStatus().toString())) {
