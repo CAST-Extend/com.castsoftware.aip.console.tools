@@ -354,7 +354,7 @@ public class RestApiServiceImpl implements RestApiService {
 
     @Override
     public void login() throws ApiCallException {
-        Request request = getRequestBuilder("/api/applications")
+        Request request = getRequestBuilder("/api/alerts")
                 .get()
                 .build();
 
