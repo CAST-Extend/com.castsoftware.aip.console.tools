@@ -50,6 +50,7 @@ public class Constants {
     public static final String FUNCTION_POINTS = "function_points";
     public static final String BACKUP = "BACKUP";
     public static final String RESTORE = "RESTORE";
+    public static final String PROCESS_IMAGING = "process_imaging";
     public static final String SHERLOCK_BACKUP = "SHERLOCK_BACKUP";
     public static final String DELIVER_VERSION = "deliver_version";
     public static final String UPLOAD_DELIVER_VERSION = "upload_deliver_version";

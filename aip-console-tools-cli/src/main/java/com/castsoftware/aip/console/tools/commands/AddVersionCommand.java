@@ -171,6 +171,7 @@ public class AddVersionCommand implements Callable<Integer> {
     @Autowired
     DebugOptionsService debugOptionsService;
 
+    private JobRequestBuilder builder;
     @Override
     public Integer call() {
         ApiInfoDto apiInfo = null;
@@ -222,7 +223,7 @@ public class AddVersionCommand implements Callable<Integer> {
             // check that the application actually has versions, otherwise it's just an add version job
             boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
 
-            JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
+            builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
                     .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
@@ -238,18 +239,22 @@ public class AddVersionCommand implements Callable<Integer> {
 
             if (StringUtils.isNotBlank(snapshotName)) {
                 builder.snapshotName(snapshotName);
-                //Snapshot required now see whether we upload application or not
-                boolean forcedConsolidation = processImaging || consolidation;
-                builder.uploadApplication(forcedConsolidation);
-                if (!forcedConsolidation) {
-                    log.info("The snapshot {} for application {} will be taken but will not be published.", snapshotName, applicationName);
-                    builder.endStep(Constants.SNAPSHOT_INDICATOR);
-                }
+            }
+
+            //Snapshot now required to see whether we upload application or not
+            boolean forcedConsolidation = processImaging || consolidation;
+            builder.uploadApplication(forcedConsolidation);
+            if (!forcedConsolidation) {
+                builder.endStep(Constants.SNAPSHOT_INDICATOR);
+                log.info("The snapshot {} for application {} will be taken but will not be published.", snapshotName, applicationName);
+            } else if (processImaging){
+                builder.endStep(Constants.PROCESS_IMAGING);
             }
 
             DebugOptionsDto oldDebugOptions = debugOptionsService.updateDebugOptions(applicationGuid,
                     DebugOptionsDto.builder().showSql(showSql).activateAmtMemoryProfile(amtProfiling).build());
 
+            log.info("Job request : " + builder.buildJobRequest().toString());
             String jobGuid = jobsService.startAddVersionJob(builder);
             // add a shutdown hook, to cancel the job
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
