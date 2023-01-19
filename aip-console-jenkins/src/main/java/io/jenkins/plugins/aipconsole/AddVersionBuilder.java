@@ -519,13 +519,17 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
-                boolean forcedConsolidation = processImaging || consolidation;
-                requestBuilder.uploadApplication(forcedConsolidation);
-                if (!forcedConsolidation) {
-                    requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);
-                    log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", resolvedSnapshotName, applicationName));
-                }
             }
+
+            boolean forcedConsolidation = processImaging || consolidation;
+            requestBuilder.uploadApplication(forcedConsolidation);
+            if (!forcedConsolidation) {
+                requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);
+                log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", resolvedSnapshotName, applicationName));
+            } else if (processImaging) {
+                requestBuilder.endStep(Constants.PROCESS_IMAGING);
+            }
+
             if (StringUtils.isNotEmpty(moduleGenerationType)) {
                 applicationService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), !applicationHasVersion);
             }
