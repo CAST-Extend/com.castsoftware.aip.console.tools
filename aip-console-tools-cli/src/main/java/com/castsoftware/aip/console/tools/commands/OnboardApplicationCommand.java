@@ -5,6 +5,7 @@ import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
+import com.castsoftware.aip.console.tools.core.dto.OnboardingMode;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
@@ -61,11 +62,9 @@ public class OnboardApplicationCommand extends BasicCollable {
             , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
     private ExclusionRuleType[] exclusionRules;
 
-    @CommandLine.Option(names = {"--run-analysis", "-analyze"},
-            description = "Set this option to false when you plan to only  perform either a first-scan action or a refresh operation"
-                    + " if specified without parameter: ${FALLBACK-VALUE}",
-            fallbackValue = "true")
-    private boolean runAnalysis = true;
+    @CommandLine.Option(names = {"--strategy"}, type = OnboardingMode.class
+            , description = "Onboard strategy manages the steps that will be processed. Default value is FAST_SCAN. Valid values: ${COMPLETION-CANDIDATES}")
+    private OnboardingMode mode = OnboardingMode.FAST_SCAN;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -84,6 +83,7 @@ public class OnboardApplicationCommand extends BasicCollable {
             log.error("Application name should not be empty.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
+        boolean runAnalysis = mode == OnboardingMode.DEEP_ANALYSIS;
 
         String applicationGuid;
         Thread shutdownHook = null;
@@ -109,7 +109,8 @@ public class OnboardApplicationCommand extends BasicCollable {
             } else {
                 onboardApplication = true;
             }
-            log.info("About to trigger on-boarding workflow for: '{}' application", firstScan ? "First-scan/Refresh" : "Rescan");
+
+            log.info("About to trigger on-boarding workflow for: '{}' application", runAnalysis ? "Deep-Analysis" : "Fast-Scan");
 
             //on-boarding
             ApplicationOnboardingDto applicationOnboardingDto;
