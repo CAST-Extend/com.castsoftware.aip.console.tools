@@ -8,6 +8,7 @@ import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.OnboardingMode;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -43,8 +44,7 @@ public class OnboardApplicationCommand extends BasicCollable {
 
     @CommandLine.Option(names = {"-f", "--file"},
             paramLabel = "FILE",
-            description = "A local zip or tar.gz file OR a path to a folder on the node where the source if saved",
-            required = true)
+            description = "A local zip or tar.gz file OR a path to a folder on the node where the source if saved")
     private File filePath;
 
     @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME",
@@ -85,6 +85,11 @@ public class OnboardApplicationCommand extends BasicCollable {
         }
         boolean runAnalysis = mode == OnboardingMode.DEEP_ANALYSIS;
 
+        if (!runAnalysis && (filePath == null || !filePath.exists())) {
+            log.error("A valid file path required to perform the FAST SCAN operation");
+            return Constants.RETURN_MISSING_FILE;
+        }
+
         String applicationGuid;
         Thread shutdownHook = null;
         boolean firstScan = true;
@@ -105,24 +110,24 @@ public class OnboardApplicationCommand extends BasicCollable {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
                 firstScan = app.getVersion() == null || StringUtils.isAnyEmpty(app.getImagingTenant(), app.getVersion().getGuid())
-                        || !app.getVersion().isImagingDone();
+                        || !app.isOnboarded();
             } else {
                 onboardApplication = true;
             }
 
-            log.info("About to trigger on-boarding workflow for: '{}' application", runAnalysis ? "Deep-Analysis" : "Fast-Scan");
+            if (firstScan && runAnalysis) {
+                log.error("Unable to trigger Deep-Analysis. The actual conditions required Fast-Scan to be running first.");
+                return Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED;
+            }
 
+            log.info("About to trigger on-boarding workflow for: '{}' application", runAnalysis ? "Deep-Analysis" : "Fast-Scan");
             //on-boarding
             ApplicationOnboardingDto applicationOnboardingDto;
-            String caipVersion;
-            String targetNode;
-            String sourcePath;
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
+            String caipVersion = app.getCaipVersion();
+            String targetNode = app.getTargetNode();
+            String sourcePath = uploadFile(existingAppGuid);
 
-            String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
-            log.info("Prepare to " + uploadAction + " for Application " + applicationName);
-            sourcePath = uploadService.uploadFileForOnboarding(filePath, existingAppGuid);
-            log.info(uploadAction + " uploaded successfully: " + sourcePath);
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
 
             if (firstScan) {
                 applicationGuid = existingAppGuid;
@@ -144,11 +149,9 @@ public class OnboardApplicationCommand extends BasicCollable {
                 caipVersion = applicationOnboardingDto.getCaipVersion();
                 targetNode = applicationOnboardingDto.getTargetNode();
                 existingAppGuid = applicationGuid;
-            } else {
+            } else if (!runAnalysis) {
                 //For RESCAN PROCESS: re-discover
                 sourcePath = app.getVersion().getSourcePath();
-                caipVersion = app.getCaipVersion();
-                targetNode = app.getTargetNode();
                 Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
                 if (exclusionRules != null && exclusionRules.length > 0) {
                     exclusions.setInitialExclusionRules(exclusionRules);
@@ -172,11 +175,12 @@ public class OnboardApplicationCommand extends BasicCollable {
             //Run Analysis
             if (!runAnalysis || !applicationService.isImagingAvailable()) {
                 String message = runAnalysis ?
-                        "The 'Run-Analysis' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging."
-                        : "The 'Run-Analysis' step has been disabled by user. To perform this step do set \"--run-analysis\" option to true";
+                        "The 'Deep Analysis' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging."
+                        : "The 'Deep Analysis' step has been disabled by user. To perform this step do configure CAST Imaging and set --strategy to DEEP_ANALYSIS";
                 log.info(message);
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
+
             if (firstScan) {
                 applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, getSharedOptions().isVerbose(), cliLogPolling);
             } else {
@@ -197,6 +201,17 @@ public class OnboardApplicationCommand extends BasicCollable {
         }
 
         return Constants.RETURN_OK;
+    }
+
+    private String uploadFile(String existingAppGuid) throws UploadException {
+        if (mode == OnboardingMode.DEEP_ANALYSIS) {
+            return ""; //not need to upload sources
+        }
+        String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "Discover sources" : "refresh sources content";
+        log.info("Prepare to " + uploadAction + " for Application " + applicationName);
+        String sourcePath = uploadService.uploadFileForOnboarding(filePath, existingAppGuid);
+        log.info(uploadAction + " uploaded successfully: " + sourcePath);
+        return sourcePath;
     }
 
     @Override

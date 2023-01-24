@@ -131,10 +131,18 @@ to create a new Version.
 To **Onboard Application** using a **file full path**, the process will upload sources on the CAST Imaging server. The
 file should be
 accessible from the machine where the batch is executed.
-To perform that action you can inspire from the following command:
+
+The command is using following strategies:
+
+- *FAST_SCAN*: for the sources' delivery contents without running the analysis. This strategy can be used as much as
+  required by providing the sources file.
+- *DEEP_SCAN*: to trigger the analysis after the FIRST_SCAN has been performed. This also manage to upload data to CAST
+  imaging depending on the available configuration.
+
+To perform that action you can inspire from the following command (see advance usage for more details):
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --strategy=FAST_SCAN --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
 ```
 
 To **Publish To Imaging**
@@ -341,21 +349,29 @@ The available options are :
 Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST
 Imaging Console.
 
-This command is used to perform the *first scan* or to *refresh* the sources contents before optionally run the
-analysis.
+This command is used to perform the *first scan* or to *refresh* the sources contents before you optionally perform a *
+Deep Analysis* (run the
+analysis).
 
 The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
-* `--file` or `-f` (**required**): A local zip or tar.gz file full path to the sources
+* `--file` or `-f`: **required** only when performing the FIRST_SCAN. Represents the local zip or tar.gz file full path
+  to the
+  sources
 * `--node-name`  (**optional**): The name of the node on which the application will be created
 * `--domain-name`  (**optional**): A domain is a group of applications. You may use domain to sort/filter applications.
   Will be created if it doesn't exists. No domain will be assigned if left empty
 * `--exclude-patterns` or `-exclude` (**optional**): File patterns(glob pattern) to exclude in the delivery, separated
   with comma
 * `--exclusion-rules`  (**optional**): Project's exclusion rules, separated with comma.
-* `--run-analysis` or `-analyze` (**optional**): Set this option to false when you plan to only perform either a
-  first-scan action or a refresh operation
+* `--strategy` (**required**): possible value is one of FIRST_SCAN (default) or DEEP_ANALYSIS. The DEEP_ANALYSIS
+  strategy requires
+  the application name only (see example below).
+
+```bash
+java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid.key" -n "my app" --strategy=DEEP_ANALYSIS --verbose=false
+```
 
 ### Publish-Imaging
 

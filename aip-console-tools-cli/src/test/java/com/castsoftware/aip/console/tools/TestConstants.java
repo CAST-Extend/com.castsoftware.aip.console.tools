@@ -14,6 +14,9 @@ public final class TestConstants {
     public static final String TEST_NODE = "TEST-NODE";
     public static final String TEST_BACKUP_NAME = "Bak-Name";
     public static final String TEST_VERSION_NAME = "V-1";
+    // OBR: OnBoard application
+    public static final String TEST_OBR_VERSION_NAME = "My version";
+    public static final String TEST_OBR_VERSION_GUID = "OBR-G-U-I-D";
     public static final String TEST_SNAPSHOT_NAME = "Snapshot-1";
     public static final String TEST_SRC_FOLDER = "temp" + File.separator + "SubFolder";
     public static final String PROFILE_INTEGRATION_TEST = "INTEGRATION_PROFILE_TEST";

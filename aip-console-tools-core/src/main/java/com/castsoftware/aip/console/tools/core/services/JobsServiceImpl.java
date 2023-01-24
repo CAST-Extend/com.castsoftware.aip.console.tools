@@ -99,8 +99,12 @@ public class JobsServiceImpl implements JobsService {
     @Override
     public String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion, String targetNode) throws JobServiceException {
         DiscoverApplicationJobRequest.DiscoverApplicationJobRequestBuilder requestBuilder = DiscoverApplicationJobRequest.builder()
-                .appGuid(applicationGuid)
-                .sourcePath(sourcePath);
+                .appGuid(applicationGuid);
+
+        if (StringUtils.isNotEmpty(sourcePath)) {
+            requestBuilder.sourcePath(caipVersion);
+        }
+
         if (StringUtils.isNotEmpty(caipVersion)) {
             requestBuilder.caipVersion(caipVersion);
         }
