@@ -4,6 +4,7 @@ import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
+import com.castsoftware.aip.console.tools.core.dto.OnboardingMode;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -13,6 +14,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.utils.FileUtils;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.Extension;
 import hudson.FilePath;
@@ -41,6 +43,7 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart;
@@ -55,11 +58,12 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload_done;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload_failed;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_missingFilePath;
 
 public class OnboardingApplicationBuilder extends CommonActionBuilder {
     private String applicationGuid;
     private String exclusionPatterns = "";
-    private boolean runAnalysis;
+    private String onboardStrategy;
 
     //This version can be null if failed to convert from string
     private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
@@ -127,6 +131,14 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
         String expandedAppName = environmentVariables.expand(getApplicationName());
         String expandedFilePath = environmentVariables.expand(getFilePath());
         String expandedDomainName = environmentVariables.expand(getDomainName());
+        OnboardingMode strategy = OnboardingMode.fromString(environmentVariables.expand(getOnboardStrategy()));
+        boolean runAnalysis = strategy == OnboardingMode.DEEP_ANALYSIS;
+
+        if (!runAnalysis && (StringUtils.isEmpty(expandedFilePath) || !FileUtils.exists(expandedFilePath))) {
+            logger.println(OnbordingApplicationBuilder_DescriptorImpl_missingFilePath());
+            run.setResult(getDefaultResult());
+            return;
+        }
 
         boolean OnBoardingModeWasOn = false; //status before processing
         boolean firstScan = true;
@@ -134,7 +146,6 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
             OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
             if (!OnBoardingModeWasOn) {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_mode("OFF"));
-                //applicationService.setEnableOnboarding(true);
                 run.setResult(getDefaultResult());
                 return;
             }
@@ -147,25 +158,33 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
                 firstScan = app.getVersion() == null || StringUtils.isAnyEmpty(app.getImagingTenant(), app.getVersion().getGuid())
-                        || !app.getVersion().isImagingDone();
+                        || !app.isOnboarded();
             } else {
                 onboardApplication = true;
+            }
+
+            if (firstScan && runAnalysis) {
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired());
+                run.setResult(getDefaultResult());
+                return;
             }
 
             String scanMode = firstScan ? " First-scan/Refresh" : " Rescan";
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_scanMode(expandedAppName + scanMode));
             //on-boarding
             ApplicationOnboardingDto applicationOnboardingDto;
-            String caipVersion;
-            String targetNode;
-            String sourcePath;
+            String caipVersion = app.getCaipVersion();
+            String targetNode = app.getTargetNode();
+            String sourcePath = "";
             boolean verbose = getDescriptor().configuration.isVerbose();
             JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(run, listener, verbose);
 
             String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
-            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload(uploadAction, expandedAppName));
-            sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedFilePath).toFile(), existingAppGuid);
-            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload_done(uploadAction, sourcePath));
+            if (!runAnalysis) {
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload(uploadAction, expandedAppName));
+                sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedFilePath).toFile(), existingAppGuid);
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload_done(uploadAction, sourcePath));
+            }
 
             if (firstScan) {
                 applicationGuid = existingAppGuid;
@@ -187,11 +206,9 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
                 caipVersion = applicationOnboardingDto.getCaipVersion();
                 targetNode = applicationOnboardingDto.getTargetNode();
                 existingAppGuid = applicationGuid;
-            } else {
+            } else if (!runAnalysis) {
                 //For RESCAN PROCESS: re-discover
                 sourcePath = app.getVersion().getSourcePath();
-                caipVersion = app.getCaipVersion();
-                targetNode = app.getTargetNode();
                 Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
 
                 //discover-packages
@@ -209,9 +226,9 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Rediscover"));
             }
 
-            //Run Analysis
-            if (!isRunAnalysis() || !applicationService.isImagingAvailable()) {
-                String message = !isRunAnalysis() ? OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled()
+            //Run Analysis or Deep analysis
+            if (!runAnalysis || !applicationService.isImagingAvailable()) {
+                String message = !runAnalysis ? OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled()
                         : OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled();
                 logger.println(message);
             } else {
@@ -250,16 +267,12 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
     }
 
     @DataBoundSetter
-    public void setRunAnalysis(boolean runAnalysis) {
-        this.runAnalysis = runAnalysis;
+    public void setOnboardStrategy(String onboardStrategy) {
+        this.onboardStrategy = onboardStrategy;
     }
 
-    public boolean getRunAnalysis() {
-        return isRunAnalysis();
-    }
-
-    public boolean isRunAnalysis() {
-        return runAnalysis;
+    public String getOnboardStrategy() {
+        return onboardStrategy;
     }
 
     @Override

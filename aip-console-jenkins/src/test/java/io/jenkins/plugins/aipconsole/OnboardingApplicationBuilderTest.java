@@ -27,6 +27,7 @@ public class OnboardingApplicationBuilderTest extends BaseBuilderTest {
         Object builtProject = project.getBuildersList().get(0);
         OnboardingApplicationBuilder expectedResults = new OnboardingApplicationBuilder("", "archive.zip");
         expectedResults.setDomainName("");
+        expectedResults.setOnboardStrategy("FIRST_SCAN");
         expectedResults.setApplicationName(TEST_APP_NAME);
         jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
     }

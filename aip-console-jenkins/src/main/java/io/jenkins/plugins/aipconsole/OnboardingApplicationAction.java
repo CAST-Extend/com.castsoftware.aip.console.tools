@@ -21,7 +21,7 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
     private String nodeName;
     @Nullable
     private String domainName;
-    private boolean runAnalysis = true;
+    private String onboardStrategy = "FIRST_SCAN";
 
     @Nullable
     private String exclusionPatterns = "";
@@ -124,15 +124,11 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
         this.domainName = domainName;
     }
 
-    public void setRunAnalysis(boolean runAnalysis) {
-        this.runAnalysis = runAnalysis;
+    public void setOnboardStrategy(String onboardStrategy) {
+        this.onboardStrategy = onboardStrategy;
     }
 
-    public boolean getRunAnalysis() {
-        return isRunAnalysis();
-    }
-
-    public boolean isRunAnalysis() {
-        return runAnalysis;
+    public String getOnboardStrategy() {
+        return onboardStrategy;
     }
 }

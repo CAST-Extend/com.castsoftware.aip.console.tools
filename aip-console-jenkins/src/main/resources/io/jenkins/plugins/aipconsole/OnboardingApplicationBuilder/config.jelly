@@ -12,9 +12,13 @@
     <f:entry title="${%domainName}" field="domainName" description="${%domainName.descr}">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%runAnalysis}" field="runAnalysis" description="${%runAnalysis.descr}">
-        <f:checkbox/>
+    <f:entry title="${%onboardStrategy}" description="${%onboardStrategy.descr}">
+        <select name="onboardStrategy" field="onboardStrategy">
+            <option value="FIRST_SCAN">First Scan</option>
+            <option value="DEEP_ANALYSIS">Deep Analysis</option>
+        </select>
     </f:entry>
+
     <f:advanced title="${%advancedSettings}">
         <f:entry title="${%aipConsoleUrl}" field="aipConsoleUrl" description="${%aipConsoleUrl.descr}">
             <f:textbox field="aipConsoleUrl" value="${aipConsoleUrl}"/>
