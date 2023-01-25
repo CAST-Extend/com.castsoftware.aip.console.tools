@@ -14,9 +14,9 @@ import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -39,9 +39,14 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {AipConsoleToolsCliIntegrationTest.class})
 @ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
 public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
-    @Autowired
+    @InjectMocks
     private AnalyzeCommand analyzeCommand;
-    
+
+    @Override
+    protected void initializePrivateMocks() {
+        assignMockedBeans(analyzeCommand);
+    }
+
     @Override
     protected void cleanupTestCommand() {
         // ===================================
@@ -56,7 +61,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         analyzeCommand.setApplicationName(null);
         analyzeCommand.setVersionName(null);
     }
-    
+
     @Test
     public void testAnalyzeCommand_UnexpectedParameters() {
         boolean verbose = true;

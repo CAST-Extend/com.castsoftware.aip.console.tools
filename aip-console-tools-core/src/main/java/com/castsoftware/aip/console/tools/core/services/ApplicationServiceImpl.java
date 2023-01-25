@@ -418,6 +418,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             log.fine("Delivery configuration response " + response);
             return response != null ? response.getGuid() : null;
         } catch (ApplicationServiceException | ApiCallException e) {
+            log.severe("Failed to create the Delivery configuration ");
             throw new JobServiceException("Error creating delivery config", e);
         }
     }
@@ -430,14 +431,22 @@ public class ApplicationServiceImpl implements ApplicationService {
             String jobGuid = jobService.startReDiscoverApplication(appGuid, sourcePath, versionName, deliveryConfig, caipVersion, targetNode);
             log.log(Level.INFO, "ReDiscover Application running job GUID= " + jobGuid);
             return logPollingProvider.pollJobLog(jobGuid);
-            /**
-             return jobService.pollAndWaitForJobFinished(jobGuid,
-             (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
-             verbose);
-             **/
         } catch (JobServiceException e) {
             log.log(Level.SEVERE, "Could not re-discover application contents due to following error", e);
             throw new ApplicationServiceException("Unable to re-discover application contents automatically.", e);
+        }
+    }
+
+    @Override
+    public String publishToImaging(String appGuid, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+        try {
+            log.log(Level.INFO, "Starting Publish to Imaging job for application GUID= " + appGuid);
+            String jobGuid = jobService.startPublishToImaging(appGuid, null, null);
+            log.log(Level.INFO, "Publish to Imaging running job GUID= " + jobGuid);
+            return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Application data could not be Published to Imaging due to following error", e);
+            throw new ApplicationServiceException("Unable to Publish application contents to Imaging.", e);
         }
     }
 

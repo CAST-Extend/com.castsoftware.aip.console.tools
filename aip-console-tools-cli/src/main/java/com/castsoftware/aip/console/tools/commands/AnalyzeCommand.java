@@ -19,6 +19,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -99,7 +100,12 @@ public class AnalyzeCommand extends BasicCollable {
     }
 
     @Override
-    public Integer call() throws Exception {
+    protected VersionInformation getMinVersion() {
+        return null;
+    }
+
+    @Override
+    public Integer processCallCommand() throws Exception {
         if (StringUtils.isBlank(applicationName)) {
             log.error("No application name provided. Exiting.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;

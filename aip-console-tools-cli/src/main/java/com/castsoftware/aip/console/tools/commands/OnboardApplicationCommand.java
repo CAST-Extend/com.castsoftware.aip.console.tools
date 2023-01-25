@@ -6,18 +6,14 @@ import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
+import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +22,6 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @CommandLine.Command(
@@ -78,48 +73,13 @@ public class OnboardApplicationCommand extends BasicCollable {
     //This version can be null if failed to convert from string
     private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
 
-    class CliLogPollingProviderImpl implements LogPollingProvider {
-        private final boolean verbose;
-
-        CliLogPollingProviderImpl(boolean verbose) {
-            this.verbose = verbose;
-        }
-
-        @Override
-        public String pollJobLog(String jobGuid) throws JobServiceException {
-            return jobsService.pollAndWaitForJobFinished(jobGuid,
-                    (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
-                    verbose);
-        }
-    }
 
     public OnboardApplicationCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
     }
 
     @Override
-    public Integer call() throws Exception {
-        try {
-            if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
-                restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
-            }
-            restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
-        } catch (ApiKeyMissingException e) {
-            return Constants.RETURN_NO_PASSWORD;
-        } catch (ApiCallException e) {
-            return Constants.RETURN_LOGIN_ERROR;
-        }
-
-        String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
-        if (MIN_VERSION != null && StringUtils.isNotEmpty(apiVersion)) {
-            VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
-            if (serverApiVersion != null && MIN_VERSION.isHigherThan(serverApiVersion)) {
-                log.error("This feature {} is not compatible with the CAST Imaging Console version {}. Please upgrade to minimum {} version."
-                        , "Onboard Application", apiVersion, MIN_VERSION.toString());
-                return Constants.RETURN_SERVER_VERSION_NOT_COMPATIBLE;
-            }
-        }
-
+    public Integer processCallCommand() throws Exception {
         if (StringUtils.isBlank(applicationName)) {
             log.error("Application name should not be empty.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
@@ -134,7 +94,7 @@ public class OnboardApplicationCommand extends BasicCollable {
             if (!OnBoardingModeWasOn) {
                 log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
                 //applicationService.setEnableOnboarding(true);
-                return Constants.RETURN_ONBOARD_APPLICATION__DISABLED;
+                return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
             }
 
             log.info("Searching for application '{}' on CAST Imaging Console", applicationName);
@@ -156,7 +116,7 @@ public class OnboardApplicationCommand extends BasicCollable {
             String caipVersion;
             String targetNode;
             String sourcePath;
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(sharedOptions.isVerbose());
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
 
             String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
             log.info("Prepare to " + uploadAction + " for Application " + applicationName);
@@ -166,7 +126,7 @@ public class OnboardApplicationCommand extends BasicCollable {
             if (firstScan) {
                 applicationGuid = existingAppGuid;
                 if (onboardApplication) {
-                    applicationGuid = applicationService.onboardApplication(applicationName, domainName, sharedOptions.isVerbose(), sourcePath);
+                    applicationGuid = applicationService.onboardApplication(applicationName, domainName, getSharedOptions().isVerbose(), sourcePath);
                     log.info("Onboard Application job has started: application GUID= " + applicationGuid);
                 }
 
@@ -176,7 +136,7 @@ public class OnboardApplicationCommand extends BasicCollable {
                 targetNode = app.getTargetNode();
 
                 applicationService.discoverApplication(applicationGuid, sourcePath,
-                        StringUtils.isNotEmpty(applicationGuid) ? "" : "My version", caipVersion, targetNode, sharedOptions.isVerbose(), cliLogPolling);
+                        StringUtils.isNotEmpty(applicationGuid) ? "" : "My version", caipVersion, targetNode, getSharedOptions().isVerbose(), cliLogPolling);
                 log.info("Application " + applicationName + " onboarded/refreshed successfully: GUID= " + applicationGuid);
 
                 applicationOnboardingDto = applicationService.getApplicationOnboarding(applicationGuid);
@@ -204,7 +164,7 @@ public class OnboardApplicationCommand extends BasicCollable {
                 //rediscover-application
                 log.info("Preparing for Rediscover Application action");
                 applicationService.reDiscoverApplication(existingAppGuid, sourcePath, "", deliveryConfiguration,
-                        caipVersion, targetNode, sharedOptions.isVerbose(), cliLogPolling);
+                        caipVersion, targetNode, getSharedOptions().isVerbose(), cliLogPolling);
                 log.info("Rediscover Application done successfully");
             }
 
@@ -217,9 +177,9 @@ public class OnboardApplicationCommand extends BasicCollable {
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
             if (firstScan) {
-                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose(), cliLogPolling);
+                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, getSharedOptions().isVerbose(), cliLogPolling);
             } else {
-                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, sharedOptions.isVerbose(), cliLogPolling);
+                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, getSharedOptions().isVerbose(), cliLogPolling);
             }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
@@ -236,5 +196,10 @@ public class OnboardApplicationCommand extends BasicCollable {
         }
 
         return Constants.RETURN_OK;
+    }
+
+    @Override
+    protected VersionInformation getMinVersion() {
+        return MIN_VERSION;
     }
 }

@@ -30,7 +30,9 @@ public class Constants {
     public static final int RETURN_JOB_CANCELED = 18;
     public static final int RETURN_RUN_ANALYSIS_DISABLED = 19;
     public static final int RETURN_SERVER_VERSION_NOT_COMPATIBLE = 20;
-    public static final int RETURN_ONBOARD_APPLICATION__DISABLED = 21;
+    public static final int RETURN_ONBOARD_APPLICATION_DISABLED = 21;
+    public static final int RETURN_ONBOARD_VERSION_STATUS_INVALID = 22;
+    public static final int RETURN_ONBOARD_OPERATION_FAILED = 23;
     public static final String DEFAULT_DOMAIN = "-";
 
     public static final int UNKNOWN_ERROR = 1000;
@@ -86,6 +88,8 @@ public class Constants {
     public static final String DELETE_SNAPSHOT = "delete_snapshot";
     public static final String CONSOLIDATE_SNAPSHOT = "consolidate_snapshot";
     public static final String SNAPSHOT_INDICATOR = "snapshot_indicator";
+    public static final String PROCESS_IMAGING = "process_imaging";
+
     public static final String UPLOAD_SNAPSHOTS = "upload_snapshots";
     // New name for the last step in analysis (this consolidate snapshots and upload to central db)
     public static final String UPLOAD_APP_SNAPSHOT = "upload_application";
