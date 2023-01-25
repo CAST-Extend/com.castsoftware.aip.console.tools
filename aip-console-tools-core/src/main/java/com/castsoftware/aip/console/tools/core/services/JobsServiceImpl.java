@@ -102,7 +102,7 @@ public class JobsServiceImpl implements JobsService {
                 .appGuid(applicationGuid);
 
         if (StringUtils.isNotEmpty(sourcePath)) {
-            requestBuilder.sourcePath(caipVersion);
+            requestBuilder.sourcePath(sourcePath);
         }
 
         if (StringUtils.isNotEmpty(caipVersion)) {

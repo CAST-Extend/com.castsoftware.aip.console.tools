@@ -65,9 +65,6 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
     private String exclusionPatterns = "";
     private String onboardStrategy;
 
-    //This version can be null if failed to convert from string
-    private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
-
     class JnksLogPollingProviderImpl implements LogPollingProvider {
         private final PrintStream log;
         private final boolean verbose;
@@ -119,10 +116,10 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
         super.perform(run, filePath, launcher, listener);
 
         String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
-        if (MIN_VERSION != null && StringUtils.isNotEmpty(apiVersion)) {
+        if (getMinVersion() != null && StringUtils.isNotEmpty(apiVersion)) {
             VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
-            if (serverApiVersion != null && MIN_VERSION.isHigherThan(serverApiVersion)) {
-                listener.error(OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible("Onboard Application", apiVersion, MIN_VERSION.toString()));
+            if (serverApiVersion != null && getMinVersion().isHigherThan(serverApiVersion)) {
+                listener.error(OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible("Onboard Application", apiVersion, getMinVersion().toString()));
                 run.setResult(Result.FAILURE);
                 return;
             }
@@ -169,7 +166,7 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
                 return;
             }
 
-            String scanMode = firstScan ? " First-scan/Refresh" : " Rescan";
+            String scanMode = firstScan ? " Fast-scan/Refresh" : " Rescan";
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_scanMode(expandedAppName + scanMode));
             //on-boarding
             ApplicationOnboardingDto applicationOnboardingDto;
@@ -256,6 +253,10 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
         }
     }
 
+    private static VersionInformation getMinVersion() {
+        //This version can be null if failed to convert from string
+        return VersionInformation.fromVersionString("2.5.0");
+    }
 
     public String getExclusionPatterns() {
         return exclusionPatterns;

@@ -73,13 +73,12 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
     public void setApplicationGuid(@Nullable String applicationGuid) {
         this.applicationGuid = applicationGuid;
     }
-
-    @CheckForNull
+    @Nullable
     public String getFilePath() {
         return filePath;
     }
 
-    public void setFilePath(@CheckForNull String filePath) {
+    public void setFilePath(@Nullable String filePath) {
         this.filePath = filePath;
     }
 
@@ -124,10 +123,12 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
         this.domainName = domainName;
     }
 
-    public void setOnboardStrategy(String onboardStrategy) {
+    public void setOnboardStrategy(@CheckForNull String onboardStrategy) {
         this.onboardStrategy = onboardStrategy;
     }
 
+    
+    @CheckForNull
     public String getOnboardStrategy() {
         return onboardStrategy;
     }
