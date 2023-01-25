@@ -66,7 +66,7 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
     }
 
     @DataBoundSetter
-    public void setApplicationGuid(String applicationGuid) {
+    public void setApplicationGuid(@Nullable String applicationGuid) {
         this.applicationGuid = applicationGuid;
     }
 
@@ -75,7 +75,7 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
     }
 
     @DataBoundSetter
-    public void setFilePath(String filePath) {
+    public void setFilePath(@Nullable String filePath) {
         this.filePath = filePath;
     }
 
