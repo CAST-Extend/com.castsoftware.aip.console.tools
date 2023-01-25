@@ -9,10 +9,10 @@ set EXTEND_URL=https://extend.castsoftware.com
 set PATH=C:\CAST-Caches\Win64;%PATH%
 
 REM
-SET MORE_OPTIONS=""
-if "%RUN_ANALYSIS%" == "true" SET MORE_OPTIONS=--run-analysis
+SET MORE_OPTIONS=--strategy=%STRATEGY%
 if not "%EXCLUSION_PATTERNS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclude-patterns="%EXCLUSION_PATTERNS%"
 if not "%EXCLUSION_RULES%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclusion-rules="%EXCLUSION_RULES%"
+if %STRATEGY%=="FIRST_SCAN" SET MORE_OPTIONS=%MORE_OPTIONS% --file="%SOURCES_ZIP%"
 
 for %%a in ( SOURCES_ZIP TOOLSDIR ) do (
 	if not defined %%a (
@@ -31,14 +31,14 @@ echo ----------------------------
 echo -- Onboard application to CAST Imaging Console --
 echo OPTIONS= %MORE_OPTIONS%
 echo java -jar aip-console-tools-cli.jar Onboard-Application --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
-     	--app-name="%APP_NAME%" --file="%SOURCES_ZIP%" --verbose=%VERBOSE% ^
+     	--app-name="%APP_NAME%" --verbose=%VERBOSE% ^
      	%MORE_OPTIONS%
 echo --------------------------------
 SET TOOLS_CLI_PATH=%TOOLSDIR%\%TOOLS_EXTENSION%
 CD /d "%TOOLS_CLI_PATH%"
 
 java -jar aip-console-tools-cli.jar Onboard-Application --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
-	--app-name="%APP_NAME%" --file="%SOURCES_ZIP%" --verbose=false ^
+	--app-name="%APP_NAME%" --verbose=false ^
 	%MORE_OPTIONS%
 
 echo exit code=%errorlevel%
