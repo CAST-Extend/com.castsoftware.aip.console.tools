@@ -123,8 +123,8 @@ public class OnboardApplicationCommand extends BasicCollable {
             log.info("About to trigger on-boarding workflow for: '{}' application", runAnalysis ? "Deep-Analysis" : "Fast-Scan");
             //on-boarding
             ApplicationOnboardingDto applicationOnboardingDto;
-            String caipVersion = app.getCaipVersion();
-            String targetNode = app.getTargetNode();
+            String caipVersion = app != null ? app.getCaipVersion() : null;
+            String targetNode = app != null ? app.getTargetNode() : null;
             String sourcePath = uploadFile(existingAppGuid);
 
             CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());

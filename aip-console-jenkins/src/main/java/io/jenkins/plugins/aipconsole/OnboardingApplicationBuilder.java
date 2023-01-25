@@ -173,8 +173,8 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_scanMode(expandedAppName + scanMode));
             //on-boarding
             ApplicationOnboardingDto applicationOnboardingDto;
-            String caipVersion = app.getCaipVersion();
-            String targetNode = app.getTargetNode();
+            String caipVersion = app == null ? null : app.getCaipVersion();
+            String targetNode = app == null ? null : app.getTargetNode();
             String sourcePath = "";
             boolean verbose = getDescriptor().configuration.isVerbose();
             JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(run, listener, verbose);

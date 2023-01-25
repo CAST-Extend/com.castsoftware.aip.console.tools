@@ -13,10 +13,7 @@
         <f:textbox/>
     </f:entry>
     <f:entry title="${%onboardStrategy}" description="${%onboardStrategy.descr}">
-        <select name="onboardStrategy" field="onboardStrategy">
-            <option value="FIRST_SCAN">First Scan</option>
-            <option value="DEEP_ANALYSIS">Deep Analysis</option>
-        </select>
+        <f:textbox field="onboardStrategy" value="${onboardStrategy}" default="FIRST_SCAN"/>
     </f:entry>
 
     <f:advanced title="${%advancedSettings}">
