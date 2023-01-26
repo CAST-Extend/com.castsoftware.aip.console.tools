@@ -144,7 +144,11 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
             if (!applicationService.isImagingAvailable()) {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled());
             } else {
-                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
+                if (StringUtils.isEmpty(app.getSchemaPrefix())) {
+                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
+                } else {
+                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
+                }
             }
         } catch (ApplicationServiceException e) {
             e.printStackTrace(logger);
