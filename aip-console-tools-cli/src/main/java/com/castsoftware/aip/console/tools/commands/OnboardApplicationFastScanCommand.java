@@ -5,7 +5,6 @@ import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
-import com.castsoftware.aip.console.tools.core.dto.OnboardingMode;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
@@ -27,15 +26,15 @@ import java.io.File;
 
 @Component
 @CommandLine.Command(
-        name = "OnboardApplication",
+        name = "FastScan",
         mixinStandardHelpOptions = true,
-        aliases = {"Onboard-Application"},
-        description = "Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST Imaging Console."
+        aliases = {"Fast-Scan"},
+        description = "Creates an application or uses an existing application to manage source code using a modern workflow in CAST Imaging Console."
 )
 @Slf4j
 @Getter
 @Setter
-public class OnboardApplicationCommand extends BasicCollable {
+public class OnboardApplicationFastScanCommand extends BasicCollable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
             description = "The Name of the application to analyze",
@@ -62,18 +61,13 @@ public class OnboardApplicationCommand extends BasicCollable {
             , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
     private ExclusionRuleType[] exclusionRules;
 
-    @CommandLine.Option(names = {"--strategy"}, type = OnboardingMode.class
-            , description = "Onboard strategy manages the steps that will be processed. Default value is FAST_SCAN. Valid values: ${COMPLETION-CANDIDATES}")
-    private OnboardingMode mode = OnboardingMode.FAST_SCAN;
-
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
     //This version can be null if failed to convert from string
-    private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
+    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
 
-
-    public OnboardApplicationCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+    public OnboardApplicationFastScanCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
     }
 
@@ -83,9 +77,8 @@ public class OnboardApplicationCommand extends BasicCollable {
             log.error("Application name should not be empty.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
-        boolean runAnalysis = mode == OnboardingMode.DEEP_ANALYSIS;
 
-        if (!runAnalysis && (filePath == null || !filePath.exists())) {
+        if (filePath == null || !filePath.exists()) {
             log.error("A valid file path required to perform the FAST SCAN operation");
             return Constants.RETURN_MISSING_FILE;
         }
@@ -109,17 +102,12 @@ public class OnboardApplicationCommand extends BasicCollable {
             if (app != null) {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
-                firstScan = app.getVersion() == null || StringUtils.isEmpty(app.getVersion().getGuid()) || !app.isOnboarded();
+                firstScan = app.getVersion() == null || !app.isOnboarded() || StringUtils.isEmpty(app.getSchemaPrefix());
             } else {
                 onboardApplication = true;
             }
 
-            if (firstScan && runAnalysis) {
-                log.error("Unable to trigger Deep-Analysis. The actual conditions required Fast-Scan to be running first.");
-                return Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED;
-            }
-
-            log.info("About to trigger on-boarding workflow for: '{}' application", runAnalysis ? "Deep-Analysis" : "Fast-Scan");
+            log.info("About to trigger New workflow for: 'Fast-Scan'");
             //on-boarding
             ApplicationOnboardingDto applicationOnboardingDto;
             String caipVersion = app != null ? app.getCaipVersion() : null;
@@ -148,7 +136,7 @@ public class OnboardApplicationCommand extends BasicCollable {
                 caipVersion = applicationOnboardingDto.getCaipVersion();
                 targetNode = applicationOnboardingDto.getTargetNode();
                 existingAppGuid = applicationGuid;
-            } else if (!runAnalysis) {
+            } else {
                 //For RESCAN PROCESS: re-discover
                 sourcePath = app.getVersion().getSourcePath();
                 Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
@@ -171,27 +159,14 @@ public class OnboardApplicationCommand extends BasicCollable {
                 log.info("Rediscover Application done successfully");
             }
 
-            //Run Analysis
-            if (!runAnalysis || !applicationService.isImagingAvailable()) {
-                String message = runAnalysis ?
-                        "The 'Deep Analysis' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging."
-                        : "The 'Deep Analysis' step has been disabled by user. To perform this step do configure CAST Imaging and set --strategy to DEEP_ANALYSIS";
-                log.info(message);
+            if (!applicationService.isImagingAvailable()) {
+                log.info("The 'Deep Analysis' step has been disabled by user. To perform this step do configure CAST Imaging and use the dedicated CLI command");
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
-
-            if (firstScan) {
-                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, getSharedOptions().isVerbose(), cliLogPolling);
-            } else {
-                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, getSharedOptions().isVerbose(), cliLogPolling);
-            }
+            //Run Analysis delegated to Deep-Analysis
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         } finally {
-            if (!OnBoardingModeWasOn) {
-                log.info("Setting the 'On-boarding mode OFF' on CAST Imaging Console");
-                applicationService.setEnableOnboarding(false);
-            }
             // Remove shutdown hook after execution
             // This is to avoid exceptions during job execution to
             if (shutdownHook != null) {
@@ -203,9 +178,6 @@ public class OnboardApplicationCommand extends BasicCollable {
     }
 
     private String uploadFile(String existingAppGuid) throws UploadException {
-        if (mode == OnboardingMode.DEEP_ANALYSIS) {
-            return ""; //not need to upload sources
-        }
         String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "Discover sources" : "refresh sources content";
         log.info("Prepare to " + uploadAction + " for Application " + applicationName);
         String sourcePath = uploadService.uploadFileForOnboarding(filePath, existingAppGuid);

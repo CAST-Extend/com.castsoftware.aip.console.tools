@@ -328,15 +328,17 @@ Under `Advanced Settings` you will find the following parameters :
   of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
 * *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
 
-### Console Onboard Application Deep-Analysis
+### Deep-Analysis
 
 * *AIP Console URL*: URL to CAST Imaging Console should you want to target a different instance that the one specified
   in the global configuration.
 * *API Key* : The API Key for the URL specified above.
 * *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
 * *Application Name*: Application on which to perform Deep Analysis.
+* *Snapshot Name*: Name of the snapshot. CAST Imaging Console will automatically assign one to the application if this
+  field is empty.
 
-### Console Onboard Application Fast Scan
+### Fast Scan
 
 * *AIP Console URL*: URL to CAST Imaging Console should you want to target a different instance that the one specified
   in the global configuration.

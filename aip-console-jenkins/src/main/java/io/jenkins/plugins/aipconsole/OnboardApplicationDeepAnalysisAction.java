@@ -7,11 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 public class OnboardApplicationDeepAnalysisAction extends BaseAction implements RunAction2 {
     private static final Logger LOGGER = LoggerFactory.getLogger(OnboardApplicationDeepAnalysisAction.class);
     @CheckForNull
     private String applicationName;
+    @Nullable
+    private String snapshotName;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
     private transient Run run;
@@ -49,6 +52,15 @@ public class OnboardApplicationDeepAnalysisAction extends BaseAction implements 
 
     public void setApplicationName(@CheckForNull String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    @Nullable
+    public String getSnapshotName() {
+        return snapshotName;
+    }
+
+    public void setSnapshotName(@Nullable String snapshotName) {
+        this.snapshotName = snapshotName;
     }
 
     public long getTimeout() {

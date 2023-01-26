@@ -20,8 +20,10 @@ import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -41,6 +43,8 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 
 public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     final static boolean runAnalysis = true;
+    @Nullable
+    private String snapshotName;
 
     @Override
     protected String checkJobParameters() {
@@ -144,10 +148,11 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
             if (!applicationService.isImagingAvailable()) {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled());
             } else {
+                String expandedSsnapshotName = environmentVariables.expand(getSnapshotName());
                 if (StringUtils.isEmpty(app.getSchemaPrefix())) {
-                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
+                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, verbose, jnksLogPollingProvider);
                 } else {
-                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
+                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, verbose, jnksLogPollingProvider);
                 }
             }
         } catch (ApplicationServiceException e) {
@@ -162,6 +167,14 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
         return VersionInformation.fromVersionString("2.5.0");
     }
 
+    public String getSnapshotName() {
+        return snapshotName;
+    }
+
+    @DataBoundSetter
+    public void setSnapshotName(@Nullable String snapshotName) {
+        this.snapshotName = snapshotName;
+    }
 
     @Override
     public OnboardApplicationDeepAnalysisBuilder.OnboardApplicationDescriptorImpl getDescriptor() {

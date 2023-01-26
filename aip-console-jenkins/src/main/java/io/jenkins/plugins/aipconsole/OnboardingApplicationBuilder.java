@@ -234,10 +234,11 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
                         : OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled();
                 logger.println(message);
             } else {
+                //TODO: remove it
                 if (firstScan) {
-                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
+                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, null, verbose, jnksLogPollingProvider);
                 } else {
-                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
+                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, null, verbose, jnksLogPollingProvider);
                 }
             }
         } catch (ApplicationServiceException | JobServiceException e) {

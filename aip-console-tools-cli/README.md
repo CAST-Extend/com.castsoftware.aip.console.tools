@@ -132,17 +132,21 @@ To **Onboard Application** using a **file full path**, the process will upload s
 file should be
 accessible from the machine where the batch is executed.
 
-The command is using following strategies:
+The command is using following strategies in a separated commands:
 
-- *FAST_SCAN*: for the sources' delivery contents without running the analysis. This strategy can be used as much as
+- *Fast-Scan*: for the sources' delivery contents without running the analysis. This strategy can be used as much as
   required by providing the sources file.
-- *DEEP_SCAN*: to trigger the analysis after the FIRST_SCAN has been performed. This also manage to upload data to CAST
+- *Deep-Analyze: to trigger the analysis after the Fast-Scan has been performed. This also manage to upload data to CAST
   imaging depending on the available configuration.
 
-To perform that action you can inspire from the following command (see advance usage for more details):
+To perform that action you can inspire from the following command (see advanced usage for more details):
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --strategy=FAST_SCAN --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+```
+
+```bash
+java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my app" --verbose=false 
 ```
 
 To **Publish To Imaging**
@@ -163,7 +167,9 @@ When running the CLI, you must specify a command to be run. The list of commands
 * `AddVersion` or `add` to create a new version and analyze it
 * `Deliver` to create a new version **without** running an analysis
 * `Analysis` or `analyze` to run an analysis on the current version
-* `Onboard-Application` to perform the *first-scan/refresh* the sources contents and optionally run the analysis.
+* `Fast-Scan` to perform a *fast-scan* on the sources contents and optionally do a Deep-Analysis (run the analysis).
+* `Deep-Analysis` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the
+  dashbord and Imanging depending on the operating settings
 * `Publish-Imaging` Publish an existing application data to CAST Imaging.
 
 Each commands has a `--help` parameter, providing a list of all parameters available.
@@ -344,7 +350,7 @@ The available options are :
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
   snapshot or from publishing application to the Health dashboard. *default* : false
 
-#### Onboard Application
+#### Fast-Scan
 
 Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST
 Imaging Console.
@@ -365,12 +371,18 @@ The available options are :
 * `--exclude-patterns` or `-exclude` (**optional**): File patterns(glob pattern) to exclude in the delivery, separated
   with comma
 * `--exclusion-rules`  (**optional**): Project's exclusion rules, separated with comma.
-* `--strategy` (**required**): possible value is one of FIRST_SCAN (default) or DEEP_ANALYSIS. The DEEP_ANALYSIS
-  strategy requires
-  the application name only (see example below).
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid.key" -n "my app" --strategy=DEEP_ANALYSIS --verbose=false
+java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+```
+
+### Deep Analyze
+
+* `--app-name` or `-n` (**required**): The application name.
+* `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
+
+```bash
+java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my app"  --verbose=false
 ```
 
 ### Publish-Imaging

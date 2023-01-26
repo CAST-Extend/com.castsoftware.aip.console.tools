@@ -151,7 +151,7 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException {
+    public String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder();
         requestBuilder.appGuid(applicationGuid);
         if (StringUtils.isNotEmpty(nodeName)) {
@@ -159,6 +159,9 @@ public class JobsServiceImpl implements JobsService {
         }
         if (StringUtils.isNotEmpty(caipVersion)) {
             requestBuilder.caipVersion(caipVersion);
+        }
+        if (StringUtils.isNotEmpty(snapshotName)) {
+            requestBuilder.snapshotName(snapshotName);
         }
 
         try {
@@ -171,7 +174,7 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException {
+    public String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
                 .appGuid(applicationGuid);
         if (StringUtils.isNotEmpty(nodeName)) {
@@ -179,6 +182,9 @@ public class JobsServiceImpl implements JobsService {
         }
         if (StringUtils.isNotEmpty(caipVersion)) {
             requestBuilder.caipVersion(caipVersion);
+        }
+        if (StringUtils.isNotEmpty(snapshotName)) {
+            requestBuilder.snapshotName(snapshotName);
         }
 
         try {

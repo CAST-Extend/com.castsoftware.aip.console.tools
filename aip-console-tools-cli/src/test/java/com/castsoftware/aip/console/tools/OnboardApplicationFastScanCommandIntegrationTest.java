@@ -1,7 +1,7 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.BasicCollable;
-import com.castsoftware.aip.console.tools.commands.OnboardApplicationCommand;
+import com.castsoftware.aip.console.tools.commands.OnboardApplicationFastScanCommand;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
@@ -36,13 +36,13 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {AipConsoleToolsCliIntegrationTest.class})
 @ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
-public class OnboardingApplicationCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
+public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     @InjectMocks
-    private OnboardApplicationCommand onboardApplicationCommand;
+    private OnboardApplicationFastScanCommand fastScanCommand;
 
     @Override
     protected void initializePrivateMocks() {
-        assignMockedBeans(onboardApplicationCommand);
+        assignMockedBeans(fastScanCommand);
     }
 
     @Override
@@ -55,11 +55,11 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
         // Still this woks fine renewing parameters values each time.
         // Here only String types, but each test should set velues to requested ones
         // ===================================
-        resetSharedOptions(onboardApplicationCommand.getSharedOptions());
-        onboardApplicationCommand.setApplicationName(null);
-        onboardApplicationCommand.setDomainName(null);
-        onboardApplicationCommand.setFilePath(null);
-        onboardApplicationCommand.setNodeName(null);
+        resetSharedOptions(fastScanCommand.getSharedOptions());
+        fastScanCommand.setApplicationName(null);
+        fastScanCommand.setDomainName(null);
+        fastScanCommand.setFilePath(null);
+        fastScanCommand.setNodeName(null);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
     }
 
     @Test
-    public void testOnboardingApplication_WithNotCompatibleVersion() throws Exception {
+    public void testOnboardApplicationFastScan_WithNotCompatibleVersion() throws Exception {
         String[] args = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
@@ -100,14 +100,14 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
 
-        runStringArgs(onboardApplicationCommand, args);
+        runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_SERVER_VERSION_NOT_COMPATIBLE));
     }
 
     @Test
-    public void testOnboardingApplication_WithCompatibleVersion() throws Exception {
+    public void testOnboardApplicationFastScan_WithCompatibleVersion() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
@@ -121,20 +121,19 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
         doThrow(ApiCallException.class).when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doThrow(ApplicationServiceException.class).when(applicationService).isOnboardingSettingsEnabled();
 
-        runStringArgs(onboardApplicationCommand, args);
+        runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_APPLICATION_INFO_MISSING));
     }
 
     @Test
-    public void testOnboardingApplication_OnboardingDisabled() throws Exception {
+    public void testOnboardApplicationFastScan_OnboardingDisabled() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
-                "--node-name", TestConstants.TEST_NODE,
-                "--strategy", "FAST_SCAN"};
+                "--node-name", TestConstants.TEST_NODE};
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
@@ -143,7 +142,7 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(false).when(applicationService).isOnboardingSettingsEnabled();
 
-        runStringArgs(onboardApplicationCommand, args);
+        runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_ONBOARD_APPLICATION_DISABLED));
@@ -151,13 +150,12 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
 
 
     @Test
-    public void testOnboardingApplication_FastScanWithoutExistingVersion() throws Exception {
+    public void testOnboardApplicationFastScan_WithoutExistingVersion() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
-                "--node-name", TestConstants.TEST_NODE,
-                "--strategy", "FAST_SCAN"}; //default
+                "--node-name", TestConstants.TEST_NODE};
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
@@ -175,19 +173,18 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
 
-        runStringArgs(onboardApplicationCommand, args);
+        runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_RUN_ANALYSIS_DISABLED));
     }
 
     @Test
-    public void testOnboardingApplication_FastScanWithoutSourcesProvided() throws Exception {
+    public void testOnboardApplicationFastScan_WithoutSourcesProvided() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "--domain-name", TestConstants.TEST_DOMAIN,
-                "--node-name", TestConstants.TEST_NODE,
-                "--strategy", "FAST_SCAN"}; //default
+                "--node-name", TestConstants.TEST_NODE}; //default
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
@@ -199,20 +196,19 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
         doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
 
-        runStringArgs(onboardApplicationCommand, args);
+        runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_MISSING_FILE));
     }
 
     @Test
-    public void testOnboardingApplication_FastScanOnRefreshSourcesContent() throws Exception {
+    public void testOnboardApplicationFastScan_OnRefreshSourcesContent() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
-                "--node-name", TestConstants.TEST_NODE,
-                "--strategy", "FAST_SCAN"}; //default
+                "--node-name", TestConstants.TEST_NODE};
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
@@ -237,77 +233,9 @@ public class OnboardingApplicationCommandIntegrationTest extends AipConsoleTools
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
 
-        runStringArgs(onboardApplicationCommand, args);
+        runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_RUN_ANALYSIS_DISABLED));
-    }
-
-    @Test
-    public void testOnboardingApplication_DeepAnalysis() throws Exception {
-        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
-                "--domain-name", TestConstants.TEST_DOMAIN,
-                "--node-name", TestConstants.TEST_NODE,
-                "--strategy", "DEEP_ANALYSIS"};
-
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
-        doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
-        doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
-
-        //first scan/ Refresh sources content done
-        applicationDto.setOnboarded(true);
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
-        VersionDto existingVersion = Mockito.mock(VersionDto.class);
-        when(existingVersion.getGuid()).thenReturn(TestConstants.TEST_OBR_VERSION_GUID);
-        when(existingVersion.getName()).thenReturn(TestConstants.TEST_OBR_VERSION_NAME);
-        when(existingVersion.isImagingDone()).thenReturn(true);
-        applicationDto.setVersion(existingVersion);
-        applicationDto.setImagingTenant("default"); //something different suit also
-        doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
-
-        ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
-        when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
-        when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
-        when(applicationService.isImagingAvailable()).thenReturn(true);
-
-        runStringArgs(onboardApplicationCommand, args);
-        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
-        assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_OK));
-    }
-
-    @Test
-    public void testOnboardingApplication_DeepAnalysisWithoutFirstScan() throws Exception {
-        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
-                "--domain-name", TestConstants.TEST_DOMAIN,
-                "--node-name", TestConstants.TEST_NODE,
-                "--strategy", "DEEP_ANALYSIS"};
-
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
-        doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
-        doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
-
-        //first scan/ Refresh sources content not done
-        applicationDto.setOnboarded(true);
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
-        doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
-
-        ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
-        when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
-        when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
-        when(applicationService.isImagingAvailable()).thenReturn(true);
-
-        runStringArgs(onboardApplicationCommand, args);
-        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
-        assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED));
     }
 }
