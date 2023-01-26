@@ -28,7 +28,6 @@ import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDenied;
-import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noApiKey;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noServerUrl;
 
@@ -107,9 +106,6 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
     }
 
     protected String checkJobParameters() {
-        if (StringUtils.isAnyBlank(applicationName, filePath)) {
-            return GenericError_error_missingRequiredParameters();
-        }
         String apiServerUrl = getAipConsoleUrl();
         String apiKey = Secret.toString(getApiKey());
 

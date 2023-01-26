@@ -15,14 +15,14 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
     private String applicationName;
     @Nullable
     private String applicationGuid;
-    @Nullable
+    @CheckForNull
     private String filePath;
     @Nullable
     private String nodeName;
     @Nullable
     private String domainName;
     @CheckForNull
-    private String onboardStrategy = "FIRST_SCAN";
+    private String onboardStrategy;
 
     @Nullable
     private String exclusionPatterns = "";
@@ -30,7 +30,7 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
 
     private transient Run run;
 
-    public OnboardingApplicationAction(@CheckForNull String applicationName, String filePath) {
+    public OnboardingApplicationAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
         this.applicationName = applicationName;
         this.filePath = filePath;
     }
@@ -122,15 +122,5 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
 
     public void setDomainName(@Nullable String domainName) {
         this.domainName = domainName;
-    }
-
-    public void setOnboardStrategy(@CheckForNull String onboardStrategy) {
-        this.onboardStrategy = onboardStrategy;
-    }
-
-
-    @CheckForNull
-    public String getOnboardStrategy() {
-        return onboardStrategy;
     }
 }

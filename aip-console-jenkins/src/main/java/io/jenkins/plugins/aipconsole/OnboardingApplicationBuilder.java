@@ -4,7 +4,6 @@ import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
-import com.castsoftware.aip.console.tools.core.dto.OnboardingMode;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -41,6 +40,7 @@ import java.util.function.Function;
 
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
@@ -63,7 +63,14 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 public class OnboardingApplicationBuilder extends CommonActionBuilder {
     private String applicationGuid;
     private String exclusionPatterns = "";
-    private String onboardStrategy;
+
+    @Override
+    protected String checkJobParameters() {
+        if (StringUtils.isAnyBlank(getApplicationName(), getFilePath())) {
+            return GenericError_error_missingRequiredParameters();
+        }
+        return super.checkJobParameters();
+    }
 
     class JnksLogPollingProviderImpl implements LogPollingProvider {
         private final PrintStream log;
@@ -102,7 +109,6 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
                         logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
                     };
         }
-
     }
 
     @DataBoundConstructor
@@ -128,8 +134,7 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
         String expandedAppName = environmentVariables.expand(getApplicationName());
         String expandedFilePath = environmentVariables.expand(getFilePath());
         String expandedDomainName = environmentVariables.expand(getDomainName());
-        OnboardingMode strategy = OnboardingMode.fromString(environmentVariables.expand(getOnboardStrategy()));
-        boolean runAnalysis = strategy == OnboardingMode.DEEP_ANALYSIS;
+        boolean runAnalysis = false;
 
         if (!runAnalysis && (StringUtils.isEmpty(expandedFilePath) || !FileUtils.exists(expandedFilePath))) {
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_missingFilePath());
@@ -265,15 +270,6 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
     @DataBoundSetter
     public void setExclusionPatterns(@Nullable String exclusionPatterns) {
         this.exclusionPatterns = exclusionPatterns;
-    }
-
-    @DataBoundSetter
-    public void setOnboardStrategy(String onboardStrategy) {
-        this.onboardStrategy = onboardStrategy;
-    }
-
-    public String getOnboardStrategy() {
-        return onboardStrategy;
     }
 
     @Override

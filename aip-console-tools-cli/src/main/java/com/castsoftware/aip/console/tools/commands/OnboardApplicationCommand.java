@@ -109,8 +109,7 @@ public class OnboardApplicationCommand extends BasicCollable {
             if (app != null) {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
-                firstScan = app.getVersion() == null || StringUtils.isAnyEmpty(app.getImagingTenant(), app.getVersion().getGuid())
-                        || !app.isOnboarded();
+                firstScan = app.getVersion() == null || StringUtils.isEmpty(app.getVersion().getGuid()) || !app.isOnboarded();
             } else {
                 onboardApplication = true;
             }
