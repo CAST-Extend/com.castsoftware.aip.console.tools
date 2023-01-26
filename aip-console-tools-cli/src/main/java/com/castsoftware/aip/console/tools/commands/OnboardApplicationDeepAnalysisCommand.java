@@ -84,6 +84,9 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             }
 
             log.info("About to trigger new workflow for: 'Deep-Analysis' ");
+            if (StringUtils.isNotEmpty(getSnapshotName())) {
+                log.info("  With snapshot name: " + getSnapshotName());
+            }
             String caipVersion = app.getCaipVersion();
             String targetNode = app.getTargetNode();
 
