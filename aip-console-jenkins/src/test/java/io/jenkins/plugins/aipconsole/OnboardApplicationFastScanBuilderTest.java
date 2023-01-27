@@ -9,25 +9,24 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OnboardingApplicationBuilderTest extends BaseBuilderTest {
+public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
     @InjectMocks
-    private OnboardingApplicationBuilder onboardingApplicationBuilder;
+    private OnboardApplicationFastScanBuilder onboardApplicationFastScanBuilder;
 
     @Before
     public void setUp() throws Exception {
         super.startUp();
-        onboardingApplicationBuilder = new OnboardingApplicationBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
+        onboardApplicationFastScanBuilder = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void testOnboardingApplicationJob() throws Exception {
-        FreeStyleProject project = getProjectWithBuilder(onboardingApplicationBuilder);
+    public void testOnboardingApplicationFastScanJob() throws Exception {
+        FreeStyleProject project = getProjectWithBuilder(onboardApplicationFastScanBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
-        OnboardingApplicationBuilder expectedResults = new OnboardingApplicationBuilder("", "archive.zip");
+        OnboardApplicationFastScanBuilder expectedResults = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, "archive.zip");
         expectedResults.setDomainName("");
-        expectedResults.setApplicationName(TEST_APP_NAME);
         jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
     }
 }

@@ -109,7 +109,6 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
 
             //Refresh application information even app was existing
             app = applicationService.getApplicationFromName(applicationName);
-            boolean firstScan = app.getVersion() == null || !app.isOnboarded() || StringUtils.isEmpty(app.getSchemaPrefix());
 
             applicationGuid = app.getGuid();
             ApplicationOnboardingDto applicationOnboardingDto = applicationService.getApplicationOnboarding(applicationGuid);
