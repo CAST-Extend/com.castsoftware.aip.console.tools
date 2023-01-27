@@ -131,10 +131,22 @@ to create a new Version.
 To **Onboard Application** using a **file full path**, the process will upload sources on the CAST Imaging server. The
 file should be
 accessible from the machine where the batch is executed.
-To perform that action you can inspire from the following command:
+
+The command is using following strategies in a separated commands:
+
+- *Fast-Scan*: for the sources' delivery contents without running the analysis. This strategy can be used as much as
+  required by providing the sources file.
+- *Deep-Analyze: to trigger the analysis after the Fast-Scan has been performed. This also manage to upload data to CAST
+  imaging depending on the available configuration.
+
+To perform that action you can inspire from the following command (see advanced usage for more details):
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+```
+
+```bash
+java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my app" --verbose=false 
 ```
 
 To **Publish To Imaging**
@@ -155,7 +167,9 @@ When running the CLI, you must specify a command to be run. The list of commands
 * `AddVersion` or `add` to create a new version and analyze it
 * `Deliver` to create a new version **without** running an analysis
 * `Analysis` or `analyze` to run an analysis on the current version
-* `Onboard-Application` to perform the *first-scan/refresh* the sources contents and optionally run the analysis.
+* `Fast-Scan` to perform a *fast-scan* on the sources contents and optionally do a Deep-Analysis (run the analysis).
+* `Deep-Analysis` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the
+  dashbord and Imanging depending on the operating settings
 * `Publish-Imaging` Publish an existing application data to CAST Imaging.
 
 Each commands has a `--help` parameter, providing a list of all parameters available.
@@ -336,26 +350,40 @@ The available options are :
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
   snapshot or from publishing application to the Health dashboard. *default* : false
 
-#### Onboard Application
+#### Fast-Scan
 
 Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST
 Imaging Console.
 
-This command is used to perform the *first scan* or to *refresh* the sources contents before optionally run the
-analysis.
+This command is used to perform the *first scan* or to *refresh* the sources contents before you optionally perform a *
+Deep Analysis* (run the
+analysis).
 
 The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
-* `--file` or `-f` (**required**): A local zip or tar.gz file full path to the sources
+* `--file` or `-f`: **required** only when performing the FIRST_SCAN. Represents the local zip or tar.gz file full path
+  to the
+  sources
 * `--node-name`  (**optional**): The name of the node on which the application will be created
 * `--domain-name`  (**optional**): A domain is a group of applications. You may use domain to sort/filter applications.
   Will be created if it doesn't exists. No domain will be assigned if left empty
 * `--exclude-patterns` or `-exclude` (**optional**): File patterns(glob pattern) to exclude in the delivery, separated
   with comma
 * `--exclusion-rules`  (**optional**): Project's exclusion rules, separated with comma.
-* `--run-analysis` or `-analyze` (**optional**): Set this option to false when you plan to only perform either a
-  first-scan action or a refresh operation
+
+```bash
+java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+```
+
+### Deep Analyze
+
+* `--app-name` or `-n` (**required**): The application name.
+* `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
+
+```bash
+java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my app"  --verbose=false
+```
 
 ### Publish-Imaging
 

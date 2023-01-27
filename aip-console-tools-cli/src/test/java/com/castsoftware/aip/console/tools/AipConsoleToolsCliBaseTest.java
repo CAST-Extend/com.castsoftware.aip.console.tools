@@ -84,7 +84,7 @@ public abstract class AipConsoleToolsCliBaseTest {
         additionalStartup();
     }
 
-    protected void additionalStartup() {
+    protected void additionalStartup() throws IOException {
         // Add others stub below
     }
 

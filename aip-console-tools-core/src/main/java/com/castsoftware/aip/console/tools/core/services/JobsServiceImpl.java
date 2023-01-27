@@ -99,8 +99,12 @@ public class JobsServiceImpl implements JobsService {
     @Override
     public String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion, String targetNode) throws JobServiceException {
         DiscoverApplicationJobRequest.DiscoverApplicationJobRequestBuilder requestBuilder = DiscoverApplicationJobRequest.builder()
-                .appGuid(applicationGuid)
-                .sourcePath(sourcePath);
+                .appGuid(applicationGuid);
+
+        if (StringUtils.isNotEmpty(sourcePath)) {
+            requestBuilder.sourcePath(sourcePath);
+        }
+
         if (StringUtils.isNotEmpty(caipVersion)) {
             requestBuilder.caipVersion(caipVersion);
         }
@@ -147,7 +151,7 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException {
+    public String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder();
         requestBuilder.appGuid(applicationGuid);
         if (StringUtils.isNotEmpty(nodeName)) {
@@ -155,6 +159,9 @@ public class JobsServiceImpl implements JobsService {
         }
         if (StringUtils.isNotEmpty(caipVersion)) {
             requestBuilder.caipVersion(caipVersion);
+        }
+        if (StringUtils.isNotEmpty(snapshotName)) {
+            requestBuilder.snapshotName(snapshotName);
         }
 
         try {
@@ -167,7 +174,7 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException {
+    public String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
                 .appGuid(applicationGuid);
         if (StringUtils.isNotEmpty(nodeName)) {
@@ -175,6 +182,9 @@ public class JobsServiceImpl implements JobsService {
         }
         if (StringUtils.isNotEmpty(caipVersion)) {
             requestBuilder.caipVersion(caipVersion);
+        }
+        if (StringUtils.isNotEmpty(snapshotName)) {
+            requestBuilder.snapshotName(snapshotName);
         }
 
         try {

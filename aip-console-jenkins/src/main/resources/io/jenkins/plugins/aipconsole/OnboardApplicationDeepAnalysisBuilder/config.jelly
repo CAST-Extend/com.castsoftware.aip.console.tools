@@ -3,13 +3,7 @@
     <f:entry title="${%applicationName}" field="applicationName" description="${%applicationName.descr}">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%filePath}" field="filePath" description="${%filePath.descr}">
-        <f:textbox/>
-    </f:entry>
-    <f:entry title="${%exclusionPatterns}" field="exclusionPatterns" description="${%exclusionPatterns.descr}">
-        <f:textbox/>
-    </f:entry>
-    <f:entry title="${%domainName}" field="domainName" description="${%domainName.descr}">
+    <f:entry title="${%snapshotName}" field="snapshotName" description="${%snapshotName.descr}">
         <f:textbox/>
     </f:entry>
 

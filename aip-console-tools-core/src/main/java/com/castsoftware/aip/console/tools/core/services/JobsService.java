@@ -61,9 +61,9 @@ public interface JobsService {
 
     String startReDiscoverApplication(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode) throws JobServiceException;
 
-    String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
+    String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException;
 
-    String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
+    String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException;
 
     String startPublishToImaging(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
 

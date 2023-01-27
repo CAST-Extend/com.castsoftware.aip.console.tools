@@ -148,15 +148,20 @@ The Snapshot can then be found inside the `Snapshot` tab in AIP Console.
 Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST
 Imaging Console.
 
-This command is used to perform the *first scan* or to *refresh* the sources contents before optionally run the
-analysis.
+This command is used to perform the *fast scan* or to *refresh* the sources contents before optionally perform a *Deep
+Analysis* (run the
+analysis).
+
+- To perform *Fast Scan* operation do select *Console Onboard Application Fast-Scan* step
+- To perform *Deep Scan* operation do select *Console Onboard Application Deep-Analysis* step
 
 **build step**
 
 ![build-step-onboard-application](doc/images/build-step-onboard-application.png)
 
-**run with parameters**
-![onboard-application](doc/images/onboard-application.png)
+***job configuration***
+![onboard-application-deep-analysis](doc/images/onboard-application-deep-analysis.png)
+![onboard-application-fast-scan](doc/images/onboard-application-fast-scan.png)
 
 ## Advanced Usage
 
@@ -316,10 +321,40 @@ Under `Advanced Settings` you will find the following parameters :
 
 ![snapshot step advanced settings](doc/images/snapshot_advanced.png)
 
-* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
+* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the
+  global configuration.
 * *API Key* : The API Key for the URL specified above.
-* *Ignore Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+* *Ignore Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead
+  of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
 * *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
+
+### Deep-Analysis
+
+* *AIP Console URL*: URL to CAST Imaging Console should you want to target a different instance that the one specified
+  in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
+* *Application Name*: Application on which to perform Deep Analysis.
+* *Snapshot Name*: Name of the snapshot. CAST Imaging Console will automatically assign one to the application if this
+  field is empty.
+
+### Fast Scan
+
+* *AIP Console URL*: URL to CAST Imaging Console should you want to target a different instance that the one specified
+  in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
+* *Application Name*: Application on which to perform Deep Analysis.
+* *Node Name* : The name of an AIP Node Instance. The field can be left empty and CAST Imagine Console will then assign
+  one automatically
+* *Domain Name*: The name of the domain to assign when application is created. The field can be left empty and the
+  application will go to the default domain.
+* *File/Folder path* (**required**): The source code that will be used. You must provide only the file full path:
+  * A File path on the Jenkins Node where the job will be run to a ZIP, TGZ or TAR.GZ file
+  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${WORKSPACE}` will be
+    replaced by the current jobs' workspace path.
+* *Exclusion patterns* : List of file patterns to exclude in the delivery, separated by a comma. Each patterns needs to
+  follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
 
 ## Other Topics
 
@@ -327,9 +362,11 @@ Under `Advanced Settings` you will find the following parameters :
 
 **This section only applies to AIP Console Standalone**
 
-In AIP Console Standalone, authentication doesn't use an API Key as it is not handled by the authentication mechanism. Instead, you will have to use username/password combo to interact with AIP Console Standalone.
+In AIP Console Standalone, authentication doesn't use an API Key as it is not handled by the authentication mechanism.
+Instead, you will have to use username/password combo to interact with AIP Console Standalone.
 
-To do this, go to the **Configure System** page of Jenkins, under **AIP Console GLobal Configuration**, click on the Advanced Settings button.
+To do this, go to the **Configure System** page of Jenkins, under **AIP Console GLobal Configuration**, click on the
+Advanced Settings button.
 
 You should see a Username field. Enter the username there and the password in the API Key field.
 

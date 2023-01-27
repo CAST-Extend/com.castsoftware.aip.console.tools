@@ -13,6 +13,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.utils.FileUtils;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.Extension;
 import hudson.FilePath;
@@ -39,8 +40,10 @@ import java.util.function.Function;
 
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart;
@@ -55,14 +58,19 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload_done;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload_failed;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_missingFilePath;
 
 public class OnboardingApplicationBuilder extends CommonActionBuilder {
     private String applicationGuid;
     private String exclusionPatterns = "";
-    private boolean runAnalysis;
 
-    //This version can be null if failed to convert from string
-    private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
+    @Override
+    protected String checkJobParameters() {
+        if (StringUtils.isAnyBlank(getApplicationName(), getFilePath())) {
+            return GenericError_error_missingRequiredParameters();
+        }
+        return super.checkJobParameters();
+    }
 
     class JnksLogPollingProviderImpl implements LogPollingProvider {
         private final PrintStream log;
@@ -101,7 +109,6 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
                         logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
                     };
         }
-
     }
 
     @DataBoundConstructor
@@ -115,10 +122,10 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
         super.perform(run, filePath, launcher, listener);
 
         String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
-        if (MIN_VERSION != null && StringUtils.isNotEmpty(apiVersion)) {
+        if (getMinVersion() != null && StringUtils.isNotEmpty(apiVersion)) {
             VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
-            if (serverApiVersion != null && MIN_VERSION.isHigherThan(serverApiVersion)) {
-                listener.error(OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible("Onboard Application", apiVersion, MIN_VERSION.toString()));
+            if (serverApiVersion != null && getMinVersion().isHigherThan(serverApiVersion)) {
+                listener.error(OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible("Onboard Application", apiVersion, getMinVersion().toString()));
                 run.setResult(Result.FAILURE);
                 return;
             }
@@ -127,6 +134,13 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
         String expandedAppName = environmentVariables.expand(getApplicationName());
         String expandedFilePath = environmentVariables.expand(getFilePath());
         String expandedDomainName = environmentVariables.expand(getDomainName());
+        boolean runAnalysis = false;
+
+        if (!runAnalysis && (StringUtils.isEmpty(expandedFilePath) || !FileUtils.exists(expandedFilePath))) {
+            logger.println(OnbordingApplicationBuilder_DescriptorImpl_missingFilePath());
+            run.setResult(getDefaultResult());
+            return;
+        }
 
         boolean OnBoardingModeWasOn = false; //status before processing
         boolean firstScan = true;
@@ -134,7 +148,6 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
             OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
             if (!OnBoardingModeWasOn) {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_mode("OFF"));
-                //applicationService.setEnableOnboarding(true);
                 run.setResult(getDefaultResult());
                 return;
             }
@@ -147,25 +160,33 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
                 firstScan = app.getVersion() == null || StringUtils.isAnyEmpty(app.getImagingTenant(), app.getVersion().getGuid())
-                        || !app.getVersion().isImagingDone();
+                        || !app.isOnboarded();
             } else {
                 onboardApplication = true;
             }
 
-            String scanMode = firstScan ? " First-scan/Refresh" : " Rescan";
+            if (firstScan && runAnalysis) {
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired());
+                run.setResult(getDefaultResult());
+                return;
+            }
+
+            String scanMode = firstScan ? " Fast-scan/Refresh" : " Rescan";
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_scanMode(expandedAppName + scanMode));
             //on-boarding
             ApplicationOnboardingDto applicationOnboardingDto;
-            String caipVersion;
-            String targetNode;
-            String sourcePath;
+            String caipVersion = app == null ? null : app.getCaipVersion();
+            String targetNode = app == null ? null : app.getTargetNode();
+            String sourcePath = "";
             boolean verbose = getDescriptor().configuration.isVerbose();
             JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(run, listener, verbose);
 
             String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
-            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload(uploadAction, expandedAppName));
-            sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedFilePath).toFile(), existingAppGuid);
-            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload_done(uploadAction, sourcePath));
+            if (!runAnalysis) {
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload(uploadAction, expandedAppName));
+                sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedFilePath).toFile(), existingAppGuid);
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload_done(uploadAction, sourcePath));
+            }
 
             if (firstScan) {
                 applicationGuid = existingAppGuid;
@@ -187,11 +208,9 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
                 caipVersion = applicationOnboardingDto.getCaipVersion();
                 targetNode = applicationOnboardingDto.getTargetNode();
                 existingAppGuid = applicationGuid;
-            } else {
+            } else if (!runAnalysis) {
                 //For RESCAN PROCESS: re-discover
                 sourcePath = app.getVersion().getSourcePath();
-                caipVersion = app.getCaipVersion();
-                targetNode = app.getTargetNode();
                 Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
 
                 //discover-packages
@@ -209,16 +228,17 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Rediscover"));
             }
 
-            //Run Analysis
-            if (!isRunAnalysis() || !applicationService.isImagingAvailable()) {
-                String message = !isRunAnalysis() ? OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled()
+            //Run Analysis or Deep analysis
+            if (!runAnalysis || !applicationService.isImagingAvailable()) {
+                String message = !runAnalysis ? OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled()
                         : OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled();
                 logger.println(message);
             } else {
+                //TODO: remove it
                 if (firstScan) {
-                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
+                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, null, verbose, jnksLogPollingProvider);
                 } else {
-                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, verbose, jnksLogPollingProvider);
+                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, null, verbose, jnksLogPollingProvider);
                 }
             }
         } catch (ApplicationServiceException | JobServiceException e) {
@@ -239,6 +259,10 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
         }
     }
 
+    private static VersionInformation getMinVersion() {
+        //This version can be null if failed to convert from string
+        return VersionInformation.fromVersionString("2.5.0");
+    }
 
     public String getExclusionPatterns() {
         return exclusionPatterns;
@@ -247,19 +271,6 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
     @DataBoundSetter
     public void setExclusionPatterns(@Nullable String exclusionPatterns) {
         this.exclusionPatterns = exclusionPatterns;
-    }
-
-    @DataBoundSetter
-    public void setRunAnalysis(boolean runAnalysis) {
-        this.runAnalysis = runAnalysis;
-    }
-
-    public boolean getRunAnalysis() {
-        return isRunAnalysis();
-    }
-
-    public boolean isRunAnalysis() {
-        return runAnalysis;
     }
 
     @Override
