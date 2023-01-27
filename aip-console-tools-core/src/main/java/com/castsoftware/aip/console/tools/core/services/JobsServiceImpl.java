@@ -8,6 +8,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverApplicationJobRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.FastScanJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -93,6 +94,39 @@ public class JobsServiceImpl implements JobsService {
         } catch (ApiCallException e) {
             log.log(Level.SEVERE, "Unable to create new application '" + applicationName + "'", e);
             throw new JobServiceException("Creation of application failed", e);
+        }
+    }
+
+    @Override
+    public String startFastScan(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode) throws JobServiceException {
+        DiscoverApplicationJobRequest.DiscoverApplicationJobRequestBuilder requestBuilder = FastScanJobRequest.builder()
+                .appGuid(applicationGuid);
+
+        if (StringUtils.isNotEmpty(sourcePath)) {
+            requestBuilder.sourcePath(sourcePath);
+        }
+
+        if (StringUtils.isNotEmpty(caipVersion)) {
+            requestBuilder.caipVersion(caipVersion);
+        }
+        if (StringUtils.isNotEmpty(targetNode)) {
+            requestBuilder.targetNode(targetNode);
+        }
+        if (StringUtils.isNotEmpty(versionName)) {
+            requestBuilder.versionName(versionName);
+        }
+        if (deliveryConfig != null) {
+            requestBuilder.deliveryConfigGuid(deliveryConfig.getGuid())
+                    .ignorePatterns(deliveryConfig.getIgnorePatterns())
+                    .exclusionRules(deliveryConfig.getExclusionRules());
+        }
+        
+        try {
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getFastScanEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            return jobStartDto.getJobGuid();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Unable to perform the Fast-Scan action for application '" + applicationGuid + "' providing source path: " + sourcePath, e);
+            throw new JobServiceException("Fast-Scan action failed", e);
         }
     }
 

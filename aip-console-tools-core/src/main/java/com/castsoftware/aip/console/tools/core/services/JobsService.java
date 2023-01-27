@@ -57,6 +57,8 @@ public interface JobsService {
      */
     String startOnboardApplication(String applicationName, String nodeName, String domainName, String caipVersion) throws JobServiceException;
 
+    String startFastScan(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode) throws JobServiceException;
+
     String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion, String targetNode) throws JobServiceException;
 
     String startReDiscoverApplication(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode) throws JobServiceException;

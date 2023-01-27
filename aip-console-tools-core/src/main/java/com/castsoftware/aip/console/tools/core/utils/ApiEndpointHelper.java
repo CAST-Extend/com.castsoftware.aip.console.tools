@@ -37,6 +37,7 @@ public class ApiEndpointHelper {
     public static final String URL_ONBOARDING_PATH = "/onboarding";
     public static final String ONBOARD_APPLICATION_ENDPOINT = "/onboard-application";
     public static final String DISCOVER_APPLICATION_ENDPOINT = "/discover-application";
+    public static final String FAST_SCAN_ENDPOINT = "/fast-scan";
     public static final String ENABLE_ONBOARDING_PATH = "/enable-onboarding";
     public static final String IMAGING_SETTINGS_PATH = "/imaging-settings";
     public static final String FIRST_SCAN_PATH = "/first-scan-application";
@@ -96,6 +97,10 @@ public class ApiEndpointHelper {
 
     public static String getFirstScanEndPoint() {
         return getJobsEndpoint() + FIRST_SCAN_PATH;
+    }
+
+    public static String getFastScanEndPoint() {
+        return getJobsEndpoint() + FAST_SCAN_ENDPOINT;
     }
 
     public static String getDiscoverApplicationEndPoint() {

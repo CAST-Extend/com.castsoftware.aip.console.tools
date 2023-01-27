@@ -18,6 +18,7 @@ public enum JobType {
 
     DELETE_SNAPSHOT(Constants.DELETE_SNAPSHOT, "Delete snapshot"),
     DELETE_SELECTED_SNAPSHOTS(Constants.DELETE_SELECTED_SNAPSHOTS, "Delete selected snapshots"),
+    FAST_SCAN(Constants.FAST_SCAN, "Fast Scan"),
 
     UPLOAD_SNAPSHOTS(Constants.UPLOAD_SNAPSHOTS, "Upload snapshots"),
 
