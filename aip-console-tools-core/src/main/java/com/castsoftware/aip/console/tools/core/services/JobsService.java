@@ -122,6 +122,8 @@ public interface JobsService {
      */
     JobState pollAndWaitForJobFinished(String jobGuid) throws JobServiceException;
 
+    void setPollingSleepDuration(long sleepDuration);
+
     /**
      * Polls AIP Console and executes the given callback once the job is completed
      *
@@ -152,7 +154,7 @@ public interface JobsService {
      */
     //<R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobStatusWithSteps> stepChangedCallback, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException;
 
-    <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobExecutionDto, R> completionCallback) throws JobServiceException;
+    <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobExecutionDto, R> completionCallback, Long sleepDuration) throws JobServiceException;
 
     void cancelJob(String jobGuid) throws JobServiceException;
 }

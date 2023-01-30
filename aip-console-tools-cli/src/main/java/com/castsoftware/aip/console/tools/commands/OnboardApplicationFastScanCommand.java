@@ -101,7 +101,6 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             String sourcePath = uploadFile(app != null ? app.getGuid() : null);
 
             CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
-
             if (app == null) {
                 applicationGuid = applicationService.onboardApplication(applicationName, domainName, getSharedOptions().isVerbose(), sourcePath);
                 log.info("Onboard Application job has started: application GUID= " + applicationGuid);

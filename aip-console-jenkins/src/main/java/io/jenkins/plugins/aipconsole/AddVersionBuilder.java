@@ -418,7 +418,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),
-                        s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
+                        s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null, null);
                 if (StringUtils.isBlank(applicationGuid)) {
                     listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(variableAppName, apiServerUrl));
                     run.setResult(defaultResult);
@@ -613,7 +613,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
-                JobExecutionDto::getState);
+                JobExecutionDto::getState, null);
     }
 
     @Symbol("aipAddVersion")

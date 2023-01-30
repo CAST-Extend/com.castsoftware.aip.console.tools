@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -71,7 +72,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
         public String pollJobLog(String jobGuid) throws JobServiceException {
             JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid,
                     jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
-                    getPollingCallback(log), Function.identity());
+                    getPollingCallback(log), Function.identity(), TimeUnit.SECONDS.toMillis(2));
             //s -> s.getState() == JobState.COMPLETED ? s : null);
 
             if (jobExecutionDto.getState() != JobState.COMPLETED) {

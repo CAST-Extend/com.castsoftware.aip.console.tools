@@ -13,7 +13,9 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.utils.FileUtils;
+import com.castsoftware.aip.console.tools.core.utils.LogUtils;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.Extension;
 import hudson.FilePath;
@@ -35,6 +37,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -48,6 +51,7 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionDone;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_mode;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled;
@@ -69,29 +73,31 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
         return super.checkJobParameters();
     }
 
-    class JnksLogPollingProviderImpl implements LogPollingProvider {
+    static class JnksLogPollingProviderImpl implements LogPollingProvider {
         private final PrintStream log;
         private final boolean verbose;
         private Run<?, ?> run;
         private final TaskListener listener;
+        private final JobsService jobsService;
 
-        JnksLogPollingProviderImpl(Run<?, ?> run, TaskListener listener, boolean verbose) {
+        JnksLogPollingProviderImpl(JobsService jobsService, Run<?, ?> run, TaskListener listener, boolean verbose) {
             this.run = run;
             this.listener = listener;
             this.log = listener.getLogger();
             this.verbose = verbose;
+            this.jobsService = jobsService;
         }
 
         @Override
         public String pollJobLog(String jobGuid) throws JobServiceException {
             JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid,
-                    jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
-                    getPollingCallback(log), Function.identity());
+                    this::callbackFunction, getPollingCallback(log), Function.identity(), TimeUnit.SECONDS.toMillis(2));
             //s -> s.getState() == JobState.COMPLETED ? s : null);
+            //JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid, this::callbackFunction, verbose);
 
             if (jobExecutionDto.getState() != JobState.COMPLETED) {
                 listener.error(AddVersionBuilder_AddVersion_error_jobFailure(jobExecutionDto.getState().toString()));
-                run.setResult(getDefaultResult());
+                run.setResult(Result.FAILURE);
                 return null;
             } else {
                 log.println(AddVersionBuilder_AddVersion_success_analysisComplete());
@@ -100,11 +106,18 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
             }
         }
 
+        private JobExecutionDto callbackFunction(JobExecutionDto jobExecutionDto) {
+            //jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep())))
+            log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobExecutionDto.getCurrentStep())));
+            return jobExecutionDto;
+        }
+
         private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
-            return !verbose ? null :
-                    logContentDto -> {
-                        logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                    };
+            return !verbose ? null : logContentDto -> printLog(logContentDto);
+        }
+
+        private void printLog(LogContentDto logContent) {
+            logContent.getLines().forEach(logLine -> log.println(LogUtils.replaceAllSensitiveInformation(logLine.getContent())));
         }
     }
 
@@ -154,8 +167,6 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_scanMode(expandedAppName + scanMode));
 
             boolean verbose = getDescriptor().configuration.isVerbose();
-            JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(run, listener, verbose);
-
             applicationGuid = app == null ? null : app.getGuid();
             String uploadAction = StringUtils.isEmpty(applicationGuid) ? "onboard sources" : "refresh sources content";
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload(uploadAction, expandedAppName));
@@ -175,11 +186,10 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
             String targetNode = applicationOnboardingDto.getTargetNode();
 
             //For RESCAN PROCESS: re-discover
-            sourcePath = app.getVersion().getSourcePath();
             Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
 
             //discover-packages
-            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart("Delivery Configuration"));
+            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration());
             final DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
             String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(applicationGuid, sourcePath, exclusions,
                     VersionStatus.IMAGING_PROCESSED, true, (config) -> deliveryConfig[0] = config);
@@ -188,6 +198,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
 
             //rediscover-application
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart("Fast-Scan"));
+            JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(jobsService, run, listener, verbose);
             applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
                     caipVersion, targetNode, verbose, jnksLogPollingProvider);
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Rediscover"));

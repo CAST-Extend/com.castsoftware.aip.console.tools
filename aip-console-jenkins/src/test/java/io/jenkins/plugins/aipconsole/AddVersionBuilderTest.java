@@ -2,13 +2,11 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
-import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -32,14 +30,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.Future;
 
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_nodeNotFound;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_uploadFailed;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate;
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
@@ -111,7 +106,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         doReturn(BaseBuilderTest.TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any(), eq(null));
 
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_success_analysisComplete(), build);
@@ -137,7 +132,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         doReturn(BaseBuilderTest.TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any(), eq(null));
 
         WorkflowRun workflowRun = jenkins.buildAndAssertSuccess(job);
         jenkins.assertLogContains(AddVersionBuilder_AddVersion_success_analysisComplete(), workflowRun);
@@ -241,7 +236,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         doReturn(BaseBuilderTest.TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.CANCELED)
-                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any());
+                .when(jobsService).pollAndWaitForJobFinished(eq(BaseBuilderTest.TEST_JOB_GUID), any(), any(), any(), eq(null));
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());

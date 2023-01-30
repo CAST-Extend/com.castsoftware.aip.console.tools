@@ -49,7 +49,7 @@ public class JobsServiceImpl implements JobsService {
 
     private final RestApiService restApiService;
 
-    private final long pollingSleepDuration;
+    private long pollingSleepDuration;
 
     private ApiInfoDto apiInfoDto;
 
@@ -369,18 +369,24 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
+    public void setPollingSleepDuration(long sleepDuration) {
+        this.pollingSleepDuration = sleepDuration;
+    }
+
+    @Override
     public <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobExecutionDto, R> callback, boolean logOutput) throws JobServiceException {
         Consumer<LogContentDto> pollingCallback = !logOutput ? null : jobContentDto -> printLog(jobContentDto);
         return pollAndWaitForJobFinished(jobGuid,
                 jobStep -> log.info("Current step is : " + jobStep.getCurrentStep()),
                 pollingCallback,
-                callback);
+                callback, pollingSleepDuration);
     }
 
     @Override
-    public <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobExecutionDto, R> completionCallback) throws JobServiceException {
+    public <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobExecutionDto, R> completionCallback, Long sleepDuration) throws JobServiceException {
         assert StringUtils.isNotBlank(jobGuid);
-
+        
+        long sleepPeriod = sleepDuration == null ? pollingSleepDuration : sleepDuration.longValue();
         String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(jobGuid);
         String previousStep = "";
         log.fine("Checking status of Job with GUID " + jobGuid);
@@ -390,7 +396,7 @@ public class JobsServiceImpl implements JobsService {
             String logName = null;
             int startOffset = 0;
             while (true) {
-                Thread.sleep(pollingSleepDuration);
+                Thread.sleep(sleepPeriod);
                 // Force login to keep session alive (jobs endpoint doesn't refresh session status)
                 restApiService.login();
 
