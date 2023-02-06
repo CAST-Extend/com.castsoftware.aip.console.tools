@@ -68,6 +68,7 @@ public enum JobType {
     DISCOVER_APPLICATION(Constants.DISCOVER_APPLICATON, "Discover Application"),
 
     REDISCOVER_APPLICATION(Constants.REDISCOVER_APPLICATON, "Re-Discover Application"),
+    FAST_SCAN(Constants.FAST_SCAN, "Fast Scan"),
 
     FIRST_SCAN_APPLICATION(Constants.FIRST_SCAN_APPLICATION, "First time Scan Application"),
 

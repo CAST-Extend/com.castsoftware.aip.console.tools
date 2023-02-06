@@ -97,7 +97,7 @@ This version and the snapshot can be found in the Application's page in AIP Cons
 
 The `Deliver Source Code to AIP Console` step is similar to the Add version step above.
 
-![Menu item to add the delvier source code step](deliver_menu.png)
+![deliver_sources_menu](doc/images/deliver_sources_menu.png)
 
 It requires the following :
 
@@ -126,6 +126,8 @@ This step will perform the following actions :
 * Get the latest version
 * Start an analysis on that version
 
+![analyze_application_menu](doc/images/analyze_application_menu.png)
+
 #### Snapshot
 
 The step `Create Snapshot on AIP Console` will create a snapshot for an Application on AIP Console.
@@ -142,6 +144,8 @@ This step will perform the following actions :
 * Optionally decided whether to publish the application to the Health Dashboard or not.
 
 The Snapshot can then be found inside the `Snapshot` tab in AIP Console.
+
+![create_snapshot_menu](doc/images/create_snapshot_menu.png)
 
 #### Onboard Application
 

@@ -48,6 +48,7 @@ public class Constants {
     public static final String ONBOARD_APPLICATON = "onboard-application";
     public static final String DISCOVER_APPLICATON = "discover-application";
     public static final String REDISCOVER_APPLICATON = "rediscover-application";
+    public static final String FAST_SCAN = "fast-scan";
     public static final String UPDATE_ANALYSIS_DATA = "update-analysis-data";
     public static final String CLEANUP_VERSIONS = "cleanup-versions";
     public static final String CLEANUP_SNAPSHOTS = "cleanup-snapshots";
