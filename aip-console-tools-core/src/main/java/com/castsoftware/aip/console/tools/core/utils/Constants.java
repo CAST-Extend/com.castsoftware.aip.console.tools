@@ -59,7 +59,6 @@ public class Constants {
     public static final String BACKUP_MEASUREMENT = "backup-measurement";
     public static final String UPGRADE_APPLICATION = "upgrade-application";
     public static final String FIRST_SCAN_APPLICATION = "first-scan-application";
-    public static final String FAST_SCAN = "fast-scan";
     public static final String RESCAN_APPLICATON = "rescan-application";
     public static final String REFRESH_ONBOARDING_DELIVERY_CONFIGURATION = "refresh-onboarding-delivery-configuration";
 
