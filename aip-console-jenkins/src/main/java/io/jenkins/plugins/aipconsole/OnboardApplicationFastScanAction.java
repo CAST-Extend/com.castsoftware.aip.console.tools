@@ -23,6 +23,7 @@ public class OnboardApplicationFastScanAction extends BaseAction implements RunA
     private String domainName;
     @CheckForNull
     private String onboardStrategy;
+    private long sleepDuration = Constants.DEFAULT_SLEEP_DURATION;
 
     @Nullable
     private String exclusionPatterns = "";
@@ -89,6 +90,14 @@ public class OnboardApplicationFastScanAction extends BaseAction implements RunA
 
     public void setTimeout(long timeout) {
         this.timeout = timeout;
+    }
+
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
+
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
     }
 
     @Nullable

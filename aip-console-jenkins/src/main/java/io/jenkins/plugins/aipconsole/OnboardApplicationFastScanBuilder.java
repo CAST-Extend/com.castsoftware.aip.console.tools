@@ -64,6 +64,7 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
     private String applicationGuid;
     private String exclusionPatterns = "";
+    private long sleepDuration;
 
     @Override
     protected String checkJobParameters() {
@@ -73,25 +74,36 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
         return super.checkJobParameters();
     }
 
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
+
+    @DataBoundSetter
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
+    }
+
     static class JnksLogPollingProviderImpl implements LogPollingProvider {
         private final PrintStream log;
         private final boolean verbose;
         private Run<?, ?> run;
         private final TaskListener listener;
         private final JobsService jobsService;
+        private final long sleepDuration;
 
-        JnksLogPollingProviderImpl(JobsService jobsService, Run<?, ?> run, TaskListener listener, boolean verbose) {
+        JnksLogPollingProviderImpl(JobsService jobsService, Run<?, ?> run, TaskListener listener, boolean verbose, long sleepDuration) {
             this.run = run;
             this.listener = listener;
             this.log = listener.getLogger();
             this.verbose = verbose;
             this.jobsService = jobsService;
+            this.sleepDuration = sleepDuration;
         }
 
         @Override
         public String pollJobLog(String jobGuid) throws JobServiceException {
             JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid,
-                    this::callbackFunction, getPollingCallback(log), Function.identity(), () -> TimeUnit.SECONDS.toMillis(1));
+                    this::callbackFunction, getPollingCallback(log), Function.identity(), () -> TimeUnit.SECONDS.toMillis(sleepDuration));
             //s -> s.getState() == JobState.COMPLETED ? s : null);
             //JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid, this::callbackFunction, verbose);
 
@@ -198,7 +210,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
 
             //rediscover-application
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart("Fast-Scan"));
-            JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(jobsService, run, listener, verbose);
+            JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(jobsService, run, listener, verbose, sleepDuration);
             applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
                     caipVersion, targetNode, verbose, jnksLogPollingProvider);
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Rediscover"));

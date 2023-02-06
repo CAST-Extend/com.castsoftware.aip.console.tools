@@ -46,6 +46,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     final static boolean runAnalysis = true;
     @Nullable
     private String snapshotName;
+    private long sleepDuration;
 
     @Override
     protected String checkJobParameters() {
@@ -53,6 +54,15 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
             return GenericError_error_missingRequiredParameters();
         }
         return super.checkJobParameters();
+    }
+
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
+
+    @DataBoundSetter
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
     }
 
     class JnksLogPollingProviderImpl implements LogPollingProvider {
