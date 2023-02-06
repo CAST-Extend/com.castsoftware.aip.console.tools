@@ -47,7 +47,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
     private SharedOptions sharedOptions;
 
     //This version can be null if failed to convert from string
-    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
+    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
 
 
     public OnboardApplicationDeepAnalysisCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {

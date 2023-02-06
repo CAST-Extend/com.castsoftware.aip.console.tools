@@ -239,7 +239,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
 
     private static VersionInformation getMinVersion() {
         //This version can be null if failed to convert from string
-        return VersionInformation.fromVersionString("2.5.0");
+        return VersionInformation.fromVersionString("2.8.0");
     }
 
     public String getExclusionPatterns() {
