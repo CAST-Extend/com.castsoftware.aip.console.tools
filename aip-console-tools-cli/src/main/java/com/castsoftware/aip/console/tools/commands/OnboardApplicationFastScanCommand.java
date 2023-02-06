@@ -61,6 +61,11 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
     private ExclusionRuleType[] exclusionRules;
 
+    @CommandLine.Option(names = {"--sleep-duration"},
+            description = "Amount of time  used to fetch the ongoing job status (specified in seconds ). The default value is: ${DEFAULT-VALUE}",
+            defaultValue = "1")
+    private long sleepDuration;
+
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
@@ -83,6 +88,9 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             return Constants.RETURN_MISSING_FILE;
         }
 
+        log.info("Fast-Scan args:");
+        log.info(String.format("\tApplication: %s%n\tFile: %s%n\tsleep: %d%n", applicationName, filePath.getAbsolutePath(), sleepDuration));
+
         String applicationGuid;
         Thread shutdownHook = null;
         boolean OnBoardingModeWasOn = false; //status before processing
@@ -100,7 +108,7 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             log.info("About to trigger New workflow for: 'Fast-Scan'");
             String sourcePath = uploadFile(app != null ? app.getGuid() : null);
 
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
             if (app == null) {
                 applicationGuid = applicationService.onboardApplication(applicationName, domainName, getSharedOptions().isVerbose(), sourcePath);
                 log.info("Onboard Application job has started: application GUID= " + applicationGuid);

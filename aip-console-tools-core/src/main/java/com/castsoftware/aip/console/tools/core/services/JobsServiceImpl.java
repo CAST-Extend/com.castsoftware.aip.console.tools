@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_CAIP_VERSION;
@@ -61,6 +62,11 @@ public class JobsServiceImpl implements JobsService {
     public JobsServiceImpl(RestApiService restApiService, long pollingSleepDuration) {
         this.restApiService = restApiService;
         this.pollingSleepDuration = pollingSleepDuration;
+    }
+
+    @Override
+    public long getDefaultSleepDuration() {
+        return POLL_SLEEP_DURATION;
     }
 
     @Override
@@ -369,24 +375,20 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public void setPollingSleepDuration(long sleepDuration) {
-        this.pollingSleepDuration = sleepDuration;
-    }
-
-    @Override
     public <R> R pollAndWaitForJobFinished(String jobGuid, Function<JobExecutionDto, R> callback, boolean logOutput) throws JobServiceException {
         Consumer<LogContentDto> pollingCallback = !logOutput ? null : jobContentDto -> printLog(jobContentDto);
         return pollAndWaitForJobFinished(jobGuid,
                 jobStep -> log.info("Current step is : " + jobStep.getCurrentStep()),
                 pollingCallback,
-                callback, pollingSleepDuration);
+                callback, () -> pollingSleepDuration);
     }
 
     @Override
-    public <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobExecutionDto, R> completionCallback, Long sleepDuration) throws JobServiceException {
+    public <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback
+            , Function<JobExecutionDto, R> completionCallback, Supplier<Long> sleepPeriodSupplier) throws JobServiceException {
         assert StringUtils.isNotBlank(jobGuid);
-        
-        long sleepPeriod = sleepDuration == null ? pollingSleepDuration : sleepDuration.longValue();
+
+        long sleepPeriod = sleepPeriodSupplier.get().longValue();
         String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(jobGuid);
         String previousStep = "";
         log.fine("Checking status of Job with GUID " + jobGuid);

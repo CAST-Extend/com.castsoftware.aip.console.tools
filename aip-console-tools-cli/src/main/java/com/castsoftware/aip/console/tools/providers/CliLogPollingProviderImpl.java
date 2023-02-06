@@ -14,10 +14,12 @@ import java.util.concurrent.TimeUnit;
 public class CliLogPollingProviderImpl implements LogPollingProvider {
     private final boolean verbose;
     private final JobsService jobsService;
+    private final long sleepDuration;
 
-    public CliLogPollingProviderImpl(JobsService jobsService, boolean verbose) {
+    public CliLogPollingProviderImpl(JobsService jobsService, boolean verbose, long sleepDuration) {
         this.verbose = verbose;
         this.jobsService = jobsService;
+        this.sleepDuration = sleepDuration;
     }
 
     @Override
@@ -26,7 +28,7 @@ public class CliLogPollingProviderImpl implements LogPollingProvider {
                 jobStep -> log.info("Current step is : " + jobStep.getCurrentStep()),
                 !verbose ? null : this::printLog,
                 (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
-                TimeUnit.SECONDS.toMillis(1)); //should be parameterizable
+                () -> TimeUnit.SECONDS.toMillis(sleepDuration));
         /*
         return jobsService.pollAndWaitForJobFinished(jobGuid,
                 (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,

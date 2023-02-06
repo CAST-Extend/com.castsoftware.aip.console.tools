@@ -80,7 +80,7 @@ public class PublishToImagingCommand extends BasicCollable {
                 return Constants.RETURN_ONBOARD_VERSION_STATUS_INVALID;
             }
 
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), 15);
             String appGuid = applicationService.publishToImaging(applicationDto.getGuid(), cliLogPolling);
 
             if (StringUtils.isEmpty(appGuid)) {

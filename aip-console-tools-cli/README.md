@@ -132,7 +132,7 @@ To **Onboard Application** using a **file full path**, the process will upload s
 file should be
 accessible from the machine where the batch is executed.
 
-The command is using following strategies in a separated commands:
+The *Onboard Application* feature is using following strategies in a separated commands:
 
 - *Fast-Scan*: for the sources' delivery contents without running the analysis. This strategy can be used as much as
   required by providing the sources file.
@@ -371,15 +371,17 @@ The available options are :
 * `--exclude-patterns` or `-exclude` (**optional**): File patterns(glob pattern) to exclude in the delivery, separated
   with comma
 * `--exclusion-rules`  (**optional**): Project's exclusion rules, separated with comma.
+* `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **1s**).
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --sleep-duration=2 --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
 ```
 
 ### Deep Analyze
 
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
+* `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ```bash
 java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my app"  --verbose=false

@@ -6,7 +6,9 @@
     <f:entry title="${%snapshotName}" field="snapshotName" description="${%snapshotName.descr}">
         <f:textbox/>
     </f:entry>
-
+    <f:entry title="${%sleepDuration}" field="sleepDuration" description="${%sleepDuration.descr}">
+        <f:number default="15"/>
+    </f:entry>
     <f:advanced title="${%advancedSettings}">
         <f:entry title="${%aipConsoleUrl}" field="aipConsoleUrl" description="${%aipConsoleUrl.descr}">
             <f:textbox field="aipConsoleUrl" value="${aipConsoleUrl}"/>

@@ -72,7 +72,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
         public String pollJobLog(String jobGuid) throws JobServiceException {
             JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid,
                     jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
-                    getPollingCallback(log), Function.identity(), TimeUnit.SECONDS.toMillis(2));
+                    getPollingCallback(log), Function.identity(), () -> TimeUnit.SECONDS.toMillis(10));
             //s -> s.getState() == JobState.COMPLETED ? s : null);
 
             if (jobExecutionDto.getState() != JobState.COMPLETED) {

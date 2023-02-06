@@ -91,7 +91,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
         @Override
         public String pollJobLog(String jobGuid) throws JobServiceException {
             JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid,
-                    this::callbackFunction, getPollingCallback(log), Function.identity(), TimeUnit.SECONDS.toMillis(2));
+                    this::callbackFunction, getPollingCallback(log), Function.identity(), () -> TimeUnit.SECONDS.toMillis(1));
             //s -> s.getState() == JobState.COMPLETED ? s : null);
             //JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid, this::callbackFunction, verbose);
 

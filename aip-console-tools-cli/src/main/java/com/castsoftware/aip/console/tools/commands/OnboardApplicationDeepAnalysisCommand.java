@@ -38,6 +38,11 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             description = "The name of the snapshot to create")
     private String snapshotName;
 
+    @CommandLine.Option(names = {"--sleep-duration"},
+            description = "Amount of time  used to fetch the ongoing job status (specified in seconds ). The default value is: ${DEFAULT-VALUE}",
+            defaultValue = "15")
+    private long sleepDuration;
+
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
@@ -55,6 +60,9 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             log.error("Application name should not be empty.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
+
+        log.info("Deep-Analysis args:");
+        log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tsleep: %d%n", applicationName, StringUtils.isEmpty(snapshotName) ? "Auto assigned" : snapshotName, sleepDuration));
 
         Thread shutdownHook = null;
         boolean firstScan = true;
@@ -90,7 +98,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             String caipVersion = app.getCaipVersion();
             String targetNode = app.getTargetNode();
 
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
 
             //Run Analysis
             if (!applicationService.isImagingAvailable()) {

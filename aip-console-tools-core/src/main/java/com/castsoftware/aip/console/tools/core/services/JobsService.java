@@ -10,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import java.util.Date;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface JobsService {
     /**
@@ -122,7 +123,7 @@ public interface JobsService {
      */
     JobState pollAndWaitForJobFinished(String jobGuid) throws JobServiceException;
 
-    void setPollingSleepDuration(long sleepDuration);
+    long getDefaultSleepDuration();
 
     /**
      * Polls AIP Console and executes the given callback once the job is completed
@@ -154,7 +155,8 @@ public interface JobsService {
      */
     //<R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobStatusWithSteps> stepChangedCallback, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException;
 
-    <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobExecutionDto, R> completionCallback, Long sleepDuration) throws JobServiceException;
+    <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback
+            , Function<JobExecutionDto, R> completionCallback, Supplier<Long> sleepPeriodSupplier) throws JobServiceException;
 
     void cancelJob(String jobGuid) throws JobServiceException;
 }
