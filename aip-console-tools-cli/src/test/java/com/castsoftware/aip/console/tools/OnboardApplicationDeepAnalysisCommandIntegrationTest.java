@@ -67,6 +67,7 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
 
     ApplicationDto applicationDto;
 
+    private static final String CONSOLE_API_VERSION = "2.8.0-SNAPSHOT-133";
     @Override
     protected void additionalStartup() throws IOException {
         super.additionalStartup();
@@ -80,7 +81,7 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(CONSOLE_API_VERSION).build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
@@ -114,7 +115,7 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(CONSOLE_API_VERSION).build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);

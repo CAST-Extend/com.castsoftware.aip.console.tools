@@ -11,18 +11,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
     @InjectMocks
-    private OnboardApplicationFastScanBuilder onboardApplicationFastScanBuilder;
+    private OnboardApplicationFastScanBuilder fastScanBuilder;
 
     @Before
     public void setUp() throws Exception {
         super.startUp();
-        onboardApplicationFastScanBuilder = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
+        fastScanBuilder = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void testOnboardingApplicationFastScanJob() throws Exception {
-        FreeStyleProject project = getProjectWithBuilder(onboardApplicationFastScanBuilder);
+        FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
         OnboardApplicationFastScanBuilder expectedResults = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, "archive.zip");
