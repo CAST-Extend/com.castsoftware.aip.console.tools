@@ -39,7 +39,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
     private String snapshotName;
 
     @CommandLine.Option(names = {"--sleep-duration"},
-            description = "Amount of time  used to fetch the ongoing job status (specified in seconds ). The default value is: ${DEFAULT-VALUE}",
+            description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
             defaultValue = "15")
     private long sleepDuration;
 

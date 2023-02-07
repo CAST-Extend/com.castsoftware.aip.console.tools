@@ -20,7 +20,7 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
-public class JnksLogPollingProviderServiceImpl implements LogPollingProvider {
+public class JenkinsLogPollingProviderServiceImpl implements LogPollingProvider {
     private final PrintStream log;
     private final boolean verbose;
     private Run<?, ?> run;
@@ -28,7 +28,7 @@ public class JnksLogPollingProviderServiceImpl implements LogPollingProvider {
     private final JobsService jobsService;
     private final long sleepDuration;
 
-    public JnksLogPollingProviderServiceImpl(JobsService jobsService, Run<?, ?> run, TaskListener listener, boolean verbose, long sleepDuration) {
+    public JenkinsLogPollingProviderServiceImpl(JobsService jobsService, Run<?, ?> run, TaskListener listener, boolean verbose, long sleepDuration) {
         this.run = run;
         this.listener = listener;
         this.log = listener.getLogger();
@@ -41,8 +41,6 @@ public class JnksLogPollingProviderServiceImpl implements LogPollingProvider {
     public String pollJobLog(String jobGuid) throws JobServiceException {
         JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid,
                 this::callbackFunction, getPollingCallback(log), Function.identity(), () -> TimeUnit.SECONDS.toMillis(sleepDuration));
-        //s -> s.getState() == JobState.COMPLETED ? s : null);
-        //JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid, this::callbackFunction, verbose);
 
         if (jobExecutionDto.getState() != JobState.COMPLETED) {
             listener.error(AddVersionBuilder_AddVersion_error_jobFailure(jobExecutionDto.getState().toString()));

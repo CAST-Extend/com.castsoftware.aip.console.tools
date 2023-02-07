@@ -29,10 +29,6 @@ public class CliLogPollingProviderImpl implements LogPollingProvider {
                 !verbose ? null : this::printLog,
                 (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
                 () -> TimeUnit.SECONDS.toMillis(sleepDuration));
-        /*
-        return jobsService.pollAndWaitForJobFinished(jobGuid,
-                (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
-                verbose);*/
     }
 
     private void printLog(LogContentDto logContent) {

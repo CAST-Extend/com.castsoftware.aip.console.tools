@@ -52,7 +52,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     public void setSleepDuration(long sleepDuration) {
         this.sleepDuration = sleepDuration;
     }
-    
+
     @DataBoundConstructor
     public OnboardApplicationDeepAnalysisBuilder(String applicationName) {
         setApplicationName(applicationName);
@@ -101,7 +101,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
             String caipVersion = app.getCaipVersion();
             String targetNode = app.getTargetNode();
             boolean verbose = getDescriptor().configuration.isVerbose();
-            JnksLogPollingProviderServiceImpl jnksLogPollingProvider = new JnksLogPollingProviderServiceImpl(jobsService, run, listener, verbose, getSleepDuration());
+            JenkinsLogPollingProviderServiceImpl jnksLogPollingProvider = new JenkinsLogPollingProviderServiceImpl(jobsService, run, listener, verbose, getSleepDuration());
 
             //Run Analysis or Deep analysis
             if (!applicationService.isImagingAvailable()) {
