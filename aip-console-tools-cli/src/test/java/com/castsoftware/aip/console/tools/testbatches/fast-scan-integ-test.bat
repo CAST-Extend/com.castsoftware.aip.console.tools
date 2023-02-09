@@ -9,10 +9,9 @@ set EXTEND_URL=https://extend.castsoftware.com
 set PATH=C:\CAST-Caches\Win64;%PATH%
 
 REM
-SET MORE_OPTIONS=--strategy=%STRATEGY%
+SET MORE_OPTIONS=--file="%SOURCES_ZIP%"
 if not "%EXCLUSION_PATTERNS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclude-patterns="%EXCLUSION_PATTERNS%"
 if not "%EXCLUSION_RULES%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclusion-rules="%EXCLUSION_RULES%"
-if %STRATEGY%=="FIRST_SCAN" SET MORE_OPTIONS=%MORE_OPTIONS% --file="%SOURCES_ZIP%"
 
 for %%a in ( SOURCES_ZIP TOOLSDIR ) do (
 	if not defined %%a (
@@ -37,7 +36,7 @@ echo --------------------------------
 SET TOOLS_CLI_PATH=%TOOLSDIR%\%TOOLS_EXTENSION%
 CD /d "%TOOLS_CLI_PATH%"
 
-java -jar aip-console-tools-cli.jar Onboard-Application --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
+java -jar aip-console-tools-cli.jar Fast-Scan --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
 	--app-name="%APP_NAME%" --verbose=false ^
 	%MORE_OPTIONS%
 
