@@ -12,6 +12,7 @@ REM
 SET MORE_OPTIONS=--file="%SOURCES_ZIP%"
 if not "%EXCLUSION_PATTERNS%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclude-patterns="%EXCLUSION_PATTERNS%"
 if not "%EXCLUSION_RULES%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --exclusion-rules="%EXCLUSION_RULES%"
+if not "%DOMAIN_NAME%" == "" SET MORE_OPTIONS=%MORE_OPTIONS% --domain-name="%DOMAIN_NAME%"
 
 for %%a in ( SOURCES_ZIP TOOLSDIR ) do (
 	if not defined %%a (
