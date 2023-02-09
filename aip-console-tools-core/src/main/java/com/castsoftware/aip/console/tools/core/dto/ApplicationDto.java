@@ -22,6 +22,7 @@ public class ApplicationDto {
     private boolean inPlaceMode;
     private String caipVersion;
     private String targetNode;
+    private String schemaPrefix;
 
     private String imagingTenant;
     private boolean onboarded;

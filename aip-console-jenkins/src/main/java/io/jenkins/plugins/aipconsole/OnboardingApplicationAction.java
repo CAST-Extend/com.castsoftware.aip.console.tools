@@ -21,7 +21,8 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
     private String nodeName;
     @Nullable
     private String domainName;
-    private boolean runAnalysis = true;
+    @CheckForNull
+    private String onboardStrategy;
 
     @Nullable
     private String exclusionPatterns = "";
@@ -73,13 +74,12 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
     public void setApplicationGuid(@Nullable String applicationGuid) {
         this.applicationGuid = applicationGuid;
     }
-
-    @CheckForNull
+    @Nullable
     public String getFilePath() {
         return filePath;
     }
 
-    public void setFilePath(@CheckForNull String filePath) {
+    public void setFilePath(@Nullable String filePath) {
         this.filePath = filePath;
     }
 
@@ -122,17 +122,5 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
 
     public void setDomainName(@Nullable String domainName) {
         this.domainName = domainName;
-    }
-
-    public void setRunAnalysis(boolean runAnalysis) {
-        this.runAnalysis = runAnalysis;
-    }
-
-    public boolean getRunAnalysis() {
-        return isRunAnalysis();
-    }
-
-    public boolean isRunAnalysis() {
-        return runAnalysis;
     }
 }

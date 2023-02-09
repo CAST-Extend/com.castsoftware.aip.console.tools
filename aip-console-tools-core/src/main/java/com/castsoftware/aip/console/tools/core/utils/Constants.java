@@ -33,6 +33,7 @@ public class Constants {
     public static final int RETURN_ONBOARD_APPLICATION_DISABLED = 21;
     public static final int RETURN_ONBOARD_VERSION_STATUS_INVALID = 22;
     public static final int RETURN_ONBOARD_OPERATION_FAILED = 23;
+    public static final int RETURN_ONBOARD_FAST_SCAN_REQUIRED = 24;
     public static final String DEFAULT_DOMAIN = "-";
 
     public static final int UNKNOWN_ERROR = 1000;
@@ -47,6 +48,7 @@ public class Constants {
     public static final String ONBOARD_APPLICATON = "onboard-application";
     public static final String DISCOVER_APPLICATON = "discover-application";
     public static final String REDISCOVER_APPLICATON = "rediscover-application";
+    public static final String FAST_SCAN = "fast-scan";
     public static final String UPDATE_ANALYSIS_DATA = "update-analysis-data";
     public static final String CLEANUP_VERSIONS = "cleanup-versions";
     public static final String CLEANUP_SNAPSHOTS = "cleanup-snapshots";

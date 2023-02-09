@@ -11,4 +11,14 @@ public class ScanAndReScanApplicationJobRequest {
     protected String appGuid;
     protected String targetNode;
     protected String caipVersion;
+    private String snapshotName;
+    
+    @Builder.Default
+    private boolean runAnalysis = false;
+    @Builder.Default
+    private boolean uploadApplication = false;
+    @Builder.Default
+    private boolean processImaging = false;
+    @Builder.Default
+    private boolean publishToEngineering = false;
 }

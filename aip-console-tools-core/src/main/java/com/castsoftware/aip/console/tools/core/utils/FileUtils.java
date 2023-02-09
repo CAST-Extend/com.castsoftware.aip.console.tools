@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Slf4j
 public final class FileUtils {
@@ -17,6 +19,14 @@ public final class FileUtils {
             bw.write(content);
         } catch (IOException e) {
             log.error("IOException: %s%n", e);
+        }
+    }
+
+    public static boolean exists(String fullFilePath) {
+        try {
+            return Paths.get(fullFilePath).toFile().exists();
+        } catch (InvalidPathException e) {
+            return false;
         }
     }
 }
