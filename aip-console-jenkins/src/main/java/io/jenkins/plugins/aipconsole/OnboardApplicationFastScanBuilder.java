@@ -13,7 +13,9 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
+import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.utils.FileUtils;
+import com.castsoftware.aip.console.tools.core.utils.LogUtils;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.Extension;
 import hudson.FilePath;
@@ -35,6 +37,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -43,26 +46,25 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_jobServiceException;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionCompleted;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionDone;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_mode;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_scanMode;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload_done;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload_failed;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_missingFilePath;
 
-public class OnboardingApplicationBuilder extends CommonActionBuilder {
+public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
     private String applicationGuid;
     private String exclusionPatterns = "";
+    private long sleepDuration;
 
     @Override
     protected String checkJobParameters() {
@@ -72,29 +74,42 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
         return super.checkJobParameters();
     }
 
-    class JnksLogPollingProviderImpl implements LogPollingProvider {
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
+
+    @DataBoundSetter
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
+    }
+
+    static class JnksLogPollingProviderImpl implements LogPollingProvider {
         private final PrintStream log;
         private final boolean verbose;
         private Run<?, ?> run;
         private final TaskListener listener;
+        private final JobsService jobsService;
+        private final long sleepDuration;
 
-        JnksLogPollingProviderImpl(Run<?, ?> run, TaskListener listener, boolean verbose) {
+        JnksLogPollingProviderImpl(JobsService jobsService, Run<?, ?> run, TaskListener listener, boolean verbose, long sleepDuration) {
             this.run = run;
             this.listener = listener;
             this.log = listener.getLogger();
             this.verbose = verbose;
+            this.jobsService = jobsService;
+            this.sleepDuration = sleepDuration;
         }
 
         @Override
         public String pollJobLog(String jobGuid) throws JobServiceException {
             JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid,
-                    jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
-                    getPollingCallback(log), Function.identity());
+                    this::callbackFunction, getPollingCallback(log), Function.identity(), () -> TimeUnit.SECONDS.toMillis(sleepDuration));
             //s -> s.getState() == JobState.COMPLETED ? s : null);
+            //JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid, this::callbackFunction, verbose);
 
             if (jobExecutionDto.getState() != JobState.COMPLETED) {
                 listener.error(AddVersionBuilder_AddVersion_error_jobFailure(jobExecutionDto.getState().toString()));
-                run.setResult(getDefaultResult());
+                run.setResult(Result.FAILURE);
                 return null;
             } else {
                 log.println(AddVersionBuilder_AddVersion_success_analysisComplete());
@@ -103,16 +118,23 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
             }
         }
 
+        private JobExecutionDto callbackFunction(JobExecutionDto jobExecutionDto) {
+            //jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep())))
+            log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobExecutionDto.getCurrentStep())));
+            return jobExecutionDto;
+        }
+
         private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
-            return !verbose ? null :
-                    logContentDto -> {
-                        logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                    };
+            return !verbose ? null : logContentDto -> printLog(logContentDto);
+        }
+
+        private void printLog(LogContentDto logContent) {
+            logContent.getLines().forEach(logLine -> log.println(LogUtils.replaceAllSensitiveInformation(logLine.getContent())));
         }
     }
 
     @DataBoundConstructor
-    public OnboardingApplicationBuilder(String applicationName, String filePath) {
+    public OnboardApplicationFastScanBuilder(String applicationName, String filePath) {
         setApplicationName(applicationName);
         setFilePath(filePath);
     }
@@ -142,104 +164,60 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
             return;
         }
 
-        boolean OnBoardingModeWasOn = false; //status before processing
-        boolean firstScan = true;
         try {
-            OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
-            if (!OnBoardingModeWasOn) {
+            if (!applicationService.isOnboardingSettingsEnabled()) {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_mode("OFF"));
                 run.setResult(getDefaultResult());
                 return;
             }
 
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup(expandedAppName));
-            boolean onboardApplication = false;
-            String existingAppGuid = null;
+
             ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
-            if (app != null) {
-                existingAppGuid = app.getGuid();
-                app = applicationService.getApplicationDetails(existingAppGuid);
-                firstScan = app.getVersion() == null || StringUtils.isAnyEmpty(app.getImagingTenant(), app.getVersion().getGuid())
-                        || !app.isOnboarded();
-            } else {
-                onboardApplication = true;
-            }
 
-            if (firstScan && runAnalysis) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired());
-                run.setResult(getDefaultResult());
-                return;
-            }
-
-            String scanMode = firstScan ? " Fast-scan/Refresh" : " Rescan";
+            String scanMode = " Fast-scan/Refresh";
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_scanMode(expandedAppName + scanMode));
-            //on-boarding
-            ApplicationOnboardingDto applicationOnboardingDto;
-            String caipVersion = app == null ? null : app.getCaipVersion();
-            String targetNode = app == null ? null : app.getTargetNode();
-            String sourcePath = "";
+
             boolean verbose = getDescriptor().configuration.isVerbose();
-            JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(run, listener, verbose);
+            applicationGuid = app == null ? null : app.getGuid();
+            String uploadAction = StringUtils.isEmpty(applicationGuid) ? "onboard sources" : "refresh sources content";
+            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload(uploadAction, expandedAppName));
+            String sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedFilePath).toFile(), applicationGuid);
+            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload_done(uploadAction, sourcePath));
 
-            String uploadAction = StringUtils.isEmpty(existingAppGuid) ? "onboard sources" : "refresh sources content";
-            if (!runAnalysis) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload(uploadAction, expandedAppName));
-                sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedFilePath).toFile(), existingAppGuid);
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_upload_done(uploadAction, sourcePath));
+            if (app == null) {
+                applicationGuid = applicationService.onboardApplication(expandedAppName, expandedDomainName, verbose, sourcePath);
             }
 
-            if (firstScan) {
-                applicationGuid = existingAppGuid;
-                if (onboardApplication) {
-                    applicationGuid = applicationService.onboardApplication(expandedAppName, expandedDomainName, verbose, sourcePath);
-                    //log.info("Onboard Application job has started: application GUID= " + applicationGuid);
-                }
+            //Refresh application information
+            app = applicationService.getApplicationFromName(expandedAppName);
+            applicationGuid = app.getGuid();
 
-                //Refresh application information
-                app = applicationService.getApplicationFromName(expandedAppName);
-                caipVersion = app.getCaipVersion();
-                targetNode = app.getTargetNode();
+            ApplicationOnboardingDto applicationOnboardingDto = applicationService.getApplicationOnboarding(applicationGuid);
+            String caipVersion = applicationOnboardingDto.getCaipVersion();
+            String targetNode = applicationOnboardingDto.getTargetNode();
 
-                String discoveredAppGuid = applicationService.discoverApplication(applicationGuid, sourcePath,
-                        StringUtils.isNotEmpty(applicationGuid) ? "" : "My version", caipVersion, targetNode, verbose, jnksLogPollingProvider);
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionCompleted(uploadAction, discoveredAppGuid));
+            //For RESCAN PROCESS: re-discover
+            Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
 
-                applicationOnboardingDto = applicationService.getApplicationOnboarding(applicationGuid);
-                caipVersion = applicationOnboardingDto.getCaipVersion();
-                targetNode = applicationOnboardingDto.getTargetNode();
-                existingAppGuid = applicationGuid;
-            } else if (!runAnalysis) {
-                //For RESCAN PROCESS: re-discover
-                sourcePath = app.getVersion().getSourcePath();
-                Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
+            //discover-packages
+            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration());
+            final DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
+            String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(applicationGuid, sourcePath, exclusions,
+                    VersionStatus.IMAGING_PROCESSED, true, (config) -> deliveryConfig[0] = config);
+            DeliveryConfigurationDto deliveryConfiguration = deliveryConfig[0];
+            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done(deliveryConfigurationGuid));
 
-                //discover-packages
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart("Delivery Configuration"));
-                final DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
-                String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(existingAppGuid, sourcePath, exclusions,
-                        VersionStatus.IMAGING_PROCESSED, true, (config) -> deliveryConfig[0] = config);
-                DeliveryConfigurationDto deliveryConfiguration = deliveryConfig[0];
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done(deliveryConfigurationGuid));
-
-                //rediscover-application
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart("Rediscover Application"));
-                applicationService.reDiscoverApplication(existingAppGuid, sourcePath, "", deliveryConfiguration,
-                        caipVersion, targetNode, verbose, jnksLogPollingProvider);
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Rediscover"));
-            }
+            //rediscover-application
+            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart("Fast-Scan"));
+            JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(jobsService, run, listener, verbose, sleepDuration);
+            applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
+                    caipVersion, targetNode, verbose, jnksLogPollingProvider);
+            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Rediscover"));
 
             //Run Analysis or Deep analysis
-            if (!runAnalysis || !applicationService.isImagingAvailable()) {
-                String message = !runAnalysis ? OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled()
-                        : OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled();
-                logger.println(message);
-            } else {
-                //TODO: remove it
-                if (firstScan) {
-                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, null, verbose, jnksLogPollingProvider);
-                } else {
-                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, null, verbose, jnksLogPollingProvider);
-                }
+            if (!applicationService.isImagingAvailable()) {
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled());
             }
         } catch (ApplicationServiceException | JobServiceException e) {
             e.printStackTrace(logger);
@@ -261,7 +239,7 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
 
     private static VersionInformation getMinVersion() {
         //This version can be null if failed to convert from string
-        return VersionInformation.fromVersionString("2.5.0");
+        return VersionInformation.fromVersionString("2.8.0");
     }
 
     public String getExclusionPatterns() {
@@ -274,13 +252,13 @@ public class OnboardingApplicationBuilder extends CommonActionBuilder {
     }
 
     @Override
-    public OnboardingApplicationBuilder.OnboardApplicationDescriptorImpl getDescriptor() {
-        return (OnboardingApplicationBuilder.OnboardApplicationDescriptorImpl) super.getDescriptor();
+    public OnboardApplicationFastScanBuilder.OnboardApplicationFastScanDescriptorImpl getDescriptor() {
+        return (OnboardApplicationFastScanBuilder.OnboardApplicationFastScanDescriptorImpl) super.getDescriptor();
     }
 
-    @Symbol("imagingOnboardApplication")
+    @Symbol("imagingOnboardApplicationFastScan")
     @Extension
-    public static final class OnboardApplicationDescriptorImpl extends BaseActionBuilderDescriptor {
+    public static final class OnboardApplicationFastScanDescriptorImpl extends BaseActionBuilderDescriptor {
         @Inject
         private AipConsoleGlobalConfiguration configuration;
 

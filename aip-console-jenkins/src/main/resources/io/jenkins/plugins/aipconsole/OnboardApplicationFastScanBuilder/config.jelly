@@ -12,6 +12,9 @@
     <f:entry title="${%domainName}" field="domainName" description="${%domainName.descr}">
         <f:textbox/>
     </f:entry>
+    <f:entry title="${%sleepDuration}" field="sleepDuration" description="${%sleepDuration.descr}">
+        <f:number default="1"/>
+    </f:entry>
 
     <f:advanced title="${%advancedSettings}">
         <f:entry title="${%aipConsoleUrl}" field="aipConsoleUrl" description="${%aipConsoleUrl.descr}">

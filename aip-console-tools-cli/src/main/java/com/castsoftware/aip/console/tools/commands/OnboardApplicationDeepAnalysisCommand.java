@@ -38,11 +38,16 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             description = "The name of the snapshot to create")
     private String snapshotName;
 
+    @CommandLine.Option(names = {"--sleep-duration"},
+            description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
+            defaultValue = "15")
+    private long sleepDuration;
+
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
     //This version can be null if failed to convert from string
-    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
+    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
 
 
     public OnboardApplicationDeepAnalysisCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
@@ -55,6 +60,9 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             log.error("Application name should not be empty.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
+
+        log.info("Deep-Analysis args:");
+        log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tsleep: %d%n", applicationName, StringUtils.isEmpty(snapshotName) ? "Auto assigned" : snapshotName, sleepDuration));
 
         Thread shutdownHook = null;
         boolean firstScan = true;
@@ -90,7 +98,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             String caipVersion = app.getCaipVersion();
             String targetNode = app.getTargetNode();
 
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose());
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
 
             //Run Analysis
             if (!applicationService.isImagingAvailable()) {

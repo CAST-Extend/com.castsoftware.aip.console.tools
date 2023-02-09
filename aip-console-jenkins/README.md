@@ -152,7 +152,7 @@ The Snapshot can then be found inside the `Snapshot` tab in AIP Console.
 Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST
 Imaging Console.
 
-This command is used to perform the *fast scan* or to *refresh* the sources contents before optionally perform a *Deep
+This command is used to perform the *Fast scan* or to *refresh* the sources contents before optionally perform a *Deep
 Analysis* (run the
 analysis).
 
@@ -341,6 +341,7 @@ Under `Advanced Settings` you will find the following parameters :
 * *Application Name*: Application on which to perform Deep Analysis.
 * *Snapshot Name*: Name of the snapshot. CAST Imaging Console will automatically assign one to the application if this
   field is empty.
+* *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ### Fast Scan
 
@@ -359,6 +360,7 @@ Under `Advanced Settings` you will find the following parameters :
     replaced by the current jobs' workspace path.
 * *Exclusion patterns* : List of file patterns to exclude in the delivery, separated by a comma. Each patterns needs to
   follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
+* *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **1s**).
 
 ## Other Topics
 

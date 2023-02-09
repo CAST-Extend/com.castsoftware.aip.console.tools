@@ -17,6 +17,7 @@ public class OnboardApplicationDeepAnalysisAction extends BaseAction implements 
     private String snapshotName;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
+    private long sleepDuration = Constants.DEFAULT_SLEEP_DURATION;
     private transient Run run;
 
     public OnboardApplicationDeepAnalysisAction(@CheckForNull String applicationName) {
@@ -71,6 +72,13 @@ public class OnboardApplicationDeepAnalysisAction extends BaseAction implements 
         this.timeout = timeout;
     }
 
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
+
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
+    }
 
     @CheckForNull
     @Override

@@ -64,6 +64,9 @@ public interface ApplicationService {
     String discoverApplication(String applicationGuid, String sourcePath, String versionName,
                                String caipVersion, String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
+    String fastScan(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig,
+                    String caipVersion, String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
+
     ApplicationOnboardingDto getApplicationOnboarding(String applicationGuid) throws ApplicationServiceException;
 
     boolean isOnboardingSettingsEnabled() throws ApplicationServiceException;

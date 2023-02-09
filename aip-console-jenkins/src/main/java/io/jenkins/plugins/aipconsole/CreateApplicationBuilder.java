@@ -1,6 +1,5 @@
 package io.jenkins.plugins.aipconsole;
 
-import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
@@ -31,7 +30,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -211,7 +209,7 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
                     jobStatusWithSteps -> {
                         applicationGuid = jobStatusWithSteps.getAppGuid();
                         return jobStatusWithSteps.getState();
-                    });
+                    }, null);
 
             if (endState != JobState.COMPLETED) {
                 listener.error(CreateApplicationBuilder_CreateApplication_error_jobFailed(endState.toString()));

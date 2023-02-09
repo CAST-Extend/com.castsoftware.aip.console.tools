@@ -296,7 +296,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
-                JobExecutionDto::getState);
+                JobExecutionDto::getState, null);
     }
 
     private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
