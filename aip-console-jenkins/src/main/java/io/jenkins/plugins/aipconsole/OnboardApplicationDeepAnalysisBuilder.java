@@ -1,12 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.Extension;
 import hudson.FilePath;
@@ -26,14 +21,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
-import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
-import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.OnboardApplicationDeepAnalysisBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible;
@@ -45,6 +34,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     final static boolean runAnalysis = true;
     @Nullable
     private String snapshotName;
+    private long sleepDuration;
 
     @Override
     protected String checkJobParameters() {
@@ -54,44 +44,13 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
         return super.checkJobParameters();
     }
 
-    class JnksLogPollingProviderImpl implements LogPollingProvider {
-        private final PrintStream log;
-        private final boolean verbose;
-        private Run<?, ?> run;
-        private final TaskListener listener;
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
 
-        JnksLogPollingProviderImpl(Run<?, ?> run, TaskListener listener, boolean verbose) {
-            this.run = run;
-            this.listener = listener;
-            this.log = listener.getLogger();
-            this.verbose = verbose;
-        }
-
-        @Override
-        public String pollJobLog(String jobGuid) throws JobServiceException {
-            JobExecutionDto jobExecutionDto = jobsService.pollAndWaitForJobFinished(jobGuid,
-                    jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
-                    getPollingCallback(log), Function.identity());
-            //s -> s.getState() == JobState.COMPLETED ? s : null);
-
-            if (jobExecutionDto.getState() != JobState.COMPLETED) {
-                listener.error(AddVersionBuilder_AddVersion_error_jobFailure(jobExecutionDto.getState().toString()));
-                run.setResult(getDefaultResult());
-                return null;
-            } else {
-                log.println(AddVersionBuilder_AddVersion_success_analysisComplete());
-                run.setResult(Result.SUCCESS);
-                return jobExecutionDto.getGuid();
-            }
-        }
-
-        private Consumer<LogContentDto> getPollingCallback(PrintStream log) {
-            return !verbose ? null :
-                    logContentDto -> {
-                        logContentDto.getLines().forEach(logLine -> log.println(logLine.getContent()));
-                    };
-        }
-
+    @DataBoundSetter
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
     }
 
     @DataBoundConstructor
@@ -142,7 +101,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
             String caipVersion = app.getCaipVersion();
             String targetNode = app.getTargetNode();
             boolean verbose = getDescriptor().configuration.isVerbose();
-            OnboardApplicationDeepAnalysisBuilder.JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(run, listener, verbose);
+            JenkinsLogPollingProviderServiceImpl jnksLogPollingProvider = new JenkinsLogPollingProviderServiceImpl(jobsService, run, listener, verbose, getSleepDuration());
 
             //Run Analysis or Deep analysis
             if (!applicationService.isImagingAvailable()) {
@@ -164,7 +123,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
 
     private static VersionInformation getMinVersion() {
         //This version can be null if failed to convert from string
-        return VersionInformation.fromVersionString("2.5.0");
+        return VersionInformation.fromVersionString("2.8.0");
     }
 
     public String getSnapshotName() {

@@ -203,6 +203,21 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public String fastScan(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion,
+                           String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+        try {
+            String discoverAction = StringUtils.isNotEmpty(applicationGuid) ? "Refresh" : "Onboard";
+            log.log(Level.INFO, "Starting Fast-Scan job" + (StringUtils.isNotEmpty(applicationGuid) ? " for application GUID= " + applicationGuid : ""));
+            String jobGuid = jobService.startFastScan(applicationGuid, sourcePath, versionName, deliveryConfig, caipVersion, targetNode);
+            log.log(Level.INFO, discoverAction + " Fast-Scan job is ongoing: GUID= " + jobGuid);
+            return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
+        } catch (JobServiceException e) {
+            log.log(Level.SEVERE, "Could not perform Fast-Scan action due to following error", e);
+            throw new ApplicationServiceException("Unable to perform Fast-Scan action.", e);
+        }
+    }
+
+    @Override
     public String discoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion,
                                       String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         try {

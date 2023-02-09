@@ -114,7 +114,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
@@ -135,7 +135,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
@@ -145,6 +145,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
+        assertThat(fastScanCommand.getSleepDuration(), is(1L)); //default value taken
         assertThat(exitCode, is(Constants.RETURN_ONBOARD_APPLICATION_DISABLED));
     }
 
@@ -155,9 +156,10 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
-                "--node-name", TestConstants.TEST_NODE};
+                "--node-name", TestConstants.TEST_NODE,
+                "--sleep-duration", "6"};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
@@ -176,6 +178,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
+        assertThat(fastScanCommand.getSleepDuration(), is(6L));
         assertThat(exitCode, is(Constants.RETURN_RUN_ANALYSIS_DISABLED));
     }
 
@@ -186,7 +189,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE}; //default
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
@@ -210,7 +213,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-SNAPSHOT-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);

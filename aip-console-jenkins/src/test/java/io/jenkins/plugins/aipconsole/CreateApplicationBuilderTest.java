@@ -68,7 +68,7 @@ public class CreateApplicationBuilderTest extends BaseBuilderTest {
                 .thenReturn(new DatabaseConnectionSettingsDto[]{oneDb});
         when(jobsService.startCreateApplication(any(String.class), eq(null), eq(null), anyBoolean(), eq(null), eq(TARGET_CSS_SERVER_NAME)))
                 .thenReturn(TEST_JOB_GUID);
-        when(jobsService.pollAndWaitForJobFinished(any(String.class), any(Consumer.class), any(Consumer.class), any(Function.class))).thenReturn(JobState.COMPLETED);
+        when(jobsService.pollAndWaitForJobFinished(any(String.class), any(Consumer.class), any(Consumer.class), any(Function.class), eq(null))).thenReturn(JobState.COMPLETED);
 
         FreeStyleProject project = getProjectWithBuilder(createApplicationBuilder);
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);

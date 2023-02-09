@@ -420,7 +420,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 applicationGuid = jobsService.pollAndWaitForJobFinished(jobGuid,
                         jobStatusWithSteps -> log.println(JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))),
                         getPollingCallback(log),
-                        s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null);
+                        s -> s.getState() == JobState.COMPLETED ? s.getAppGuid() : null, null);
                 if (StringUtils.isBlank(applicationGuid)) {
                     listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(expandedAppName, apiServerUrl));
                     run.setResult(defaultResult);
@@ -620,7 +620,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                                 JobsSteps_changed(JobStepTranslationHelper.getStepTranslation(jobStatusWithSteps.getCurrentStep()))
                 ),
                 getPollingCallback(log),
-                JobExecutionDto::getState);
+                JobExecutionDto::getState, null);
     }
 
     private Consumer<LogContentDto> getPollingCallback(PrintStream log) {

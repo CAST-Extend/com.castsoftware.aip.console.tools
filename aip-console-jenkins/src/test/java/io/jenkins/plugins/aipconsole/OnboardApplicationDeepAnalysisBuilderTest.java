@@ -8,18 +8,18 @@ import org.mockito.MockitoAnnotations;
 
 public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
     @InjectMocks
-    private OnboardApplicationDeepAnalysisBuilder onboardApplicationBuilder;
+    private OnboardApplicationDeepAnalysisBuilder deepAnalysisBuilder;
 
     @Before
     public void setUp() throws Exception {
         super.startUp();
-        onboardApplicationBuilder = new OnboardApplicationDeepAnalysisBuilder(BaseBuilderTest.TEST_APP_NAME);
+        deepAnalysisBuilder = new OnboardApplicationDeepAnalysisBuilder(BaseBuilderTest.TEST_APP_NAME);
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void testOnboardApplicationDeepAnalysisJob() throws Exception {
-        FreeStyleProject project = getProjectWithBuilder(onboardApplicationBuilder);
+        FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
         OnboardApplicationDeepAnalysisBuilder expectedResults = new OnboardApplicationDeepAnalysisBuilder(TEST_APP_NAME);

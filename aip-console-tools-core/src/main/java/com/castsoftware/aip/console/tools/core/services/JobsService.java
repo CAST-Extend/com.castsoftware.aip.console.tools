@@ -10,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import java.util.Date;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface JobsService {
     /**
@@ -56,6 +57,8 @@ public interface JobsService {
      * @throws JobServiceException
      */
     String startOnboardApplication(String applicationName, String nodeName, String domainName, String caipVersion) throws JobServiceException;
+
+    String startFastScan(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode) throws JobServiceException;
 
     String startDiscoverApplication(String applicationGuid, String sourcePath, String versionName, String caipVersion, String targetNode) throws JobServiceException;
 
@@ -120,6 +123,8 @@ public interface JobsService {
      */
     JobState pollAndWaitForJobFinished(String jobGuid) throws JobServiceException;
 
+    long getDefaultSleepDuration();
+
     /**
      * Polls AIP Console and executes the given callback once the job is completed
      *
@@ -150,7 +155,8 @@ public interface JobsService {
      */
     //<R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobStatusWithSteps> stepChangedCallback, Function<JobStatusWithSteps, R> completionCallback) throws JobServiceException;
 
-    <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback, Function<JobExecutionDto, R> completionCallback) throws JobServiceException;
+    <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback
+            , Function<JobExecutionDto, R> completionCallback, Supplier<Long> sleepPeriodSupplier) throws JobServiceException;
 
     void cancelJob(String jobGuid) throws JobServiceException;
 }

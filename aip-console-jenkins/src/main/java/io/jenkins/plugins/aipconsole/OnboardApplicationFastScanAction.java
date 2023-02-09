@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-public class OnboardingApplicationAction extends BaseAction implements RunAction2 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OnboardingApplicationAction.class);
+public class OnboardApplicationFastScanAction extends BaseAction implements RunAction2 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OnboardApplicationFastScanAction.class);
     @CheckForNull
     private String applicationName;
     @Nullable
@@ -23,6 +23,7 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
     private String domainName;
     @CheckForNull
     private String onboardStrategy;
+    private long sleepDuration = Constants.DEFAULT_SLEEP_DURATION;
 
     @Nullable
     private String exclusionPatterns = "";
@@ -30,7 +31,7 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
 
     private transient Run run;
 
-    public OnboardingApplicationAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
+    public OnboardApplicationFastScanAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
         this.applicationName = applicationName;
         this.filePath = filePath;
     }
@@ -89,6 +90,14 @@ public class OnboardingApplicationAction extends BaseAction implements RunAction
 
     public void setTimeout(long timeout) {
         this.timeout = timeout;
+    }
+
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
+
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
     }
 
     @Nullable
