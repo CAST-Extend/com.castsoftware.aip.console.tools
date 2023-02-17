@@ -93,15 +93,7 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
 
         String applicationGuid;
         Thread shutdownHook = null;
-        boolean OnBoardingModeWasOn = false; //status before processing
         try {
-            OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
-            if (!OnBoardingModeWasOn) {
-                log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
-                //applicationService.setEnableOnboarding(true);
-                return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
-            }
-
             log.info("Searching for application '{}' on CAST Imaging Console", applicationName);
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
 
