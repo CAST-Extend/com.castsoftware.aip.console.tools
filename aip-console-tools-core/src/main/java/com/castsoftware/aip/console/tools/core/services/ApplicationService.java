@@ -75,9 +75,9 @@ public interface ApplicationService {
 
     boolean isImagingAvailable() throws ApplicationServiceException;
 
-    String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
+    String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
-    String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
+    String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
     /**
      * Retrieve an application's GUID from the given application name.

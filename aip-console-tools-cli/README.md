@@ -146,7 +146,7 @@ java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app"
 ```
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my app" --verbose=false 
+java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my app" --module-option="ONE_PER_AU" --snapshot-name="desired name" --verbose=false 
 ```
 
 To **Publish To Imaging**
@@ -381,6 +381,9 @@ java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app"
 
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
+* `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
+  module.
+  Possible value is one of: full_content, one_per_au, one_per_techno
 * `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ```bash

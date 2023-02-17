@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.Extension;
@@ -35,6 +36,17 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     @Nullable
     private String snapshotName;
     private long sleepDuration;
+
+    private String moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
+
+    @DataBoundSetter
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
+    }
 
     @Override
     protected String checkJobParameters() {
@@ -108,10 +120,15 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled());
             } else {
                 String expandedSsnapshotName = environmentVariables.expand(getSnapshotName());
+                ModuleGenerationType moduleType = ModuleGenerationType.FULL_CONTENT; //default
+                if (StringUtils.isNotEmpty(moduleGenerationType)) {
+                    moduleType = ModuleGenerationType.fromString(moduleGenerationType);
+                }
+
                 if (StringUtils.isEmpty(app.getSchemaPrefix())) {
-                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, verbose, jnksLogPollingProvider);
+                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
                 } else {
-                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, verbose, jnksLogPollingProvider);
+                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
                 }
             }
         } catch (ApplicationServiceException e) {
