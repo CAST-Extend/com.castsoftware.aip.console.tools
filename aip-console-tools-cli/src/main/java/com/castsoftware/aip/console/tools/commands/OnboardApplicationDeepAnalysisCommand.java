@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -42,6 +43,10 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
             defaultValue = "15")
     private long sleepDuration;
+
+    @CommandLine.Option(names = "--module-option"
+            , description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno (default: ${DEFAULT-VALUE})")
+    private ModuleGenerationType moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -107,9 +112,9 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             }
 
             if (firstScan) {
-                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, snapshotName, getSharedOptions().isVerbose(), cliLogPolling);
+                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, snapshotName, moduleGenerationType, getSharedOptions().isVerbose(), cliLogPolling);
             } else {
-                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, snapshotName, getSharedOptions().isVerbose(), cliLogPolling);
+                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, snapshotName, moduleGenerationType, getSharedOptions().isVerbose(), cliLogPolling);
             }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

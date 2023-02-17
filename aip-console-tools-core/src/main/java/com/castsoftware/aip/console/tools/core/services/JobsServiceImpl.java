@@ -191,7 +191,7 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException {
+    public String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder();
         requestBuilder.appGuid(applicationGuid);
         if (StringUtils.isNotEmpty(nodeName)) {
@@ -214,7 +214,7 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException {
+    public String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
                 .appGuid(applicationGuid);
         if (StringUtils.isNotEmpty(nodeName)) {

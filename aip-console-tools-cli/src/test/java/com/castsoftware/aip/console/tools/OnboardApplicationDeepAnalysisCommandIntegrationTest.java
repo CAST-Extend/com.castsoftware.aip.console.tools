@@ -5,8 +5,10 @@ import com.castsoftware.aip.console.tools.commands.OnboardApplicationDeepAnalysi
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,6 +21,7 @@ import picocli.CommandLine;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -79,7 +82,9 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
     @Test
     public void testOnboardApplicationDeepAnalysis() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP};
+                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--module-option", "ONE_PER_AU"
+        };
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(CONSOLE_API_VERSION).build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
@@ -107,6 +112,19 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
         runStringArgs(deepAnalysisCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
+
+        //Checks that the initial value set for the module type is full content
+        List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
+        for (CommandLine.Model.ArgSpec cmdArg : argsSpec) {
+            CommandLine.Model.OptionSpec optionSpec = (CommandLine.Model.OptionSpec) cmdArg;
+            if (StringUtils.equalsAny("--module-option", optionSpec.names())) {
+                assertThat(optionSpec.hasInitialValue(), is(true));
+                assertThat(optionSpec.initialValue(), is(ModuleGenerationType.FULL_CONTENT));
+                break;
+            }
+        }
+        // Now check the argument passed to the CLI has been taken into account
+        assertThat(deepAnalysisCommand.getModuleGenerationType(), is(ModuleGenerationType.ONE_PER_AU));
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
 

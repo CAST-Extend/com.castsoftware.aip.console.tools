@@ -233,10 +233,10 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+    public String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         log.log(Level.INFO, "Starting job to perform Application First-Scan action (Run Analysis) ");
         try {
-            String jobGuid = jobService.startRunFirstScanApplication(applicationGuid, targetNode, caipVersion, snapshotName);
+            String jobGuid = jobService.startRunFirstScanApplication(applicationGuid, targetNode, caipVersion, snapshotName, moduleGenerationType);
             log.log(Level.INFO, "First-Scan Application running job GUID= " + jobGuid);
             return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
         } catch (JobServiceException e) {
@@ -246,10 +246,10 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+    public String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         log.log(Level.INFO, "Starting job to perform Rescan Application action (Run Analysis) ");
         try {
-            String jobGuid = jobService.startRunReScanApplication(applicationGuid, targetNode, caipVersion, snapshotName);
+            String jobGuid = jobService.startRunReScanApplication(applicationGuid, targetNode, caipVersion, snapshotName, moduleGenerationType);
             log.log(Level.INFO, "Rescan Application running job GUID= " + jobGuid);
             return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
         } catch (JobServiceException e) {

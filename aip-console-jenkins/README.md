@@ -156,8 +156,8 @@ This command is used to perform the *Fast scan* or to *refresh* the sources cont
 Analysis* (run the
 analysis).
 
-- To perform *Fast Scan* operation do select *Console Onboard Application Fast-Scan* step
-- To perform *Deep Scan* operation do select *Console Onboard Application Deep-Analysis* step
+- To perform *Fast Scan/New Scan* operation do select *Console Onboard Application Fast-Scan* step
+- To perform *Deep Scan/Run Analysis* operation do select *Console Onboard Application Deep-Analysis* step
 
 **build step**
 
@@ -341,6 +341,8 @@ Under `Advanced Settings` you will find the following parameters :
 * *Application Name*: Application on which to perform Deep Analysis.
 * *Snapshot Name*: Name of the snapshot. CAST Imaging Console will automatically assign one to the application if this
   field is empty.
+* *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "
+  Analysis Unit module" or "Technology Module".
 * *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ### Fast Scan

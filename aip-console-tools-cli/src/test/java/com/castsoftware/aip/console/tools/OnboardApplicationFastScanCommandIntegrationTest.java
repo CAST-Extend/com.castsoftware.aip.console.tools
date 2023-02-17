@@ -120,6 +120,10 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doThrow(ApiCallException.class).when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doThrow(ApplicationServiceException.class).when(applicationService).isOnboardingSettingsEnabled();
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
+        when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
+        when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
 
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();

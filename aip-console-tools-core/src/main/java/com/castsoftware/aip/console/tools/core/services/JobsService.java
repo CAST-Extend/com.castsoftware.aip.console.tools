@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -64,9 +65,9 @@ public interface JobsService {
 
     String startReDiscoverApplication(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode) throws JobServiceException;
 
-    String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException;
+    String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException;
 
-    String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException;
+    String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException;
 
     String startPublishToImaging(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
 
