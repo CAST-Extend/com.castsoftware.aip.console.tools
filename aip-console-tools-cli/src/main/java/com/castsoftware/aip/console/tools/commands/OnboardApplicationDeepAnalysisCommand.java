@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -42,6 +43,9 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
             defaultValue = "15")
     private long sleepDuration;
+
+    @CommandLine.Option(names = "--module-option", description = "Generates a user defined module option forr either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno")
+    private ModuleGenerationType moduleGenerationType;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -105,6 +109,8 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
                 log.info("The 'Deep Analysis' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging.");
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
+            
+            applicationService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, !cloneVersion);
 
             if (firstScan) {
                 applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, snapshotName, getSharedOptions().isVerbose(), cliLogPolling);
