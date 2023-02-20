@@ -66,7 +66,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
         }
 
         log.info("Deep-Analysis args:");
-        log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tsleep: %d%n", applicationName, StringUtils.isEmpty(snapshotName) ? "Auto assigned" : snapshotName, sleepDuration));
+        log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tmodule generation type: %s%n\tsleep: %d%n", applicationName, StringUtils.isEmpty(snapshotName) ? "Auto assigned" : snapshotName, moduleGenerationType.toString(), sleepDuration));
 
         Thread shutdownHook = null;
         try {
