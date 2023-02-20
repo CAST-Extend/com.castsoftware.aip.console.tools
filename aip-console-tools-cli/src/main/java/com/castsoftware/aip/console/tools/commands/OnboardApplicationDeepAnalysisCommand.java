@@ -54,7 +54,6 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
     //This version can be null if failed to convert from string
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
 
-
     public OnboardApplicationDeepAnalysisCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
     }
@@ -70,7 +69,6 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
         log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tsleep: %d%n", applicationName, StringUtils.isEmpty(snapshotName) ? "Auto assigned" : snapshotName, sleepDuration));
 
         Thread shutdownHook = null;
-        boolean firstScan = true;
         try {
             boolean OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
             if (!OnBoardingModeWasOn) {
@@ -85,7 +83,6 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             if (app != null) {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
-                firstScan = app.getVersion() == null || !app.isOnboarded() || StringUtils.isEmpty(app.getSchemaPrefix());
             } else {
                 onboardApplication = true;
             }
@@ -111,11 +108,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
 
-            if (firstScan) {
-                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, snapshotName, moduleGenerationType, getSharedOptions().isVerbose(), cliLogPolling);
-            } else {
-                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, snapshotName, moduleGenerationType, getSharedOptions().isVerbose(), cliLogPolling);
-            }
+            applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, snapshotName, moduleGenerationType, getSharedOptions().isVerbose(), cliLogPolling);
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         } finally {

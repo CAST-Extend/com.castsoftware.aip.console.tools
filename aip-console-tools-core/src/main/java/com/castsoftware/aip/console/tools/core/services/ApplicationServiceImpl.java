@@ -231,30 +231,17 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new ApplicationServiceException("Unable to discover application contents automatically.", e);
         }
     }
-
+    
     @Override
-    public String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
-        log.log(Level.INFO, "Starting job to perform Application First-Scan action (Run Analysis) ");
+    public String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+        log.log(Level.INFO, "Starting job to perform Deep Analysis action (Run Analysis) ");
         try {
-            String jobGuid = jobService.startRunFirstScanApplication(applicationGuid, targetNode, caipVersion, snapshotName, moduleGenerationType);
-            log.log(Level.INFO, "First-Scan Application running job GUID= " + jobGuid);
+            String jobGuid = jobService.startDeepAnalysis(applicationGuid, targetNode, caipVersion, snapshotName, moduleGenerationType);
+            log.log(Level.INFO, "Deep Analysis running job GUID= " + jobGuid);
             return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
         } catch (JobServiceException e) {
-            log.log(Level.SEVERE, "Could not perform the First-Scan application due to the following error", e);
-            throw new ApplicationServiceException("Unable to Run Analysis automatically.", e);
-        }
-    }
-
-    @Override
-    public String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
-        log.log(Level.INFO, "Starting job to perform Rescan Application action (Run Analysis) ");
-        try {
-            String jobGuid = jobService.startRunReScanApplication(applicationGuid, targetNode, caipVersion, snapshotName, moduleGenerationType);
-            log.log(Level.INFO, "Rescan Application running job GUID= " + jobGuid);
-            return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
-        } catch (JobServiceException e) {
-            log.log(Level.SEVERE, "Could not perform the Rescan application due to the following error", e);
-            throw new ApplicationServiceException("Unable to Run Rescan application automatically.", e);
+            log.log(Level.SEVERE, "Could not perform the Deep Analysis due to the following error", e);
+            throw new ApplicationServiceException("Unable to Run Deep Analysis automatically.", e);
         }
     }
 

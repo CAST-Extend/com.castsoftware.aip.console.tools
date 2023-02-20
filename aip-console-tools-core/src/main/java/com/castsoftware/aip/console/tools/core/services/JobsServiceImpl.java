@@ -191,30 +191,7 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException {
-        ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder();
-        requestBuilder.appGuid(applicationGuid);
-        if (StringUtils.isNotEmpty(nodeName)) {
-            requestBuilder.targetNode(nodeName);
-        }
-        if (StringUtils.isNotEmpty(caipVersion)) {
-            requestBuilder.caipVersion(caipVersion);
-        }
-        if (StringUtils.isNotEmpty(snapshotName)) {
-            requestBuilder.snapshotName(snapshotName);
-        }
-
-        try {
-            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getFirstScanEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
-            return jobStartDto.getJobGuid();
-        } catch (ApiCallException e) {
-            log.log(Level.SEVERE, "Unable to perform application First-Scan action (Run Analysis)", e);
-            throw new JobServiceException("The First-Scan of application failed", e);
-        }
-    }
-
-    @Override
-    public String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException {
+    public String startDeepAnalysis(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
                 .appGuid(applicationGuid);
         if (StringUtils.isNotEmpty(nodeName)) {
@@ -228,7 +205,7 @@ public class JobsServiceImpl implements JobsService {
         }
 
         try {
-            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getReScanApplicationEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getDeepAnalysisEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
             return jobStartDto.getJobGuid();
         } catch (ApiCallException e) {
             log.log(Level.SEVERE, "Unable to perform ReScan application action (Run Analysis)", e);

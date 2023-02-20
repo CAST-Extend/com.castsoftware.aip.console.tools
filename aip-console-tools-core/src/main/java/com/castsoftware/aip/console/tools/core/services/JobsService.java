@@ -65,9 +65,7 @@ public interface JobsService {
 
     String startReDiscoverApplication(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode) throws JobServiceException;
 
-    String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException;
-
-    String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException;
+    String startDeepAnalysis(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException;
 
     String startPublishToImaging(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
 

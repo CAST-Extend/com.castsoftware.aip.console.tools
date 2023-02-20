@@ -125,11 +125,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
                     moduleType = ModuleGenerationType.fromString(moduleGenerationType);
                 }
 
-                if (StringUtils.isEmpty(app.getSchemaPrefix())) {
-                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
-                } else {
-                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
-                }
+                applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
             }
         } catch (ApplicationServiceException e) {
             e.printStackTrace(logger);
