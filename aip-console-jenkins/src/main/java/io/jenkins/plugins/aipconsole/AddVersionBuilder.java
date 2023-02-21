@@ -536,6 +536,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
             requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);

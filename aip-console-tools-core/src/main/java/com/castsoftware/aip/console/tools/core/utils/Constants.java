@@ -109,7 +109,8 @@ public class Constants {
     public static final String DEEP_ANALYSIS = "deep-analysis";
     public static final String UPLOAD_SNAPSHOT_VERSION = "upload_snapshot_version";
     public static final String DATAFLOW_SECURITY_ANALYZE = "dataflow_security_analyze";
-
+    public static final String JEE_TECHNOLOGY_PATH = "/jee";
+    public static final String DOTNET_TECHNOLOGY_PATH = "/dotnet";
     // Job params
     public static final String PARAM_APP_NAME = "appName";
     public static final String PARAM_INPLACE_MODE = "inPlaceMode";
