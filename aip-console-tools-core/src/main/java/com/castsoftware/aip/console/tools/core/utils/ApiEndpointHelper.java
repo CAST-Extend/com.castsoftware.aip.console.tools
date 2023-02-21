@@ -42,7 +42,7 @@ public class ApiEndpointHelper {
     public static final String IMAGING_SETTINGS_PATH = "/imaging-settings";
     public static final String FIRST_SCAN_PATH = "/first-scan-application";
     public static final String RE_DISCOVER_APPLICATION_PATH = "/rediscover-application";
-    public static final String RE_SCAN_APPLICATION_PATH = "/rescan-application";
+    public static final String DEEP_ANALYSIS_PATH = "/deep-analysis";
     public static final String PUBLISH_PATH = "/publish";
 
     public static String getRootPath() {
@@ -111,8 +111,8 @@ public class ApiEndpointHelper {
         return getJobsEndpoint() + RE_DISCOVER_APPLICATION_PATH;
     }
 
-    public static String getReScanApplicationEndPoint() {
-        return getJobsEndpoint() + RE_SCAN_APPLICATION_PATH;
+    public static String getDeepAnalysisEndPoint() {
+        return getJobsEndpoint() + DEEP_ANALYSIS_PATH;
     }
 
     public static String getPublishToImagingEndPoint() {

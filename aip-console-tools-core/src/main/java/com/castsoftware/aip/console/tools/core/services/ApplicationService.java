@@ -74,10 +74,8 @@ public interface ApplicationService {
     void setEnableOnboarding(boolean enabled) throws ApplicationServiceException;
 
     boolean isImagingAvailable() throws ApplicationServiceException;
-
-    String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
-
-    String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
+    
+    String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
     /**
      * Retrieve an application's GUID from the given application name.

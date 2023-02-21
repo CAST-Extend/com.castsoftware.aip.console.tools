@@ -106,6 +106,7 @@ public class Constants {
     public static final String DELIVER_VERSION = "deliver_version";
     public static final String UPLOAD_DELIVER_VERSION = "upload_deliver_version";
     public static final String RESCAN_APPLICATION = "rescan_application";
+    public static final String DEEP_ANALYSIS = "deep-analysis";
     public static final String UPLOAD_SNAPSHOT_VERSION = "upload_snapshot_version";
     public static final String DATAFLOW_SECURITY_ANALYZE = "dataflow_security_analyze";
 
