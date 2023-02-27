@@ -53,7 +53,7 @@ public class JobRequestBuilder {
         this.jobType = jobType;
         this.caipVersion = caipVersion;
         this.startStep = Constants.EXTRACT_STEP_NAME;
-        this.endStep = Constants.CONSOLIDATE_SNAPSHOT;
+        this.endStep = Constants.SNAPSHOT_INDICATOR;
         this.objectives.add(GLOBAL_RISK_OBJECTIVE);
         this.objectives.add(FUNCTIONAL_POINTS_OBJECTIVE);
 

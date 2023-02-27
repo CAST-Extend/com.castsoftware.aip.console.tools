@@ -279,7 +279,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         assertNotNull(addVersionCommand.getBuilder());
         CreateJobsRequest jobRequest = addVersionCommand.getBuilder().buildJobRequest();
         String endStep = (String) jobRequest.getJobParameters().get(Constants.PARAM_END_STEP);
-        assertEquals("consolidate_snapshot", endStep); //so that Console will move up to publish to health
+        assertEquals("snapshot_indicator", endStep); //so that Console will move up to publish to health
 
         assertThat(exitCode, is(Constants.RETURN_OK));
     }

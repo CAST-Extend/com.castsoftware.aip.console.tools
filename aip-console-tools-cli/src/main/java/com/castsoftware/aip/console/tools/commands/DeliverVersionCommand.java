@@ -243,6 +243,8 @@ public class DeliverVersionCommand implements Callable<Integer> {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
             }
 
+            log.info("Job request : " + builder.buildJobRequest().toString());
+
             String jobGuid = jobsService.startAddVersionJob(builder);
             shutdownHook = getShutdownHookForJobGuid(jobGuid);
 
