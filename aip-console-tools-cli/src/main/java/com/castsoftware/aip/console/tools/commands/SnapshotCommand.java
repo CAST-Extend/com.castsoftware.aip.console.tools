@@ -167,7 +167,7 @@ public class SnapshotCommand implements Callable<Integer> {
                     .processImaging(processImaging)
                     .uploadApplication(forcedConsolidation)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                            Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT);
+                            Constants.UPLOAD_APP_SNAPSHOT : Constants.SNAPSHOT_INDICATOR);
 
             //Snapshot required now see whether we upload application or not
             if (!forcedConsolidation) {
@@ -176,6 +176,8 @@ public class SnapshotCommand implements Callable<Integer> {
             }
 
             log.info("Running Snapshot Job on application '{}' with Version '{}' (guid: '{}')", applicationName, foundVersion.getName(), foundVersion.getGuid());
+            log.info("Job request : " + builder.buildJobRequest().toString());
+
             String jobGuid = jobsService.startJob(builder);
 
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
