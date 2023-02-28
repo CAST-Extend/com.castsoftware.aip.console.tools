@@ -368,7 +368,7 @@ public class JobsServiceImpl implements JobsService {
             , Function<JobExecutionDto, R> completionCallback, Supplier<Long> sleepPeriodSupplier) throws JobServiceException {
         assert StringUtils.isNotBlank(jobGuid);
 
-        long sleepPeriod = sleepPeriodSupplier.get().longValue();
+        long sleepPeriod = (sleepPeriodSupplier != null) ? sleepPeriodSupplier.get().longValue() : getDefaultSleepDuration();
         String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(jobGuid);
         String previousStep = "";
         log.fine("Checking status of Job with GUID " + jobGuid);
