@@ -273,6 +273,10 @@ public class AddVersionCommand implements Callable<Integer> {
             if (amtProfiling) {
                 applicationService.updateAmtProfileDebugOption(applicationGuid, amtProfiling);
             }
+            
+            log.info("Update JEE and DOTNET security dataflow settings to: {}", enableSecurityDataflow);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
             log.info("Job request : " + builder.buildJobRequest().toString());
             String jobGuid = jobsService.startAddVersionJob(builder);

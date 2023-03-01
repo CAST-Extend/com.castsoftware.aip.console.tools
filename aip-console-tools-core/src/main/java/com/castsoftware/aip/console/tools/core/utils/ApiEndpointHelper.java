@@ -44,7 +44,7 @@ public class ApiEndpointHelper {
     public static final String RE_DISCOVER_APPLICATION_PATH = "/rediscover-application";
     public static final String DEEP_ANALYSIS_PATH = "/deep-analysis";
     public static final String PUBLISH_PATH = "/publish";
-
+    public static final String SECURITY_DATAFLOW_PATH = "/security-dataflow";
     public static String getRootPath() {
         return ROOT_PATH + "/";
     }
@@ -140,6 +140,10 @@ public class ApiEndpointHelper {
 
     public static String getDebugOptionsPath(String appGuid) {
         return getApplicationPath(appGuid) + DEBUG_OPTIONS_ENDPOINT;
+    }
+
+    public static String getApplicationSecurityDataflowPath(String appGuid) {
+        return getApplicationPath(appGuid) + SECURITY_DATAFLOW_PATH;
     }
 
     public static String getDebugOptionShowSqlPath(String appGuid) {

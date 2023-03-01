@@ -142,6 +142,8 @@ public interface ApplicationService {
      */
     DebugOptionsDto getDebugOptions(String appGuid);
 
+    void updateSecurityDataflow(String appGuid, boolean securityDataflowFlag, String technologyPath);
+
     void updateShowSqlDebugOption(String appGuid, boolean showSql);
 
     void updateAmtProfileDebugOption(String appGuid, boolean amtProfile);

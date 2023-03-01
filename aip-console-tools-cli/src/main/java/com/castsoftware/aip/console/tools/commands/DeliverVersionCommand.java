@@ -242,6 +242,10 @@ public class DeliverVersionCommand implements Callable<Integer> {
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
             }
+            
+            log.info("Update JEE and DOTNET security dataflow settings to: {}", enableSecurityDataflow);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
             log.info("Job request : " + builder.buildJobRequest().toString());
 

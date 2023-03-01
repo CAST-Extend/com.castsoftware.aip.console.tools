@@ -228,7 +228,8 @@ The available options are :
 * `--snapshot-date` (option): The snapshot date associated with the snapshot to be created: default
   format `yyyy-MM-ddTHH:mm:ss` (example `2022-07-11T07:22:46`). <br>Depending on Console 's timezone, this can be
   displayed differently
-* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. This setting will
+  operate for both technologies JEE and DOTNET as well. <u>Has no impact
   when cloning a version</u>.
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
@@ -282,7 +283,8 @@ The available options are :
   To get the full list do run help on this command (*deliver* --help).
 * `--auto-discover`: will discover new technologies and install new extensions during rescan, to disable when run
   consistency check
-* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. This setting will
+  operate for both technologies JEE and DOTNET as well.<u>Has no impact
   when cloning a version</u>.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *
