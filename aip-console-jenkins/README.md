@@ -285,7 +285,7 @@ The Deliver Source step provides similar parameters to the Add Version step :
   the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no
   version exists, it will run an Add version job instead.
 * *Enable Security Dataflow*: Enables the Security Objective for this version. This setting will operate for both
-  technologies JEE and DOTNET as well,and it will be ignored if `Rescan` is checked.
+  technologies JEE and DOTNET as well, and it will be ignored if `Rescan` is checked.
 
 Under `Advanced Settings` you will find the following parameters :
 
