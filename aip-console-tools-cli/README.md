@@ -142,11 +142,11 @@ The *Onboard Application* feature is using following strategies in a separated c
 To perform that action you can inspire from the following command (see advanced usage for more details):
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+java -jar .\aip-console-tools-cli.jar Fast-Scan -s="Console URL" --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
 ```
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my app" --module-option="ONE_PER_AU" --snapshot-name="desired name" --verbose=false 
+java -jar .\aip-console-tools-cli.jar Deep-Analyze -s="Console URL" --apikey="valid.key" -n "my app" --module-option="ONE_PER_AU" --snapshot-name="desired name" --verbose=false 
 ```
 
 To **Publish To Imaging**
@@ -363,6 +363,8 @@ analysis).
 
 The available options are :
 
+* `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--file` or `-f`: **required** only when performing the FIRST_SCAN. Represents the local zip or tar.gz file full path
   to the
@@ -381,6 +383,8 @@ java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app"
 
 ### Deep Analyze
 
+* `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
 * `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
