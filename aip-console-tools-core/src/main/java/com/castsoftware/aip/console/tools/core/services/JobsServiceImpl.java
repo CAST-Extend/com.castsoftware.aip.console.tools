@@ -203,10 +203,12 @@ public class JobsServiceImpl implements JobsService {
         if (StringUtils.isNotEmpty(snapshotName)) {
             requestBuilder.snapshotName(snapshotName);
         }
-        if (moduleGenerationType != null) {
+
+        //The module parameter should be left empty or null when dealing with full content
+        if (moduleGenerationType != null && (moduleGenerationType != ModuleGenerationType.FULL_CONTENT)) {
             requestBuilder.moduleGenerationType(moduleGenerationType.toString());
         }
-        
+
         try {
             SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getDeepAnalysisEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
             return jobStartDto.getJobGuid();
