@@ -209,6 +209,7 @@ public class JobsServiceImpl implements JobsService {
             requestBuilder.moduleGenerationType(moduleGenerationType.toString());
         }
 
+        log.info("Job Parameters: " + requestBuilder.build().toString());
         try {
             SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getDeepAnalysisEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
             return jobStartDto.getJobGuid();
