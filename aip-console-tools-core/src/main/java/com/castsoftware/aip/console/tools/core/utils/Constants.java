@@ -34,6 +34,7 @@ public class Constants {
     public static final int RETURN_ONBOARD_VERSION_STATUS_INVALID = 22;
     public static final int RETURN_ONBOARD_OPERATION_FAILED = 23;
     public static final int RETURN_ONBOARD_FAST_SCAN_REQUIRED = 24;
+    public static final int RETURN_ONBOARD_FAST_SCAN_FORBIDDEN = 25;
     public static final String DEFAULT_DOMAIN = "-";
 
     public static final int UNKNOWN_ERROR = 1000;

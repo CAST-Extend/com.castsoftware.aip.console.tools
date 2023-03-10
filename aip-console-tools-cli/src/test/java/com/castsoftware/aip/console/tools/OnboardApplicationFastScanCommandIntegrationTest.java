@@ -171,6 +171,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        applicationDto.setOnboarded(true);
         doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
 
         Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATRE_APP).resolve("main_sources");
@@ -184,6 +185,38 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         assertThat(spec, is(notNullValue()));
         assertThat(fastScanCommand.getSleepDuration(), is(6L));
         assertThat(exitCode, is(Constants.RETURN_RUN_ANALYSIS_DISABLED));
+    }
+
+    @Test
+    public void testOnboardApplicationFastScan_OnAnExistingNonOnboardeApplication() throws Exception {
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "-f", zippedSourcesPath.toString(),
+                "--domain-name", TestConstants.TEST_DOMAIN,
+                "--node-name", TestConstants.TEST_NODE,
+                "--sleep-duration", "6"};
+
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
+        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
+        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
+        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
+        doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
+        doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
+
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        applicationDto.setOnboarded(false);
+        doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
+
+        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATRE_APP).resolve("main_sources");
+        doReturn(sourcesPath.toString()).when(uploadService).uploadFileForOnboarding(zippedSourcesPath.toFile(), TestConstants.TEST_APP_GUID);
+        ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
+        when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
+        when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
+
+        runStringArgs(fastScanCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_ONBOARD_FAST_SCAN_FORBIDDEN));
     }
 
     @Test
@@ -232,6 +265,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         when(existingVersion.isImagingDone()).thenReturn(true);
         applicationDto.setVersion(existingVersion);
         applicationDto.setImagingTenant("default");
+        applicationDto.setOnboarded(true);
         doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
 
         Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATRE_APP).resolve("main_sources");

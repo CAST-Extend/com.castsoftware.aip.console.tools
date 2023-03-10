@@ -7,7 +7,6 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
-import com.google.common.collect.Lists;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -29,7 +28,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.concurrent.Future;
 
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
@@ -116,7 +114,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
     @Ignore
     public void testBuildPipelineScriptOk() throws Exception {
         // Replace path separators with / for the groovy script
-        String filePath = StringUtils.replaceChars(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME), File.separatorChar, '/');
+        String filePath = StringUtils.replaceChars(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME).toString(), File.separatorChar, '/');
         WorkflowJob job = jenkins.createProject(WorkflowJob.class);
         job.setDefinition(new CpsFlowDefinition("node {" +
                 "  aipAddVersion applicationName: '" + BaseBuilderTest.TEST_APP_NAME + "', filePath: '" + filePath + "'" +
@@ -172,7 +170,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
     @Test
     public void testBuildApplicationNotFoundAndAutoCreateFalse() throws Exception {
         Assert.assertFalse("Auto create should be false. Some changes were persisted to the builder ?", addVersionBuilder.isAutoCreate());
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME).toString());
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
@@ -187,7 +185,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
 
     @Test
     public void testBuildApplicationUploadFailure() throws Exception {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME).toString());
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
@@ -203,7 +201,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
 
     @Test
     public void testBuildErrorCreatingAnalyzeJob() throws Exception {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME).toString());
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
@@ -224,7 +222,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
 
     @Test
     public void testBuildAnalyseResultCancelled() throws Exception {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME).toString());
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
         doNothing().
@@ -247,7 +245,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
     public void testBuildApplicationNotFoundCreateApplicationFails() throws Exception {
         Assert.assertTrue("Node name should be null/empty. Other test set it and it wasn't reset ?",
                 StringUtils.isBlank(addVersionBuilder.getNodeName()));
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME).toString());
         addVersionBuilder.setAutoCreate(true);
         FreeStyleProject project = getProjectWithBuilder(addVersionBuilder);
 
@@ -271,13 +269,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
     }
 
     private FreeStyleProject getProjectWithDefaultAddVersionAndFile(String fileName) throws IOException {
-        addVersionBuilder.setFilePath(createTempFileAndGetPath(fileName));
+        addVersionBuilder.setFilePath(createTempFileAndGetPath(fileName).toString());
         return getProjectWithBuilder(addVersionBuilder);
-    }
-
-    private String createTempFileAndGetPath(String fileName) throws IOException {
-        File tempFile = temporaryFolder.newFile(fileName);
-        Files.write(tempFile.toPath(), Lists.newArrayList(BaseBuilderTest.TEST_CONTENT));
-        return tempFile.getAbsolutePath();
     }
 }

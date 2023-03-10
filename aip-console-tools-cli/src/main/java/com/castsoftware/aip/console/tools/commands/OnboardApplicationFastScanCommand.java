@@ -114,6 +114,11 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
 
             //Refresh application information even app was existing
             app = applicationService.getApplicationFromName(applicationName);
+            if (!app.isOnboarded()) {
+                log.info("The existing application has not been created using the new onboard workflow.\n" +
+                        "The 'Fast-Scan' operation will not be applied");
+                return Constants.RETURN_ONBOARD_FAST_SCAN_FORBIDDEN;
+            }
 
             applicationGuid = app.getGuid();
             ApplicationOnboardingDto applicationOnboardingDto = applicationService.getApplicationOnboarding(applicationGuid);
@@ -121,18 +126,18 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             String targetNode = applicationOnboardingDto.getTargetNode();
 
             DeliveryConfigurationDto deliveryConfiguration = null;
-                Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
-                if (exclusionRules != null && exclusionRules.length > 0) {
-                    exclusions.setInitialExclusionRules(exclusionRules);
-                }
+            Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
+            if (exclusionRules != null && exclusionRules.length > 0) {
+                exclusions.setInitialExclusionRules(exclusionRules);
+            }
 
-                //discover-packages
-                log.info("Preparing the Application Delivery Configuration");
-                final DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
-                String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(applicationGuid, sourcePath, exclusions,
-                        VersionStatus.IMAGING_PROCESSED, true, (config) -> deliveryConfig[0] = config);
-                deliveryConfiguration = deliveryConfig[0];
-                log.info("Application Delivery Configuration done: GUID=" + deliveryConfigurationGuid);
+            //discover-packages
+            log.info("Preparing the Application Delivery Configuration");
+            DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
+            String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(applicationGuid, sourcePath, exclusions,
+                    VersionStatus.IMAGING_PROCESSED, true, (config) -> deliveryConfig[0] = config);
+            deliveryConfiguration = deliveryConfig[0];
+            log.info("Application Delivery Configuration done: GUID=" + deliveryConfigurationGuid);
 
             //rediscover-application
             log.info("Start Fast-Scan action");
