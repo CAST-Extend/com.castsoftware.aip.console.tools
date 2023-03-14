@@ -89,6 +89,12 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
 
             boolean deepAnalysisCondition = !onboardApplication && (app.isOnboarded() || StringUtils.isNotEmpty(app.getSchemaPrefix()));
             if (!deepAnalysisCondition) {
+                if (app != null && !app.isOnboarded()) {
+                    log.info("The existing application has not been created using the Fast-Scan workflow.\n" +
+                            "The 'Deep-Analysis' operation will not be applied");
+                    return Constants.RETURN_ONBOARD_DEEP_ANALYSIS_FORBIDDEN;
+                }
+
                 log.error("Unable to trigger Deep-Analysis. The actual conditions required Fast-Scan to be running first.");
                 return Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED;
             }

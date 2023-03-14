@@ -115,7 +115,7 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             //Refresh application information even app was existing
             app = applicationService.getApplicationFromName(applicationName);
             if (!app.isOnboarded()) {
-                log.info("The existing application has not been created using the new onboard workflow.\n" +
+                log.info("The existing application has not been created using the Fast-Scan workflow.\n" +
                         "The 'Fast-Scan' operation will not be applied");
                 return Constants.RETURN_ONBOARD_FAST_SCAN_FORBIDDEN;
             }
