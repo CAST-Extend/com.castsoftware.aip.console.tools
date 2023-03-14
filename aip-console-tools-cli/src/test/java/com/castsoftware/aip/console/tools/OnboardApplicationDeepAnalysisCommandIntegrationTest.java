@@ -129,7 +129,29 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
     }
 
     @Test
-    public void testOnboardApplicationDeepAnalysis_WithoutFirstScan() throws Exception {
+    public void testOnboardApplicationDeepAnalysis_WithoutFastScan_AppNotExist() throws Exception {
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name", TestConstants.TEST_CREATRE_APP};
+
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(CONSOLE_API_VERSION).build();
+        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
+        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
+        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
+        doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
+        doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
+
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(null);
+        doReturn(null).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
+        when(applicationService.isImagingAvailable()).thenReturn(true);
+
+        runStringArgs(deepAnalysisCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED));
+    }
+
+    @Test
+    public void testOnboardApplicationDeepAnalysis_WithoutFastScan_ExistingAppNotUsingFastScanWorkflow() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP};
 
@@ -152,6 +174,6 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
         runStringArgs(deepAnalysisCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED));
+        assertThat(exitCode, is(Constants.RETURN_ONBOARD_DEEP_ANALYSIS_FORBIDDEN));
     }
 }

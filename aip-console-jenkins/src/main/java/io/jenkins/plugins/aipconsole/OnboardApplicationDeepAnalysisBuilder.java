@@ -25,6 +25,7 @@ import java.io.IOException;
 
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.OnboardApplicationDeepAnalysisBuilder_DescriptorImpl_displayName;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_DeepAnalysisForbidden;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
@@ -100,11 +101,14 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
             if (app != null) {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
-                firstScan = app.getVersion() == null || StringUtils.isEmpty(app.getVersion().getGuid()) || !app.isOnboarded();
+                firstScan = app == null || app.getVersion() == null || StringUtils.isEmpty(app.getVersion().getGuid()) || !app.isOnboarded();
             }
 
-            if (firstScan || app == null) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired());
+            if (firstScan || app == null || !app.isOnboarded()) {
+
+                logger.println((app != null && !app.isOnboarded())
+                        ? OnbordingApplicationBuilder_DescriptorImpl_DeepAnalysisForbidden()
+                        : OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired());
                 run.setResult(getDefaultResult());
                 return;
             }
