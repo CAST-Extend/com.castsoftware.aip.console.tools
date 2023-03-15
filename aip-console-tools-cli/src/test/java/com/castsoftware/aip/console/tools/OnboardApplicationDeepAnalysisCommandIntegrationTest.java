@@ -95,6 +95,7 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
 
         //first scan/ Refresh sources content done
         applicationDto.setOnboarded(true);
+        applicationDto.setSchemaPrefix("ShouldHave_One");
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
         VersionDto existingVersion = Mockito.mock(VersionDto.class);
         when(existingVersion.getGuid()).thenReturn(TestConstants.TEST_OBR_VERSION_GUID);
@@ -129,7 +130,7 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
     }
 
     @Test
-    public void testOnboardApplicationDeepAnalysis_WithoutFastScan_AppNotExist() throws Exception {
+    public void testOnboardApplicationDeepAnalysis_WithoutFastScan_AppDoesNotExist() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP};
 

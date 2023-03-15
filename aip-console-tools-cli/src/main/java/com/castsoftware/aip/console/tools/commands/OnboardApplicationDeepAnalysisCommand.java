@@ -77,17 +77,14 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             }
 
             log.info("Searching for application '{}' on CAST Imaging Console", applicationName);
-            boolean onboardApplication = false;
             String existingAppGuid = null;
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
             if (app != null) {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
-            } else {
-                onboardApplication = true;
             }
 
-            boolean deepAnalysisCondition = !onboardApplication && (app.isOnboarded() || StringUtils.isNotEmpty(app.getSchemaPrefix()));
+            boolean deepAnalysisCondition = (app != null) && app.isOnboarded() && StringUtils.isNotEmpty(app.getSchemaPrefix());
             if (!deepAnalysisCondition) {
                 if (app != null && !app.isOnboarded()) {
                     log.info("The existing application has not been created using the Fast-Scan workflow.\n" +
