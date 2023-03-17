@@ -144,11 +144,6 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
                     caipVersion, targetNode, getSharedOptions().isVerbose(), cliLogPolling);
             log.info("Fast-Scan done successfully");
-
-            if (!applicationService.isImagingAvailable()) {
-                log.info("The 'Deep Analysis' step has been disabled by user. To perform this step do configure CAST Imaging and use the dedicated CLI command");
-                return Constants.RETURN_RUN_ANALYSIS_DISABLED;
-            }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         } finally {

@@ -179,12 +179,14 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
+        //Should work without imaging
+        when(applicationService.isImagingAvailable()).thenReturn(false);
 
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(fastScanCommand.getSleepDuration(), is(6L));
-        assertThat(exitCode, is(Constants.RETURN_RUN_ANALYSIS_DISABLED));
+        assertThat(exitCode, is(Constants.RETURN_OK));
     }
 
     @Test
@@ -277,6 +279,6 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_RUN_ANALYSIS_DISABLED));
+        assertThat(exitCode, is(Constants.RETURN_OK));
     }
 }

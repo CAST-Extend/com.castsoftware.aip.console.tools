@@ -55,7 +55,6 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_mode;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_scanMode;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload_done;
@@ -220,12 +219,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
             JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(jobsService, run, listener, verbose, sleepDuration);
             applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
                     caipVersion, targetNode, verbose, jnksLogPollingProvider);
-            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Rediscover"));
-
-            //Run Analysis or Deep analysis
-            if (!applicationService.isImagingAvailable()) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled());
-            }
+            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Fast-Scan"));
         } catch (ApplicationServiceException | JobServiceException e) {
             e.printStackTrace(logger);
             run.setResult(getDefaultResult());
