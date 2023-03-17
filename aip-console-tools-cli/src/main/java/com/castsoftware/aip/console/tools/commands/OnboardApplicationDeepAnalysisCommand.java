@@ -84,7 +84,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
                 app = applicationService.getApplicationDetails(existingAppGuid);
             }
 
-            boolean deepAnalysisCondition = (app != null) && app.isOnboarded() && StringUtils.isNotEmpty(app.getSchemaPrefix());
+            boolean deepAnalysisCondition = (app != null) && app.isOnboarded();
             if (!deepAnalysisCondition) {
                 if (app != null && !app.isOnboarded()) {
                     log.info("The existing application has not been created using the Fast-Scan workflow.\n" +
