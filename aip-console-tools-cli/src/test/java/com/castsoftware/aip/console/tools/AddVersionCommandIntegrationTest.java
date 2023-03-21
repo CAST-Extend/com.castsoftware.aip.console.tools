@@ -98,6 +98,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
 
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
+        assertThat(addVersionCommand.isEnableDataSafety(), is(false));
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
 
@@ -372,6 +373,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
                 "--node-name", TestConstants.TEST_NODE
                 , "--process-imaging=false", "--snapshot-name", "SNAP-NAME"
                 , "-date", versionDateString
+                , "--enable-data-safety-investigation"
         };
 
         // gives the existing application
@@ -399,6 +401,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
 
         assertThat(spec, is(notNullValue()));
+        assertThat(addVersionCommand.isEnableDataSafety(), is(true));
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
 }
