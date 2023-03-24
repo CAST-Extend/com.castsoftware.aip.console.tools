@@ -231,6 +231,8 @@ The available options are :
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. This setting will
   operate for both technologies JEE and DOTNET as well. <u>Has no impact
   when cloning a version</u>.
+* `--enable-data-safety-investigation` or `--enable-data-safety` (optional): Enables the data safety investigation
+  objective for this version.
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *
@@ -286,6 +288,8 @@ The available options are :
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. This setting will
   operate for both technologies JEE and DOTNET as well.<u>Has no impact
   when cloning a version</u>.
+* `--enable-data-safety-investigation` or `--enable-data-safety` (optional): Enables the data safety investigation
+  objective for this version.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *
   default*:

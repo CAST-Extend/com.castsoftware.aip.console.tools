@@ -105,7 +105,7 @@ public class AddVersionCommand implements Callable<Integer> {
     @CommandLine.Option(names = "--auto-create", description = "If the given application name doesn't exist on the target server, it'll be automatically created before creating a new version"
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean autoCreate = false;
-    
+
     @CommandLine.Option(names = {"-css", "--css-server"}, description = "CSS Server name that will host the application data: Format will be host:port/databaseName and can be checked on AIP Console's Global Configuration page.")
     private String cssServerName;
 
@@ -113,6 +113,11 @@ public class AddVersionCommand implements Callable<Integer> {
             + " if specified without parameter: ${FALLBACK-VALUE}",
             fallbackValue = "true")
     private boolean enableSecurityDataflow = false;
+    @CommandLine.Option(names = {"--enable-data-safety-investigation", "--enable-data-safety"},
+            description = "If defined, this will activate the Data Safety investigation for this version"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
+    private boolean enableDataSafety = false;
 
     @CommandLine.Option(names = "--process-imaging", description = "If provided, will upload data to Imaging"
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
@@ -234,7 +239,7 @@ public class AddVersionCommand implements Callable<Integer> {
                     .versionName(versionName)
                     .versionReleaseDate(applicationService.getVersionDate(versionDateString))
                     .snapshotDate(applicationService.getVersionDate(snapshotDateString))
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, enableDataSafety)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);

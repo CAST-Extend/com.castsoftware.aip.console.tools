@@ -110,6 +110,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     @Nullable
     private String nodeName = "";
     private boolean enableSecurityDataflow = false;
+    private boolean enableDataSafety = false;
+
     private boolean backupApplicationEnabled = false;
     @Nullable
     private String backupName = "";
@@ -280,6 +282,15 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         this.enableSecurityDataflow = enableSecurityDataflow;
     }
 
+    @DataBoundSetter
+    public void setEnableDataSafety(boolean enableDataSafety) {
+        this.enableDataSafety = enableDataSafety;
+    }
+
+    public boolean isEnableDataSafety() {
+        return enableDataSafety;
+    }
+
     public boolean isBackupApplicationEnabled() {
         return backupApplicationEnabled;
     }
@@ -328,7 +339,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
-        boolean applicationHasVersion = this.cloneVersion;
+        boolean applicationHasVersion = cloneVersion;
         boolean isUpload = false;
 
         String errorMessage;
@@ -492,7 +503,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 resolvedVersionName = String.format("v%s", formatVersionName.format(new Date()));
             }
 
-            if (this.cloneVersion) {
+            if (cloneVersion) {
                 if (applicationHasVersion) {
                     log.println(DeliverBuilder_Deliver_info_startDeliverCloneJob(expandedAppName));
                 } else {
@@ -507,7 +518,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                     .nodeName(app.getTargetNode())
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, isEnableDataSafety())
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);

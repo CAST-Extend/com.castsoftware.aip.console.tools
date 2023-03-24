@@ -239,6 +239,8 @@ The Add Version step provides the following parameters :
     replaced by the current jobs' build number.
 * *Enable Security Dataflow*: Enables the Security Objective for this version. This setting will operate for both
   technologies JEE and DOTNET as well.<u>Has no effect if `Rescan` is checked</u>.
+* *Enable Data Safety Investigation*: Enables the data safety investigation
+  objective for the version.
 * *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "
   Analysis Unit module" or "Technology Module".
 
@@ -286,6 +288,8 @@ The Deliver Source step provides similar parameters to the Add Version step :
   version exists, it will run an Add version job instead.
 * *Enable Security Dataflow*: Enables the Security Objective for this version. This setting will operate for both
   technologies JEE and DOTNET as well, and it will be ignored if `Rescan` is checked.
+* *Enable Data Safety Investigation*: Enables the data safety investigation
+  objective for the version.
 
 Under `Advanced Settings` you will find the following parameters :
 
