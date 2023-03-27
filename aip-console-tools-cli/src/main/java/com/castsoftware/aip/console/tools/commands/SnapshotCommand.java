@@ -161,7 +161,7 @@ public class SnapshotCommand implements Callable<Integer> {
             }
 
             if (app.isOnboarded()) {
-                log.info(" Triggering snapshot for an application using Fast-Scan workflow.");
+                log.info("Triggering snapshot for an application using Fast-Scan workflow.");
                 ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
                         .appGuid(applicationGuid);
                 String targetNode = app.getTargetNode();

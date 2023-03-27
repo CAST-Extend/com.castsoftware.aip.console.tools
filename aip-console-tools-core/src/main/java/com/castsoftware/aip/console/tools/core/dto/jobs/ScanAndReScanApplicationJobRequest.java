@@ -39,7 +39,11 @@ public class ScanAndReScanApplicationJobRequest {
                 ", targetNode='" + targetNode + '\'' +
                 ", caipVersion='" + caipVersion + '\'' +
                 ", snapshotName='" + snapshotName + '\'' +
-                ", moduleGenerationType='" + moduleGenerationType + '\'' +
+                ", runAnalysis='" + runAnalysis + '\'' +
+                ", uploadApplication='" + uploadApplication + '\'' +
+                ", publishToEngineering='" + publishToEngineering + '\'' +
+                ", publishToEngineering='" + publishToEngineering + '\'' +
+                ", processImaging='" + processImaging + '\'' +
                 '}';
     }
 }
