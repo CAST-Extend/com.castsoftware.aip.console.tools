@@ -8,6 +8,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
@@ -17,6 +18,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
+import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -82,6 +84,10 @@ public class SnapshotCommand implements Callable<Integer> {
                     + " if specified without parameter: ${FALLBACK-VALUE}",
             defaultValue = "true", fallbackValue = "true")
     private boolean consolidation = true;
+    @CommandLine.Option(names = {"--sleep-duration"},
+            description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
+            defaultValue = "15")
+    private long sleepDuration;
 
     public SnapshotCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
@@ -154,7 +160,32 @@ public class SnapshotCommand implements Callable<Integer> {
                 snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
-            // Run snapshot
+            if (app.isOnboarded()) {
+                log.info(" Triggering snapshot for an application using Fast-Scan workflow.");
+                ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
+                        .appGuid(applicationGuid);
+                String targetNode = app.getTargetNode();
+                if (StringUtils.isNotEmpty(targetNode)) {
+                    requestBuilder.targetNode(targetNode);
+                }
+                String caipVersion = apiInfoDto.getApiVersion();
+                if (StringUtils.isNotEmpty(caipVersion)) {
+                    requestBuilder.caipVersion(caipVersion);
+                }
+                if (StringUtils.isNotEmpty(snapshotName)) {
+                    requestBuilder.snapshotName(snapshotName);
+                }
+
+                requestBuilder.processImaging(processImaging);
+                requestBuilder.publishToEngineering(processImaging || consolidation);
+                requestBuilder.uploadApplication(true);
+
+                CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
+                String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), cliLogPolling);
+                return StringUtils.isEmpty(appGuid) ? Constants.RETURN_JOB_FAILED : Constants.RETURN_OK;
+            }
+
+            // Run snapshot in legacy workflow
             boolean forcedConsolidation = processImaging || consolidation;
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, app.getCaipVersion())
                     .nodeName(app.getTargetNode())

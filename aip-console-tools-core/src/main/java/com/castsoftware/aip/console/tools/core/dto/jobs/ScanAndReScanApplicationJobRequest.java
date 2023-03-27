@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.core.dto.jobs;
 
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,13 @@ public class ScanAndReScanApplicationJobRequest {
     private boolean publishToEngineering = false;
 
     private String moduleGenerationType;
+
+    public ScanAndReScanApplicationJobRequest moduleGenerationType(ModuleGenerationType generationType) {
+        if (generationType != null && (generationType != ModuleGenerationType.FULL_CONTENT)) {
+            moduleGenerationType = generationType.toString();
+        }
+        return this;
+    }
 
     @Override
     public String toString() {
