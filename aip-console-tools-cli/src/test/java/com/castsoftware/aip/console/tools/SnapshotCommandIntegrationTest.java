@@ -1,17 +1,17 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.SnapshotCommand;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatusWithSteps;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
-import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,7 +60,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     }
 
     @Test
-    public void testSnapshotCommand_WhenAnalysisNotDone() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
+    public void testSnapshotCommand_WhenAnalysisNotDone() throws ApplicationServiceException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name=" + TestConstants.TEST_CREATRE_APP,
@@ -77,6 +77,63 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_VERSION_WITH_ANALYSIS_DONE_NOT_FOUND));
+    }
+
+    @Test
+    public void testSnapshotCommand_WhenFastScanWorkFlow_JobFailed() throws ApplicationServiceException {
+        boolean verbose = true;
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--snapshot-name", "SNAP-Name-here",
+                "--process-imaging"};
+
+        ApplicationDto applicationDto = ApplicationDto.builder()
+                .guid(TestConstants.TEST_APP_GUID)
+                .name(TestConstants.TEST_CREATRE_APP)
+                .onboarded(true)
+                .schemaPrefix("ShouldHave_One").build();
+
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        VersionDto versionDto = new VersionDto();
+        versionDto.setName(TestConstants.TEST_VERSION_NAME);
+        versionDto.setStatus(VersionStatus.ANALYSIS_DONE);
+        when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
+
+        runStringArgs(snapshotCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_JOB_FAILED));
+    }
+
+    @Test
+    public void testSnapshotCommand_WhenFastScanWorkFlow_JobSucceeded() throws ApplicationServiceException {
+        boolean verbose = true;
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--snapshot-name", "SNAP-Name-here",
+                "--process-imaging"};
+
+        ApplicationDto applicationDto = ApplicationDto.builder()
+                .guid(TestConstants.TEST_APP_GUID)
+                .name(TestConstants.TEST_CREATRE_APP)
+                .onboarded(true)
+                .schemaPrefix("ShouldHave_One").build();
+
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        VersionDto versionDto = new VersionDto();
+        versionDto.setName(TestConstants.TEST_VERSION_NAME);
+        versionDto.setStatus(VersionStatus.ANALYSIS_DONE);
+        when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
+        when(applicationService.runDeepAnalysis(any(ScanAndReScanApplicationJobRequest.class), any(CliLogPollingProviderImpl.class))).thenReturn(TestConstants.TEST_APP_GUID);
+
+        runStringArgs(snapshotCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_OK));
     }
 
     @Test

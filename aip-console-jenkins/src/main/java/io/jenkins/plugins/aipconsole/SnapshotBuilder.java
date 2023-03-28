@@ -56,6 +56,7 @@ import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_er
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_jobFailure;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_noAnalyzedVersion;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_version;
+import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_info_fastScanWorkflow;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_info_pollJobMessage;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_success_complete;
 
@@ -238,7 +239,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
 
             //TODO: refactor after release to get separated workflows
             if (app.isOnboarded()) {
-                log.println("Triggering snapshot for an application using Fast-Scan workflow.");
+                log.println(SnapshotBuilder_Snapshot_info_fastScanWorkflow(expandedAppName));
                 ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
                         .appGuid(applicationGuid);
                 String targetNode = app.getTargetNode();
