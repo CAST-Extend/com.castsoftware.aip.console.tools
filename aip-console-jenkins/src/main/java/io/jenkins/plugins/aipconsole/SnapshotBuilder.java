@@ -250,13 +250,15 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
                 if (StringUtils.isNotEmpty(caipVersion)) {
                     requestBuilder.caipVersion(caipVersion);
                 }
-                if (StringUtils.isNotEmpty(snapshotName)) {
-                    requestBuilder.snapshotName(snapshotName);
+                if (StringUtils.isNotEmpty(resolveSnapshotName)) {
+                    requestBuilder.snapshotName(resolveSnapshotName);
                 }
 
                 requestBuilder.processImaging(processImaging);
                 requestBuilder.publishToEngineering(processImaging || consolidation);
                 requestBuilder.uploadApplication(true);
+
+                log.println("Job request : " + requestBuilder.build().toString());
 
                 JenkinsLogPollingProviderServiceImpl jnksLogPollingProvider = new JenkinsLogPollingProviderServiceImpl(jobsService, run, listener, getDescriptor().configuration.isVerbose(), getSleepDuration());
                 String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), jnksLogPollingProvider);
