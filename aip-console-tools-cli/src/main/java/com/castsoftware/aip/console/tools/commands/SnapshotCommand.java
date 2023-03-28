@@ -160,6 +160,7 @@ public class SnapshotCommand implements Callable<Integer> {
                 snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
+            //TODO: refactor after release to get separated workflows
             if (app.isOnboarded()) {
                 log.info("Triggering snapshot for an application using Fast-Scan workflow.");
                 ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
@@ -182,7 +183,11 @@ public class SnapshotCommand implements Callable<Integer> {
 
                 CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
                 String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), cliLogPolling);
-                return StringUtils.isEmpty(appGuid) ? Constants.RETURN_JOB_FAILED : Constants.RETURN_OK;
+                if (StringUtils.isEmpty(appGuid)) {
+                    log.error("Snapshot operating wasn't performed successfully. Toggle verbose ON or check CAST Console logs for more details.");
+                    return Constants.RETURN_JOB_FAILED;
+                }
+                return Constants.RETURN_OK;
             }
 
             // Run snapshot in legacy workflow

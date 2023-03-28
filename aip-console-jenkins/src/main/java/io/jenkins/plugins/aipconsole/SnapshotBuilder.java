@@ -9,6 +9,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -78,6 +79,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean consolidation = true;
+    private long sleepDuration;
 
     @DataBoundConstructor
     public SnapshotBuilder(String applicationName) {
@@ -234,6 +236,35 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
                 resolveSnapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
+            //TODO: refactor after release to get separated workflows
+            if (app.isOnboarded()) {
+                log.println("Triggering snapshot for an application using Fast-Scan workflow.");
+                ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
+                        .appGuid(applicationGuid);
+                String targetNode = app.getTargetNode();
+                if (StringUtils.isNotEmpty(targetNode)) {
+                    requestBuilder.targetNode(targetNode);
+                }
+
+                if (StringUtils.isNotEmpty(caipVersion)) {
+                    requestBuilder.caipVersion(caipVersion);
+                }
+                if (StringUtils.isNotEmpty(snapshotName)) {
+                    requestBuilder.snapshotName(snapshotName);
+                }
+
+                requestBuilder.processImaging(processImaging);
+                requestBuilder.publishToEngineering(processImaging || consolidation);
+                requestBuilder.uploadApplication(true);
+
+                JenkinsLogPollingProviderServiceImpl jnksLogPollingProvider = new JenkinsLogPollingProviderServiceImpl(jobsService, run, listener, getDescriptor().configuration.isVerbose(), getSleepDuration());
+                String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), jnksLogPollingProvider);
+                if (StringUtils.isEmpty(appGuid)) {
+                    run.setResult(Result.FAILURE);
+                }
+                return;
+            }
+
             boolean forcedConsolidation = processImaging || consolidation;
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, caipVersion)
                     .nodeName(app.getTargetNode())
@@ -287,6 +318,15 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         }
+    }
+
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
+
+    @DataBoundSetter
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
     }
 
     private JobState pollJob(String jobGuid, PrintStream log) throws JobServiceException {
