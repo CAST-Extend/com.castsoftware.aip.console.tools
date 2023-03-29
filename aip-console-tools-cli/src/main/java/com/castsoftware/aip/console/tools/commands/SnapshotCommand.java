@@ -160,6 +160,7 @@ public class SnapshotCommand implements Callable<Integer> {
                 snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
+            boolean forcedConsolidation = processImaging || consolidation;
             //TODO: refactor after release to get separated workflows
             if (app.isOnboarded()) {
                 log.info("Triggering snapshot for an application using Fast-Scan workflow.");
@@ -178,8 +179,8 @@ public class SnapshotCommand implements Callable<Integer> {
                 }
 
                 requestBuilder.processImaging(processImaging);
-                requestBuilder.publishToEngineering(processImaging || consolidation);
-                requestBuilder.uploadApplication(true);
+                requestBuilder.publishToEngineering(forcedConsolidation);
+                requestBuilder.uploadApplication(forcedConsolidation);
 
                 CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
                 String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), cliLogPolling);
@@ -191,7 +192,6 @@ public class SnapshotCommand implements Callable<Integer> {
             }
 
             // Run snapshot in legacy workflow
-            boolean forcedConsolidation = processImaging || consolidation;
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, app.getCaipVersion())
                     .nodeName(app.getTargetNode())
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
