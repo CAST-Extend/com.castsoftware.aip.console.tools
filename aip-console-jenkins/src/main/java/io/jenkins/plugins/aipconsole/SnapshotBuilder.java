@@ -237,6 +237,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
                 resolveSnapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
+            boolean forcedConsolidation = processImaging || consolidation;
             //TODO: refactor after release to get separated workflows
             if (app.isOnboarded()) {
                 log.println(SnapshotBuilder_Snapshot_info_fastScanWorkflow(expandedAppName));
@@ -255,8 +256,8 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
                 }
 
                 requestBuilder.processImaging(processImaging);
-                requestBuilder.publishToEngineering(processImaging || consolidation);
-                requestBuilder.uploadApplication(true);
+                requestBuilder.publishToEngineering(forcedConsolidation);
+                requestBuilder.uploadApplication(forcedConsolidation);
 
                 log.println("Job request : " + requestBuilder.build().toString());
 
@@ -268,7 +269,6 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
                 return;
             }
 
-            boolean forcedConsolidation = processImaging || consolidation;
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, caipVersion)
                     .nodeName(app.getTargetNode())
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
