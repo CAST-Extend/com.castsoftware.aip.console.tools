@@ -247,7 +247,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
                 if (StringUtils.isNotEmpty(targetNode)) {
                     requestBuilder.targetNode(targetNode);
                 }
-
+                caipVersion = app.getCaipVersion();
                 if (StringUtils.isNotEmpty(caipVersion)) {
                     requestBuilder.caipVersion(caipVersion);
                 }
@@ -257,7 +257,8 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
 
                 requestBuilder.processImaging(processImaging);
                 requestBuilder.publishToEngineering(forcedConsolidation);
-                requestBuilder.uploadApplication(forcedConsolidation);
+                //Should remains true to prevent deep-analyze to trigger analyze step when publis and imaging options are set false
+                requestBuilder.uploadApplication(true);
 
                 log.println("Job request : " + requestBuilder.build().toString());
 

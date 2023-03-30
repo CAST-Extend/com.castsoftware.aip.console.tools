@@ -166,7 +166,7 @@ public class SnapshotCommand implements Callable<Integer> {
                 if (StringUtils.isNotEmpty(targetNode)) {
                     requestBuilder.targetNode(targetNode);
                 }
-                String caipVersion = apiInfoDto.getApiVersion();
+                String caipVersion = app.getCaipVersion();
                 if (StringUtils.isNotEmpty(caipVersion)) {
                     requestBuilder.caipVersion(caipVersion);
                 }

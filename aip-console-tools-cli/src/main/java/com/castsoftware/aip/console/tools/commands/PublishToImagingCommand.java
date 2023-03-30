@@ -1,6 +1,5 @@
 package com.castsoftware.aip.console.tools.commands;
 
-import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
@@ -86,14 +85,13 @@ public class PublishToImagingCommand extends BasicCollable {
             //TODO: refactor after release to get separated workflows
             if (applicationDto.isOnboarded()) {
                 log.info("Triggering Publish to Imaging for an application using Fast-Scan workflow.");
-                ApiInfoDto apiInfo = restApiService.getAipConsoleApiInfo();
                 ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
                         .appGuid(applicationDto.getGuid());
                 String targetNode = applicationDto.getTargetNode();
                 if (StringUtils.isNotEmpty(targetNode)) {
                     requestBuilder.targetNode(targetNode);
                 }
-                String caipVersion = apiInfo.getApiVersion();
+                String caipVersion = applicationDto.getCaipVersion();
                 if (StringUtils.isNotEmpty(caipVersion)) {
                     requestBuilder.caipVersion(caipVersion);
                 }

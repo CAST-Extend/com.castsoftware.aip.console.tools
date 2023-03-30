@@ -213,7 +213,7 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     public String startDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest) throws JobServiceException {
-        log.info("Job Parameters: " + fastScanRequest.toString());
+        log.fine("Job Parameters: " + fastScanRequest.toString());
         try {
             SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getDeepAnalysisEndPoint(), fastScanRequest, SuccessfulJobStartDto.class);
             return jobStartDto.getJobGuid();
