@@ -176,7 +176,8 @@ public class SnapshotCommand implements Callable<Integer> {
 
                 requestBuilder.processImaging(processImaging);
                 requestBuilder.publishToEngineering(forcedConsolidation);
-                requestBuilder.uploadApplication(forcedConsolidation);
+                //Should remains true to prevent deep-analyze to trigger analyze step when publis and imaging options are set false
+                requestBuilder.uploadApplication(true);
 
                 CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
                 String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), cliLogPolling);
@@ -197,7 +198,7 @@ public class SnapshotCommand implements Callable<Integer> {
                     .uploadApplication(true)
                     .snapshotDate(applicationService.getVersionDate(snapshotDateString))
                     .processImaging(processImaging)
-                    .uploadApplication(forcedConsolidation)
+                    .uploadApplication(true)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
                             Constants.UPLOAD_APP_SNAPSHOT : Constants.SNAPSHOT_INDICATOR);
 
