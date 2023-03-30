@@ -39,11 +39,6 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             description = "The name of the snapshot to create")
     private String snapshotName;
 
-    @CommandLine.Option(names = {"--sleep-duration"},
-            description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
-            defaultValue = "15")
-    private long sleepDuration;
-
     @CommandLine.Option(names = "--module-option"
             , description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno (default: ${DEFAULT-VALUE})")
     private ModuleGenerationType moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
@@ -66,7 +61,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
         }
 
         log.info("Deep-Analysis args:");
-        log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tmodule generation type: %s%n\tsleep: %d%n", applicationName, StringUtils.isEmpty(snapshotName) ? "Auto assigned" : snapshotName, moduleGenerationType.toString(), sleepDuration));
+        log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tmodule generation type: %s%n\tsleep: %d%n", applicationName, StringUtils.isEmpty(snapshotName) ? "Auto assigned" : snapshotName, moduleGenerationType.toString(), getSharedOptions().getSleepDuration()));
 
         Thread shutdownHook = null;
         try {
@@ -103,7 +98,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             String caipVersion = app.getCaipVersion();
             String targetNode = app.getTargetNode();
 
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
 
             //Run Analysis
             if (!applicationService.isImagingAvailable()) {

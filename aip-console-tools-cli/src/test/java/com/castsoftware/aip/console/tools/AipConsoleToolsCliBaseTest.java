@@ -10,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,6 +32,7 @@ import java.util.concurrent.Callable;
 
 import static org.mockito.Mockito.when;
 
+@Slf4j
 public abstract class AipConsoleToolsCliBaseTest {
     @Autowired
     protected SpringAwareCommandFactory springAwareCommandFactory;
@@ -168,6 +170,7 @@ public abstract class AipConsoleToolsCliBaseTest {
                 }
             }
         } catch (Throwable t) {
+            log.error(t.getMessage());
             exitCode = Constants.UNKNOWN_ERROR;
         }
     }

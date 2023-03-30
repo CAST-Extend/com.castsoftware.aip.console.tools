@@ -149,7 +149,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
-        assertThat(fastScanCommand.getSleepDuration(), is(1L)); //default value taken
+        assertThat(fastScanCommand.getSharedOptions().getSleepDuration(), is(10L)); //default value taken
         assertThat(exitCode, is(Constants.RETURN_ONBOARD_APPLICATION_DISABLED));
     }
 
@@ -185,7 +185,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
-        assertThat(fastScanCommand.getSleepDuration(), is(6L));
+        assertThat(fastScanCommand.getSharedOptions().getSleepDuration(), is(6L));
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
 

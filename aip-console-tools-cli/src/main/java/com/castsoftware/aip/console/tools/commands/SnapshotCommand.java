@@ -84,10 +84,6 @@ public class SnapshotCommand implements Callable<Integer> {
                     + " if specified without parameter: ${FALLBACK-VALUE}",
             defaultValue = "true", fallbackValue = "true")
     private boolean consolidation = true;
-    @CommandLine.Option(names = {"--sleep-duration"},
-            description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
-            defaultValue = "15")
-    private long sleepDuration;
 
     public SnapshotCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this.restApiService = restApiService;
@@ -182,7 +178,7 @@ public class SnapshotCommand implements Callable<Integer> {
                 requestBuilder.publishToEngineering(forcedConsolidation);
                 requestBuilder.uploadApplication(forcedConsolidation);
 
-                CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
+                CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
                 String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), cliLogPolling);
                 if (StringUtils.isEmpty(appGuid)) {
                     log.error("Snapshot operating wasn't performed successfully. Toggle verbose ON or check CAST Console logs for more details.");

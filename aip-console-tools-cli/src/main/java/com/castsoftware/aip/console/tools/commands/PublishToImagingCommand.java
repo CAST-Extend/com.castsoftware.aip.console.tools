@@ -41,11 +41,6 @@ public class PublishToImagingCommand extends BasicCollable {
             required = true)
     private String applicationName;
 
-    @CommandLine.Option(names = {"--sleep-duration"},
-            description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
-            defaultValue = "10")
-    private long sleepDuration;
-
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
     private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
@@ -87,7 +82,7 @@ public class PublishToImagingCommand extends BasicCollable {
                 return Constants.RETURN_ONBOARD_VERSION_STATUS_INVALID;
             }
 
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
             //TODO: refactor after release to get separated workflows
             if (applicationDto.isOnboarded()) {
                 log.info("Triggering Publish to Imaging for an application using Fast-Scan workflow.");
