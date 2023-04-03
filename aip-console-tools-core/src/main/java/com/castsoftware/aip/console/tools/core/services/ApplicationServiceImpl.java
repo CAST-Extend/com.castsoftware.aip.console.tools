@@ -21,6 +21,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverPackageRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -52,7 +53,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     public ApplicationServiceImpl(RestApiService restApiService, JobsService jobsService) {
         this.restApiService = restApiService;
-        this.jobService = jobsService;
+        jobService = jobsService;
     }
 
     @Override
@@ -234,9 +235,29 @@ public class ApplicationServiceImpl implements ApplicationService {
     
     @Override
     public String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+        ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
+                .appGuid(applicationGuid);
+        if (StringUtils.isNotEmpty(targetNode)) {
+            requestBuilder.targetNode(targetNode);
+        }
+        if (StringUtils.isNotEmpty(caipVersion)) {
+            requestBuilder.caipVersion(caipVersion);
+        }
+        if (StringUtils.isNotEmpty(snapshotName)) {
+            requestBuilder.snapshotName(snapshotName);
+        }
+        //The module parameter should be left empty or null when dealing with full content
+        if (moduleGenerationType != null && (moduleGenerationType != ModuleGenerationType.FULL_CONTENT)) {
+            requestBuilder.moduleGenerationType(moduleGenerationType.toString());
+        }
+        return runDeepAnalysis(requestBuilder.build(), logPollingProvider);
+    }
+
+    @Override
+    public String runDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         log.log(Level.INFO, "Starting job to perform Deep Analysis action (Run Analysis) ");
         try {
-            String jobGuid = jobService.startDeepAnalysis(applicationGuid, targetNode, caipVersion, snapshotName, moduleGenerationType);
+            String jobGuid = jobService.startDeepAnalysis(fastScanRequest);
             log.log(Level.INFO, "Deep Analysis running job GUID= " + jobGuid);
             return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
         } catch (JobServiceException e) {

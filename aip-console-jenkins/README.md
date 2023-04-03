@@ -334,9 +334,12 @@ Under `Advanced Settings` you will find the following parameters :
 The Snapshot step provides the following parameters :
 
 * *Application Name* (**required**): The name of tshe application for which the analysis will be run.
-* *Snapshot Name* : The name of the Snapshot to create. If left blank, the snapshot will be named with the following pattern: `Snapshot-YYYY-MM-DDThh-mm-ss` depending on current date and time.
+* *Snapshot Name* : The name of the Snapshot to create. If left blank, the snapshot will be named with the following
+  pattern: `Snapshot-YYYY-MM-DDThh-mm-ss` depending on current date and time.
 * *Publish to Imaging*: Publish to Imaging if Imaging is configured with AIP Console
-* *Publish to the Health Dashboard* : When checked, consolidates snapshots and publishes data to the Health Dashboards. Checked by default.
+* *Publish to the Health Dashboard* : When checked, consolidates snapshots and publishes data to the Health Dashboards.
+  Checked by default.
+* *Sleep Duration*: Number of seconds used to refresh the ongoing job status
 
 Under `Advanced Settings` you will find the following parameters :
 

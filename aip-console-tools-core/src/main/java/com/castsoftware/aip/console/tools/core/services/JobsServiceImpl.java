@@ -56,7 +56,7 @@ public class JobsServiceImpl implements JobsService {
 
     public JobsServiceImpl(RestApiService restApiService) {
         this.restApiService = restApiService;
-        this.pollingSleepDuration = POLL_SLEEP_DURATION;
+        pollingSleepDuration = POLL_SLEEP_DURATION;
     }
 
     public JobsServiceImpl(RestApiService restApiService, long pollingSleepDuration) {
@@ -208,10 +208,14 @@ public class JobsServiceImpl implements JobsService {
         if (moduleGenerationType != null && (moduleGenerationType != ModuleGenerationType.FULL_CONTENT)) {
             requestBuilder.moduleGenerationType(moduleGenerationType.toString());
         }
+        return startDeepAnalysis(requestBuilder.build());
+    }
 
-        log.info("Job Parameters: " + requestBuilder.build().toString());
+    @Override
+    public String startDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest) throws JobServiceException {
+        log.fine("Job Parameters: " + fastScanRequest.toString());
         try {
-            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getDeepAnalysisEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getDeepAnalysisEndPoint(), fastScanRequest, SuccessfulJobStartDto.class);
             return jobStartDto.getJobGuid();
         } catch (ApiCallException e) {
             log.log(Level.SEVERE, "Unable to perform ReScan application action (Run Analysis)", e);
