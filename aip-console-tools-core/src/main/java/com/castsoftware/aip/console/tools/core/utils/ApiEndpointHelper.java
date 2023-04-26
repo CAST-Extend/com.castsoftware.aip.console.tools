@@ -45,6 +45,12 @@ public class ApiEndpointHelper {
     public static final String DEEP_ANALYSIS_PATH = "/deep-analysis";
     public static final String PUBLISH_PATH = "/publish";
     public static final String SECURITY_DATAFLOW_PATH = "/security-dataflow";
+
+    public static final String ARCHITECTURE_ENDPOINT = "/architecture";
+
+    public static final String MODELS = "/models";
+
+    public static final String MODEL_CHECK = "/model-check";
     public static String getRootPath() {
         return ROOT_PATH + "/";
     }
@@ -72,6 +78,14 @@ public class ApiEndpointHelper {
         assert appGuid != null && !appGuid.isEmpty();
 
         return getApplicationPath(appGuid) + UPLOAD_ENDPOINT;
+    }
+
+    public static String getArchitectureModelUrl() {
+        return ROOT_PATH + ARCHITECTURE_ENDPOINT + MODELS;
+    }
+
+    public static String getModelCheckUrl(String appGuid) {
+        return getApplicationPath(appGuid) + ARCHITECTURE_ENDPOINT + MODELS + MODEL_CHECK;
     }
 
     public static String getApplicationOnboardingUploadPath() {
