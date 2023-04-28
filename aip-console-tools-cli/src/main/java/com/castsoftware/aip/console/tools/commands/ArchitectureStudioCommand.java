@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.architecturestudio.ArchitectureModelDto;
+import com.castsoftware.aip.console.tools.core.dto.architecturestudio.ArchitectureModelLinkDto;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.ArchitectureStudioService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -65,8 +66,11 @@ public class ArchitectureStudioCommand extends BasicCollable{
         log.info(String.format("Getting model: %s", modelName));
         Set<ArchitectureModelDto> modelDtoSet = archService.getArchitectureModels();
 
+        if(modelDtoSet.isEmpty()){
+            return Constants.RETURN_ARCHITECTURE_MODEL_NOT_FOUND;
+        }
         /* Search name of the model in the list of available models and get the model details. */
-        ArchitectureModelDto modelInUse = modelDtoSet.stream().filter(m -> m.getModelName().equalsIgnoreCase(modelName)).collect(Collectors.collectingAndThen(Collectors.toSet(),
+        ArchitectureModelDto modelInUse = modelDtoSet.stream().filter(m -> m.getName().equalsIgnoreCase(modelName)).collect(Collectors.collectingAndThen(Collectors.toSet(),
                 (Set<ArchitectureModelDto> dtoSet) -> dtoSet.isEmpty() ? null : dtoSet.iterator().next()));
 
         //Check if model list is empty
@@ -83,7 +87,10 @@ public class ArchitectureStudioCommand extends BasicCollable{
 
         String path = modelInUse.getPath();
         log.info("App '{}' successful", applicationName);
-        log.info(path);
+
+        Set<ArchitectureModelLinkDto> checkModel = archService.modelChecker(app.getGuid(), modelInUse.getPath(), app.getCaipVersion());
+        log.info("Violations for architecture model: %s", modelName);
+        log.info(String.valueOf(checkModel));
         return Constants.RETURN_OK;
     }
 

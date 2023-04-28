@@ -1,5 +1,10 @@
 package com.castsoftware.aip.console.tools.core.dto.architecturestudio;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ArchitectureModelLinkDto {
 
     private int callerSubsetId;

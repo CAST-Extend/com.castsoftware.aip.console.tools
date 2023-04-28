@@ -12,9 +12,10 @@ public class ArchitectureStudioCommandTest extends AipCommandTest<ArchitectureSt
 
     @Test
     public void testArchitectureStudio_withDefaultParams(){
-        String[] sb = new String[]{"Arch-Studio", "--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=", TestConstants.TEST_CREATRE_APP,
-                "--model-name=", "Demo"
+        String[] sb = new String[]{
+                "--apikey", TestConstants.TEST_API_KEY,
+                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--model-name", "Demo"
         };
 
         aipCommandLine.parseArgs(sb);

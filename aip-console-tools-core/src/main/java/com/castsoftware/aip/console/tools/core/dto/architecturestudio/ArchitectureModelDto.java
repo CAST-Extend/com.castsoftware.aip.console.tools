@@ -2,13 +2,14 @@ package com.castsoftware.aip.console.tools.core.dto.architecturestudio;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Builder
+@NoArgsConstructor
 public class ArchitectureModelDto {
 
     private String guid;
@@ -20,5 +21,10 @@ public class ArchitectureModelDto {
     private String description;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
+
+    private String name;
+    private String fileName;
+    private Category category;
+    private Boolean valid;
 
 }
