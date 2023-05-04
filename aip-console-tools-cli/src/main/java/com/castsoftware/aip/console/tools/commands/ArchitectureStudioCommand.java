@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @CommandLine.Command(
@@ -66,8 +65,11 @@ public class ArchitectureStudioCommand extends BasicCollable{
         log.info("Getting all architecture models");
         Set<ArchitectureModelDto> modelDtoSet = archService.getArchitectureModels();
         log.info("Available Architecture Models:");
-        log.info(String.valueOf(modelDtoSet));
-
+        int index = 1;
+        for (ArchitectureModelDto dto : modelDtoSet) {
+            log.info(String.format("%s. %s", index, dto.getName()));
+            index++;
+        }
 
         if(modelDtoSet.isEmpty()){
             log.info("No archutecture models available");
@@ -78,7 +80,6 @@ public class ArchitectureStudioCommand extends BasicCollable{
         /* Search name of the model in the list of available models and get the model details. */
         ArchitectureModelDto modelInUse = modelDtoSet
                 .stream()
-                .peek(m -> log.info("Name property value: " + m.getName()))
                 .filter(m -> m.getName().equalsIgnoreCase(modelName))
                 .findFirst()
                 .orElse(null);
@@ -97,24 +98,18 @@ public class ArchitectureStudioCommand extends BasicCollable{
             log.error(String.format("Application %s could not be found.", applicationName));
             return Constants.RETURN_APPLICATION_NOT_FOUND;
         }
-        log.info(String.format("Checking architecture model with app: %s", applicationName));
+        log.info(String.format("Checking architecture model : %s", applicationName));
 
-        log.info("App '{}' successful", applicationName);
+        log.info("Architecture model check for '{}' is successful", applicationName);
 
         Set<ArchitectureModelLinkDto> checkModel = archService.modelChecker(app.getGuid(), path, app.getCaipVersion());
-        log.info("Violations for architecture model: '{}'", modelName);
 
-        //Print the result
-        log.info(String.format("| %10s | %15s | %10s | %10s | %15s | %10s |",
-                "Caller Name", "Caller Type", "Callee Name",
-                "Callee Type", "Link Type", "Dynamic Info"));
-        log.info("+------------+-----------------+------------+-----------------+---------------+--------------------------------+");
-        for (ArchitectureModelLinkDto dto : checkModel) {
-            log.info(String.format("| %10s | %15s | %10s | %10s | %15s | %10s |",
-                    dto.getCallerName(), dto.getCallerType(), dto.getCalleeName(),
-                    dto.getCalleeType(), dto.getLinkType(), dto.getDynamicInfo()));
-        }
-        log.info("+------------+-----------------+------------+-----------------+---------------+--------------------------------+");
+        log.info("Downloading architecture model report");
+
+        //Check the transaction Id part
+        Integer transactionId = null;
+        archService.downloadCheckedModelReport(app.getGuid(), modelInUse.getName(), modelInUse.getMetricId(), modelInUse.getDescription(), transactionId, checkModel );
+        log.info("Report downloaded successfully");
 
         return Constants.RETURN_OK;
     }
