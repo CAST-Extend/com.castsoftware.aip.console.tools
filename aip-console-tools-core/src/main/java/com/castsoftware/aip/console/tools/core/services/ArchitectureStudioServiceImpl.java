@@ -48,7 +48,7 @@ public class ArchitectureStudioServiceImpl implements ArchitectureStudioService 
         );
     }
 
-    public void downloadCheckedModelReport(String appGuid, String modelName, Integer metricId, String description, Integer transactionId, Set<ArchitectureModelLinkDto> checkModel) throws Exception {
+    public void downloadCheckedModelReport(String appGuid, String modelName, Integer metricId, String description, Integer transactionId, Set<ArchitectureModelLinkDto> checkModel, String reportPath) throws Exception {
 
         CheckModelReportRequest checkModelReportRequest = CheckModelReportRequest
                 .builder()
@@ -68,11 +68,10 @@ public class ArchitectureStudioServiceImpl implements ArchitectureStudioService 
         );
         ResponseBody responseBody = response.body();
 
-
         String filename = getDownloadedFileName(modelName);
         //downloads the report
         if(responseBody != null) {
-            FileUtils.fileDownload(filename, responseBody);
+            FileUtils.fileDownload(filename, responseBody, reportPath);
         }
     }
 

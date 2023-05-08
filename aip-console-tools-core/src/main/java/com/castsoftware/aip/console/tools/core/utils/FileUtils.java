@@ -34,9 +34,15 @@ public final class FileUtils {
         }
     }
 
-    public static void fileDownload(String filename, ResponseBody responseBody) throws Exception {
+    public static void fileDownload(String filename, ResponseBody responseBody, String reportPath) throws Exception {
         InputStream inputStream = responseBody.byteStream();
-        FileOutputStream outputStream = new FileOutputStream(filename);
+        if(reportPath == null){
+            reportPath = System.getProperty("user.dir") + "\\aip-console-tools-cli\\target";
+        }
+        String fullPath = Paths.get(reportPath, filename).toString();
+
+        //manage the failure scenarios
+        FileOutputStream outputStream = new FileOutputStream(fullPath);
         byte[] buffer = new byte[4096];
         int bytesRead;
         while ((bytesRead = inputStream.read(buffer)) != -1) {

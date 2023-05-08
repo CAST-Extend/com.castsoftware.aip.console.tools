@@ -159,6 +159,16 @@ To perform *Publish-Imaging* action you can use following command
 java -jar .\aip-console-tools-cli.jar Publish-Imaging --apikey="valid.key" -n "my app" --verbose"
 ```
 
+To **ArchitectureStudioModelCheck**
+
+- application should exist
+
+To perform *ArchitectureStudioModelCheck* action you can use following command
+
+```bash
+java -jar .\aip-console-tools-cli.jar ArchitectureStudioModelCheck --apikey "valid.key" -n "my-app" --model-name "model.name" --report-path "report.path"
+```
+
 ### Advanced Usage
 
 When running the CLI, you must specify a command to be run. The list of commands is :
@@ -171,6 +181,7 @@ When running the CLI, you must specify a command to be run. The list of commands
 * `Deep-Analysis` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the
   dashbord and Imanging depending on the operating settings
 * `Publish-Imaging` Publish an existing application data to CAST Imaging.
+* `ArchitectureStudioModelCheck` Check an existing application against a model.
 
 Each commands has a `--help` parameter, providing a list of all parameters available.
 
@@ -425,6 +436,33 @@ Here is a detailed list of all error codes that can be returned by the CLI :
 * 8 : Source Folder Not Found. THe given source folder could not be found on the AIP Node where the application version is delivered
 * 9 : No Version. Application has no version and the provided command cannot be run.
 * 10 : Version Not Found. The given version could not be found OR no version matches the requested command (i.e. No delivered version exists to be used for analysis)
+* 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
+
+### ArchitectureStudioModelCheck
+
+Check an existing application against a model.
+
+The available options are :
+
+* `--app-name` or `-n` (**required**): The application name.
+
+* `--model-name` or `-m` (**required**): The directory path where the report will be downloaded.
+
+* `--report-path` or `-p` : The directory path where the report will be downloaded.
+
+When AIP Console finishes execution, it will return a specific return code, based on the execution.
+
+Here is a detailed list of all error codes that can be returned by the CLI :
+
+* 0 : No errors, processing was completed correctly. This is also the return code for`--help` and `--version`
+  parameters.
+* 1 : API key missing. No API key was provided either in the prompt or in the environment variable.
+* 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper
+  value.
+* 6 : Application name or GUID missing. The model check cannot run due to a missing application name or missing application guid.
+* 7 : Application Not Found. The given Application Name or GUID could not be found.
+* 10 : Version Not Found. The given version could not be found OR no version matches the requested command (i.e. No delivered version exists to be used for analysis)
+* 27 : Architecture model not found.
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
 
 ### Authentication

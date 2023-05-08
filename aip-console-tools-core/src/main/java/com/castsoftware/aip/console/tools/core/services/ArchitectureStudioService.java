@@ -14,6 +14,6 @@ public interface ArchitectureStudioService {
 
     Set<ArchitectureModelLinkDto>  modelChecker(String appGuid, String path, String caipVersion) throws ApiCallException;
 
-    void downloadCheckedModelReport(String appGuid, String modelName, Integer metricId, String description, Integer transactionId, Set<ArchitectureModelLinkDto> checkModel) throws Exception;
+    void downloadCheckedModelReport(String appGuid, String modelName, Integer metricId, String description, Integer transactionId, Set<ArchitectureModelLinkDto> checkModel, String reportPath) throws Exception;
 
 }

@@ -22,10 +22,10 @@ import java.util.Set;
 
 @Component
 @CommandLine.Command(
-        name = "ArchitectureStudio",
+        name = "ArchitectureStudioModelCheck",
         mixinStandardHelpOptions = true,
-        aliases = {"Arch-Studio"},
-        description = "Arch studio"
+        aliases = {"Model-Check"},
+        description = "Checks an application against a model."
 )
 @Slf4j
 @Getter
@@ -45,8 +45,15 @@ public class ArchitectureStudioCommand extends BasicCollable{
     private String applicationName;
 
     @CommandLine.Option(
-            names = "--model-name",
-            description = "The name of the model",
+            names = {"-p", "--report-path"},
+            paramLabel = "PATH",
+            description = "The path of the report file")
+    private String reportPath;
+
+    @CommandLine.Option(
+            names = {"-m", "--model-name"},
+            paramLabel = "MODEL_NAME",
+            description = "",
             required = true)
     private String modelName;
 
@@ -108,7 +115,7 @@ public class ArchitectureStudioCommand extends BasicCollable{
 
         //Check the transaction Id part
         Integer transactionId = null;
-        archService.downloadCheckedModelReport(app.getGuid(), modelInUse.getName(), modelInUse.getMetricId(), modelInUse.getDescription(), transactionId, checkModel );
+        archService.downloadCheckedModelReport(app.getGuid(), modelInUse.getName(), modelInUse.getMetricId(), modelInUse.getDescription(), transactionId, checkModel, reportPath);
         log.info("Report downloaded successfully");
 
         return Constants.RETURN_OK;
