@@ -166,7 +166,7 @@ To **ArchitectureStudioModelCheck**
 To perform *ArchitectureStudioModelCheck* action you can use following command
 
 ```bash
-java -jar .\aip-console-tools-cli.jar ArchitectureStudioModelCheck --apikey "valid.key" -n "my-app" --model-name "model.name" --report-path "report.path"
+java -jar .\aip-console-tools-cli.jar ArchitectureStudioModelCheck -s="Console URL" --apikey "valid.key" -n "my-app" --model-name "model filename" --report-path "valid local path"
 ```
 
 ### Advanced Usage
@@ -178,10 +178,9 @@ When running the CLI, you must specify a command to be run. The list of commands
 * `Deliver` to create a new version **without** running an analysis
 * `Analysis` or `analyze` to run an analysis on the current version
 * `Fast-Scan` to perform a *fast-scan* on the sources contents and optionally do a Deep-Analysis (run the analysis).
-* `Deep-Analysis` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the
-  dashbord and Imanging depending on the operating settings
+* `Deep-Analysis` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the dashboard and Imaging depending on the operating settings
 * `Publish-Imaging` Publish an existing application data to CAST Imaging.
-* `ArchitectureStudioModelCheck` Check an existing application against a model.
+* `ArchitectureStudioModelCheck` to check an existing application against a model.
 
 Each commands has a `--help` parameter, providing a list of all parameters available.
 
@@ -461,7 +460,6 @@ Here is a detailed list of all error codes that can be returned by the CLI :
   value.
 * 6 : Application name or GUID missing. The model check cannot run due to a missing application name or missing application guid.
 * 7 : Application Not Found. The given Application Name or GUID could not be found.
-* 10 : Version Not Found. The given version could not be found OR no version matches the requested command (i.e. No delivered version exists to be used for analysis)
 * 27 : Architecture model not found.
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
 
