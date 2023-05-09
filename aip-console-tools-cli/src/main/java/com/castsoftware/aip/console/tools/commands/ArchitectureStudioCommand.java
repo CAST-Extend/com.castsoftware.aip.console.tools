@@ -46,7 +46,7 @@ public class ArchitectureStudioCommand extends BasicCollable{
 
     @CommandLine.Option(
             names = {"-p", "--report-path"},
-            paramLabel = "PATH",
+            paramLabel = "MODEL_CHECK_REPORT_PATH",
             description = "The path of the report file")
     private String reportPath;
 
