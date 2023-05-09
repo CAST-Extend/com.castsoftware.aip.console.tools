@@ -42,7 +42,7 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     @Nullable
     private String snapshotName;
     private String moduleGenerationType;
-
+    private boolean enableDataSafety;
     private transient Run run;
 
     public AddVersionAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
@@ -236,5 +236,13 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     public void setCssServerName(String cssServerName) {
         this.cssServerName = cssServerName;
+    }
+
+    public void setEnableDataSafety(boolean flag) {
+        enableDataSafety = flag;
+    }
+
+    public boolean isEnableDataSafety() {
+        return enableDataSafety;
     }
 }

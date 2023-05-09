@@ -108,6 +108,12 @@ public class DeliverVersionCommand implements Callable<Integer> {
             fallbackValue = "true")
     private boolean enableSecurityDataflow = false;
 
+    @CommandLine.Option(names = {"--enable-data-safety-investigation", "--enable-data-safety"},
+            description = "If defined, this will activate the Data Safety investigation for this version"
+                    + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
+    private boolean enableDataSafety = false;
+
     @CommandLine.Option(names = "--node-name",
             paramLabel = "NODE_NAME", description = "The name of the node on which the application will be created. Ignored if no --auto-create or the application already exists.")
     private String nodeName;
@@ -221,7 +227,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .nodeName(app.getTargetNode())
                     .versionReleaseDate(applicationService.getVersionDate(versionDateString))
                     .snapshotDate(new Date())
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.DATA_SAFETY, enableDataSafety)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
@@ -242,6 +248,12 @@ public class DeliverVersionCommand implements Callable<Integer> {
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
             }
+            
+            log.info("Update JEE and DOTNET security dataflow settings to: {}", enableSecurityDataflow);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
+
+            log.info("Job request : " + builder.buildJobRequest().toString());
 
             String jobGuid = jobsService.startAddVersionJob(builder);
             shutdownHook = getShutdownHookForJobGuid(jobGuid);

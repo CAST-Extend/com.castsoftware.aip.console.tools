@@ -82,6 +82,7 @@ public abstract class BasicCollable implements Callable<Integer> {
             }
         }
 
+        log.info("Target CAST Console version: {}", apiVersion);
         return processCallCommand();
     }
 }

@@ -31,16 +31,19 @@
     <f:entry title="${%enableSecurity}" field="enableSecurityDataflow" description="${%enableSecurity.descr}">
         <f:checkbox/>
     </f:entry>
+    <f:entry title="${%enableDataSafety}" field="enableDataSafety" description="${%enableDataSafety.descr}">
+        <f:checkbox field="enableDataSafety" default="false" value="${enableDataSafety}"/>
+    </f:entry>
     <f:advanced title="${%advancedSettings}">
         <f:entry title="${%aipConsoleUrl}" field="aipConsoleUrl" description="${%aipConsoleUrl.descr}">
             <f:textbox field="aipConsoleUrl" value="${aipConsoleUrl}"/>
         </f:entry>
         <f:entry title="${%apiKey}" field="apiKey" description="${%apiKey.descr}">
-            <f:password />
+            <f:password/>
         </f:entry>
         <f:entry title="${%cloneVersion}" field="cloneVersion" description="${%cloneVersion.descr}">
-              <f:checkbox field="cloneVersion" value="${cloneVersion}" default="true"/>
-         </f:entry>
+            <f:checkbox field="cloneVersion" value="${cloneVersion}" default="true"/>
+        </f:entry>
         <f:entry title="${%blueprint}" field="blueprint" description="${%blueprint.descr}">
             <f:checkbox field="blueprint" value="${blueprint}" default="false"/>
         </f:entry>

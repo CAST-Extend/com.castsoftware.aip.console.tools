@@ -142,11 +142,11 @@ The *Onboard Application* feature is using following strategies in a separated c
 To perform that action you can inspire from the following command (see advanced usage for more details):
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+java -jar .\aip-console-tools-cli.jar Fast-Scan -s="Console URL" --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
 ```
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my app" --verbose=false 
+java -jar .\aip-console-tools-cli.jar Deep-Analyze -s="Console URL" --apikey="valid.key" -n "my app" --module-option="ONE_PER_AU" --snapshot-name="desired name" --verbose=false 
 ```
 
 To **Publish To Imaging**
@@ -228,8 +228,11 @@ The available options are :
 * `--snapshot-date` (option): The snapshot date associated with the snapshot to be created: default
   format `yyyy-MM-ddTHH:mm:ss` (example `2022-07-11T07:22:46`). <br>Depending on Console 's timezone, this can be
   displayed differently
-* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. This setting will
+  operate for both technologies JEE and DOTNET as well. <u>Has no impact
   when cloning a version</u>.
+* `--enable-data-safety-investigation` or `--enable-data-safety` (optional): Enables the data safety investigation
+  objective for this version.
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *
@@ -282,8 +285,11 @@ The available options are :
   To get the full list do run help on this command (*deliver* --help).
 * `--auto-discover`: will discover new technologies and install new extensions during rescan, to disable when run
   consistency check
-* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. This setting will
+  operate for both technologies JEE and DOTNET as well.<u>Has no impact
   when cloning a version</u>.
+* `--enable-data-safety-investigation` or `--enable-data-safety` (optional): Enables the data safety investigation
+  objective for this version.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *
   default*:
@@ -361,6 +367,8 @@ analysis).
 
 The available options are :
 
+* `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--file` or `-f`: **required** only when performing the FIRST_SCAN. Represents the local zip or tar.gz file full path
   to the
@@ -379,8 +387,13 @@ java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app"
 
 ### Deep Analyze
 
+* `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
+* `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
+  module.
+  Possible value is one of: full_content, one_per_au, one_per_techno
 * `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ```bash

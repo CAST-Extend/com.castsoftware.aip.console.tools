@@ -89,6 +89,7 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
 
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
+        assertThat(deliverVersionCommand.isEnableDataSafety(), is(false));
         assertThat(exitCode, is(Constants.RETURN_JOB_FAILED));
     }
 

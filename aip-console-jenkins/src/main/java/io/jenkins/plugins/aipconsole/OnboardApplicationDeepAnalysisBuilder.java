@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.Extension;
@@ -24,6 +25,7 @@ import java.io.IOException;
 
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.OnboardApplicationDeepAnalysisBuilder_DescriptorImpl_displayName;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_DeepAnalysisForbidden;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
@@ -35,6 +37,17 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     @Nullable
     private String snapshotName;
     private long sleepDuration;
+
+    private String moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
+
+    @DataBoundSetter
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
+    }
 
     @Override
     protected String checkJobParameters() {
@@ -88,11 +101,14 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
             if (app != null) {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
-                firstScan = app.getVersion() == null || StringUtils.isEmpty(app.getVersion().getGuid()) || !app.isOnboarded();
+                firstScan = app == null || app.getVersion() == null || StringUtils.isEmpty(app.getVersion().getGuid()) || !app.isOnboarded();
             }
 
-            if (firstScan || app == null) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired());
+            if (firstScan || app == null || !app.isOnboarded()) {
+
+                logger.println((app != null && !app.isOnboarded())
+                        ? OnbordingApplicationBuilder_DescriptorImpl_DeepAnalysisForbidden()
+                        : OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired());
                 run.setResult(getDefaultResult());
                 return;
             }
@@ -108,11 +124,12 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled());
             } else {
                 String expandedSsnapshotName = environmentVariables.expand(getSnapshotName());
-                if (StringUtils.isEmpty(app.getSchemaPrefix())) {
-                    applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, verbose, jnksLogPollingProvider);
-                } else {
-                    applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, verbose, jnksLogPollingProvider);
+                ModuleGenerationType moduleType = ModuleGenerationType.FULL_CONTENT; //default
+                if (StringUtils.isNotEmpty(moduleGenerationType)) {
+                    moduleType = ModuleGenerationType.fromString(moduleGenerationType);
                 }
+
+                applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
             }
         } catch (ApplicationServiceException e) {
             e.printStackTrace(logger);

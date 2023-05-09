@@ -34,6 +34,8 @@ public class Constants {
     public static final int RETURN_ONBOARD_VERSION_STATUS_INVALID = 22;
     public static final int RETURN_ONBOARD_OPERATION_FAILED = 23;
     public static final int RETURN_ONBOARD_FAST_SCAN_REQUIRED = 24;
+    public static final int RETURN_ONBOARD_FAST_SCAN_FORBIDDEN = 25;
+    public static final int RETURN_ONBOARD_DEEP_ANALYSIS_FORBIDDEN = 26;
     public static final String DEFAULT_DOMAIN = "-";
 
     public static final int UNKNOWN_ERROR = 1000;
@@ -106,9 +108,11 @@ public class Constants {
     public static final String DELIVER_VERSION = "deliver_version";
     public static final String UPLOAD_DELIVER_VERSION = "upload_deliver_version";
     public static final String RESCAN_APPLICATION = "rescan_application";
+    public static final String DEEP_ANALYSIS = "deep-analysis";
     public static final String UPLOAD_SNAPSHOT_VERSION = "upload_snapshot_version";
     public static final String DATAFLOW_SECURITY_ANALYZE = "dataflow_security_analyze";
-
+    public static final String JEE_TECHNOLOGY_PATH = "/jee";
+    public static final String DOTNET_TECHNOLOGY_PATH = "/dotnet";
     // Job params
     public static final String PARAM_APP_NAME = "appName";
     public static final String PARAM_INPLACE_MODE = "inPlaceMode";

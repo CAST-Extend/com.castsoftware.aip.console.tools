@@ -30,6 +30,11 @@ public class SharedOptions {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
     private boolean verbose = true;
 
+    @CommandLine.Option(names = {"--sleep-duration"},
+            description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
+            defaultValue = "10")
+    private long sleepDuration;
+
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
@@ -103,6 +108,14 @@ public class SharedOptions {
         return serverRootUrl;
     }
 
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
+
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
+    }
+
     @Override
     public String toString() {
         return "SharedOptions{" +
@@ -112,7 +125,8 @@ public class SharedOptions {
                 ", username='" + username + '\'' +
                 ", timeout='" + timeout + '\'' +
                 ", unmatchedOptions=" + unmatchedOptions +
-                ", log output= " + verbose +
+                ", log verbose= " + verbose +
+                ", sleep duration= " + sleepDuration +
                 '}';
     }
 }

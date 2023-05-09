@@ -21,6 +21,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverPackageRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -52,7 +53,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     public ApplicationServiceImpl(RestApiService restApiService, JobsService jobsService) {
         this.restApiService = restApiService;
-        this.jobService = jobsService;
+        jobService = jobsService;
     }
 
     @Override
@@ -231,30 +232,37 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new ApplicationServiceException("Unable to discover application contents automatically.", e);
         }
     }
-
+    
     @Override
-    public String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
-        log.log(Level.INFO, "Starting job to perform Application First-Scan action (Run Analysis) ");
-        try {
-            String jobGuid = jobService.startRunFirstScanApplication(applicationGuid, targetNode, caipVersion, snapshotName);
-            log.log(Level.INFO, "First-Scan Application running job GUID= " + jobGuid);
-            return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
-        } catch (JobServiceException e) {
-            log.log(Level.SEVERE, "Could not perform the First-Scan application due to the following error", e);
-            throw new ApplicationServiceException("Unable to Run Analysis automatically.", e);
+    public String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+        ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
+                .appGuid(applicationGuid);
+        if (StringUtils.isNotEmpty(targetNode)) {
+            requestBuilder.targetNode(targetNode);
         }
+        if (StringUtils.isNotEmpty(caipVersion)) {
+            requestBuilder.caipVersion(caipVersion);
+        }
+        if (StringUtils.isNotEmpty(snapshotName)) {
+            requestBuilder.snapshotName(snapshotName);
+        }
+        //The module parameter should be left empty or null when dealing with full content
+        if (moduleGenerationType != null && (moduleGenerationType != ModuleGenerationType.FULL_CONTENT)) {
+            requestBuilder.moduleGenerationType(moduleGenerationType.toString());
+        }
+        return runDeepAnalysis(requestBuilder.build(), logPollingProvider);
     }
 
     @Override
-    public String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
-        log.log(Level.INFO, "Starting job to perform Rescan Application action (Run Analysis) ");
+    public String runDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+        log.log(Level.INFO, "Starting job to perform Deep Analysis action (Run Analysis) ");
         try {
-            String jobGuid = jobService.startRunReScanApplication(applicationGuid, targetNode, caipVersion, snapshotName);
-            log.log(Level.INFO, "Rescan Application running job GUID= " + jobGuid);
+            String jobGuid = jobService.startDeepAnalysis(fastScanRequest);
+            log.log(Level.INFO, "Deep Analysis running job GUID= " + jobGuid);
             return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
         } catch (JobServiceException e) {
-            log.log(Level.SEVERE, "Could not perform the Rescan application due to the following error", e);
-            throw new ApplicationServiceException("Unable to Run Rescan application automatically.", e);
+            log.log(Level.SEVERE, "Could not perform the Deep Analysis due to the following error", e);
+            throw new ApplicationServiceException("Unable to Run Deep Analysis automatically.", e);
         }
     }
 
@@ -335,11 +343,20 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public void updateSecurityDataflow(String appGuid, boolean securityDataflowFlag, String technologyPath) {
+        try {
+            restApiService.putForEntity(ApiEndpointHelper.getApplicationSecurityDataflowPath(appGuid) + technologyPath, JsonDto.of(securityDataflowFlag), String.class);
+        } catch (ApiCallException e) {
+            log.log(Level.WARNING, e.getMessage());
+        }
+    }
+
+    @Override
     public void updateShowSqlDebugOption(String appGuid, boolean showSql) {
         try {
             restApiService.putForEntity(ApiEndpointHelper.getDebugOptionShowSqlPath(appGuid), JsonDto.of(showSql), String.class);
         } catch (ApiCallException e) {
-            //log.log(Level.SEVERE, e.getMessage());
+            log.log(Level.WARNING, e.getMessage());
         }
     }
 

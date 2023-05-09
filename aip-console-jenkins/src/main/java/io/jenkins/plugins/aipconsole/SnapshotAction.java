@@ -23,6 +23,7 @@ public class SnapshotAction extends BaseAction implements RunAction2 {
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean consolidation = true;
+    private long sleepDuration = Constants.DEFAULT_SLEEP_DURATION;
 
     @CheckForNull
     public String getApplicationName() {
@@ -119,5 +120,13 @@ public class SnapshotAction extends BaseAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
+    }
+
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
+
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
     }
 }

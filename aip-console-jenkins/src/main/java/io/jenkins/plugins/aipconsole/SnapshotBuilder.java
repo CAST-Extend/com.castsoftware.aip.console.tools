@@ -9,6 +9,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -55,6 +56,7 @@ import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_er
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_jobFailure;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_noAnalyzedVersion;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_error_version;
+import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_info_fastScanWorkflow;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_info_pollJobMessage;
 import static io.jenkins.plugins.aipconsole.Messages.SnapshotBuilder_Snapshot_success_complete;
 
@@ -78,6 +80,7 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
     private boolean consolidation = true;
+    private long sleepDuration;
 
     @DataBoundConstructor
     public SnapshotBuilder(String applicationName) {
@@ -235,6 +238,38 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
             }
 
             boolean forcedConsolidation = processImaging || consolidation;
+            //TODO: refactor after release to get separated workflows
+            if (app.isOnboarded()) {
+                log.println(SnapshotBuilder_Snapshot_info_fastScanWorkflow(expandedAppName));
+                ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
+                        .appGuid(applicationGuid);
+                String targetNode = app.getTargetNode();
+                if (StringUtils.isNotEmpty(targetNode)) {
+                    requestBuilder.targetNode(targetNode);
+                }
+                caipVersion = app.getCaipVersion();
+                if (StringUtils.isNotEmpty(caipVersion)) {
+                    requestBuilder.caipVersion(caipVersion);
+                }
+                if (StringUtils.isNotEmpty(resolveSnapshotName)) {
+                    requestBuilder.snapshotName(resolveSnapshotName);
+                }
+
+                requestBuilder.processImaging(processImaging);
+                requestBuilder.publishToEngineering(forcedConsolidation);
+                //Should remains true to prevent deep-analyze to trigger analyze step when publis and imaging options are set false
+                requestBuilder.uploadApplication(true);
+
+                log.println("Job request : " + requestBuilder.build().toString());
+
+                JenkinsLogPollingProviderServiceImpl jnksLogPollingProvider = new JenkinsLogPollingProviderServiceImpl(jobsService, run, listener, getDescriptor().configuration.isVerbose(), getSleepDuration());
+                String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), jnksLogPollingProvider);
+                if (StringUtils.isEmpty(appGuid)) {
+                    run.setResult(Result.FAILURE);
+                }
+                return;
+            }
+
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, caipVersion)
                     .nodeName(app.getTargetNode())
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
@@ -287,6 +322,15 @@ public class SnapshotBuilder extends BaseActionBuilder implements SimpleBuildSte
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         }
+    }
+
+    public long getSleepDuration() {
+        return sleepDuration;
+    }
+
+    @DataBoundSetter
+    public void setSleepDuration(long sleepDuration) {
+        this.sleepDuration = sleepDuration;
     }
 
     private JobState pollJob(String jobGuid, PrintStream log) throws JobServiceException {

@@ -15,6 +15,9 @@ public class OnboardApplicationDeepAnalysisAction extends BaseAction implements 
     private String applicationName;
     @Nullable
     private String snapshotName;
+
+    private String moduleGenerationType;
+
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
     private long sleepDuration = Constants.DEFAULT_SLEEP_DURATION;
@@ -22,6 +25,14 @@ public class OnboardApplicationDeepAnalysisAction extends BaseAction implements 
 
     public OnboardApplicationDeepAnalysisAction(@CheckForNull String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
+    }
+
+    public void setModuleGenerationType(@CheckForNull String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
     }
 
     @Override
