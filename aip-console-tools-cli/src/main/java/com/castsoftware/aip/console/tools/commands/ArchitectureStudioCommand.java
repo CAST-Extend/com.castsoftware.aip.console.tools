@@ -91,7 +91,6 @@ public class ArchitectureStudioCommand extends BasicCollable{
                 .findFirst()
                 .orElse(null);
 
-
         //Check if model list is empty
         if (modelInUse == null){
             log.error(String.format("Architecture model %s could not be found.", modelName));
@@ -105,7 +104,7 @@ public class ArchitectureStudioCommand extends BasicCollable{
             log.error(String.format("Application %s could not be found.", applicationName));
             return Constants.RETURN_APPLICATION_NOT_FOUND;
         }
-        log.info(String.format("Checking architecture model : %s", applicationName));
+        log.info(String.format("Checking architecture model against %s", applicationName));
 
         log.info("Architecture model check for '{}' is successful", applicationName);
 
