@@ -4,6 +4,8 @@ import com.castsoftware.aip.console.tools.core.services.AipConsoleService;
 import com.castsoftware.aip.console.tools.core.services.AipConsoleServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationServiceImpl;
+import com.castsoftware.aip.console.tools.core.services.ArchitectureStudioService;
+import com.castsoftware.aip.console.tools.core.services.ArchitectureStudioServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.JobsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -39,6 +41,12 @@ public class AipConsoleModule extends AbstractModule {
     @Singleton
     public ApplicationService getApplicationService(RestApiService restApiService, JobsService jobsService) {
         return new ApplicationServiceImpl(restApiService, jobsService);
+    }
+
+    @Provides
+    @Singleton
+    public ArchitectureStudioService getArchitectureStudioService(RestApiService restApiService) {
+        return new ArchitectureStudioServiceImpl(restApiService);
     }
 
     @Provides

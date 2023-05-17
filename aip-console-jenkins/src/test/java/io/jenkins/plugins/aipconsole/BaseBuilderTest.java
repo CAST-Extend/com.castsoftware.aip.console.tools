@@ -3,6 +3,7 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.services.AipConsoleService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
+import com.castsoftware.aip.console.tools.core.services.ArchitectureStudioService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
@@ -30,6 +31,8 @@ public class BaseBuilderTest {
     protected static final String TEST_ARCHIVE_NAME = "archive.zip";
     protected static final String TEST_JOB_GUID = "jobGuid";
     protected static final String TEST_NODE_NAME = "nodeName";
+    protected static final String TEST_MODEL_NAME = "modelName";
+    protected static final String TEST_REPORT_PATH = "C:\\Report";
     protected static final ApplicationDto TEST_APP = ApplicationDto.builder().name(TEST_APP_NAME).guid(TEST_APP_NAME).inPlaceMode(false).build();
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
@@ -48,6 +51,9 @@ public class BaseBuilderTest {
 
     @Mock
     protected ApplicationService applicationService;
+
+    @Mock
+    protected ArchitectureStudioService architectureStudioService;
     @Mock
     protected AipConsoleService aipConsoleService;
 
