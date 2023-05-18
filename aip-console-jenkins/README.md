@@ -384,6 +384,23 @@ Under `Advanced Settings` you will find the following parameters :
   follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
 * *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **1s**).
 
+### Architecture Studio Model Check
+![analyze application step parameters](doc/images/arch_studio_model_check.png)
+The architecture studio model check step provides the following parameters :
+
+* *Application Name* (**required**): The name of the application for which the analysis will be run.
+* *Model Name*: (**required**): The name of the model to check against the application. 
+* *Report Path*: The path where the downloaded report will be saved. 
+
+Under `Advanced Settings` you will find the following parameters :
+
+![Analyze step advanced settings](doc/images/arch_studio_model_check_advanced_settings.png)
+
+* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *Ignore Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
+
 ## Other Topics
 
 #### Authentication with username (AIP Console Standalone)

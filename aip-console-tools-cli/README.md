@@ -445,9 +445,9 @@ The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
 
-* `--model-name` or `-m` (**required**): The directory path where the report will be downloaded.
+* `--model-name` or `-m` (**required**): The name of the model to check against an application.
 
-* `--report-path` or `-p` : The directory path where the report will be downloaded.
+* `--report-path` or `-p` : The local directory path where the report will be downloaded.
 
 When AIP Console finishes execution, it will return a specific return code, based on the execution.
 
