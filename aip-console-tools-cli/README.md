@@ -458,7 +458,7 @@ Here is a detailed list of all error codes that can be returned by the CLI :
 * 1 : API key missing. No API key was provided either in the prompt or in the environment variable.
 * 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper
   value.
-* 6 : Application name or GUID missing. The model check cannot run due to a missing application name or missing application guid.
+* 6 : Application name or GUID missing. The model checker cannot run due to a missing application name or missing application guid.
 * 7 : Application Not Found. The given Application Name or GUID could not be found.
 * 27 : Architecture model not found.
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.

@@ -385,8 +385,8 @@ Under `Advanced Settings` you will find the following parameters :
 * *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **1s**).
 
 ### Architecture Studio Model Checker
-![Architecture Studio Model Checker step parameters](doc/images/architecture_studio_model_check.png)
-The architecture studio model check step provides the following parameters :
+![Architecture Studio Model Checker step parameters](doc/images/architecture_studio_model_checker.png)
+The architecture studio model checker step provides the following parameters :
 
 * *Application Name* (**required**): The name of the application for which the analysis will be run.
 * *Model Name*: (**required**): The name of the model to check against the application. 
@@ -394,7 +394,7 @@ The architecture studio model check step provides the following parameters :
 
 Under `Advanced Settings` you will find the following parameters :
 
-![Architecture Studio Model Checker step advanced settings](doc/images/architecture_studio_model_check_advanced_settings.png)
+![Architecture Studio Model Checker step advanced settings](doc/images/architecture_studio_model_checker_advanced_settings.png)
 
 * *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
 * *API Key* : The API Key for the URL specified above.
