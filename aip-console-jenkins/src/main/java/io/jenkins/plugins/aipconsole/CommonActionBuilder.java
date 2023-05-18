@@ -45,7 +45,7 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
     @Inject
     protected ApplicationService applicationService;
     @Inject
-    protected ArchitectureStudioService archService;
+    protected ArchitectureStudioService architectureStudioService;
 
     private String applicationName;
     private String applicationGuid;
@@ -148,7 +148,7 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
         }
 
         // Check the services have been properly initialized
-        if (!ObjectUtils.allNotNull(apiService, uploadService, jobsService, applicationService, archService)) {
+        if (!ObjectUtils.allNotNull(apiService, uploadService, jobsService, applicationService, architectureStudioService)) {
             // Manually setup Guice Injector using Module (Didn't find any way to make this automatically)
             Injector injector = Guice.createInjector(new AipConsoleModule());
             // Guice can automatically inject those, but then findbugs, not seeing the change,
@@ -158,7 +158,7 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
             uploadService = injector.getInstance(UploadService.class);
             jobsService = injector.getInstance(JobsService.class);
             applicationService = injector.getInstance(ApplicationService.class);
-            archService = injector.getInstance(ArchitectureStudioService.class);
+            architectureStudioService = injector.getInstance(ArchitectureStudioService.class);
         }
 
         String apiServerUrl = environmentVariables.expand(getAipConsoleUrl());
@@ -177,7 +177,6 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
         } catch (ApiCallException e) {
             listener.error(GenericError_error_accessDenied(apiServerUrl));
             run.setResult(defaultResult);
-            return;
         }
     }
 }

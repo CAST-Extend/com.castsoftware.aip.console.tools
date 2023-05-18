@@ -92,7 +92,7 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         logger.println("Getting all architecture models");
         Set<ArchitectureModelDto> modelDtoSet;
         try {
-            modelDtoSet = archService.getArchitectureModels();
+            modelDtoSet = architectureStudioService.getArchitectureModels();
         } catch (ApplicationServiceException e) {
             throw new RuntimeException(e);
         }
@@ -142,9 +142,9 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
 
         logger.println(String.format("Architecture model check for %s is successful", expandedAppName));
 
-        Set<ArchitectureModelLinkDto> checkModel;
+        Set<ArchitectureModelLinkDto> modelChecker;
         try {
-            checkModel = archService.modelChecker(app.getGuid(), path, app.getCaipVersion());
+            modelChecker = architectureStudioService.modelChecker(app.getGuid(), path, app.getCaipVersion());
         } catch (ApiCallException e) {
             throw new RuntimeException(e);
         }
@@ -154,7 +154,7 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         //Check the transaction Id part
         Integer transactionId = null;
         try {
-            archService.downloadCheckedModelReport(app.getGuid(), modelInUse.getName(), modelInUse.getMetricId(), modelInUse.getDescription(), transactionId, checkModel, expandedReportPath);
+            architectureStudioService.downloadCheckedModelReport(app.getGuid(), modelInUse.getName(), modelInUse.getMetricId(), modelInUse.getDescription(), transactionId, modelChecker, expandedReportPath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -182,7 +182,7 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         return (ArchitectureStudioBuilder.ArchitectureStudioDescriptorImpl) super.getDescriptor();
     }
 
-    @Symbol("ArchitectureStudioModelCheck")
+    @Symbol("ArchitectureStudioModelChecker")
     @Extension
     public static final class ArchitectureStudioDescriptorImpl extends BaseActionBuilderDescriptor {
         @Inject

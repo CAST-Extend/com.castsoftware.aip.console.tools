@@ -48,12 +48,12 @@ public class ArchitectureStudioServiceImpl implements ArchitectureStudioService 
         );
     }
 
-    public void downloadCheckedModelReport(String appGuid, String modelName, Integer metricId, String description, Integer transactionId, Set<ArchitectureModelLinkDto> checkModel, String reportPath) throws Exception {
+    public void downloadCheckedModelReport(String appGuid, String modelName, Integer metricId, String description, Integer transactionId, Set<ArchitectureModelLinkDto> modelChecker, String reportPath) throws Exception {
 
         CheckModelReportRequest checkModelReportRequest = CheckModelReportRequest
                 .builder()
                 .description(description)
-                .links(checkModel)
+                .links(modelChecker)
                 .metricId(metricId)
                 .name(modelName)
                 .transactionId(transactionId)

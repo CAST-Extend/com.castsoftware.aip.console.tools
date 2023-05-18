@@ -44,7 +44,6 @@ public class ArchitectureStudioBuilderTest extends BaseBuilderTest{
 
         Set<ArchitectureModelDto> expectedModels = new HashSet<>();
 
-        //
         expectedModels.add(new ArchitectureModelDto(
                 "guid",
                 "modelName",
@@ -60,8 +59,8 @@ public class ArchitectureStudioBuilderTest extends BaseBuilderTest{
                 Category.STANDARD_LAYER,
                 false));
 
-        Set<ArchitectureModelLinkDto> checkModel = new HashSet<>();
-        checkModel.add(new ArchitectureModelLinkDto());
+        Set<ArchitectureModelLinkDto> modelChecker = new HashSet<>();
+        modelChecker.add(new ArchitectureModelLinkDto());
 
         architectureStudioBuilder.setModelName(BaseBuilderTest.TEST_MODEL_NAME);
         architectureStudioBuilder.setReportPath(BaseBuilderTest.TEST_REPORT_PATH);
@@ -75,7 +74,7 @@ public class ArchitectureStudioBuilderTest extends BaseBuilderTest{
 
         when(applicationService.getApplicationFromName(BaseBuilderTest.TEST_APP_NAME)).thenReturn(applicationDto);
         doNothing().when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
-        when(architectureStudioService.modelChecker(BaseBuilderTest.TEST_APP_GUID, "path", apiInfoDto.getApiVersion())).thenReturn(checkModel);
+        when(architectureStudioService.modelChecker(BaseBuilderTest.TEST_APP_GUID, "path", apiInfoDto.getApiVersion())).thenReturn(modelChecker);
 
         doNothing().when(architectureStudioService).downloadCheckedModelReport(
                 BaseBuilderTest.TEST_APP_GUID,
@@ -83,7 +82,7 @@ public class ArchitectureStudioBuilderTest extends BaseBuilderTest{
                 0,
                 "description",
                 0,
-                checkModel,
+                modelChecker,
                 BaseBuilderTest.TEST_REPORT_PATH);
 
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);

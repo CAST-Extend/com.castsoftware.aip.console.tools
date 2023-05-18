@@ -22,7 +22,7 @@ import java.util.Set;
 
 @Component
 @CommandLine.Command(
-        name = "ArchitectureStudioModelCheck",
+        name = "ArchitectureStudioModelChecker",
         mixinStandardHelpOptions = true,
         aliases = {"Model-Check"},
         description = "Checks an application against a model."
@@ -33,7 +33,7 @@ import java.util.Set;
 public class ArchitectureStudioCommand extends BasicCollable{
 
     @Autowired
-    private ArchitectureStudioService archService;
+    private ArchitectureStudioService architectureStudioService;
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
@@ -70,7 +70,7 @@ public class ArchitectureStudioCommand extends BasicCollable{
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
         log.info("Getting all architecture models");
-        Set<ArchitectureModelDto> modelDtoSet = archService.getArchitectureModels();
+        Set<ArchitectureModelDto> modelDtoSet = architectureStudioService.getArchitectureModels();
         log.info("Available Architecture Models:");
         int index = 1;
         for (ArchitectureModelDto dto : modelDtoSet) {
@@ -108,13 +108,13 @@ public class ArchitectureStudioCommand extends BasicCollable{
 
         log.info("Architecture model check for '{}' is successful", applicationName);
 
-        Set<ArchitectureModelLinkDto> checkModel = archService.modelChecker(app.getGuid(), path, app.getCaipVersion());
+        Set<ArchitectureModelLinkDto> modelChecker = architectureStudioService.modelChecker(app.getGuid(), path, app.getCaipVersion());
 
         log.info("Downloading architecture model report");
 
         //Check the transaction Id part
         Integer transactionId = null;
-        archService.downloadCheckedModelReport(app.getGuid(), modelInUse.getName(), modelInUse.getMetricId(), modelInUse.getDescription(), transactionId, checkModel, reportPath);
+        architectureStudioService.downloadCheckedModelReport(app.getGuid(), modelInUse.getName(), modelInUse.getMetricId(), modelInUse.getDescription(), transactionId, modelChecker, reportPath);
         log.info("Report downloaded successfully");
 
         return Constants.RETURN_OK;

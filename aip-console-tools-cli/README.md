@@ -159,14 +159,14 @@ To perform *Publish-Imaging* action you can use following command
 java -jar .\aip-console-tools-cli.jar Publish-Imaging --apikey="valid.key" -n "my app" --verbose"
 ```
 
-To **ArchitectureStudioModelCheck**
+To **ArchitectureStudioModelChecker**
 
 - application should exist
 
-To perform *ArchitectureStudioModelCheck* action you can use following command
+To perform *ArchitectureStudioModelChecker* action you can use following command
 
 ```bash
-java -jar .\aip-console-tools-cli.jar ArchitectureStudioModelCheck -s="Console URL" --apikey "valid.key" -n "my-app" --model-name "model filename" --report-path "valid local path"
+java -jar .\aip-console-tools-cli.jar ArchitectureStudioModelChecker -s="Console URL" --apikey "valid.key" -n "my-app" --model-name "model filename" --report-path "valid local path"
 ```
 
 ### Advanced Usage
@@ -180,7 +180,7 @@ When running the CLI, you must specify a command to be run. The list of commands
 * `Fast-Scan` to perform a *fast-scan* on the sources contents and optionally do a Deep-Analysis (run the analysis).
 * `Deep-Analysis` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the dashboard and Imaging depending on the operating settings
 * `Publish-Imaging` Publish an existing application data to CAST Imaging.
-* `ArchitectureStudioModelCheck` to check an existing application against a model.
+* `ArchitectureStudioModelChecker` to check an existing application against a model.
 
 Each commands has a `--help` parameter, providing a list of all parameters available.
 
@@ -437,7 +437,7 @@ Here is a detailed list of all error codes that can be returned by the CLI :
 * 10 : Version Not Found. The given version could not be found OR no version matches the requested command (i.e. No delivered version exists to be used for analysis)
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
 
-### ArchitectureStudioModelCheck
+### ArchitectureStudioModelChecker
 
 Check an existing application against a model.
 
