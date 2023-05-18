@@ -106,7 +106,6 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
             }
         } else {
             logger.println("No architecture models available");
-            logger.println(expandedModelName + " not found in available architecture models list");
             run.setResult(Result.FAILURE);
             return;
         }
