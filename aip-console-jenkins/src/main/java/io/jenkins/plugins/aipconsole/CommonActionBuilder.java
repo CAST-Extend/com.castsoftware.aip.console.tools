@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
+import com.castsoftware.aip.console.tools.core.services.ArchitectureStudioService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
@@ -43,6 +44,8 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
 
     @Inject
     protected ApplicationService applicationService;
+    @Inject
+    protected ArchitectureStudioService architectureStudioService;
 
     private String applicationName;
     private String applicationGuid;
@@ -132,7 +135,8 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws
+            InterruptedException, IOException{
         logger = listener.getLogger();
         environmentVariables = run.getEnvironment(listener);
 
@@ -144,7 +148,7 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
         }
 
         // Check the services have been properly initialized
-        if (!ObjectUtils.allNotNull(apiService, uploadService, jobsService, applicationService)) {
+        if (!ObjectUtils.allNotNull(apiService, uploadService, jobsService, applicationService, architectureStudioService)) {
             // Manually setup Guice Injector using Module (Didn't find any way to make this automatically)
             Injector injector = Guice.createInjector(new AipConsoleModule());
             // Guice can automatically inject those, but then findbugs, not seeing the change,
@@ -154,9 +158,10 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
             uploadService = injector.getInstance(UploadService.class);
             jobsService = injector.getInstance(JobsService.class);
             applicationService = injector.getInstance(ApplicationService.class);
+            architectureStudioService = injector.getInstance(ArchitectureStudioService.class);
         }
 
-        String apiServerUrl = getAipConsoleUrl();
+        String apiServerUrl = environmentVariables.expand(getAipConsoleUrl());
         String apiKey = Secret.toString(getApiKey());
         String username = getDescriptor().getAipConsoleUsername();
         // Job level timeout different from default ? use it, else use the global config level timeout
@@ -172,7 +177,6 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
         } catch (ApiCallException e) {
             listener.error(GenericError_error_accessDenied(apiServerUrl));
             run.setResult(defaultResult);
-            return;
         }
     }
 }
