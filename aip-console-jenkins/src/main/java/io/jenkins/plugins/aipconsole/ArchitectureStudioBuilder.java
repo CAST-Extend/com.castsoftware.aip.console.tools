@@ -29,6 +29,18 @@ import java.io.IOException;
 import java.util.Set;
 
 import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_DescriptorImpl_displayName;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_DescriptorImpl_feature_incompatible;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_DescriptorImpl_success;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_download;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_error_application;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_error_availableModels;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_error_availableModels_modelName;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_error_modelName;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_info_application;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_info_availableModels;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_info_availableModels_modelName;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_info_models;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_success;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 
 public class ArchitectureStudioBuilder extends  CommonActionBuilder {
@@ -74,6 +86,7 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         if (getMinVersion() != null && StringUtils.isNotEmpty(apiVersion)) {
             VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
             if (serverApiVersion != null && getMinVersion().isHigherThan(serverApiVersion)) {
+                listener.error(ArchitectureStudioBuilder_DescriptorImpl_feature_incompatible("Model Checker", apiVersion, getMinVersion().toString()));
                 run.setResult(Result.FAILURE);
                 return;
             }
@@ -85,11 +98,11 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         String expandedReportPath = vars.expand(getReportPath());
 
         if (StringUtils.isBlank(expandedModelName)) {
-            logger.println("Architecture model name should not be empty.");
+            listener.error(ArchitectureStudioBuilder_ModelChecker_error_modelName());
             run.setResult(Result.FAILURE);
             return;
         }
-        logger.println("Getting all architecture models");
+        logger.println(ArchitectureStudioBuilder_ModelChecker_info_models());
         Set<ArchitectureModelDto> modelDtoSet;
         try {
             modelDtoSet = architectureStudioService.getArchitectureModels();
@@ -98,14 +111,14 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         }
 
         if(!modelDtoSet.isEmpty()){
-            logger.println("Available Architecture Models:");
+            logger.println(ArchitectureStudioBuilder_ModelChecker_info_availableModels());
             int index = 1;
             for (ArchitectureModelDto dto : modelDtoSet) {
-                logger.println(index + ". " + dto.getName());
+                logger.println(ArchitectureStudioBuilder_ModelChecker_info_availableModels_modelName(index, dto.getName()));
                 index++;
             }
         } else {
-            logger.println("No architecture models available");
+            listener.error(ArchitectureStudioBuilder_ModelChecker_error_availableModels());
             run.setResult(Result.FAILURE);
             return;
         }
@@ -119,7 +132,7 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
 
         //Check if model list is empty
         if (modelInUse == null){
-            logger.println(String.format("Architecture model %s could not be found.", expandedModelName));
+            listener.error(ArchitectureStudioBuilder_ModelChecker_error_availableModels_modelName(expandedModelName));
             run.setResult(Result.FAILURE);
             return;
         }
@@ -133,13 +146,13 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
             throw new RuntimeException(e);
         }
         if (app == null){
-            logger.println(String.format("Application %s could not be found.", expandedAppName));
+            listener.error(ArchitectureStudioBuilder_ModelChecker_error_application(expandedAppName));
             run.setResult(Result.FAILURE);
             return;
         }
-        logger.println("Checking architecture model against" + expandedAppName);
+        logger.println(ArchitectureStudioBuilder_ModelChecker_info_application(expandedAppName));
 
-        logger.println(String.format("Architecture model check for %s is successful", expandedAppName));
+        logger.println(ArchitectureStudioBuilder_ModelChecker_success(expandedAppName));
 
         Set<ArchitectureModelLinkDto> modelChecker;
         try {
@@ -148,7 +161,7 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
             throw new RuntimeException(e);
         }
 
-        logger.println("Downloading architecture model report");
+        logger.println(ArchitectureStudioBuilder_ModelChecker_download());
 
         //Check the transaction Id part
         Integer transactionId = null;
@@ -157,7 +170,7 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        logger.println("Report downloaded successfully");
+        logger.println(ArchitectureStudioBuilder_DescriptorImpl_success());
         run.setResult(Result.SUCCESS);
     }
 

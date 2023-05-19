@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelCheck_Success;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_DescriptorImpl_success;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -86,7 +86,7 @@ public class ArchitectureStudioBuilderTest extends BaseBuilderTest{
                 BaseBuilderTest.TEST_REPORT_PATH);
 
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
-        jenkins.assertLogContains(ArchitectureStudioBuilder_ModelCheck_Success(), build);
+        jenkins.assertLogContains(ArchitectureStudioBuilder_DescriptorImpl_success(), build);
     }
 
 
