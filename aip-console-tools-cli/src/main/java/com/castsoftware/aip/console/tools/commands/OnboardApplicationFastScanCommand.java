@@ -130,7 +130,7 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             log.info("Preparing the Application Delivery Configuration");
             DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
             String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(applicationGuid, sourcePath, exclusions,
-                    VersionStatus.IMAGING_PROCESSED, true, (config) -> deliveryConfig[0] = config);
+                    VersionStatus.DELIVERED, true, (config) -> deliveryConfig[0] = config);
             deliveryConfiguration = deliveryConfig[0];
             log.info("Application Delivery Configuration done: GUID=" + deliveryConfigurationGuid);
 
