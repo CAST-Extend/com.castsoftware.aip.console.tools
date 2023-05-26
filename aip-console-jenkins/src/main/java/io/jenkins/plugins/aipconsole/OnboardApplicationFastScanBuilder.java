@@ -210,7 +210,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration());
             DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
             String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(applicationGuid, sourcePath, exclusions,
-                    VersionStatus.IMAGING_PROCESSED, true, (config) -> deliveryConfig[0] = config);
+                    VersionStatus.DELIVERED, true, (config) -> deliveryConfig[0] = config, true);
             DeliveryConfigurationDto deliveryConfiguration = deliveryConfig[0];
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done(deliveryConfigurationGuid));
 
