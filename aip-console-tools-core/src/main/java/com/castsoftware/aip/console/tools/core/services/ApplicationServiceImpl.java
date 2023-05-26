@@ -415,7 +415,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String discoverPackagesAndCreateDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions,
-                                                                 VersionStatus status, boolean rescan, Consumer<DeliveryConfigurationDto> deliveryConfigConsumer) throws JobServiceException, PackagePathInvalidException {
+                                                                 VersionStatus status, boolean rescan, Consumer<DeliveryConfigurationDto> deliveryConfigConsumer
+            , boolean throwPackagePathCheckError) throws JobServiceException, PackagePathInvalidException {
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
         String flag = apiInfoDto.isEnablePackagePathCheck() ? "enabled" : "disabled";
         log.info("enable.package.path.check option is " + flag);
@@ -430,7 +431,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     Exclusions.getDefaultIgnorePatterns() : Arrays.stream(exclusions.getExcludePatterns().split(",")).collect(Collectors.toSet());
             if (apiInfoDto.isEnablePackagePathCheck() && previousVersion != null && rescan) {
                 log.info("Copy configuration from the previous version: " + previousVersion.getName());
-                packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid());
+                packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid(), throwPackagePathCheckError);
                 if (StringUtils.isEmpty(exclusions.getExcludePatterns()) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
                     exclusions.setExclusionRules(previousVersion.getDeliveryConfiguration().getExclusionRules());
@@ -484,10 +485,10 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public String createDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, boolean rescan) throws JobServiceException, PackagePathInvalidException {
-        return discoverPackagesAndCreateDeliveryConfiguration(appGuid, sourcePath, exclusions, VersionStatus.DELIVERED, rescan, null);
+        return discoverPackagesAndCreateDeliveryConfiguration(appGuid, sourcePath, exclusions, VersionStatus.DELIVERED, rescan, null, false);
     }
 
-    private Set<DeliveryPackageDto> discoverPackages(String appGuid, String sourcePath, String previousVersionGuid) throws PackagePathInvalidException, JobServiceException {
+    private Set<DeliveryPackageDto> discoverPackages(String appGuid, String sourcePath, String previousVersionGuid, boolean throwPackagePathCheckError) throws PackagePathInvalidException, JobServiceException {
         try {
             Response resp = restApiService.exchangeForResponse("POST", "/api/applications/" + appGuid + "/delivery-configuration/discover-packages",
                     DiscoverPackageRequest.builder().previousVersionGuid(previousVersionGuid).sourcePath(sourcePath).build());
@@ -514,7 +515,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 });
 
                 ApplicationDto app = getApplicationFromGuid(appGuid);
-                if (!app.isInPlaceMode() && packages.stream().anyMatch(p -> p.getPath() == null)) {
+                if ((throwPackagePathCheckError || !app.isInPlaceMode()) && packages.stream().anyMatch(p -> p.getPath() == null)) {
                     throw new PackagePathInvalidException(packages.stream().filter(p -> p.getPath() == null).collect(Collectors.toSet()));
                 }
                 return packages;
