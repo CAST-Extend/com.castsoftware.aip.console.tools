@@ -133,9 +133,10 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
                     VersionStatus.DELIVERED, true, (config) -> deliveryConfig[0] = config, true);
             deliveryConfiguration = deliveryConfig[0];
             log.info("Application Delivery Configuration done: GUID=" + deliveryConfigurationGuid);
+            deliveryConfiguration.setGuid(deliveryConfigurationGuid);
 
             //rediscover-application
-            log.info("Start Fast-Scan action");
+            log.info("Start Fast-Scan action with Delivery Configuration Guid=" + deliveryConfiguration.getGuid());
             applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
                     caipVersion, targetNode, getSharedOptions().isVerbose(), cliLogPolling);
             log.info("Fast-Scan done successfully");

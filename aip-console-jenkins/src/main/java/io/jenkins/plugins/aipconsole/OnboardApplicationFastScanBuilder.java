@@ -213,7 +213,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
                     VersionStatus.DELIVERED, true, (config) -> deliveryConfig[0] = config, true);
             DeliveryConfigurationDto deliveryConfiguration = deliveryConfig[0];
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done(deliveryConfigurationGuid));
-
+            deliveryConfiguration.setGuid(deliveryConfigurationGuid);
             //rediscover-application
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart("Fast-Scan"));
             JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(jobsService, run, listener, verbose, sleepDuration);
