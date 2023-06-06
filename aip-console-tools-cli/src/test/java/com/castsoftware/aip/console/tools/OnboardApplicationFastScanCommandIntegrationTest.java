@@ -5,12 +5,16 @@ import com.castsoftware.aip.console.tools.commands.OnboardApplicationFastScanCom
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
+import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,10 +27,13 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -181,6 +188,14 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
         //Should work without imaging
         when(applicationService.isImagingAvailable()).thenReturn(false);
+        when(applicationService.discoverPackagesAndCreateDeliveryConfiguration(
+                anyString(), anyString(), any(Exclusions.class), any(VersionStatus.class), anyBoolean(),
+                ArgumentMatchers.<Consumer<DeliveryConfigurationDto>>any(), anyBoolean()))
+                .then(invocationOnMock -> {
+                    Consumer<DeliveryConfigurationDto> arg = invocationOnMock.getArgument(5);
+                    arg.accept(DeliveryConfigurationDto.builder().build());
+                    return "delivery-Configuration-G-U-I-D";
+                });
 
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
@@ -275,6 +290,14 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
+        when(applicationService.discoverPackagesAndCreateDeliveryConfiguration(
+                anyString(), anyString(), any(Exclusions.class), any(VersionStatus.class), anyBoolean(),
+                ArgumentMatchers.<Consumer<DeliveryConfigurationDto>>any(), anyBoolean()))
+                .then(invocationOnMock -> {
+                    Consumer<DeliveryConfigurationDto> arg = invocationOnMock.getArgument(5);
+                    arg.accept(DeliveryConfigurationDto.builder().build());
+                    return "delivery-Configuration-G-U-I-D";
+                });
 
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
