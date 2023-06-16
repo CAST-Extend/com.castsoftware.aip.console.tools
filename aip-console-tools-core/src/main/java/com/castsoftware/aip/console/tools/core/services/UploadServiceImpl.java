@@ -96,7 +96,9 @@ public class UploadServiceImpl implements UploadService {
                 throw new UploadException(e);
             }
         }
-        return uploadedFilePath[0];
+
+        //call api to check if the folder exists
+        return checkServerFolder(filePath);
     }
 
     @Override
@@ -117,7 +119,10 @@ public class UploadServiceImpl implements UploadService {
                 throw new UploadException(e);
             }
         }
-        //call api to check if the folder exists
+        return checkServerFolder(filePath);
+    }
+
+    private String checkServerFolder(File filePath) throws UploadException {
         try {
             FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath.toPath()).build();
             restApiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);

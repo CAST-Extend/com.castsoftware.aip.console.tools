@@ -6,6 +6,7 @@ import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
@@ -78,7 +79,7 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
 
-        if (filePath == null || !filePath.exists()) {
+        if (filePath == null) {
             log.error("A valid file path required to perform the FAST SCAN operation");
             return Constants.RETURN_MISSING_FILE;
         }
@@ -137,9 +138,11 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
 
             //rediscover-application
             log.info("Start Fast-Scan action with Delivery Configuration Guid=" + deliveryConfiguration.getGuid());
-            applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
+            String jobStatus = applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
                     caipVersion, targetNode, getSharedOptions().isVerbose(), cliLogPolling);
-            log.info("Fast-Scan done successfully");
+            if(jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())){
+                log.info("Fast-Scan done successfully");
+            }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         } finally {

@@ -371,8 +371,11 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback
-            , Function<JobExecutionDto, R> completionCallback, Supplier<Long> sleepPeriodSupplier) throws JobServiceException {
+    public <R> R pollAndWaitForJobFinished(String jobGuid,
+                                           Consumer<JobExecutionDto> stepChangedCallback,
+                                           Consumer<LogContentDto> pollingCallback,
+                                           Function<JobExecutionDto, R> completionCallback,
+                                           Supplier<Long> sleepPeriodSupplier) throws JobServiceException {
         assert StringUtils.isNotBlank(jobGuid);
 
         long sleepPeriod = (sleepPeriodSupplier != null) ? sleepPeriodSupplier.get().longValue() : getDefaultSleepDuration();
@@ -381,7 +384,7 @@ public class JobsServiceImpl implements JobsService {
         log.fine("Checking status of Job with GUID " + jobGuid);
         int retryCount = 0;
         try {
-            JobExecutionDto jobStatus;
+            JobExecutionDto jobDetails;
             String logName = null;
             int startOffset = 0;
             while (true) {
@@ -389,9 +392,9 @@ public class JobsServiceImpl implements JobsService {
                 // Force login to keep session alive (jobs endpoint doesn't refresh session status)
                 restApiService.login();
 
-                // Sometimes it takes more than 10 secs till the jobstatus is ready
-                jobStatus = getJobStatus(jobDetailsEndpoint);
-                if (jobStatus == null) {
+                // Sometimes it takes more than 10 secs till the job status is ready
+                jobDetails = getJobStatus(jobDetailsEndpoint);
+                if (jobDetails == null) {
                     if (retryCount < 20) {
                         ++retryCount;
                         continue;
@@ -403,12 +406,12 @@ public class JobsServiceImpl implements JobsService {
                     retryCount = 0;
                 }
 
-                String currentStep = jobStatus.getCurrentStep();
+                String currentStep = jobDetails.getCurrentStep();
 
                 if (currentStep != null && !currentStep.equalsIgnoreCase(previousStep)) {
                     previousStep = currentStep;
                     if (stepChangedCallback != null) {
-                        stepChangedCallback.accept(jobStatus);
+                        stepChangedCallback.accept(jobDetails);
                     }
                     logName = getLogName(jobGuid, currentStep);
                     startOffset = 0;
@@ -421,12 +424,16 @@ public class JobsServiceImpl implements JobsService {
                         startOffset = startOffset + logContent.getNbLines();
                     }
                 }
+                if(jobDetails.getState() == JobState.FAILED){
+                    log.log(Level.SEVERE, "Error occurred while performing fast-scan");
+                    break;
+                }
 
-                if (jobStatus.getState() != JobState.STARTED && jobStatus.getState() != JobState.STARTING) {
+                if (jobDetails.getState() != JobState.STARTED && jobDetails.getState() != JobState.STARTING) {
                     break;
                 }
             }
-            return completionCallback.apply(jobStatus);
+            return completionCallback.apply(jobDetails);
         } catch (InterruptedException | ApiCallException e) {
             log.log(Level.SEVERE, "Error occurred while polling the job status", e);
             throw new JobServiceException(e);
