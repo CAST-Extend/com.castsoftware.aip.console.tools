@@ -158,7 +158,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
         String expandedDomainName = environmentVariables.expand(getDomainName());
         boolean runAnalysis = false;
 
-        if (!runAnalysis && (StringUtils.isEmpty(expandedFilePath) || !FileUtils.exists(expandedFilePath))) {
+        if (!runAnalysis && (StringUtils.isEmpty(expandedFilePath))) {
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_missingFilePath());
             run.setResult(getDefaultResult());
             return;
@@ -217,9 +217,11 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
             //rediscover-application
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart("Fast-Scan"));
             JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(jobsService, run, listener, verbose, sleepDuration);
-            applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
+            String jobStatus = applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
                     caipVersion, targetNode, verbose, jnksLogPollingProvider);
-            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Fast-Scan"));
+            if(jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Fast-Scan"));
+            }
         } catch (ApplicationServiceException | JobServiceException e) {
             e.printStackTrace(logger);
             run.setResult(getDefaultResult());

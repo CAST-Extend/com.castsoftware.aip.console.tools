@@ -27,7 +27,7 @@ public class CliLogPollingProviderImpl implements LogPollingProvider {
         return jobsService.pollAndWaitForJobFinished(jobGuid,
                 jobStep -> log.info("Current step is : " + jobStep.getCurrentStep()),
                 !verbose ? null : this::printLog,
-                (s) -> s.getState() == JobState.COMPLETED ? s.getJobParameters().get("appGuid") : null,
+                (s) -> s.getState().toString(),
                 () -> TimeUnit.SECONDS.toMillis(sleepDuration));
     }
 

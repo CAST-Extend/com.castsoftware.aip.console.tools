@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -55,6 +56,7 @@ public abstract class AipConsoleToolsCliBaseTest {
     protected String[] defaultArgs;
     protected Path sflPath;
     protected Path zippedSourcesPath;
+    protected Path sourceFolderPath;
     protected int exitCode;
     private List<String> unExpectedParameters;
     protected static String ARG_CONSOLIDATE_LABEL = "<consolidation>";
@@ -65,6 +67,7 @@ public abstract class AipConsoleToolsCliBaseTest {
         initializePrivateMocks();
 
         sflPath = folder.getRoot().toPath().resolve("SFL");
+        sourceFolderPath = Paths.get("testFolder");
         Files.createDirectories(sflPath);
         zippedSourcesPath = sflPath.resolve("fake_sources.zip");
         zippedSourcesPath.toFile().createNewFile();
