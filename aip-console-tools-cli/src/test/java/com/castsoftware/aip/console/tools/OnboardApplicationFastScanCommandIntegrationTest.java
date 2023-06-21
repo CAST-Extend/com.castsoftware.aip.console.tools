@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.BasicCollable;
 import com.castsoftware.aip.console.tools.commands.OnboardApplicationFastScanCommand;
+import com.castsoftware.aip.console.tools.commands.SharedOptions;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
@@ -9,9 +10,12 @@ import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -35,6 +39,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -60,7 +65,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         //The best way is to run java -jar .\aip-console-tools-cli.jar add ...
         // So that app creates new instances of commands.
         // Still this woks fine renewing parameters values each time.
-        // Here only String types, but each test should set velues to requested ones
+        // Here only String types, but each test should set values to requested ones
         // ===================================
         resetSharedOptions(fastScanCommand.getSharedOptions());
         fastScanCommand.setApplicationName(null);

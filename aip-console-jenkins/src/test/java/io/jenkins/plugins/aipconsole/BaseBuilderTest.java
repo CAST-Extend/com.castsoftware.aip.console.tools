@@ -29,6 +29,7 @@ public class BaseBuilderTest {
     protected static final String TEST_APP_NAME = "appName";
     protected static final String TEST_APP_GUID = "app-GUID";
     protected static final String TEST_ARCHIVE_NAME = "archive.zip";
+    protected static final String TEST_FOLDER_NAME = "testFolder";
     protected static final String TEST_JOB_GUID = "jobGuid";
     protected static final String TEST_NODE_NAME = "nodeName";
     protected static final String TEST_MODEL_NAME = "modelName";
@@ -67,6 +68,11 @@ public class BaseBuilderTest {
         File tempFile = temporaryFolder.newFile(fileName);
         Files.write(tempFile.toPath(), Lists.newArrayList(BaseBuilderTest.TEST_CONTENT));
         return tempFile.toPath();
+    }
+
+    protected Path createTempFolderAndGetPath(String folderName) throws IOException {
+        File tempFolder = temporaryFolder.newFolder(folderName);
+        return tempFolder.toPath();
     }
 
     protected FreeStyleProject getProjectWithBuilder(Builder builder) throws IOException {
