@@ -31,25 +31,21 @@ public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
     private OnboardApplicationFastScanBuilder fastScanBuilder;
 
     Path testSourcesPath;
+
     @Before
     public void setUp() throws Exception {
         super.startUp();
+    }
+
+    private void createFastScanBuilderFilePath(String sourcesPath) throws Exception {
+        testSourcesPath = createTempFileAndGetPath(sourcesPath);
+        fastScanBuilder = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         MockitoAnnotations.initMocks(this);
     }
-
-    private void createFastScanBuilderWithFullFilePath() throws Exception {
-        testSourcesPath = createTempFileAndGetPath(BaseBuilderTest.TEST_ARCHIVE_NAME);
-        fastScanBuilder = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
-    }
-
-    private void createFastScanBuilderWithRelativeFilePath() throws Exception {
-        testSourcesPath = createTempFolderAndGetPath(BaseBuilderTest.TEST_FOLDER_NAME);
-        fastScanBuilder = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
-    }
-
+    
     @Test
     public void testOnboardingApplicationFastScanJob() throws Exception {
-        createFastScanBuilderWithFullFilePath();
+        createFastScanBuilderFilePath(BaseBuilderTest.TEST_ARCHIVE_NAME);
         FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
@@ -60,7 +56,7 @@ public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
 
     @Test
     public void testOnboardingApplicationFastScanJobWithRelativePath() throws Exception {
-        createFastScanBuilderWithRelativeFilePath();
+        createFastScanBuilderFilePath(BaseBuilderTest.TEST_FOLDER_NAME);
         FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
@@ -71,7 +67,7 @@ public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
 
     @Test
     public void testFastScan_OnAnExistingNonOnboardApplication() throws Exception {
-        createFastScanBuilderWithFullFilePath();
+        createFastScanBuilderFilePath(BaseBuilderTest.TEST_ARCHIVE_NAME);
         FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
