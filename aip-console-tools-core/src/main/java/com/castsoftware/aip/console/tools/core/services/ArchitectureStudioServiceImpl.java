@@ -3,6 +3,7 @@ package com.castsoftware.aip.console.tools.core.services;
 import com.castsoftware.aip.console.tools.core.dto.architecturestudio.ArchitectureModelDto;
 import com.castsoftware.aip.console.tools.core.dto.architecturestudio.ArchitectureModelLinkDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CheckModelReportRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.CheckModelUploadRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.PathRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
@@ -12,6 +13,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+
+import java.io.File;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
@@ -32,6 +36,20 @@ public class ArchitectureStudioServiceImpl implements ArchitectureStudioService 
             });
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to get architecture models", e);
+        }
+    }
+
+    public void uploadArchitectureModel(String filePath, Boolean isTemplate) throws ApplicationServiceException {
+        try{
+            File file = new File(filePath);
+            CheckModelUploadRequest checkModelUploadRequest = CheckModelUploadRequest.builder().isTemplate(isTemplate).file(file).build();
+            String uploadModelUrl = ApiEndpointHelper.getArchitectureUploadModelEndpoint();
+            restApiService.postForEntity(
+                    uploadModelUrl,
+                    checkModelUploadRequest,
+                    String.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to upload architecture model", e);
         }
     }
 

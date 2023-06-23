@@ -57,6 +57,13 @@ public class ArchitectureStudioCommand extends BasicCollable{
             required = true)
     private String modelName;
 
+    @CommandLine.Option(
+            names = {"-f", "--file-path"},
+            paramLabel = "FILE_PATH",
+            description = "",
+            required = true)
+    private String filePath;
+
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
 
     public ArchitectureStudioCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
@@ -65,10 +72,17 @@ public class ArchitectureStudioCommand extends BasicCollable{
 
     @Override
     public Integer processCallCommand() throws Exception {
-        if (StringUtils.isBlank(modelName)) {
-            log.error("Architecture model name should not be empty.");
-            return Constants.RETURN_APPLICATION_INFO_MISSING;
+        if(StringUtils.isBlank(filePath)){
+            if (StringUtils.isBlank(modelName)) {
+                log.error("Architecture model name/file path should not be empty.");
+                return Constants.RETURN_APPLICATION_INFO_MISSING;
+            }
+        } else {
+            modelName = filePath.substring(filePath.lastIndexOf("/")+1);
+            log.info("Uploading architecture model");
+            architectureStudioService.uploadArchitectureModel(filePath, false);
         }
+
         log.info("Getting all architecture models");
         Set<ArchitectureModelDto> modelDtoSet = architectureStudioService.getArchitectureModels();
         log.info("Available Architecture Models:");
@@ -79,7 +93,7 @@ public class ArchitectureStudioCommand extends BasicCollable{
         }
 
         if(modelDtoSet.isEmpty()){
-            log.info("No archutecture models available");
+            log.info("No architecture models available");
             log.info(String.format("%s not found in available architecture models list", modelName));
             return Constants.RETURN_ARCHITECTURE_MODEL_NOT_FOUND;
         }

@@ -12,6 +12,8 @@ public interface ArchitectureStudioService {
 
     Set<ArchitectureModelDto> getArchitectureModels() throws ApplicationServiceException;
 
+    void uploadArchitectureModel(String filePath, Boolean isTemplate) throws ApplicationServiceException;
+
     Set<ArchitectureModelLinkDto>  modelChecker(String appGuid, String path, String caipVersion) throws ApiCallException;
 
     void downloadCheckedModelReport(String appGuid, String modelName, Integer metricId, String description, Integer transactionId, Set<ArchitectureModelLinkDto> modelChecker, String reportPath) throws Exception;
