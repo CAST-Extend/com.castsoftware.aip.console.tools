@@ -20,7 +20,7 @@ public class ArchitectureStudioAction extends BaseAction implements RunAction2 {
     private String modelName;
 
     @Nullable
-    private String filePath;
+    private String uploadFilePath;
 
     @Nullable
     private String reportPath;
@@ -76,9 +76,9 @@ public class ArchitectureStudioAction extends BaseAction implements RunAction2 {
 
     public void setModelName(@CheckForNull String modelName) { this.modelName = modelName; }
 
-    public String getFilePath() { return filePath; }
+    public String getUploadFilePath() { return uploadFilePath; }
 
-    public void setFilePath(@Nullable String filePath) { this.filePath = filePath; }
+    public void setUploadFilePath(@Nullable String uploadFilePath) { this.uploadFilePath = uploadFilePath; }
 
     public String getReportPath() { return reportPath; }
 

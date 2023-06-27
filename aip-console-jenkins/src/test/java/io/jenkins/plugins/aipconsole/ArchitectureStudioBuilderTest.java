@@ -63,6 +63,7 @@ public class ArchitectureStudioBuilderTest extends BaseBuilderTest{
         modelChecker.add(new ArchitectureModelLinkDto());
 
         architectureStudioBuilder.setModelName(BaseBuilderTest.TEST_MODEL_NAME);
+        architectureStudioBuilder.setUploadFilePath(BaseBuilderTest.TEST_UPLOAD_FILE_PATH);
         architectureStudioBuilder.setReportPath(BaseBuilderTest.TEST_REPORT_PATH);
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.9.0-SNAPSHOT-1997").build();

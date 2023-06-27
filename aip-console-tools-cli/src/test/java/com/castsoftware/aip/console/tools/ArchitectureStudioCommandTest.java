@@ -16,6 +16,7 @@ public class ArchitectureStudioCommandTest extends AipCommandTest<ArchitectureSt
                 "--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "--model-name", "Demo",
+                "--file-path", "path"
         };
 
         aipCommandLine.parseArgs(sb);

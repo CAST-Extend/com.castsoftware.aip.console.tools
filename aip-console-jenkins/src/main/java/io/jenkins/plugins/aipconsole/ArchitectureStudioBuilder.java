@@ -54,7 +54,7 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
     private String modelName;
 
     @Nullable
-    private String filePath;
+    private String uploadFilePath;
 
     @Nullable
     private String reportPath;
@@ -101,12 +101,12 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         EnvVars vars = run.getEnvironment(listener);
         String expandedAppName = vars.expand(getApplicationName());
         String expandedModelName = vars.expand(getModelName());
-        String expandedFilePath = vars.expand(getFilePath());
+        String expandedUploadFilePath = vars.expand(getUploadFilePath());
         String expandedReportPath = vars.expand(getReportPath());
 
         Set<ArchitectureModelDto> modelDtoSet;
         try {
-            if(StringUtils.isBlank(expandedFilePath)){
+            if(StringUtils.isBlank(expandedUploadFilePath)){
                 if (StringUtils.isBlank(expandedModelName)) {
                     listener.error(ArchitectureStudioBuilder_ModelChecker_error_modelName());
                     run.setResult(Result.FAILURE);
@@ -114,8 +114,8 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
                 }
             } else {
                 logger.println(ArchitectureStudioBuilder_ModelChecker_uploading_model());
-                Response resp = architectureStudioService.uploadArchitectureModel(expandedFilePath, false);
-                if(resp.code() == 201){
+                Response resp = architectureStudioService.uploadArchitectureModel(expandedUploadFilePath, false);
+                if(resp != null && resp.code() == 201){
                     logger.println(ArchitectureStudioBuilder_ModelChecker_upload_success());
                 }
             }
@@ -199,10 +199,10 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
     @DataBoundSetter
     public void setModelName(@CheckForNull String modelName) { this.modelName = modelName; }
 
-    public String getFilePath() { return filePath; }
+    public String getUploadFilePath() { return uploadFilePath; }
 
     @DataBoundSetter
-    public void setFilePath(@Nullable String filePath) { this.filePath = filePath; }
+    public void setUploadFilePath(@Nullable String uploadFilePath) { this.uploadFilePath = uploadFilePath; }
 
     public String getReportPath() { return reportPath; }
 
