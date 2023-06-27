@@ -13,6 +13,7 @@ import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -74,13 +75,16 @@ public class ArchitectureStudioCommand extends BasicCollable{
     public Integer processCallCommand() throws Exception {
         if(StringUtils.isBlank(filePath)){
             if (StringUtils.isBlank(modelName)) {
-                log.error("Architecture model name/file path should not be empty.");
+                log.error("Architecture model name should not be empty.");
                 return Constants.RETURN_APPLICATION_INFO_MISSING;
             }
         } else {
-            modelName = filePath.substring(filePath.lastIndexOf("/")+1);
+            modelName = filePath.substring(filePath.lastIndexOf("\\")+1);
             log.info("Uploading architecture model");
-            architectureStudioService.uploadArchitectureModel(filePath, false);
+            Response resp = architectureStudioService.uploadArchitectureModel(filePath, false);
+            if(resp.code() == 201){
+                log.info("Model uploaded successfully");
+            }
         }
 
         log.info("Getting all architecture models");
@@ -101,7 +105,7 @@ public class ArchitectureStudioCommand extends BasicCollable{
         /* Search name of the model in the list of available models and get the model details. */
         ArchitectureModelDto modelInUse = modelDtoSet
                 .stream()
-                .filter(m -> m.getName().equalsIgnoreCase(modelName))
+                .filter(m -> m.getName().equalsIgnoreCase(modelName) || m.getFileName().equalsIgnoreCase(modelName))
                 .findFirst()
                 .orElse(null);
 

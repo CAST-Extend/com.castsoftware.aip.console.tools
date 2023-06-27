@@ -4,6 +4,7 @@ import com.castsoftware.aip.console.tools.core.dto.architecturestudio.Architectu
 import com.castsoftware.aip.console.tools.core.dto.architecturestudio.ArchitectureModelLinkDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import okhttp3.Response;
 
 import java.util.Set;
 
@@ -12,7 +13,7 @@ public interface ArchitectureStudioService {
 
     Set<ArchitectureModelDto> getArchitectureModels() throws ApplicationServiceException;
 
-    void uploadArchitectureModel(String filePath, Boolean isTemplate) throws ApplicationServiceException;
+    Response uploadArchitectureModel(String filePath, Boolean isTemplate) throws ApplicationServiceException;
 
     Set<ArchitectureModelLinkDto>  modelChecker(String appGuid, String path, String caipVersion) throws ApiCallException;
 

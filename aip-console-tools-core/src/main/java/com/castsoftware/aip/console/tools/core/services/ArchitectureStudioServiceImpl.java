@@ -13,11 +13,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.apache.commons.fileupload.FileUploadBase;
+import org.springframework.http.MediaType;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Log
@@ -39,15 +42,18 @@ public class ArchitectureStudioServiceImpl implements ArchitectureStudioService 
         }
     }
 
-    public void uploadArchitectureModel(String filePath, Boolean isTemplate) throws ApplicationServiceException {
-        try{
+    public Response uploadArchitectureModel(String filePath, Boolean isTemplate) throws ApplicationServiceException {
+        try {
             File file = new File(filePath);
-            CheckModelUploadRequest checkModelUploadRequest = CheckModelUploadRequest.builder().isTemplate(isTemplate).file(file).build();
             String uploadModelUrl = ApiEndpointHelper.getArchitectureUploadModelEndpoint();
-            restApiService.postForEntity(
-                    uploadModelUrl,
-                    checkModelUploadRequest,
-                    String.class);
+            Map<String, String> contentHeaderMap = new HashMap<>();
+            contentHeaderMap.put(FileUploadBase.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+            contentHeaderMap.put(FileUploadBase.CONTENT_DISPOSITION, "form-data; name=\"file\"; filename=\"" + file.getName() + "\"");
+
+            Map<String, Map<String, String>> headers = new HashMap<>();
+            headers.put("content", contentHeaderMap);
+            Response resp = restApiService.exchangeMultipartForResponse("POST", uploadModelUrl, headers, file);
+            return resp;
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to upload architecture model", e);
         }

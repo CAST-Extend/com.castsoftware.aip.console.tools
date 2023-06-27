@@ -6,10 +6,11 @@ import lombok.Setter;
 
 import java.io.File;
 
+@Builder
 @Getter
 @Setter
-@Builder
 public class CheckModelUploadRequest {
+
     private File file;
-    private Boolean isTemplate;
+
 }

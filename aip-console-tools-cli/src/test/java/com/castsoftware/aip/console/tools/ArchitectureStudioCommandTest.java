@@ -15,10 +15,11 @@ public class ArchitectureStudioCommandTest extends AipCommandTest<ArchitectureSt
         String[] sb = new String[]{
                 "--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
-                "--model-name", "Demo"
+                "--model-name", "Demo",
         };
 
         aipCommandLine.parseArgs(sb);
         assertEquals(TestConstants.TEST_CREATRE_APP, aipCommand.getApplicationName());
     }
+
 }
