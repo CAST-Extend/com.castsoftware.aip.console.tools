@@ -16,6 +16,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -41,6 +42,8 @@ import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_M
 import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_info_availableModels_modelName;
 import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_info_models;
 import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_success;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_upload_success;
+import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_uploading_model;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 
 public class ArchitectureStudioBuilder extends  CommonActionBuilder {
@@ -49,6 +52,9 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
     private String applicationName;
     @CheckForNull
     private String modelName;
+
+    @Nullable
+    private String uploadFilePath;
 
     @Nullable
     private String reportPath;
@@ -95,16 +101,25 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         EnvVars vars = run.getEnvironment(listener);
         String expandedAppName = vars.expand(getApplicationName());
         String expandedModelName = vars.expand(getModelName());
+        String expandedUploadFilePath = vars.expand(getUploadFilePath());
         String expandedReportPath = vars.expand(getReportPath());
 
-        if (StringUtils.isBlank(expandedModelName)) {
-            listener.error(ArchitectureStudioBuilder_ModelChecker_error_modelName());
-            run.setResult(Result.FAILURE);
-            return;
-        }
-        logger.println(ArchitectureStudioBuilder_ModelChecker_info_models());
         Set<ArchitectureModelDto> modelDtoSet;
         try {
+            if(StringUtils.isBlank(expandedUploadFilePath)){
+                if (StringUtils.isBlank(expandedModelName)) {
+                    listener.error(ArchitectureStudioBuilder_ModelChecker_error_modelName());
+                    run.setResult(Result.FAILURE);
+                    return;
+                }
+            } else {
+                logger.println(ArchitectureStudioBuilder_ModelChecker_uploading_model());
+                Response resp = architectureStudioService.uploadArchitectureModel(expandedUploadFilePath, false);
+                if(resp != null && resp.code() == 201){
+                    logger.println(ArchitectureStudioBuilder_ModelChecker_upload_success());
+                }
+            }
+            logger.println(ArchitectureStudioBuilder_ModelChecker_info_models());
             modelDtoSet = architectureStudioService.getArchitectureModels();
         } catch (ApplicationServiceException e) {
             throw new RuntimeException(e);
@@ -126,7 +141,7 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         /* Search name of the model in the list of available models and get the model details. */
         ArchitectureModelDto modelInUse = modelDtoSet
                 .stream()
-                .filter(m -> m.getName().equalsIgnoreCase(expandedModelName))
+                .filter(m -> m.getName().equalsIgnoreCase(expandedModelName) || m.getFileName().equalsIgnoreCase(expandedModelName))
                 .findFirst()
                 .orElse(null);
 
@@ -179,10 +194,15 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         return VersionInformation.fromVersionString("2.8.0");
     }
 
-    public String getModelName() { return  modelName; }
+    public String getModelName() { return modelName; }
 
     @DataBoundSetter
     public void setModelName(@CheckForNull String modelName) { this.modelName = modelName; }
+
+    public String getUploadFilePath() { return uploadFilePath; }
+
+    @DataBoundSetter
+    public void setUploadFilePath(@Nullable String uploadFilePath) { this.uploadFilePath = uploadFilePath; }
 
     public String getReportPath() { return reportPath; }
 

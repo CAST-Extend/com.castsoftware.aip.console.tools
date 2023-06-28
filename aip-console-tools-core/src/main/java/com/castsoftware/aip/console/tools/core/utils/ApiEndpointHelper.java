@@ -84,6 +84,10 @@ public class ApiEndpointHelper {
         return ROOT_PATH + ARCHITECTURE_ENDPOINT + MODELS;
     }
 
+    public static String getArchitectureUploadModelEndpoint() {
+        return ROOT_PATH + ARCHITECTURE_ENDPOINT + MODELS + UPLOAD_ENDPOINT;
+    }
+
     public static String getModelCheckUrl(String appGuid) {
         return getApplicationPath(appGuid) + ARCHITECTURE_ENDPOINT + MODELS + MODEL_CHECK;
     }

@@ -20,6 +20,9 @@ public class ArchitectureStudioAction extends BaseAction implements RunAction2 {
     private String modelName;
 
     @Nullable
+    private String uploadFilePath;
+
+    @Nullable
     private String reportPath;
 
     private final long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -69,9 +72,13 @@ public class ArchitectureStudioAction extends BaseAction implements RunAction2 {
         this.applicationName = applicationName;
     }
 
-    public String getModelName() { return  modelName; }
+    public String getModelName() { return modelName; }
 
     public void setModelName(@CheckForNull String modelName) { this.modelName = modelName; }
+
+    public String getUploadFilePath() { return uploadFilePath; }
+
+    public void setUploadFilePath(@Nullable String uploadFilePath) { this.uploadFilePath = uploadFilePath; }
 
     public String getReportPath() { return reportPath; }
 

@@ -7,6 +7,9 @@
     <f:entry title="${%modelName}" field="modelName" description="${%modelName.descr}">
         <f:textbox/>
     </f:entry>
+    <f:entry title="${%uploadFilePath}" field="uploadFilePath" description="${%uploadFilePath.descr}">
+        <f:textbox/>
+    </f:entry>
     <f:entry title="${%reportPath}" field="reportPath" description="${%reportPath.descr}">
         <f:textbox/>
     </f:entry>

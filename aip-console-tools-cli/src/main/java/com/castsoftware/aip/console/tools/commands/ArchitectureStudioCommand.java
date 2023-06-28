@@ -13,6 +13,7 @@ import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,6 +58,13 @@ public class ArchitectureStudioCommand extends BasicCollable{
             required = true)
     private String modelName;
 
+    @CommandLine.Option(
+            names = {"-f", "--file-path"},
+            paramLabel = "FILE_PATH",
+            description = "",
+            required = true)
+    private String filePath;
+
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
 
     public ArchitectureStudioCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
@@ -65,10 +73,20 @@ public class ArchitectureStudioCommand extends BasicCollable{
 
     @Override
     public Integer processCallCommand() throws Exception {
-        if (StringUtils.isBlank(modelName)) {
-            log.error("Architecture model name should not be empty.");
-            return Constants.RETURN_APPLICATION_INFO_MISSING;
+        if(StringUtils.isBlank(filePath)){
+            if (StringUtils.isBlank(modelName)) {
+                log.error("Architecture model name should not be empty.");
+                return Constants.RETURN_APPLICATION_INFO_MISSING;
+            }
+        } else {
+            modelName = filePath.substring(filePath.lastIndexOf("\\")+1);
+            log.info("Uploading architecture model");
+            Response resp = architectureStudioService.uploadArchitectureModel(filePath, false);
+            if(resp.code() == 201){
+                log.info("Model uploaded successfully");
+            }
         }
+
         log.info("Getting all architecture models");
         Set<ArchitectureModelDto> modelDtoSet = architectureStudioService.getArchitectureModels();
         log.info("Available Architecture Models:");
@@ -79,7 +97,7 @@ public class ArchitectureStudioCommand extends BasicCollable{
         }
 
         if(modelDtoSet.isEmpty()){
-            log.info("No archutecture models available");
+            log.info("No architecture models available");
             log.info(String.format("%s not found in available architecture models list", modelName));
             return Constants.RETURN_ARCHITECTURE_MODEL_NOT_FOUND;
         }
@@ -87,7 +105,7 @@ public class ArchitectureStudioCommand extends BasicCollable{
         /* Search name of the model in the list of available models and get the model details. */
         ArchitectureModelDto modelInUse = modelDtoSet
                 .stream()
-                .filter(m -> m.getName().equalsIgnoreCase(modelName))
+                .filter(m -> m.getName().equalsIgnoreCase(modelName) || m.getFileName().equalsIgnoreCase(modelName))
                 .findFirst()
                 .orElse(null);
 

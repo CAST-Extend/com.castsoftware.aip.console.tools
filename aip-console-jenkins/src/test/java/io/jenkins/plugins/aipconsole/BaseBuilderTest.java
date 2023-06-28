@@ -33,6 +33,8 @@ public class BaseBuilderTest {
     protected static final String TEST_JOB_GUID = "jobGuid";
     protected static final String TEST_NODE_NAME = "nodeName";
     protected static final String TEST_MODEL_NAME = "modelName";
+
+    protected static final String TEST_UPLOAD_FILE_PATH = "C:\\Report\\model.CASTArchitect";
     protected static final String TEST_REPORT_PATH = "C:\\Report";
     protected static final ApplicationDto TEST_APP = ApplicationDto.builder().name(TEST_APP_NAME).guid(TEST_APP_NAME).inPlaceMode(false).build();
     @Rule
