@@ -7,7 +7,7 @@ SET IN_PLACE_MODE=%~4
 SET DOMAIN_NAME=%~5
 SET CSS=%~6
 REM SET NODE_NAME=%~7
-set TOOLS_EXTENSION=com.castsoftware.aip.console.tools
+set TOOLS_EXTENSION=com.castsoftware.aip.console.tools.%TOOLS_VERSION%
 set EXTEND_URL=https://extend.castsoftware.com
 set PATH=C:\CAST-Caches\Win64;%PATH%
 
@@ -24,19 +24,19 @@ if not defined TOOLSDIR (
 	set TOOLSDIR=%WORKSPACE%\bin
 )
 
-if not exist %TOOLSDIR%\%TOOLS_EXTENSION%*.zip (
-    @echo ===== Processing NUPKG artifact ==========
-7z.exe e "%DEV_ARTIFACT%\upload\com.castsoftware.aip.console.tools*.nupkg" -y -o"%TOOLSDIR%" com.castsoftware.aip.console.tools*.zip
+if not exist %TOOLSDIR%\%TOOLS_EXTENSION%.zip (
+    @echo ===== Processing NUPKG artifact version %TOOLS_VERSION% ==========
+7z.exe e "%DEV_ARTIFACT%\upload\com.castsoftware.aip.console.tools.%TOOLS_VERSION%.nupkg" -y -o"%TOOLSDIR%" %TOOLS_EXTENSION%.zip
     REM @echo.
     REM @echo ERROR : %TOOLSDIR%\%TOOLS_EXTENSION%.zip file should be downloaded from DEV Build job ...
     REM @echo.
     REM exit /b -1
 )
 
-echo ----------------------------
-echo Unzip the downloaded extension
-echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%*.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
-echo ----------------------------
+@echo ----------------------------
+@echo Unzip the downloaded extension
+@echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%*.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
+@echo ----------------------------
 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
 
 SET TOOLS_CLI_PATH=%TOOLSDIR%\%TOOLS_EXTENSION%
