@@ -24,14 +24,13 @@ if not defined TOOLSDIR (
 	set TOOLSDIR=%WORKSPACE%\bin
 )
 
-echo ===== Processing NUPKG artifact ==========
-7z.exe e "%DEV_ARTIFACT%\upload\com.castsoftware.aip.console.tools*.nupkg" -y -o"%TOOLSDIR%" com.castsoftware.aip.console.tools*.zip
-
 if not exist %TOOLSDIR%\%TOOLS_EXTENSION%.zip (
-    @echo.
-    @echo ERROR : %TOOLSDIR%\%TOOLS_EXTENSION%.zip file should be downloaded from DEV Build job ...
-    @echo.
-    exit /b -1
+    @echo ===== Processing NUPKG artifact ==========
+7z.exe e "%DEV_ARTIFACT%\upload\com.castsoftware.aip.console.tools*.nupkg" -y -o"%TOOLSDIR%" com.castsoftware.aip.console.tools*.zip
+    REM @echo.
+    REM @echo ERROR : %TOOLSDIR%\%TOOLS_EXTENSION%.zip file should be downloaded from DEV Build job ...
+    REM @echo.
+    REM exit /b -1
 )
 
 echo ----------------------------
