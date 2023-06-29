@@ -26,7 +26,7 @@ if not defined TOOLSDIR (
 
 if not exist %TOOLSDIR%\%TOOLS_EXTENSION%.zip (
     @echo ===== Processing NUPKG artifact version %TOOLS_VERSION% ==========
-7z.exe e "%DEV_ARTIFACT%\upload\com.castsoftware.aip.console.tools.%TOOLS_VERSION%.nupkg" -y -o"%TOOLSDIR%" %TOOLS_EXTENSION%.zip
+7z.exe e "%DEV_ARTIFACT%\upload\com.castsoftware.aip.console.tools*.nupkg" -y -o"%TOOLSDIR%" %TOOLS_EXTENSION%.zip
     REM @echo.
     REM @echo ERROR : %TOOLSDIR%\%TOOLS_EXTENSION%.zip file should be downloaded from DEV Build job ...
     REM @echo.
