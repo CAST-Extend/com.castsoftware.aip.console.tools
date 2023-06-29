@@ -7,7 +7,7 @@ SET IN_PLACE_MODE=%~4
 SET DOMAIN_NAME=%~5
 SET CSS=%~6
 REM SET NODE_NAME=%~7
-set TOOLS_EXTENSION=com.castsoftware.aip.console.tools
+set TOOLS_EXTENSION=com.castsoftware.aip.console.tools.%TOOLS_VERSION%
 set EXTEND_URL=https://extend.castsoftware.com
 set PATH=C:\CAST-Caches\Win64;%PATH%
 
@@ -38,6 +38,10 @@ for %%a in ( SOURCES_ZIP TOOLSDIR ) do (
 			@echo.
 			exit /b 1
 	)
+)
+if not exist %TOOLSDIR%\%TOOLS_EXTENSION%.zip (
+ @echo ===== Processing NUPKG artifact version %TOOLS_VERSION% ==========
+7z.exe e "%DEV_ARTIFACT%\upload\com.castsoftware.aip.console.tools*.nupkg" -y -o"%TOOLSDIR%" %TOOLS_EXTENSION%.zip
 )
 echo ----------------------------
 echo Unzip the downloaded build artifact

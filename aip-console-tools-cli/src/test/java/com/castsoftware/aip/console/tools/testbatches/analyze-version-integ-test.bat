@@ -5,7 +5,7 @@ SET API_KEY=%~2
 SET APP_NAME=%~3
 SET VERSION_NAME=%~4
 
-set TOOLS_EXTENSION=com.castsoftware.aip.console.tools
+set TOOLS_EXTENSION=com.castsoftware.aip.console.tools.%TOOLS_VERSION%
 set EXTEND_URL=https://extend.castsoftware.com
 set PATH=C:\CAST-Caches\Win64;%PATH%
 
@@ -30,7 +30,10 @@ for %%a in ( VERSION_NAME APP_NAME TOOLSDIR) do (
 			exit /b 1
 	)
 )
-
+if not exist %TOOLSDIR%\%TOOLS_EXTENSION%.zip (
+ @echo ===== Processing NUPKG artifact version %TOOLS_VERSION% ==========
+7z.exe e "%DEV_ARTIFACT%\upload\com.castsoftware.aip.console.tools*.nupkg" -y -o"%TOOLSDIR%" %TOOLS_EXTENSION%.zip
+)
 echo ----------------------------
 echo Unzip the downloaded build artifact
 echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
