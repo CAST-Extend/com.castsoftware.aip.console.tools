@@ -24,7 +24,7 @@ if not defined TOOLSDIR (
 	set TOOLSDIR=%WORKSPACE%\bin
 )
 
-if not exist %TOOLSDIR%\%TOOLS_EXTENSION%.zip (
+if not exist %TOOLSDIR%\%TOOLS_EXTENSION%*.zip (
     @echo ===== Processing NUPKG artifact ==========
 7z.exe e "%DEV_ARTIFACT%\upload\com.castsoftware.aip.console.tools*.nupkg" -y -o"%TOOLSDIR%" com.castsoftware.aip.console.tools*.zip
     REM @echo.
@@ -35,7 +35,7 @@ if not exist %TOOLSDIR%\%TOOLS_EXTENSION%.zip (
 
 echo ----------------------------
 echo Unzip the downloaded extension
-echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
+echo 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%*.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
 echo ----------------------------
 7z.exe x "%TOOLSDIR%\%TOOLS_EXTENSION%.zip" -y -o"%TOOLSDIR%\%TOOLS_EXTENSION%"
 
