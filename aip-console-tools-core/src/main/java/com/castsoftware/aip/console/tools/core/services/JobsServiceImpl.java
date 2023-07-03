@@ -56,7 +56,7 @@ public class JobsServiceImpl implements JobsService {
 
     public JobsServiceImpl(RestApiService restApiService) {
         this.restApiService = restApiService;
-        this.pollingSleepDuration = POLL_SLEEP_DURATION;
+        pollingSleepDuration = POLL_SLEEP_DURATION;
     }
 
     public JobsServiceImpl(RestApiService restApiService, long pollingSleepDuration) {
@@ -191,30 +191,7 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException {
-        ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder();
-        requestBuilder.appGuid(applicationGuid);
-        if (StringUtils.isNotEmpty(nodeName)) {
-            requestBuilder.targetNode(nodeName);
-        }
-        if (StringUtils.isNotEmpty(caipVersion)) {
-            requestBuilder.caipVersion(caipVersion);
-        }
-        if (StringUtils.isNotEmpty(snapshotName)) {
-            requestBuilder.snapshotName(snapshotName);
-        }
-
-        try {
-            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getFirstScanEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
-            return jobStartDto.getJobGuid();
-        } catch (ApiCallException e) {
-            log.log(Level.SEVERE, "Unable to perform application First-Scan action (Run Analysis)", e);
-            throw new JobServiceException("The First-Scan of application failed", e);
-        }
-    }
-
-    @Override
-    public String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException {
+    public String startDeepAnalysis(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
                 .appGuid(applicationGuid);
         if (StringUtils.isNotEmpty(nodeName)) {
@@ -227,8 +204,18 @@ public class JobsServiceImpl implements JobsService {
             requestBuilder.snapshotName(snapshotName);
         }
 
+        //The module parameter should be left empty or null when dealing with full content
+        if (moduleGenerationType != null && (moduleGenerationType != ModuleGenerationType.FULL_CONTENT)) {
+            requestBuilder.moduleGenerationType(moduleGenerationType.toString());
+        }
+        return startDeepAnalysis(requestBuilder.build());
+    }
+
+    @Override
+    public String startDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest) throws JobServiceException {
+        log.fine("Job Parameters: " + fastScanRequest.toString());
         try {
-            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getReScanApplicationEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getDeepAnalysisEndPoint(), fastScanRequest, SuccessfulJobStartDto.class);
             return jobStartDto.getJobGuid();
         } catch (ApiCallException e) {
             log.log(Level.SEVERE, "Unable to perform ReScan application action (Run Analysis)", e);
@@ -384,17 +371,20 @@ public class JobsServiceImpl implements JobsService {
     }
 
     @Override
-    public <R> R pollAndWaitForJobFinished(String jobGuid, Consumer<JobExecutionDto> stepChangedCallback, Consumer<LogContentDto> pollingCallback
-            , Function<JobExecutionDto, R> completionCallback, Supplier<Long> sleepPeriodSupplier) throws JobServiceException {
+    public <R> R pollAndWaitForJobFinished(String jobGuid,
+                                           Consumer<JobExecutionDto> stepChangedCallback,
+                                           Consumer<LogContentDto> pollingCallback,
+                                           Function<JobExecutionDto, R> completionCallback,
+                                           Supplier<Long> sleepPeriodSupplier) throws JobServiceException {
         assert StringUtils.isNotBlank(jobGuid);
 
-        long sleepPeriod = sleepPeriodSupplier.get().longValue();
+        long sleepPeriod = (sleepPeriodSupplier != null) ? sleepPeriodSupplier.get().longValue() : getDefaultSleepDuration();
         String jobDetailsEndpoint = ApiEndpointHelper.getJobDetailsEndpoint(jobGuid);
         String previousStep = "";
         log.fine("Checking status of Job with GUID " + jobGuid);
         int retryCount = 0;
         try {
-            JobExecutionDto jobStatus;
+            JobExecutionDto jobDetails;
             String logName = null;
             int startOffset = 0;
             while (true) {
@@ -402,9 +392,9 @@ public class JobsServiceImpl implements JobsService {
                 // Force login to keep session alive (jobs endpoint doesn't refresh session status)
                 restApiService.login();
 
-                // Sometimes it takes more than 10 secs till the jobstatus is ready
-                jobStatus = getJobStatus(jobDetailsEndpoint);
-                if (jobStatus == null) {
+                // Sometimes it takes more than 10 secs till the job status is ready
+                jobDetails = getJobStatus(jobDetailsEndpoint);
+                if (jobDetails == null) {
                     if (retryCount < 20) {
                         ++retryCount;
                         continue;
@@ -416,12 +406,12 @@ public class JobsServiceImpl implements JobsService {
                     retryCount = 0;
                 }
 
-                String currentStep = jobStatus.getCurrentStep();
+                String currentStep = jobDetails.getCurrentStep();
 
                 if (currentStep != null && !currentStep.equalsIgnoreCase(previousStep)) {
                     previousStep = currentStep;
                     if (stepChangedCallback != null) {
-                        stepChangedCallback.accept(jobStatus);
+                        stepChangedCallback.accept(jobDetails);
                     }
                     logName = getLogName(jobGuid, currentStep);
                     startOffset = 0;
@@ -434,12 +424,16 @@ public class JobsServiceImpl implements JobsService {
                         startOffset = startOffset + logContent.getNbLines();
                     }
                 }
+                if(jobDetails.getState() == JobState.FAILED){
+                    log.log(Level.SEVERE, "Error occurred while performing fast-scan");
+                    break;
+                }
 
-                if (jobStatus.getState() != JobState.STARTED && jobStatus.getState() != JobState.STARTING) {
+                if (jobDetails.getState() != JobState.STARTED && jobDetails.getState() != JobState.STARTING) {
                     break;
                 }
             }
-            return completionCallback.apply(jobStatus);
+            return completionCallback.apply(jobDetails);
         } catch (InterruptedException | ApiCallException e) {
             log.log(Level.SEVERE, "Error occurred while polling the job status", e);
             throw new JobServiceException(e);

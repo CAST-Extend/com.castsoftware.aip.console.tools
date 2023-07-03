@@ -6,6 +6,7 @@ import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
@@ -61,11 +62,6 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
     private ExclusionRuleType[] exclusionRules;
 
-    @CommandLine.Option(names = {"--sleep-duration"},
-            description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
-            defaultValue = "1")
-    private long sleepDuration;
-
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
@@ -83,22 +79,20 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
 
-        if (filePath == null || !filePath.exists()) {
+        if (filePath == null) {
             log.error("A valid file path required to perform the FAST SCAN operation");
             return Constants.RETURN_MISSING_FILE;
         }
 
         log.info("Fast-Scan args:");
-        log.info(String.format("\tApplication: %s%n\tFile: %s%n\tsleep: %d%n", applicationName, filePath.getAbsolutePath(), sleepDuration));
+        log.info(String.format("\tApplication: %s%n\tFile: %s%n\tsleep: %d%n", applicationName, filePath.getAbsolutePath(), sharedOptions.getSleepDuration()));
 
         String applicationGuid;
         Thread shutdownHook = null;
-        boolean OnBoardingModeWasOn = false; //status before processing
         try {
-            OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
+            boolean OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
             if (!OnBoardingModeWasOn) {
                 log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
-                //applicationService.setEnableOnboarding(true);
                 return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
             }
 
@@ -108,7 +102,7 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             log.info("About to trigger New workflow for: 'Fast-Scan'");
             String sourcePath = uploadFile(app != null ? app.getGuid() : null);
 
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
             if (app == null) {
                 applicationGuid = applicationService.onboardApplication(applicationName, domainName, getSharedOptions().isVerbose(), sourcePath);
                 log.info("Onboard Application job has started: application GUID= " + applicationGuid);
@@ -116,6 +110,11 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
 
             //Refresh application information even app was existing
             app = applicationService.getApplicationFromName(applicationName);
+            if (!app.isOnboarded()) {
+                log.info("The existing application has not been created using the Fast-Scan workflow.\n" +
+                        "The 'Fast-Scan' operation will not be applied");
+                return Constants.RETURN_ONBOARD_FAST_SCAN_FORBIDDEN;
+            }
 
             applicationGuid = app.getGuid();
             ApplicationOnboardingDto applicationOnboardingDto = applicationService.getApplicationOnboarding(applicationGuid);
@@ -123,28 +122,26 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             String targetNode = applicationOnboardingDto.getTargetNode();
 
             DeliveryConfigurationDto deliveryConfiguration = null;
-                Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
-                if (exclusionRules != null && exclusionRules.length > 0) {
-                    exclusions.setInitialExclusionRules(exclusionRules);
-                }
+            Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
+            if (exclusionRules != null && exclusionRules.length > 0) {
+                exclusions.setInitialExclusionRules(exclusionRules);
+            }
 
-                //discover-packages
-                log.info("Preparing the Application Delivery Configuration");
-                final DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
-                String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(applicationGuid, sourcePath, exclusions,
-                        VersionStatus.IMAGING_PROCESSED, true, (config) -> deliveryConfig[0] = config);
-                deliveryConfiguration = deliveryConfig[0];
-                log.info("Application Delivery Configuration done: GUID=" + deliveryConfigurationGuid);
+            //discover-packages
+            log.info("Preparing the Application Delivery Configuration");
+            DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
+            String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(applicationGuid, sourcePath, exclusions,
+                    VersionStatus.DELIVERED, true, (config) -> deliveryConfig[0] = config, true);
+            deliveryConfiguration = deliveryConfig[0];
+            log.info("Application Delivery Configuration done: GUID=" + deliveryConfigurationGuid);
+            deliveryConfiguration.setGuid(deliveryConfigurationGuid);
 
             //rediscover-application
-            log.info("Start Fast-Scan action");
-            applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
+            log.info("Start Fast-Scan action with Delivery Configuration Guid=" + deliveryConfiguration.getGuid());
+            String jobStatus = applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
                     caipVersion, targetNode, getSharedOptions().isVerbose(), cliLogPolling);
-            log.info("Fast-Scan done successfully");
-
-            if (!applicationService.isImagingAvailable()) {
-                log.info("The 'Deep Analysis' step has been disabled by user. To perform this step do configure CAST Imaging and use the dedicated CLI command");
-                return Constants.RETURN_RUN_ANALYSIS_DISABLED;
+            if(jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())){
+                log.info("Fast-Scan done successfully");
             }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

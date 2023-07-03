@@ -193,7 +193,7 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
             }
 
             String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
-            log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(applicationName, expandedCssServerName));
+            log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(expandedAppName, StringUtils.isEmpty(expandedCssServerName) ? "default" : expandedCssServerName));
 
             log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
             String createJobGuid = jobsService.startCreateApplication(expandedAppName, expandedNodeName, expandedDomainName, inPlaceMode, null, expandedCssServerName);

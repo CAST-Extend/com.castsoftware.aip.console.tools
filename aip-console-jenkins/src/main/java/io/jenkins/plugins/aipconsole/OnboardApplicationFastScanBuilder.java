@@ -46,6 +46,7 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanForbidden;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart;
@@ -54,7 +55,6 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_mode;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_scanMode;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_upload_done;
@@ -94,7 +94,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
         JnksLogPollingProviderImpl(JobsService jobsService, Run<?, ?> run, TaskListener listener, boolean verbose, long sleepDuration) {
             this.run = run;
             this.listener = listener;
-            this.log = listener.getLogger();
+            log = listener.getLogger();
             this.verbose = verbose;
             this.jobsService = jobsService;
             this.sleepDuration = sleepDuration;
@@ -158,7 +158,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
         String expandedDomainName = environmentVariables.expand(getDomainName());
         boolean runAnalysis = false;
 
-        if (!runAnalysis && (StringUtils.isEmpty(expandedFilePath) || !FileUtils.exists(expandedFilePath))) {
+        if (!runAnalysis && (StringUtils.isEmpty(expandedFilePath))) {
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_missingFilePath());
             run.setResult(getDefaultResult());
             return;
@@ -191,6 +191,12 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
 
             //Refresh application information
             app = applicationService.getApplicationFromName(expandedAppName);
+            if (!app.isOnboarded()) {
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_FastScanForbidden());
+                run.setResult(getDefaultResult());
+                return;
+            }
+
             applicationGuid = app.getGuid();
 
             ApplicationOnboardingDto applicationOnboardingDto = applicationService.getApplicationOnboarding(applicationGuid);
@@ -202,22 +208,19 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
 
             //discover-packages
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration());
-            final DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
+            DeliveryConfigurationDto[] deliveryConfig = new DeliveryConfigurationDto[1];
             String deliveryConfigurationGuid = applicationService.discoverPackagesAndCreateDeliveryConfiguration(applicationGuid, sourcePath, exclusions,
-                    VersionStatus.IMAGING_PROCESSED, true, (config) -> deliveryConfig[0] = config);
+                    VersionStatus.DELIVERED, true, (config) -> deliveryConfig[0] = config, true);
             DeliveryConfigurationDto deliveryConfiguration = deliveryConfig[0];
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done(deliveryConfigurationGuid));
-
+            deliveryConfiguration.setGuid(deliveryConfigurationGuid);
             //rediscover-application
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart("Fast-Scan"));
             JnksLogPollingProviderImpl jnksLogPollingProvider = new JnksLogPollingProviderImpl(jobsService, run, listener, verbose, sleepDuration);
-            applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
+            String jobStatus = applicationService.fastScan(applicationGuid, sourcePath, "", deliveryConfiguration,
                     caipVersion, targetNode, verbose, jnksLogPollingProvider);
-            logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Rediscover"));
-
-            //Run Analysis or Deep analysis
-            if (!applicationService.isImagingAvailable()) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_cancelled());
+            if(jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_actionDone("Fast-Scan"));
             }
         } catch (ApplicationServiceException | JobServiceException e) {
             e.printStackTrace(logger);

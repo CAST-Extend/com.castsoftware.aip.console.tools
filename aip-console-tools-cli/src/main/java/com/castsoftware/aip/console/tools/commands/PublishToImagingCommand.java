@@ -3,6 +3,7 @@ package com.castsoftware.aip.console.tools.commands;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -14,8 +15,8 @@ import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import picocli.CommandLine;
 
 import java.util.EnumSet;
@@ -80,7 +81,30 @@ public class PublishToImagingCommand extends BasicCollable {
                 return Constants.RETURN_ONBOARD_VERSION_STATUS_INVALID;
             }
 
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), 15);
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
+            //TODO: refactor after release to get separated workflows
+            if (applicationDto.isOnboarded()) {
+                log.info("Triggering Publish to Imaging for an application using Fast-Scan workflow.");
+                ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
+                        .appGuid(applicationDto.getGuid());
+                String targetNode = applicationDto.getTargetNode();
+                if (StringUtils.isNotEmpty(targetNode)) {
+                    requestBuilder.targetNode(targetNode);
+                }
+                String caipVersion = applicationDto.getCaipVersion();
+                if (StringUtils.isNotEmpty(caipVersion)) {
+                    requestBuilder.caipVersion(caipVersion);
+                }
+                requestBuilder.processImaging(true);
+
+                String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), cliLogPolling);
+                if (StringUtils.isEmpty(appGuid)) {
+                    log.error("Something went wrong while Publishing to Imaging.");
+                    return Constants.RETURN_JOB_FAILED;
+                }
+                return Constants.RETURN_OK;
+            }
+
             String appGuid = applicationService.publishToImaging(applicationDto.getGuid(), cliLogPolling);
 
             if (StringUtils.isEmpty(appGuid)) {

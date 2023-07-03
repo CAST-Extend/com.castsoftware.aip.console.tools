@@ -12,6 +12,7 @@ import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
@@ -75,9 +76,9 @@ public interface ApplicationService {
 
     boolean isImagingAvailable() throws ApplicationServiceException;
 
-    String runFirstScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
+    String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
-    String runReScanApplication(String applicationGuid, String targetNode, String caipVersion, String snapshotName, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
+    String runDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
     /**
      * Retrieve an application's GUID from the given application name.
@@ -128,7 +129,8 @@ public interface ApplicationService {
      */
     String createDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, boolean rescan) throws JobServiceException, PackagePathInvalidException;
 
-    String discoverPackagesAndCreateDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, VersionStatus status, boolean rescan, Consumer<DeliveryConfigurationDto> deliveryConfigConsumer) throws JobServiceException, PackagePathInvalidException;
+    String discoverPackagesAndCreateDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions, VersionStatus status, boolean rescan
+            , Consumer<DeliveryConfigurationDto> deliveryConfigConsumer, boolean throwPackagePathCheckError) throws JobServiceException, PackagePathInvalidException;
 
     String reDiscoverApplication(String appGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig,
                                  String caipVersion, String targetNode, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
@@ -143,6 +145,8 @@ public interface ApplicationService {
      * @throws ApplicationServiceException
      */
     DebugOptionsDto getDebugOptions(String appGuid);
+
+    void updateSecurityDataflow(String appGuid, boolean securityDataflowFlag, String technologyPath);
 
     void updateShowSqlDebugOption(String appGuid, boolean showSql);
 

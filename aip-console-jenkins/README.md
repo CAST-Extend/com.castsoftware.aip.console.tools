@@ -156,8 +156,8 @@ This command is used to perform the *Fast scan* or to *refresh* the sources cont
 Analysis* (run the
 analysis).
 
-- To perform *Fast Scan* operation do select *Console Onboard Application Fast-Scan* step
-- To perform *Deep Scan* operation do select *Console Onboard Application Deep-Analysis* step
+- To perform *Fast Scan/New Scan* operation do select *Console Onboard Application Fast-Scan* step
+- To perform *Deep Scan/Run Analysis* operation do select *Console Onboard Application Deep-Analysis* step
 
 **build step**
 
@@ -215,20 +215,34 @@ The Add Version step provides the following parameters :
 
 * *Application Name* (**required**): The name of the application for which a new version will be created.
   * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
-* *File/Folder path* (**required**): The source code that will be used to create the new version. You can provide either :
+* *File/Folder path* (**required**): The source code that will be used to create the new version. You can provide
+  either :
   * A File path on the Jenkins Node where the job will be run to a ZIP, TGZ or TAR.GZ file
-  * A Folder Path on the AIP Node relative to the Source Folder Path defined inside AIP Console. For more information, [please see here under Source Folder Location](https://doc.castsoftware.com/display/AIPCONSOLE/Administration+Center+-+Settings) **Requires AIP Console 1.15.0 or above**
-  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${WORKSPACE}` will be replaced by the current jobs' workspace path.
+  * A Folder Path on the AIP Node relative to the Source Folder Path defined inside AIP Console. For more
+    information, [please see here under Source Folder Location](https://doc.castsoftware.com/display/AIPCONSOLE/Administration+Center+-+Settings) **
+    Requires AIP Console 1.15.0 or above**
+  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${WORKSPACE}` will be
+    replaced by the current jobs' workspace path.
 * *Create Application if missing*: If checked and the application cannot be found on AIP Console, it will be created.
-  * If checked, the option to specify a CSS server will appear. You can then specify which CSS server will store the application data. Format should ``host:port/dbName``. You can check the available CSS server in the Admin Section of AIP Console :
-<img src="./doc/images/target-css_settings.png" alt="css connection details in the aip console admin center" style="zoom:50%;" />
+  * If checked, the option to specify a CSS server will appear. You can then specify which CSS server will store the
+    application data. Format should ``host:port/dbName``. You can check the available CSS server in the Admin Section of
+    AIP Console :
+    <img src="./doc/images/target-css_settings.png" alt="css connection details in the aip console admin center" style="zoom:50%;" />
 
-* *Version Name* (optional): The name of the version that will be created. If left blank, the version will be named with the following pattern : `vYYMMDD.hhmmss` based on date and time.
-  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
-* *Snapshot Name* (optional): The name of the snapshot that will be created, if left blank, the snapshot will be named with date and time
-  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be replaced by the current jobs' build number.
-* *Enable Security Dataflow*: Enables the Security Objective for this version. <u>Has no effect if `Rescan` is checked</u>.
-* *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "Analysis Unit module" or "Technology Module".
+* *Version Name* (optional): The name of the version that will be created. If left blank, the version will be named with
+  the following pattern : `vYYMMDD.hhmmss` based on date and time.
+  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be
+    replaced by the current jobs' build number.
+* *Snapshot Name* (optional): The name of the snapshot that will be created, if left blank, the snapshot will be named
+  with date and time
+  * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be
+    replaced by the current jobs' build number.
+* *Enable Security Dataflow*: Enables the Security Objective for this version. This setting will operate for both
+  technologies JEE and DOTNET as well.<u>Has no effect if `Rescan` is checked</u>.
+* *Enable Data Safety Investigation*: Enables the data safety investigation
+  objective for the version.
+* *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "
+  Analysis Unit module" or "Technology Module".
 
 Under `Advanced Settings` you will find the following parameters :
 
@@ -272,7 +286,10 @@ The Deliver Source step provides similar parameters to the Add Version step :
 * *Copy configuration from previous version*: Clone the previous version of the application (similar to
   the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no
   version exists, it will run an Add version job instead.
-* *Enable Security Dataflow*: Enables the Security Objective for this version. Will be ignored if `Rescan` is checked.
+* *Enable Security Dataflow*: Enables the Security Objective for this version. This setting will operate for both
+  technologies JEE and DOTNET as well, and it will be ignored if `Rescan` is checked.
+* *Enable Data Safety Investigation*: Enables the data safety investigation
+  objective for the version.
 
 Under `Advanced Settings` you will find the following parameters :
 
@@ -317,9 +334,12 @@ Under `Advanced Settings` you will find the following parameters :
 The Snapshot step provides the following parameters :
 
 * *Application Name* (**required**): The name of tshe application for which the analysis will be run.
-* *Snapshot Name* : The name of the Snapshot to create. If left blank, the snapshot will be named with the following pattern: `Snapshot-YYYY-MM-DDThh-mm-ss` depending on current date and time.
+* *Snapshot Name* : The name of the Snapshot to create. If left blank, the snapshot will be named with the following
+  pattern: `Snapshot-YYYY-MM-DDThh-mm-ss` depending on current date and time.
 * *Publish to Imaging*: Publish to Imaging if Imaging is configured with AIP Console
-* *Publish to the Health Dashboard* : When checked, consolidates snapshots and publishes data to the Health Dashboards. Checked by default.
+* *Publish to the Health Dashboard* : When checked, consolidates snapshots and publishes data to the Health Dashboards.
+  Checked by default.
+* *Sleep Duration*: Number of seconds used to refresh the ongoing job status
 
 Under `Advanced Settings` you will find the following parameters :
 
@@ -341,6 +361,8 @@ Under `Advanced Settings` you will find the following parameters :
 * *Application Name*: Application on which to perform Deep Analysis.
 * *Snapshot Name*: Name of the snapshot. CAST Imaging Console will automatically assign one to the application if this
   field is empty.
+* *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "
+  Analysis Unit module" or "Technology Module".
 * *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ### Fast Scan
@@ -361,6 +383,23 @@ Under `Advanced Settings` you will find the following parameters :
 * *Exclusion patterns* : List of file patterns to exclude in the delivery, separated by a comma. Each patterns needs to
   follow the syntax of [glob patterns](https://www.malikbrowne.com/blog/a-beginners-guide-glob-patterns)
 * *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **1s**).
+
+### Architecture Studio Model Checker
+![Architecture Studio Model Checker step parameters](doc/images/architecture_studio_model_checker.png)
+The architecture studio model checker step provides the following parameters :
+
+* *Application Name* (**required**): The name of the application for which the analysis will be run.
+* *Model Name*: (**required**): The name of the model to check against the application. 
+* *Report Path*: The path where the downloaded report will be saved. 
+
+Under `Advanced Settings` you will find the following parameters :
+
+![Architecture Studio Model Checker step advanced settings](doc/images/architecture_studio_model_checker_advanced_settings.png)
+
+* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *Ignore Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
 
 ## Other Topics
 

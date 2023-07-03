@@ -24,6 +24,7 @@ public class DeliverAction extends BaseAction implements RunAction2 {
     private boolean cloneVersion = false;
     private boolean blueprint = false;
     private boolean enableSecurityAssessment = false;
+    private boolean enableDataSafety;
 
     @Nullable
     private String versionName;
@@ -111,8 +112,17 @@ public class DeliverAction extends BaseAction implements RunAction2 {
     public boolean isSecurityAssessmentEnabled() {
         return enableSecurityAssessment;
     }
+
     public void setSecurityAssessment(boolean enableFlag) {
         enableSecurityAssessment = enableFlag;
+    }
+
+    public void setEnableDataSafety(boolean flag) {
+        enableDataSafety = flag;
+    }
+
+    public boolean isEnableDataSafety() {
+        return enableDataSafety;
     }
 
     @Nullable

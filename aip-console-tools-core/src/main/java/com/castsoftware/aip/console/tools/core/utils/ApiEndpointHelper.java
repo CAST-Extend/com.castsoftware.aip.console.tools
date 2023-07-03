@@ -42,9 +42,15 @@ public class ApiEndpointHelper {
     public static final String IMAGING_SETTINGS_PATH = "/imaging-settings";
     public static final String FIRST_SCAN_PATH = "/first-scan-application";
     public static final String RE_DISCOVER_APPLICATION_PATH = "/rediscover-application";
-    public static final String RE_SCAN_APPLICATION_PATH = "/rescan-application";
+    public static final String DEEP_ANALYSIS_PATH = "/deep-analysis";
     public static final String PUBLISH_PATH = "/publish";
-
+    public static final String SECURITY_DATAFLOW_PATH = "/security-dataflow";
+    public static final String ARCHITECTURE_ENDPOINT = "/architecture";
+    public static final String MODELS = "/models";
+    public static final String MODEL = "/model";
+    public static final String MODEL_CHECK = "/model-check";
+    public static final String VIOLATIONS = "/violations";
+    public static final String REPORT = "/report";
     public static String getRootPath() {
         return ROOT_PATH + "/";
     }
@@ -72,6 +78,18 @@ public class ApiEndpointHelper {
         assert appGuid != null && !appGuid.isEmpty();
 
         return getApplicationPath(appGuid) + UPLOAD_ENDPOINT;
+    }
+
+    public static String getArchitectureModelUrl() {
+        return ROOT_PATH + ARCHITECTURE_ENDPOINT + MODELS;
+    }
+
+    public static String getModelCheckUrl(String appGuid) {
+        return getApplicationPath(appGuid) + ARCHITECTURE_ENDPOINT + MODELS + MODEL_CHECK;
+    }
+
+    public static String getDownlaodModelCheckUrl(String appGuid) {
+        return getApplicationPath(appGuid) + ARCHITECTURE_ENDPOINT + MODEL + VIOLATIONS + REPORT;
     }
 
     public static String getApplicationOnboardingUploadPath() {
@@ -111,8 +129,8 @@ public class ApiEndpointHelper {
         return getJobsEndpoint() + RE_DISCOVER_APPLICATION_PATH;
     }
 
-    public static String getReScanApplicationEndPoint() {
-        return getJobsEndpoint() + RE_SCAN_APPLICATION_PATH;
+    public static String getDeepAnalysisEndPoint() {
+        return getJobsEndpoint() + DEEP_ANALYSIS_PATH;
     }
 
     public static String getPublishToImagingEndPoint() {
@@ -140,6 +158,10 @@ public class ApiEndpointHelper {
 
     public static String getDebugOptionsPath(String appGuid) {
         return getApplicationPath(appGuid) + DEBUG_OPTIONS_ENDPOINT;
+    }
+
+    public static String getApplicationSecurityDataflowPath(String appGuid) {
+        return getApplicationPath(appGuid) + SECURITY_DATAFLOW_PATH;
     }
 
     public static String getDebugOptionShowSqlPath(String appGuid) {

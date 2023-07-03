@@ -21,19 +21,19 @@
         <url>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools.git</url>
     </scm>
 
-    <modules>
-        <module>aip-console-tools-core</module>
-        <module>aip-console-tools-cli</module>
-        <module>aip-console-jenkins</module>
-    </modules>
-
     <properties>
-        <revision>2.8.0-SNAPSHOT</revision>
+        <revision>2.9.0-SNAPSHOT</revision>
         <java.version>1.8</java.version>
         <spring-boot.version>${project.parent.version}</spring-boot.version>
         <picocli.version>4.6.1</picocli.version>
         <jackson.version>2.10.0</jackson.version>
     </properties>
+
+    <modules>
+        <module>aip-console-tools-core</module>
+        <module>aip-console-tools-cli</module>
+        <module>aip-console-jenkins</module>
+    </modules>
 
     <dependencyManagement>
         <dependencies>
@@ -95,6 +95,16 @@
 
             <!-- Brings JUnit 4.12 and mockito-core 2.23.4 -->
             <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-to-slf4j</artifactId>
+                <version>2.17.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>2.17.1</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-test</artifactId>
                 <version>2.1.4.RELEASE</version>
@@ -105,6 +115,11 @@
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli-spring-boot-starter</artifactId>
                 <version>${picocli.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>1.4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

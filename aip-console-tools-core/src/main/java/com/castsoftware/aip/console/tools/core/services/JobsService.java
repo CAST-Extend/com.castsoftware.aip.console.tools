@@ -1,10 +1,12 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 
 import java.util.Date;
@@ -64,9 +66,9 @@ public interface JobsService {
 
     String startReDiscoverApplication(String applicationGuid, String sourcePath, String versionName, DeliveryConfigurationDto deliveryConfig, String caipVersion, String targetNode) throws JobServiceException;
 
-    String startRunFirstScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException;
+    String startDeepAnalysis(String applicationGuid, String nodeName, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType) throws JobServiceException;
 
-    String startRunReScanApplication(String applicationGuid, String nodeName, String caipVersion, String snapshotName) throws JobServiceException;
+    String startDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest) throws JobServiceException;
 
     String startPublishToImaging(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
 

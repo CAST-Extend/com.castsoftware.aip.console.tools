@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
@@ -38,17 +39,15 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             description = "The name of the snapshot to create")
     private String snapshotName;
 
-    @CommandLine.Option(names = {"--sleep-duration"},
-            description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
-            defaultValue = "15")
-    private long sleepDuration;
+    @CommandLine.Option(names = "--module-option"
+            , description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno (default: ${DEFAULT-VALUE})")
+    private ModuleGenerationType moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
     //This version can be null if failed to convert from string
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
-
 
     public OnboardApplicationDeepAnalysisCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
@@ -62,10 +61,9 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
         }
 
         log.info("Deep-Analysis args:");
-        log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tsleep: %d%n", applicationName, StringUtils.isEmpty(snapshotName) ? "Auto assigned" : snapshotName, sleepDuration));
+        log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tmodule generation type: %s%n\tsleep: %d%n", applicationName, StringUtils.isEmpty(snapshotName) ? "Auto assigned" : snapshotName, moduleGenerationType.toString(), getSharedOptions().getSleepDuration()));
 
         Thread shutdownHook = null;
-        boolean firstScan = true;
         try {
             boolean OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
             if (!OnBoardingModeWasOn) {
@@ -74,19 +72,21 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             }
 
             log.info("Searching for application '{}' on CAST Imaging Console", applicationName);
-            boolean onboardApplication = false;
             String existingAppGuid = null;
             ApplicationDto app = applicationService.getApplicationFromName(applicationName);
             if (app != null) {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
-                firstScan = app.getVersion() == null || !app.isOnboarded() || StringUtils.isEmpty(app.getSchemaPrefix());
-            } else {
-                onboardApplication = true;
             }
 
-            boolean deepAnalysisCondition = !onboardApplication && (app.isOnboarded() || StringUtils.isNotEmpty(app.getSchemaPrefix()));
+            boolean deepAnalysisCondition = (app != null) && app.isOnboarded();
             if (!deepAnalysisCondition) {
+                if (app != null && !app.isOnboarded()) {
+                    log.info("The existing application has not been created using the Fast-Scan workflow.\n" +
+                            "The 'Deep-Analysis' operation will not be applied");
+                    return Constants.RETURN_ONBOARD_DEEP_ANALYSIS_FORBIDDEN;
+                }
+
                 log.error("Unable to trigger Deep-Analysis. The actual conditions required Fast-Scan to be running first.");
                 return Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED;
             }
@@ -98,7 +98,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             String caipVersion = app.getCaipVersion();
             String targetNode = app.getTargetNode();
 
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), sleepDuration);
+            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
 
             //Run Analysis
             if (!applicationService.isImagingAvailable()) {
@@ -106,11 +106,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
 
-            if (firstScan) {
-                applicationService.runFirstScanApplication(existingAppGuid, targetNode, caipVersion, snapshotName, getSharedOptions().isVerbose(), cliLogPolling);
-            } else {
-                applicationService.runReScanApplication(existingAppGuid, targetNode, caipVersion, snapshotName, getSharedOptions().isVerbose(), cliLogPolling);
-            }
+            applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, snapshotName, moduleGenerationType, getSharedOptions().isVerbose(), cliLogPolling);
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         } finally {

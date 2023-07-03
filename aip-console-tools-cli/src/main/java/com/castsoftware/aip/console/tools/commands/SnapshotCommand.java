@@ -8,6 +8,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
@@ -17,6 +18,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
+import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -154,8 +156,39 @@ public class SnapshotCommand implements Callable<Integer> {
                 snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
             }
 
-            // Run snapshot
             boolean forcedConsolidation = processImaging || consolidation;
+            //TODO: refactor after release to get separated workflows
+            if (app.isOnboarded()) {
+                log.info("Triggering snapshot for an application using Fast-Scan workflow.");
+                ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
+                        .appGuid(applicationGuid);
+                String targetNode = app.getTargetNode();
+                if (StringUtils.isNotEmpty(targetNode)) {
+                    requestBuilder.targetNode(targetNode);
+                }
+                String caipVersion = app.getCaipVersion();
+                if (StringUtils.isNotEmpty(caipVersion)) {
+                    requestBuilder.caipVersion(caipVersion);
+                }
+                if (StringUtils.isNotEmpty(snapshotName)) {
+                    requestBuilder.snapshotName(snapshotName);
+                }
+
+                requestBuilder.processImaging(processImaging);
+                requestBuilder.publishToEngineering(forcedConsolidation);
+                //Should remains true to prevent deep-analyze to trigger analyze step when publis and imaging options are set false
+                requestBuilder.uploadApplication(true);
+
+                CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
+                String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), cliLogPolling);
+                if (StringUtils.isEmpty(appGuid)) {
+                    log.error("Snapshot operating wasn't performed successfully. Toggle verbose ON or check CAST Console logs for more details.");
+                    return Constants.RETURN_JOB_FAILED;
+                }
+                return Constants.RETURN_OK;
+            }
+
+            // Run snapshot in legacy workflow
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, null, JobType.ANALYZE, app.getCaipVersion())
                     .nodeName(app.getTargetNode())
                     .startStep(Constants.SNAPSHOT_STEP_NAME)
@@ -165,9 +198,9 @@ public class SnapshotCommand implements Callable<Integer> {
                     .uploadApplication(true)
                     .snapshotDate(applicationService.getVersionDate(snapshotDateString))
                     .processImaging(processImaging)
-                    .uploadApplication(forcedConsolidation)
+                    .uploadApplication(true)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
-                            Constants.UPLOAD_APP_SNAPSHOT : Constants.CONSOLIDATE_SNAPSHOT);
+                            Constants.UPLOAD_APP_SNAPSHOT : Constants.SNAPSHOT_INDICATOR);
 
             //Snapshot required now see whether we upload application or not
             if (!forcedConsolidation) {
@@ -176,6 +209,8 @@ public class SnapshotCommand implements Callable<Integer> {
             }
 
             log.info("Running Snapshot Job on application '{}' with Version '{}' (guid: '{}')", applicationName, foundVersion.getName(), foundVersion.getGuid());
+            log.info("Job request : " + builder.buildJobRequest().toString());
+
             String jobGuid = jobsService.startJob(builder);
 
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);

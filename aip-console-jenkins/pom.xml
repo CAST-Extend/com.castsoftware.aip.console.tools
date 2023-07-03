@@ -14,7 +14,7 @@
     <packaging>hpi</packaging>
     <properties>
         <!-- Console Tools version -->
-        <revision>2.8.0-SNAPSHOT</revision>
+        <revision>2.9.0-SNAPSHOT</revision>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <jenkins.version>2.60.3</jenkins.version>
         <java.level>8</java.level>
@@ -25,6 +25,7 @@
      -->
         <hpi-plugin.version>3.5</hpi-plugin.version>
     </properties>
+
     <name>AIP Console Jenkins Plugin</name>
     <description>This plugin aims at helping users of AIP Console integrate the analysis of their applications with
         Jenkins Jobs.
@@ -48,6 +49,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -57,7 +59,6 @@
         <dependency>
             <groupId>com.castsoftware.aip.console.tools</groupId>
             <artifactId>aip-console-tools-core</artifactId>
-            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

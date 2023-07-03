@@ -4,6 +4,8 @@ import com.castsoftware.aip.console.tools.core.services.AipConsoleService;
 import com.castsoftware.aip.console.tools.core.services.AipConsoleServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationServiceImpl;
+import com.castsoftware.aip.console.tools.core.services.ArchitectureStudioService;
+import com.castsoftware.aip.console.tools.core.services.ArchitectureStudioServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.JobsServiceImpl;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -59,6 +61,11 @@ public class ApiIntegrationConfig {
     @Bean
     public ApplicationService applicationService(@Autowired RestApiService restApiService, @Autowired JobsService jobsService) {
         return new ApplicationServiceImpl(restApiService, jobsService);
+    }
+
+    @Bean
+    public ArchitectureStudioService architectureStudioService(@Autowired RestApiService restApiService) {
+        return new ArchitectureStudioServiceImpl(restApiService);
     }
 
     @Bean

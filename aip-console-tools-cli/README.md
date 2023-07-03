@@ -142,11 +142,11 @@ The *Onboard Application* feature is using following strategies in a separated c
 To perform that action you can inspire from the following command (see advanced usage for more details):
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
+java -jar .\aip-console-tools-cli.jar Fast-Scan -s="Console URL" --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
 ```
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my app" --verbose=false 
+java -jar .\aip-console-tools-cli.jar Deep-Analyze -s="Console URL" --apikey="valid.key" -n "my app" --module-option="ONE_PER_AU" --snapshot-name="desired name" --verbose=false 
 ```
 
 To **Publish To Imaging**
@@ -159,6 +159,16 @@ To perform *Publish-Imaging* action you can use following command
 java -jar .\aip-console-tools-cli.jar Publish-Imaging --apikey="valid.key" -n "my app" --verbose"
 ```
 
+To **ArchitectureStudioModelChecker**
+
+- application should exist
+
+To perform *ArchitectureStudioModelChecker* action you can use following command
+
+```bash
+java -jar .\aip-console-tools-cli.jar ArchitectureStudioModelChecker -s="Console URL" --apikey "valid.key" -n "my-app" --model-name "model filename" --report-path "valid local path"
+```
+
 ### Advanced Usage
 
 When running the CLI, you must specify a command to be run. The list of commands is :
@@ -168,9 +178,9 @@ When running the CLI, you must specify a command to be run. The list of commands
 * `Deliver` to create a new version **without** running an analysis
 * `Analysis` or `analyze` to run an analysis on the current version
 * `Fast-Scan` to perform a *fast-scan* on the sources contents and optionally do a Deep-Analysis (run the analysis).
-* `Deep-Analysis` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the
-  dashbord and Imanging depending on the operating settings
+* `Deep-Analysis` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the dashboard and Imaging depending on the operating settings
 * `Publish-Imaging` Publish an existing application data to CAST Imaging.
+* `ArchitectureStudioModelChecker` to check an existing application against a model.
 
 Each commands has a `--help` parameter, providing a list of all parameters available.
 
@@ -228,8 +238,11 @@ The available options are :
 * `--snapshot-date` (option): The snapshot date associated with the snapshot to be created: default
   format `yyyy-MM-ddTHH:mm:ss` (example `2022-07-11T07:22:46`). <br>Depending on Console 's timezone, this can be
   displayed differently
-* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. This setting will
+  operate for both technologies JEE and DOTNET as well. <u>Has no impact
   when cloning a version</u>.
+* `--enable-data-safety-investigation` or `--enable-data-safety` (optional): Enables the data safety investigation
+  objective for this version.
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *
@@ -282,8 +295,11 @@ The available options are :
   To get the full list do run help on this command (*deliver* --help).
 * `--auto-discover`: will discover new technologies and install new extensions during rescan, to disable when run
   consistency check
-* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. <u>Has no impact
+* `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. This setting will
+  operate for both technologies JEE and DOTNET as well.<u>Has no impact
   when cloning a version</u>.
+* `--enable-data-safety-investigation` or `--enable-data-safety` (optional): Enables the data safety investigation
+  objective for this version.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.
 * `--backup-name` (optional): Specify a name for the backup. <u>Requires the backup parameter to be passed</u>. *
   default*:
@@ -361,6 +377,8 @@ analysis).
 
 The available options are :
 
+* `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--file` or `-f`: **required** only when performing the FIRST_SCAN. Represents the local zip or tar.gz file full path
   to the
@@ -379,8 +397,13 @@ java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app"
 
 ### Deep Analyze
 
+* `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
+* `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
+  module.
+  Possible value is one of: full_content, one_per_au, one_per_techno
 * `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ```bash
@@ -412,6 +435,32 @@ Here is a detailed list of all error codes that can be returned by the CLI :
 * 8 : Source Folder Not Found. THe given source folder could not be found on the AIP Node where the application version is delivered
 * 9 : No Version. Application has no version and the provided command cannot be run.
 * 10 : Version Not Found. The given version could not be found OR no version matches the requested command (i.e. No delivered version exists to be used for analysis)
+* 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
+
+### ArchitectureStudioModelChecker
+
+Check an existing application against a model.
+
+The available options are :
+
+* `--app-name` or `-n` (**required**): The application name.
+
+* `--model-name` or `-m` (**required**): The name of the model to check against an application.
+
+* `--report-path` or `-p` : The local directory path where the report will be downloaded.
+
+When AIP Console finishes execution, it will return a specific return code, based on the execution.
+
+Here is a detailed list of all error codes that can be returned by the CLI :
+
+* 0 : No errors, processing was completed correctly. This is also the return code for`--help` and `--version`
+  parameters.
+* 1 : API key missing. No API key was provided either in the prompt or in the environment variable.
+* 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper
+  value.
+* 6 : Application name or GUID missing. The model checker cannot run due to a missing application name or missing application guid.
+* 7 : Application Not Found. The given Application Name or GUID could not be found.
+* 27 : Architecture model not found.
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
 
 ### Authentication

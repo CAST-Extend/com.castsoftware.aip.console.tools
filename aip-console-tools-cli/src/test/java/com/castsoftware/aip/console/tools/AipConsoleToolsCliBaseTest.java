@@ -10,6 +10,7 @@ import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +33,7 @@ import java.util.concurrent.Callable;
 
 import static org.mockito.Mockito.when;
 
+@Slf4j
 public abstract class AipConsoleToolsCliBaseTest {
     @Autowired
     protected SpringAwareCommandFactory springAwareCommandFactory;
@@ -53,6 +56,7 @@ public abstract class AipConsoleToolsCliBaseTest {
     protected String[] defaultArgs;
     protected Path sflPath;
     protected Path zippedSourcesPath;
+    protected Path sourceFolderPath;
     protected int exitCode;
     private List<String> unExpectedParameters;
     protected static String ARG_CONSOLIDATE_LABEL = "<consolidation>";
@@ -63,6 +67,7 @@ public abstract class AipConsoleToolsCliBaseTest {
         initializePrivateMocks();
 
         sflPath = folder.getRoot().toPath().resolve("SFL");
+        sourceFolderPath = Paths.get("testFolder");
         Files.createDirectories(sflPath);
         zippedSourcesPath = sflPath.resolve("fake_sources.zip");
         zippedSourcesPath.toFile().createNewFile();
@@ -168,6 +173,7 @@ public abstract class AipConsoleToolsCliBaseTest {
                 }
             }
         } catch (Throwable t) {
+            log.error(t.getMessage());
             exitCode = Constants.UNKNOWN_ERROR;
         }
     }

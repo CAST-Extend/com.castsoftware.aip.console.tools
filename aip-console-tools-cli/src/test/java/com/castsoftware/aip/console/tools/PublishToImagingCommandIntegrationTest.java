@@ -52,7 +52,7 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
     }
 
     @Test
-    public void testPublishToImagingCommand_OnboarApplicationSettingsOFF() throws Exception {
+    public void testPublishToImagingCommand_OnboardApplicationSettingsOFF() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP
         };
