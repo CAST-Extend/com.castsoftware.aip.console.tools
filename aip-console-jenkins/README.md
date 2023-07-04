@@ -147,6 +147,25 @@ The Snapshot can then be found inside the `Snapshot` tab in AIP Console.
 
 ![create_snapshot_menu](doc/images/create_snapshot_menu.png)
 
+#### Architecture Studio Model Checker
+
+![Menu item to add the model checker step](doc/images/arch_studio_model_checker.png)
+
+The `Architecture Studio Model Checker` will check the application against a model.
+
+This step requires the following :
+
+* An application name against which the model will be checked. <u>This application must exist in AIP Console</u>.
+* A model name which is the name of the architecture model.
+* A report path location where the report will be downloaded.
+* An upload path with filename where the architecture model is located(only required when the architecture model against which the application needs to be checked is not already present in the AIP console).
+
+This step will perform the following actions :
+
+* Upload the file `filename.CASTArchitect` to architecture studio in AIP Console(if file path is provided).
+* Checks the application against the provided model.
+* Downloads the report in the provided report path
+
 #### Onboard Application
 
 Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST
@@ -184,6 +203,9 @@ You can use these environment variables on the following fields in each jobs (wh
 * Snapshot name
 * Domain Name
 * Source File Path
+* Model Name
+* Report Path
+* Upload File Path
 
 You can manually add environment variables to a build or use global jenkins environment variables (see [the jenkins documentation](https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables))
 
@@ -387,12 +409,13 @@ Under `Advanced Settings` you will find the following parameters :
 * *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **1s**).
 
 ### Architecture Studio Model Checker
-![Architecture Studio Model Checker step parameters](doc/images/architecture_studio_model_checker.png)
+![Architecture Studio Model Checker step parameters](doc/images/arch_studio_model_checker_build_steps.png)
 The architecture studio model checker step provides the following parameters :
 
 * *Application Name* (**required**): The name of the application for which the analysis will be run.
 * *Model Name*: (**required**): The name of the model to check against the application. 
-* *Report Path*: The path where the downloaded report will be saved. 
+* *Report Path*: The path where the downloaded report will be saved.
+* *Upload File Path*: The path where the architecture model is located.
 
 Under `Advanced Settings` you will find the following parameters :
 

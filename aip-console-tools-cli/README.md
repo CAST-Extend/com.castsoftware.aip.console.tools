@@ -166,7 +166,7 @@ To **ArchitectureStudioModelChecker**
 To perform *ArchitectureStudioModelChecker* action you can use following command
 
 ```bash
-java -jar .\aip-console-tools-cli.jar ArchitectureStudioModelChecker -s="Console URL" --apikey "valid.key" -n "my-app" --model-name "model filename" --report-path "valid local path"
+java -jar .\aip-console-tools-cli.jar ArchitectureStudioModelChecker -s="Console URL" --apikey "valid.key" -n "my-app" --model-name "model filename" --report-path "valid local path" --file-path "valid filepath with filename"
 ```
 
 ### Advanced Usage
@@ -448,6 +448,8 @@ The available options are :
 * `--model-name` or `-m` (**required**): The name of the model to check against an application.
 
 * `--report-path` or `-p` : The local directory path where the report will be downloaded.
+
+* `--file-path` or `-f` : The local directory path where the model is located.
 
 When AIP Console finishes execution, it will return a specific return code, based on the execution.
 
