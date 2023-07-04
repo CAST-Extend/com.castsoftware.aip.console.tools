@@ -380,9 +380,9 @@ The available options are :
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
-* `--file` or `-f`: **required** only when performing the FIRST_SCAN. Represents the local zip or tar.gz file full path
-  to the
-  sources
+* `--file` or `-f`: **required** only when performing the FIRST_SCAN. Represents either the local zip or tar.gz file
+  full path
+  to the sources or a relative path using the Source Folder Location configured
 * `--node-name`  (**optional**): The name of the node on which the application will be created
 * `--domain-name`  (**optional**): A domain is a group of applications. You may use domain to sort/filter applications.
   Will be created if it doesn't exists. No domain will be assigned if left empty
