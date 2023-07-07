@@ -325,7 +325,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         boolean isUpload = false;
 
         String errorMessage;
-        if ((errorMessage = checkJobParameters()) != null) {
+        if ((errorMessage = checkJobParameters(run.getEnvironment(listener))) != null) {
             listener.error(errorMessage);
             run.setResult(Result.NOT_BUILT);
             return;
@@ -492,12 +492,12 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                     }
                     if (apiInfoDto.isExtractionRequired()) {
                         // If we have already extracted the content, the source path will be application main sources
-                        fileName = applicationName + "/main_sources";
+                        fileName = expandedAppName + "/main_sources";
                         if (apiInfoDto.isSourcePathPrefixRequired()) {
                             fileName = "upload:" + fileName;
                         }
                     } else {
-                        fileName = "upload:" + applicationName + "/" + fileName;
+                        fileName = "upload:" + expandedAppName + "/" + fileName;
                     }
                 }
             }
@@ -540,7 +540,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.SECURITY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
@@ -550,7 +550,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+            requestBuilder.objectives(VersionObjective.DATA_SAFETY, isSecurityAssessmentEnabled());
 
             String expandedExclusionPatterns = vars.expand(exclusionPatterns);
             Exclusions exclusions = Exclusions.builder().excludePatterns(expandedExclusionPatterns).build();
@@ -626,8 +626,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
      *
      * @return The error message based on the issue that was found, null if no issue was found
      */
-    private String checkJobParameters() {
-        if (StringUtils.isAnyBlank(applicationName, filePath)) {
+    private String checkJobParameters(EnvVars vars) {
+        if (StringUtils.isAnyBlank(vars.expand(applicationName), vars.expand(filePath))) {
             return GenericError_error_missingRequiredParameters();
         }
         String apiServerUrl = getAipConsoleUrl();

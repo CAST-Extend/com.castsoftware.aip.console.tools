@@ -333,7 +333,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         boolean isUpload = false;
 
         String errorMessage;
-        if ((errorMessage = checkJobParameters()) != null) {
+
+        if ((errorMessage = checkJobParameters(run.getEnvironment(listener))) != null) {
             listener.error(errorMessage);
             run.setResult(Result.NOT_BUILT);
             return;
@@ -503,12 +504,12 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
                     if (apiInfoDto.isExtractionRequired()) {
                         // If we have already extracted the content, the source path will be application main sources
-                        fileName = applicationName + "/main_sources";
+                        fileName = variableAppName + "/main_sources";
                         if (apiInfoDto.isSourcePathPrefixRequired()) {
                             fileName = "upload:" + fileName;
                         }
                     } else {
-                        fileName = "upload:" + applicationName + "/" + fileName;
+                        fileName = "upload:" + variableAppName + "/" + fileName;
                     }
                 }
             }
@@ -551,7 +552,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .versionName(resolvedVersionName)
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.SECURITY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
@@ -569,7 +570,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+            requestBuilder.objectives(VersionObjective.DATA_SAFETY, isSecurityAssessmentEnabled());
 
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
@@ -577,7 +578,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 requestBuilder.uploadApplication(forcedConsolidation);
                 if (!forcedConsolidation) {
                     requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);
-                    log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", resolvedSnapshotName, applicationName));
+                    log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", resolvedSnapshotName, variableAppName));
                 }
             }
 
@@ -623,8 +624,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
      *
      * @return The error message based on the issue that was found, null if no issue was found
      */
-    private String checkJobParameters() {
-        if (StringUtils.isAnyBlank(applicationName, filePath)) {
+    private String checkJobParameters(EnvVars vars) {
+        if (StringUtils.isAnyBlank(vars.expand(applicationName), vars.expand(filePath))) {
             return Messages.GenericError_error_missingRequiredParameters();
         }
 

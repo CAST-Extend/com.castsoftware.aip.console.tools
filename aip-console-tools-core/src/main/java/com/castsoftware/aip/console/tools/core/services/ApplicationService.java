@@ -111,4 +111,6 @@ public interface ApplicationService {
     void setModuleOptionsGenerationType(String appGuid, ModuleGenerationType generationType);
 
     void updateModuleGenerationType(String applicationGuid, JobRequestBuilder builder, ModuleGenerationType generationType, boolean firstVersion);
+
+    void updateSecurityDataflow(String appGuid, boolean securityDataflowFlag, String technologyPath);
 }
