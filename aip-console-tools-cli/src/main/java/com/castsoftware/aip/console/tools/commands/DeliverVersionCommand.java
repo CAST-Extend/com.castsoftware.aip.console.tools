@@ -211,7 +211,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
                     .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.SECURITY, enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
@@ -221,11 +221,7 @@ public class DeliverVersionCommand implements Callable<Integer> {
                 builder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
-            builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
-            
-            log.info("Switching security dataflow {} for application {}.", enableSecurityDataflow ? "ON" : "OFF", applicationName);
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
+            builder.objectives(VersionObjective.DATA_SAFETY, enableSecurityAssessment);
 
             Exclusions selectedExclusions = Exclusions.builder().excludePatterns(exclusionPatterns)
                     .exclusionRules(ExclusionRuleType.toExclusionRuleDtos(exclusionRules)).build();

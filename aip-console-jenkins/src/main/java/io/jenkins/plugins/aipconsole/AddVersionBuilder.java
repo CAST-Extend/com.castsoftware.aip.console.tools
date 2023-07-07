@@ -552,7 +552,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .versionName(resolvedVersionName)
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.SECURITY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
@@ -570,11 +570,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
-
-            listener.getLogger().println("Switching security dataflow" + (enableSecurityDataflow ? "ON" : "OFF"));
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
+            requestBuilder.objectives(VersionObjective.DATA_SAFETY, isSecurityAssessmentEnabled());
 
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
