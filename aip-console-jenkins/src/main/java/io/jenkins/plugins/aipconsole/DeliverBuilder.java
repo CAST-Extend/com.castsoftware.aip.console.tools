@@ -540,7 +540,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.SECURITY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
@@ -550,11 +550,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
-            
-            listener.getLogger().println("Switching security dataflow" + (enableSecurityDataflow ? "ON" : "OFF"));
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
+            requestBuilder.objectives(VersionObjective.DATA_SAFETY, isSecurityAssessmentEnabled());
 
             String expandedExclusionPatterns = vars.expand(exclusionPatterns);
             Exclusions exclusions = Exclusions.builder().excludePatterns(expandedExclusionPatterns).build();

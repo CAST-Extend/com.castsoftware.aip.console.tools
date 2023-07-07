@@ -238,7 +238,7 @@ public class AddVersionCommand implements Callable<Integer> {
             JobRequestBuilder builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION)
                     .versionName(versionName)
                     .releaseAndSnapshotDate(new Date())
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.SECURITY, enableSecurityDataflow)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
@@ -250,7 +250,7 @@ public class AddVersionCommand implements Callable<Integer> {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
             }
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
-            builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
+            builder.objectives(VersionObjective.DATA_SAFETY, enableSecurityAssessment);
 
             log.info("Selected Module generation type" + moduleGenerationType);
             applicationService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, !cloneVersion);
@@ -266,10 +266,6 @@ public class AddVersionCommand implements Callable<Integer> {
                 }
             }
 
-            log.info("Switching security dataflow {} for application {}.", enableSecurityDataflow ? "ON" : "OFF", applicationName);
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
-            
             DebugOptionsDto oldDebugOptions = debugOptionsService.updateDebugOptions(applicationGuid,
                     DebugOptionsDto.builder().showSql(showSql).activateAmtMemoryProfile(amtProfiling).build());
 
