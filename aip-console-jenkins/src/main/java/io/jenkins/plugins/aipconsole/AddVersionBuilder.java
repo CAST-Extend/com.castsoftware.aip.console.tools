@@ -572,6 +572,10 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
             requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
 
+            listener.getLogger().println("Switching security dataflow" + (enableSecurityDataflow ? "ON" : "OFF"));
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
+
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
                 boolean forcedConsolidation = processImaging || consolidation;

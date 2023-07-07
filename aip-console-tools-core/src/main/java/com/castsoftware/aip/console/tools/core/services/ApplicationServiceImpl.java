@@ -326,4 +326,14 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
         }
     }
+
+    @Override
+    public void updateSecurityDataflow(String appGuid, boolean securityDataflowFlag, String technologyPath) {
+        try {
+            restApiService.putForEntity(ApiEndpointHelper.getApplicationSecurityDataflowPath(appGuid) + technologyPath, JsonDto.of(securityDataflowFlag), String.class);
+        } catch (ApiCallException e) {
+            log.log(Level.WARNING, e.getMessage());
+        }
+    }
+
 }
