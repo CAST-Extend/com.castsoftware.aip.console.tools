@@ -2,6 +2,8 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -116,6 +118,10 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     private String snapshotName = "";
     private boolean blueprint = false;
     private boolean enableSecurityAssessment = false;
+    private String moduleGenerationType;
+
+    @Nullable
+    private String exclusionPatterns = "";
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {
@@ -164,6 +170,24 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
     public boolean isConsolidation() {
         return consolidation;
+    }
+
+    @DataBoundSetter
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
+    }
+
+    @DataBoundSetter
+    public void setExclusionPatterns(String patterns) {
+        exclusionPatterns = patterns;
+    }
+
+    public String getExclusionPatterns() {
+        return exclusionPatterns;
     }
 
     @DataBoundSetter
@@ -309,11 +333,13 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         boolean isUpload = false;
 
         String errorMessage;
-        if ((errorMessage = checkJobParameters()) != null) {
+
+        if ((errorMessage = checkJobParameters(run.getEnvironment(listener))) != null) {
             listener.error(errorMessage);
             run.setResult(Result.NOT_BUILT);
             return;
         }
+
 
         // Check the services have been properly initialized
         if (!ObjectUtils.allNotNull(apiService, uploadService, jobsService, applicationService)) {
@@ -333,6 +359,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
         String username = getDescriptor().getAipConsoleUsername();
         // Job level timeout different from default ? use it, else use the global config level timeout
         long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());
+
+        listener.getLogger().println("Provided Module generation type is: " + getModuleGenerationType());
 
         try {
             // update timeout of HTTP Client if different from default
@@ -476,12 +504,12 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
 
                     if (apiInfoDto.isExtractionRequired()) {
                         // If we have already extracted the content, the source path will be application main sources
-                        fileName = applicationName + "/main_sources";
+                        fileName = variableAppName + "/main_sources";
                         if (apiInfoDto.isSourcePathPrefixRequired()) {
                             fileName = "upload:" + fileName;
                         }
                     } else {
-                        fileName = "upload:" + applicationName + "/" + fileName;
+                        fileName = "upload:" + variableAppName + "/" + fileName;
                     }
                 }
             }
@@ -524,18 +552,25 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION);
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .versionName(resolvedVersionName)
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.SECURITY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
 
-            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, null, applicationHasVersion);
+            String expandedExclusionPatterns = vars.expand(exclusionPatterns);
+            Exclusions exclusions = Exclusions.builder().excludePatterns(expandedExclusionPatterns).build();
+            String deliveryConfig = applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion);
             if (StringUtils.isNotBlank(deliveryConfig)) {
                 requestBuilder.deliveryConfigGuid(deliveryConfig);
             }
 
+            if (StringUtils.isNotEmpty(moduleGenerationType)) {
+                listener.getLogger().println("Selected Module generation type of" + moduleGenerationType);
+                applicationService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), !applicationHasVersion);
+            }
+
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+            requestBuilder.objectives(VersionObjective.DATA_SAFETY, isSecurityAssessmentEnabled());
 
             if (StringUtils.isNotBlank(resolvedSnapshotName)) {
                 requestBuilder.snapshotName(resolvedSnapshotName);
@@ -543,7 +578,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
                 requestBuilder.uploadApplication(forcedConsolidation);
                 if (!forcedConsolidation) {
                     requestBuilder.endStep(Constants.SNAPSHOT_INDICATOR);
-                    log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", resolvedSnapshotName, applicationName));
+                    log.println(String.format("The snapshot %s for application %s will be taken but will not be published.", resolvedSnapshotName, variableAppName));
                 }
             }
 
@@ -589,8 +624,8 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
      *
      * @return The error message based on the issue that was found, null if no issue was found
      */
-    private String checkJobParameters() {
-        if (StringUtils.isAnyBlank(applicationName, filePath)) {
+    private String checkJobParameters(EnvVars vars) {
+        if (StringUtils.isAnyBlank(vars.expand(applicationName), vars.expand(filePath))) {
             return Messages.GenericError_error_missingRequiredParameters();
         }
 

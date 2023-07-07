@@ -60,6 +60,9 @@ public class Constants {
     public static final String RESCAN_APPLICATION = "rescan_application";
     public static final String UPLOAD_SNAPSHOT_VERSION = "upload_snapshot_version";
     public static final String DATAFLOW_SECURITY_ANALYZE = "dataflow_security_analyze";
+    public static final String SECURITY_DATAFLOW_PATH = "/security-dataflow";
+    public static final String JEE_TECHNOLOGY_PATH = "/jee";
+    public static final String DOTNET_TECHNOLOGY_PATH = "/dotnet";
 
     // Job params
     public static final String PARAM_APP_NAME = "appName";
@@ -86,7 +89,8 @@ public class Constants {
     public static final String PARAM_ENABLE_AUTO_DISCOVER = "extensionAutoConfigEnabled";
     public static final String PARAM_PROCESS_IMAGING = "processImaging";
     public static final String PARAM_UPLOAD_APPLICATION = "uploadApplication";
-
+    public static final String PARAM_MODULE_GENERATION_TYPE = "moduleGenerationType";
+    
     // Job Step Names
     public static final String EXTRACT_STEP_NAME = "unzip_source";
     public static final String CODE_SCANNER_STEP_NAME = "code_scanner";

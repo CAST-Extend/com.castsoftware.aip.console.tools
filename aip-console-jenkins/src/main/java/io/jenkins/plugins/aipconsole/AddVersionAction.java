@@ -40,6 +40,11 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     private String snapshotName;
     private boolean consolidation = true;
 
+    private String moduleGenerationType;
+
+    @Nullable
+    private String exclusionPatterns = "";
+
     private transient Run run;
 
     public AddVersionAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
@@ -72,6 +77,14 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
 
     public void setSnapshotName(@Nullable String snapshotName) {
         this.snapshotName = snapshotName;
+    }
+
+    public String getModuleGenerationType() {
+        return moduleGenerationType;
+    }
+
+    public void setModuleGenerationType(String moduleGenerationType) {
+        this.moduleGenerationType = moduleGenerationType;
     }
 
     @CheckForNull
@@ -218,5 +231,13 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     @Override
     public String getUrlName() {
         return null;
+    }
+    
+    public void setExclusionPatterns(String patterns) {
+        exclusionPatterns = patterns;
+    }
+
+    public String getExclusionPatterns() {
+        return exclusionPatterns;
     }
 }

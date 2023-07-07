@@ -2,10 +2,20 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.NodeDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.*;
-import com.castsoftware.aip.console.tools.core.exceptions.*;
+import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
+import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
+import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -53,7 +63,26 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static io.jenkins.plugins.aipconsole.Messages.*;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appCreateError;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_appNotFound;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_fileNotFound;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobFailure;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_nodeNotFound;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_error_uploadFailed;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_noVersionAvailable;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_pollJobMessage;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_info_startUpload;
+import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersion_success_analysisComplete;
+import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
+import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_Deliver_info_startDeliverCloneJob;
+import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_DescriptorImpl_displayName;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDenied;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noApiKey;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noServerUrl;
+import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
 public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep {
     public static final int BUFFER_SIZE = 10 * 1024 * 1024;
@@ -296,7 +325,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         boolean isUpload = false;
 
         String errorMessage;
-        if ((errorMessage = checkJobParameters()) != null) {
+        if ((errorMessage = checkJobParameters(run.getEnvironment(listener))) != null) {
             listener.error(errorMessage);
             run.setResult(Result.NOT_BUILT);
             return;
@@ -463,12 +492,12 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                     }
                     if (apiInfoDto.isExtractionRequired()) {
                         // If we have already extracted the content, the source path will be application main sources
-                        fileName = applicationName + "/main_sources";
+                        fileName = expandedAppName + "/main_sources";
                         if (apiInfoDto.isSourcePathPrefixRequired()) {
                             fileName = "upload:" + fileName;
                         }
                     } else {
-                        fileName = "upload:" + applicationName + "/" + fileName;
+                        fileName = "upload:" + expandedAppName + "/" + fileName;
                     }
                 }
             }
@@ -511,7 +540,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
-                    .objectives(VersionObjective.DATA_SAFETY, enableSecurityDataflow)
+                    .objectives(VersionObjective.SECURITY, enableSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
@@ -521,10 +550,11 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+            requestBuilder.objectives(VersionObjective.DATA_SAFETY, isSecurityAssessmentEnabled());
 
-            log.println("Exclusion patterns : " + exclusionPatterns);
-            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusionPatterns, applicationHasVersion));
+            String expandedExclusionPatterns = vars.expand(exclusionPatterns);
+            Exclusions exclusions = Exclusions.builder().excludePatterns(expandedExclusionPatterns).build();
+            requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion));
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);
@@ -596,8 +626,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
      *
      * @return The error message based on the issue that was found, null if no issue was found
      */
-    private String checkJobParameters() {
-        if (StringUtils.isAnyBlank(applicationName, filePath)) {
+    private String checkJobParameters(EnvVars vars) {
+        if (StringUtils.isAnyBlank(vars.expand(applicationName), vars.expand(filePath))) {
             return GenericError_error_missingRequiredParameters();
         }
         String apiServerUrl = getAipConsoleUrl();
