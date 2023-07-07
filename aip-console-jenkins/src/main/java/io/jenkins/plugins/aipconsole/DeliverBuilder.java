@@ -551,6 +551,10 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
             requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+            
+            listener.getLogger().println("Switching security dataflow" + (enableSecurityDataflow ? "ON" : "OFF"));
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
             String expandedExclusionPatterns = vars.expand(exclusionPatterns);
             Exclusions exclusions = Exclusions.builder().excludePatterns(expandedExclusionPatterns).build();

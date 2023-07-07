@@ -60,6 +60,9 @@ public class Constants {
     public static final String RESCAN_APPLICATION = "rescan_application";
     public static final String UPLOAD_SNAPSHOT_VERSION = "upload_snapshot_version";
     public static final String DATAFLOW_SECURITY_ANALYZE = "dataflow_security_analyze";
+    public static final String SECURITY_DATAFLOW_PATH = "/security-dataflow";
+    public static final String JEE_TECHNOLOGY_PATH = "/jee";
+    public static final String DOTNET_TECHNOLOGY_PATH = "/dotnet";
 
     // Job params
     public static final String PARAM_APP_NAME = "appName";

@@ -266,6 +266,10 @@ public class AddVersionCommand implements Callable<Integer> {
                 }
             }
 
+            log.info("Switching security dataflow {} for application {}.", enableSecurityDataflow ? "ON" : "OFF", applicationName);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
+            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
+            
             DebugOptionsDto oldDebugOptions = debugOptionsService.updateDebugOptions(applicationGuid,
                     DebugOptionsDto.builder().showSql(showSql).activateAmtMemoryProfile(amtProfiling).build());
 

@@ -80,4 +80,8 @@ public class ApiEndpointHelper {
     public static String getModuleOptionsGenerationTypePath(String appGuid) {
         return getApplicationPath(appGuid) + MODULE_OPTIONS_GENERATION_TYPE_ENDPOINT;
     }
+
+    public static String getApplicationSecurityDataflowPath(String appGuid) {
+        return getApplicationPath(appGuid) + Constants.SECURITY_DATAFLOW_PATH;
+    }
 }
