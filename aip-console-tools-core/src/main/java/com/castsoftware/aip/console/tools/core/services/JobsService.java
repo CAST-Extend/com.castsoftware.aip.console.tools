@@ -108,6 +108,10 @@ public interface JobsService {
 
     String startAddVersionJob(JobRequestBuilder jobRequestBuilder) throws JobServiceException;
 
+    String startUpgradeApplication(String appGuid, String appName, String appCaipVersion, String nodeCaipVersion) throws JobServiceException;
+
+    String startResyncApplication(String appGuid) throws JobServiceException;
+
     /**
      * This starts any job based on the job request builder content
      *

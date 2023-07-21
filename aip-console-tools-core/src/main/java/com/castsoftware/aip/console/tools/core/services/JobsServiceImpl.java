@@ -19,11 +19,13 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.OnboardApplicationJobReq
 import com.castsoftware.aip.console.tools.core.dto.jobs.PublishApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.SuccessfulJobStartDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.LogUtils;
+import com.castsoftware.aip.console.tools.core.utils.VersionUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -265,6 +267,47 @@ public class JobsServiceImpl implements JobsService {
         } catch (ApiCallException e) {
             log.log(Level.SEVERE, "Unable to create new application '" + applicationName + "'", e);
             throw new JobServiceException("Creation of application failed", e);
+        }
+    }
+
+
+    @Override
+    public String startUpgradeApplication(String appGuid, String appName, String appCaipVersion, String nodeCaipVersion) throws JobServiceException {
+        if (StringUtils.isBlank(appGuid)) {
+            throw new JobServiceException("Application guid is empty. Unable to upgrade application");
+        }
+        int value = VersionUtils.compareVersions(nodeCaipVersion, appCaipVersion);
+        if(value > 0) {
+            return startUpgradeApplication(appGuid, appName, nodeCaipVersion);
+        } else if(value == 0) {
+            throw new JobServiceException(String.format("Application cannot be upgraded as appCaipVersion: %s is same as the nodeCaipVersion: %s", appCaipVersion, nodeCaipVersion ));
+        } else {
+            throw new JobServiceException(String.format("Application cannot be upgraded as appCaipVersion: %s is ahead of the nodeCaipVersion: %s", appCaipVersion, nodeCaipVersion ));
+        }
+    }
+
+    private String startUpgradeApplication(String appGuid, String appName, String nodeCaipVersion) throws JobServiceException {
+        try{
+            ApplicationJobRequest.ApplicationJobRequestBuilder requestBuilder = ApplicationJobRequest.builder().appGuid(appGuid).caipVersion(nodeCaipVersion);
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getUpgradeApplicationEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            return jobStartDto.getJobGuid();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Unable to upgrade application '" + appName + "'", e);
+            throw new JobServiceException("Upgradation of application failed", e);
+        }
+    }
+
+    public String startResyncApplication(String appGuid) throws JobServiceException {
+        if (StringUtils.isBlank(appGuid)) {
+            throw new JobServiceException("Application guid is empty. Unable to resync application");
+        }
+        try {
+            ApplicationJobRequest.ApplicationJobRequestBuilder requestBuilder = ApplicationJobRequest.builder().appGuid(appGuid);
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getResyncApplicationEndpoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            return jobStartDto.getJobGuid();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Unable to sync application '" + "'", e);
+            throw new JobServiceException("Resync of application failed", e);
         }
     }
 

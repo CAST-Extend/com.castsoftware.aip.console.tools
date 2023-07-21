@@ -24,17 +24,17 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @CommandLine.Command(
-        name = "UpgradeApplicationJob",
+        name = "ResyncApplicationJob",
         mixinStandardHelpOptions = true,
-        aliases = {"upgrade"},
-        description = "Upgrades application on AIP Console"
+        aliases = {"resync"},
+        description = "Sync application on AIP Console"
 )
 @Slf4j
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpgradeApplicationCommand implements Callable<Integer> {
+public class ResyncApplicationCommand implements Callable<Integer> {
 
     @Autowired
     private JobsService jobsService;
@@ -67,27 +67,22 @@ public class UpgradeApplicationCommand implements Callable<Integer> {
             return Constants.RETURN_LOGIN_ERROR;
         }
 
-        log.info("Upgrade application command has triggered with log output = '{}'", sharedOptions.isVerbose());
+        log.info("Sync application command has triggered with log output = '{}'", sharedOptions.isVerbose());
 
         try {
             ApplicationDto app = applicationService.getApplicationFromGuid(appGuid);
-            String nodeCaipVersion = applicationService.getAipConsoleApiInfo().getCaipVersion();
 
             String appName = app.getName();
-            String appCaipVersion = app.getCaipVersion();
 
-            log.info(String.format("Caip version of app: %s" , appCaipVersion));
-            log.info(String.format("Caip version of node: %s", nodeCaipVersion));
+            String jobGuid = jobsService.startResyncApplication(appGuid);
 
-            String jobGuid = jobsService.startUpgradeApplication(appGuid, appName, appCaipVersion, nodeCaipVersion);
-
-            log.info(String.format("Started job to upgrade application for %s", appName));
+            log.info(String.format("Started job to resync application for %s", appName));
             return jobsService.pollAndWaitForJobFinished(jobGuid, (jobDetails) -> {
                 if (jobDetails.getState() != JobState.COMPLETED) {
-                    log.error("Upgrade of the application failed with status '{}'", jobDetails.getState());
+                    log.error("Resync of the application failed with status '{}'", jobDetails.getState());
                     return jobDetails.getState() == JobState.CANCELED ? Constants.RETURN_JOB_CANCELED : Constants.RETURN_JOB_FAILED;
                 }
-                log.info("Application '{}' upgraded successfully:  GUID is '{}'", jobDetails.getAppName(), jobDetails.getAppGuid());
+                log.info("Application '{}' synced successfully:  GUID is '{}'", jobDetails.getAppName(), jobDetails.getAppGuid());
                 return Constants.RETURN_OK;
             }, sharedOptions.isVerbose());
         } catch (JobServiceException e) {

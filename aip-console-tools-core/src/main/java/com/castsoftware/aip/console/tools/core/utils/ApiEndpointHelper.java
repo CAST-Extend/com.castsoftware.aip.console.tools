@@ -17,6 +17,9 @@ public class ApiEndpointHelper {
     private static final String SHOW_SQL_ENDPOINT = "/show-sql";
     private static final String AMT_PROFILE_ENDPOINT = "/activate-amt-memory-profile";
     private static final String CREATE_APPLICATION_ENDPOINT = "/create-application";
+    private static final String UPGRADE_APPLICATION_ENDPOINT = "/upgrade-application";
+
+    private static final String RESYNC_APPLICATION_ENDPOINT = "/resync-application";
     public static final String ADD_VERSION_ENDPOINT = "/add-version";
     public static final String CLONE_VERSION_ENDPOINT = "/clone-version";
     public static final String ANALYZE_SECURITY_DATAFLOW = "/analyze-security-dataflow";
@@ -190,6 +193,14 @@ public class ApiEndpointHelper {
 
     public static String getCreateApplicationEndPoint() {
         return getJobsEndpoint() + CREATE_APPLICATION_ENDPOINT;
+    }
+
+    public static String getUpgradeApplicationEndPoint() {
+        return getJobsEndpoint() + UPGRADE_APPLICATION_ENDPOINT;
+    }
+
+    public static String getResyncApplicationEndpoint() {
+        return getJobsEndpoint() + RESYNC_APPLICATION_ENDPOINT;
     }
 
     public static String getJobsEndpoint(CreateJobsRequest jobRequest) throws JobServiceException {
