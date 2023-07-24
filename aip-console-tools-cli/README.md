@@ -263,7 +263,8 @@ The available options are :
   snapshot or from publishing application to the Health dashboard. *default* : false
 * `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
   module.
-  Possible value is one of: full_content, one_per_au, one_per_techno
+  Possible value is one of: preserve_configured, full_content, one_per_au, one_per_techno.
+  * **NOTE** Use Preserve Configured option to keep your existing module generation type unchanged.
 
   *NOTE*: When creating a version, if a previous version exists, it's configuration will be cloned to the new version,
   but the new source will be used for analysis.
@@ -338,7 +339,8 @@ The available options are :
 * `--consolidation` or `--upload-application` (optional)  : When sets to false, this prevents from consolidating
 * `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
   module.
-  Possible value is one of: full_content, one_per_au, one_per_techno
+  Possible value is one of: preserve_configured, full_content, one_per_au, one_per_techno
+  * **NOTE** Use Preserve Configured option to keep your existing module generation type unchanged.
 
 * snapshot or from publishing application to the Health dashboard. *default* : false
 

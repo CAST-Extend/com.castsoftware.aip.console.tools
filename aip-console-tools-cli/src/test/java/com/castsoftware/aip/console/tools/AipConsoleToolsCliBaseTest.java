@@ -11,6 +11,7 @@ import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -149,6 +150,18 @@ public abstract class AipConsoleToolsCliBaseTest {
         when(applicationDto.getName()).thenReturn(TestConstants.TEST_CREATRE_APP);
         when(applicationDto.getGuid()).thenReturn(TestConstants.TEST_APP_GUID);
         return applicationDto;
+    }
+
+    protected CommandLine.Model.OptionSpec getCommandLineOption(CommandLine.Model.CommandSpec spec, String optionName) {
+        //Checks that the initial value set for the module type is full content
+        List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
+        for (CommandLine.Model.ArgSpec cmdArg : argsSpec) {
+            CommandLine.Model.OptionSpec optionSpec = (CommandLine.Model.OptionSpec) cmdArg;
+            if (StringUtils.equalsAny(optionName, optionSpec.names())) {
+                return optionSpec;
+            }
+        }
+        return null;
     }
 
     protected void runStringArgs(Callable<Integer> command, String[] args) {

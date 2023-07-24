@@ -64,6 +64,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         doReturn(ApiInfoDto.builder().apiVersion("1.12.0-DEV").build())
                 .when(restApiService).getAipConsoleApiInfo();
         doReturn(BaseBuilderTest.TEST_APP).when(applicationService).getApplicationFromGuid(BaseBuilderTest.TEST_APP_NAME);
+        doReturn(BaseBuilderTest.TEST_APP).when(applicationService).getApplicationFromGuid(BaseBuilderTest.TEST_APP_GUID);
     }
 
     @Test
@@ -73,7 +74,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         AddVersionBuilder job = new AddVersionBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         job.setDomainName("");
         job.setCssServerName("");
-        job.setModuleGenerationType(ModuleGenerationType.FULL_CONTENT.toString());
+        job.setModuleGenerationType(ModuleGenerationType.PRESERVE_CONFIGURED.toString());
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
 
@@ -100,7 +101,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         doReturn(BaseBuilderTest.TEST_APP)
                 .when(applicationService).getApplicationFromName(BaseBuilderTest.TEST_APP_NAME);
         doReturn(true)
-                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_GUID), anyString(), anyLong(), isA(InputStream.class));
         doReturn(BaseBuilderTest.TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.COMPLETED)
@@ -211,7 +212,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         doReturn(BaseBuilderTest.TEST_APP)
                 .when(applicationService).getApplicationFromName(BaseBuilderTest.TEST_APP_NAME);
         doReturn(true)
-                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_GUID), anyString(), anyLong(), isA(InputStream.class));
         doThrow(new JobServiceException("fake exception"))
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
 
@@ -230,7 +231,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         doReturn(BaseBuilderTest.TEST_APP)
                 .when(applicationService).getApplicationFromName(BaseBuilderTest.TEST_APP_NAME);
         doReturn(true)
-                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
+                .when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_GUID), anyString(), anyLong(), isA(InputStream.class));
         doReturn(BaseBuilderTest.TEST_JOB_GUID)
                 .when(jobsService).startAddVersionJob(any(JobRequestBuilder.class));
         doReturn(JobState.CANCELED)

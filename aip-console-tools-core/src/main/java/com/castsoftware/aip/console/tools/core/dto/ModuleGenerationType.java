@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.stream.Collectors;
 
 public enum ModuleGenerationType {
+    PRESERVE_CONFIGURED,
     ONE_PER_TECHNO,
     ONE_PER_AU,
     FULL_CONTENT;

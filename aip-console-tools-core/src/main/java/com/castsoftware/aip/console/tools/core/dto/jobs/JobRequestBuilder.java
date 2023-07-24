@@ -52,16 +52,16 @@ public class JobRequestBuilder {
         this.sourcePath = sourcePath;
         this.jobType = jobType;
         this.caipVersion = caipVersion;
-        this.startStep = Constants.EXTRACT_STEP_NAME;
-        this.endStep = Constants.SNAPSHOT_INDICATOR;
-        this.objectives.add(GLOBAL_RISK_OBJECTIVE);
-        this.objectives.add(FUNCTIONAL_POINTS_OBJECTIVE);
+        startStep = Constants.EXTRACT_STEP_NAME;
+        endStep = Constants.SNAPSHOT_INDICATOR;
+        objectives.add(GLOBAL_RISK_OBJECTIVE);
+        objectives.add(FUNCTIONAL_POINTS_OBJECTIVE);
 
         Date now = new Date();
-        this.versionName = String.format("v%s", VERSION_NAME_FORMATTER.format(now));
+        versionName = String.format("v%s", VERSION_NAME_FORMATTER.format(now));
         String nowStr = RELEASE_DATE_FORMATTER.format(now);
-        this.releaseDateStr = nowStr;
-        this.snapshotDateStr = nowStr;
+        releaseDateStr = nowStr;
+        snapshotDateStr = nowStr;
     }
 
     public JobRequestBuilder nodeName(String nodeName) {
@@ -126,10 +126,10 @@ public class JobRequestBuilder {
 
     public JobRequestBuilder securityObjective(boolean enable) {
         if (enable) {
-            this.objectives.add(SECURITY_OBJECTIVE);
+            objectives.add(SECURITY_OBJECTIVE);
         }
-        if (!enable && this.objectives.contains(SECURITY_OBJECTIVE)) {
-            this.objectives = new ArrayList<>();
+        if (!enable && objectives.contains(SECURITY_OBJECTIVE)) {
+            objectives = new ArrayList<>();
             objectives.add(GLOBAL_RISK_OBJECTIVE);
             objectives.add(FUNCTIONAL_POINTS_OBJECTIVE);
         }
@@ -159,7 +159,7 @@ public class JobRequestBuilder {
             return this;
         }
         String dateStr = RELEASE_DATE_FORMATTER.format(date);
-        return this.releaseDateStr(dateStr)
+        return releaseDateStr(dateStr)
                 .snapshotDateStr(dateStr);
     }
 
@@ -168,7 +168,7 @@ public class JobRequestBuilder {
             return this;
         }
         String dateStr = RELEASE_DATE_FORMATTER.format(date);
-        return this.snapshotDateStr(dateStr);
+        return snapshotDateStr(dateStr);
     }
 
     public JobRequestBuilder versionReleaseDate(Date releaseDate) {
@@ -176,7 +176,7 @@ public class JobRequestBuilder {
             return this;
         }
         String dateStr = RELEASE_DATE_FORMATTER.format(releaseDate);
-        return this.releaseDateStr(dateStr);
+        return releaseDateStr(dateStr);
     }
 
     public JobRequestBuilder snapshotDateStr(String snapshotDateStr) {
@@ -185,7 +185,7 @@ public class JobRequestBuilder {
     }
 
     public JobRequestBuilder versionGuid(String guid) {
-        this.versionGuid = guid;
+        versionGuid = guid;
         return this;
     }
 
@@ -195,14 +195,14 @@ public class JobRequestBuilder {
     }
 
     public JobRequestBuilder moduleGenerationType(ModuleGenerationType generationType) {
-        this.moduleGenerationType = generationType;
+        moduleGenerationType = generationType;
         return this;
     }
 
     private Map<String, Object> getJobParameters() {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(Constants.PARAM_APP_GUID, this.appGuid);
-        parameters.put(Constants.PARAM_VERSION_NAME, this.versionName);
+        parameters.put(Constants.PARAM_APP_GUID, appGuid);
+        parameters.put(Constants.PARAM_VERSION_NAME, versionName);
         if (StringUtils.isNotBlank(sourcePath)) {
             parameters.put(Constants.PARAM_SOURCE_PATH, sourcePath);
             // for 1.12 compatibility
@@ -247,7 +247,9 @@ public class JobRequestBuilder {
             parameters.put(Constants.PARAM_BACKUP_NAME, backupName);
         }
         parameters.put(Constants.PARAM_PROCESS_IMAGING, Boolean.toString(processImaging));
-        if (moduleGenerationType != null && moduleGenerationType != ModuleGenerationType.FULL_CONTENT) {
+        if (moduleGenerationType != null
+                && moduleGenerationType != ModuleGenerationType.PRESERVE_CONFIGURED
+                && moduleGenerationType != ModuleGenerationType.FULL_CONTENT) {
             // Full_content manged by application service
             parameters.put(Constants.PARAM_MODULE_GENERATION_TYPE, moduleGenerationType.toString());
         }
@@ -258,7 +260,7 @@ public class JobRequestBuilder {
     public CreateJobsRequest buildJobRequest() {
         CreateJobsRequest jobRequest = new CreateJobsRequest();
         jobRequest.setJobType(jobType);
-        jobRequest.setJobParameters(this.getJobParameters());
+        jobRequest.setJobParameters(getJobParameters());
         return jobRequest;
     }
 
