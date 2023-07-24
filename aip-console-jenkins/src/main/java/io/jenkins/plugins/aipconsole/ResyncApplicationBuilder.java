@@ -13,7 +13,6 @@ import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.LogUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.sun.istack.internal.NotNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -47,7 +46,7 @@ import static io.jenkins.plugins.aipconsole.Messages.ResyncApplicationBuilder_Re
 import static io.jenkins.plugins.aipconsole.Messages.ResyncApplicationBuilder_ResyncApplication_error_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.ResyncApplicationBuilder_ResyncApplication_error_unavailable;
 import static io.jenkins.plugins.aipconsole.Messages.ResyncApplicationBuilder_ResyncApplication_info_jobStarted;
-import static io.jenkins.plugins.aipconsole.Messages.ResyncApplicationBuilder_ResyncApplication_info_success;
+import static io.jenkins.plugins.aipconsole.Messages.ResyncApplicationBuilder_ResyncApplication_info_jobSuccess;
 
 public class ResyncApplicationBuilder extends BaseActionBuilder implements SimpleBuildStep {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -61,7 +60,6 @@ public class ResyncApplicationBuilder extends BaseActionBuilder implements Simpl
     @Inject
     private ApplicationService applicationService;
 
-    @NotNull
     private String appGuid;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -181,7 +179,7 @@ public class ResyncApplicationBuilder extends BaseActionBuilder implements Simpl
                 listener.error(ResyncApplicationBuilder_ResyncApplication_error_jobFailed(endState.toString()));
                 run.setResult(defaultResult);
             } else {
-                log.println(ResyncApplicationBuilder_ResyncApplication_info_success(appName));
+                log.println(ResyncApplicationBuilder_ResyncApplication_info_jobSuccess(appName));
                 run.setResult(Result.SUCCESS);
             }
         } catch (JobServiceException e) {

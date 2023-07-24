@@ -13,7 +13,6 @@ import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.LogUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.sun.istack.internal.NotNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -47,7 +46,7 @@ import static io.jenkins.plugins.aipconsole.Messages.UpgradeApplicationBuilder_U
 import static io.jenkins.plugins.aipconsole.Messages.UpgradeApplicationBuilder_UpgradeApplication_error_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.UpgradeApplicationBuilder_UpgradeApplication_error_unavailable;
 import static io.jenkins.plugins.aipconsole.Messages.UpgradeApplicationBuilder_UpgradeApplication_info_jobStarted;
-import static io.jenkins.plugins.aipconsole.Messages.UpgradeApplicationBuilder_UpgradeApplication_info_success;
+import static io.jenkins.plugins.aipconsole.Messages.UpgradeApplicationBuilder_UpgradeApplication_info_jobSuccess;
 
 public class UpgradeApplicationBuilder extends BaseActionBuilder implements SimpleBuildStep {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -61,7 +60,6 @@ public class UpgradeApplicationBuilder extends BaseActionBuilder implements Simp
     @Inject
     private ApplicationService applicationService;
 
-    @NotNull
     private String appGuid;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -183,7 +181,7 @@ public class UpgradeApplicationBuilder extends BaseActionBuilder implements Simp
                 listener.error(UpgradeApplicationBuilder_UpgradeApplication_error_jobFailed(endState.toString()));
                 run.setResult(defaultResult);
             } else {
-                log.println(UpgradeApplicationBuilder_UpgradeApplication_info_success(appName));
+                log.println(UpgradeApplicationBuilder_UpgradeApplication_info_jobSuccess(appName));
                 run.setResult(Result.SUCCESS);
             }
         } catch (JobServiceException e) {
