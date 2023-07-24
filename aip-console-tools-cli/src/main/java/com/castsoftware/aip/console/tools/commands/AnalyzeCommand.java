@@ -177,6 +177,7 @@ public class AnalyzeCommand extends BasicCollable {
             } else {
                 builder.endStep(Constants.ANALYZE);
             }
+
             applicationService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, false);
 
             builder.versionName(versionToAnalyze.getName())

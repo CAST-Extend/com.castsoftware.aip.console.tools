@@ -396,7 +396,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public void updateModuleGenerationType(String applicationGuid, JobRequestBuilder builder, ModuleGenerationType moduleGenerationType, boolean firstVersion) {
-        if (moduleGenerationType != null) {
+        if (moduleGenerationType != null && moduleGenerationType != ModuleGenerationType.PRESERVE_CONFIGURED) {
             if (moduleGenerationType == ModuleGenerationType.FULL_CONTENT) {
                 setModuleOptionsGenerationType(applicationGuid, moduleGenerationType);
                 log.info("Module option has been set to " + moduleGenerationType);

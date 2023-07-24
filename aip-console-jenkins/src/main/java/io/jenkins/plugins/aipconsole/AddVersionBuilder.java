@@ -118,7 +118,7 @@ public class AddVersionBuilder extends BaseActionBuilder implements SimpleBuildS
     @Nullable
     private String snapshotName = "";
 
-    private String moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
+    private String moduleGenerationType;
 
     @DataBoundConstructor
     public AddVersionBuilder(String applicationName, String filePath) {

@@ -263,8 +263,10 @@ The Add Version step provides the following parameters :
   technologies JEE and DOTNET as well.<u>Has no effect if `Rescan` is checked</u>.
 * *Enable Data Safety Investigation*: Enables the data safety investigation
   objective for the version.
-* *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "
+* *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Preserve Configured" (
+  default), or '"Full Content", "
   Analysis Unit module" or "Technology Module".
+  * **NOTE** Use Preserve Configured option to keep your existing module generation type unchanged.
 
 Under `Advanced Settings` you will find the following parameters :
 
@@ -334,11 +336,15 @@ Under `Advanced Settings` you will find the following parameters :
 The Analyze step provides the following parameters :
 
 * *Application Name* (**required**): The name of the application for which the analysis will be run.
-* *Version Name*: The name of the version to Analyze. <u>If left blank</u>, the analyzed version will <u>be the latest Delivered Version</u>. If no new Delivered Version Exists, <u>it will use the Current Version</u>.
+* *Version Name*: The name of the version to Analyze. <u>If left blank</u>, the analyzed version will <u>be the latest
+  Delivered Version</u>. If no new Delivered Version Exists, <u>it will use the Current Version</u>.
 * *Snapshot*: Whether Snapshots should be created after Analysis.
 * *Publish to Imaging*: Publish to Imaging if Imaging is configured with AIP Console
-* *Publish to the Health Dashboard* : When checked, consolidates snapshots and publishes data to the Health Dashboards. Checked by default.
-* *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "Analysis Unit module" or "Technology Module".
+* *Publish to the Health Dashboard* : When checked, consolidates snapshots and publishes data to the Health Dashboards.
+  Checked by default.
+* *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Preserve Configured" (
+  default), or '"Full Content", "Analysis Unit module" or "Technology Module".
+  * **NOTE** Use Preserve Configured option to keep your existing module generation type unchanged..
 
 Under `Advanced Settings` you will find the following parameters :
 
