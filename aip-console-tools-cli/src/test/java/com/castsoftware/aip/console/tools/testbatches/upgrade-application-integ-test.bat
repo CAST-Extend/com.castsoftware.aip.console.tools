@@ -1,8 +1,9 @@
 @echo off
 REM -- Upgrade Application --
-SET APP_GUID=%~1
-SET SERVER_URL=%~2
-SET API_KEY=%~3
+
+SET SERVER_URL=%~1
+SET API_KEY=%~2
+SET APP_GUID=%~3
 set TOOLS_EXTENSION=com.castsoftware.aip.console.tools
 set EXTEND_URL=https://extend.castsoftware.com
 set PATH=C:\CAST-Caches\Win64;%PATH%
