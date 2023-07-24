@@ -27,6 +27,7 @@ public class BaseBuilderTest {
     protected static final String TEST_KEY = "key";
     protected static final String TEST_CONTENT = "test";
     protected static final String TEST_APP_NAME = "appName";
+    protected static final String TEST_VERSION_NAME = "versionName";
     protected static final String TEST_APP_GUID = "app-GUID";
     protected static final String TEST_ARCHIVE_NAME = "archive.zip";
     protected static final String TEST_FOLDER_NAME = "testFolder";
@@ -36,7 +37,7 @@ public class BaseBuilderTest {
 
     protected static final String TEST_UPLOAD_FILE_PATH = "C:\\Report\\model.CASTArchitect";
     protected static final String TEST_REPORT_PATH = "C:\\Report";
-    protected static final ApplicationDto TEST_APP = ApplicationDto.builder().name(TEST_APP_NAME).guid(TEST_APP_NAME).inPlaceMode(false).build();
+    protected static final ApplicationDto TEST_APP = ApplicationDto.builder().name(TEST_APP_NAME).guid(TEST_APP_GUID).inPlaceMode(false).build();
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
 

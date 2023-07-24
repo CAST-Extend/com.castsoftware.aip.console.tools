@@ -2,6 +2,7 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.AnalyzeCommand;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
@@ -28,8 +29,10 @@ import java.util.function.Function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -220,4 +223,51 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_JOB_CANCELED));
     }
+
+    @Test
+    public void testAnalyzeCommand_WithModulePreserveConfigured() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
+        boolean verbose = true;
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "-S", "--process-imaging",
+                "--module-option", ModuleGenerationType.PRESERVE_CONFIGURED.toString()};
+
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        //Set<VersionDto> versions =
+        VersionDto versionDto = new VersionDto();
+        versionDto.setName(TestConstants.TEST_VERSION_NAME);
+        versionDto.setStatus(VersionStatus.DELIVERED);
+        when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
+        when(jobsService.startJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
+        DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
+        when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
+        when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
+
+        JobExecutionDto jobStatus = new JobExecutionDto();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(JobState.COMPLETED);
+        jobStatus.setCreatedDate(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
+
+        runStringArgs(analyzeCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+
+        //Checks that the initial value set for the module type is full content
+        CommandLine.Model.OptionSpec optionSpec = getCommandLineOption(spec, "--module-option");
+        assertThat(optionSpec.hasInitialValue(), is(true));
+        assertThat(optionSpec.mapFallbackValue(), is("__unspecified__"));
+        assertThat(optionSpec.initialValue(), is(nullValue())); //not initialized in the command
+        assertThat(optionSpec.typedValues(), hasSize(1));
+        ModuleGenerationType typeInfo = (ModuleGenerationType) optionSpec.typedValues().get(0);
+        assertThat(typeInfo, is(ModuleGenerationType.PRESERVE_CONFIGURED));
+
+        // What you set is what you get
+        assertThat(analyzeCommand.getModuleGenerationType(), is(ModuleGenerationType.PRESERVE_CONFIGURED));
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
 }

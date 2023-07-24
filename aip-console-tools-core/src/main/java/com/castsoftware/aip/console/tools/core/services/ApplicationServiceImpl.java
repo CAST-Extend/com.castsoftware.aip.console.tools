@@ -247,7 +247,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             requestBuilder.snapshotName(snapshotName);
         }
         //The module parameter should be left empty or null when dealing with full content
-        if (moduleGenerationType != null && (moduleGenerationType != ModuleGenerationType.FULL_CONTENT)) {
+        if (moduleGenerationType != null
+                && (moduleGenerationType != ModuleGenerationType.PRESERVE_CONFIGURED)
+                && (moduleGenerationType != ModuleGenerationType.FULL_CONTENT)) {
             requestBuilder.moduleGenerationType(moduleGenerationType.toString());
         }
         return runDeepAnalysis(requestBuilder.build(), logPollingProvider);
