@@ -169,6 +169,26 @@ To perform *ArchitectureStudioModelChecker* action you can use following command
 java -jar .\aip-console-tools-cli.jar ArchitectureStudioModelChecker -s="Console URL" --apikey "valid.key" -n "my-app" --model-name "model filename" --report-path "valid local path" --file-path "valid filepath with filename"
 ```
 
+To **UpgradeApplicationJob**
+
+- application should exist
+
+To perform *UpgradeApplicationJob* action you can use following command
+
+```bash
+java -jar .\aip-console-tools-cli.jar UpgradeApplicationJob -s="Console URL" --apikey "valid.key" -a "my-guid"
+```
+
+To **ResyncApplicationJob**
+
+- application should exist
+
+To perform *ResyncApplicationJob* action you can use following command
+
+```bash
+java -jar .\aip-console-tools-cli.jar ResyncApplicationJob -s="Console URL" --apikey "valid.key" -a "my-guid"
+```
+
 ### Advanced Usage
 
 When running the CLI, you must specify a command to be run. The list of commands is :
@@ -181,6 +201,8 @@ When running the CLI, you must specify a command to be run. The list of commands
 * `Deep-Analysis` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the dashboard and Imaging depending on the operating settings
 * `Publish-Imaging` Publish an existing application data to CAST Imaging.
 * `ArchitectureStudioModelChecker` to check an existing application against a model.
+* `UpgradeApplicationJob` to upgrade an application to the available version of node.
+* `ResyncApplicationJob` to resync an application.
 
 Each commands has a `--help` parameter, providing a list of all parameters available.
 
@@ -464,6 +486,49 @@ Here is a detailed list of all error codes that can be returned by the CLI :
 * 7 : Application Not Found. The given Application Name or GUID could not be found.
 * 27 : Architecture model not found.
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
+
+### UpgradeApplicationJob
+
+Upgrade an application to the available node version.
+
+The available options are :
+
+* `--app-guid` or `-a` (**required**): The application guid.
+
+When AIP Console finishes execution, it will return a specific return code, based on the execution.
+
+Here is a detailed list of all error codes that can be returned by the CLI :
+
+* 0 : No errors, processing was completed correctly. This is also the return code for`--help` and `--version`
+  parameters.
+* 1 : API key missing. No API key was provided either in the prompt or in the environment variable.
+* 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper
+  value.
+* 6 : Application GUID missing. The upgrade cannot run due to a missing application guid.
+* 7 : Application Not Found. The given Application GUID could not be found.
+* 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
+
+### ResyncApplicationJob
+
+Resync an application.
+
+The available options are :
+
+* `--app-guid` or `-a` (**required**): The application guid.
+
+When AIP Console finishes execution, it will return a specific return code, based on the execution.
+
+Here is a detailed list of all error codes that can be returned by the CLI :
+
+* 0 : No errors, processing was completed correctly. This is also the return code for`--help` and `--version`
+  parameters.
+* 1 : API key missing. No API key was provided either in the prompt or in the environment variable.
+* 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper
+  value.
+* 6 : Application GUID missing. The resync cannot run due to a missing application guid.
+* 7 : Application Not Found. The given Application GUID could not be found.
+* 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
+
 
 ### Authentication
 

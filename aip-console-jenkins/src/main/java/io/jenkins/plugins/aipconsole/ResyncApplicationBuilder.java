@@ -155,13 +155,8 @@ public class ResyncApplicationBuilder extends BaseActionBuilder implements Simpl
 
         try {
             ApplicationDto app = applicationService.getApplicationFromGuid(expandedAppGuid);
+
             appName = app.getName();
-
-            String nodeCaipVersion = applicationService.getAipConsoleApiInfo().getCaipVersion();
-            String appCaipVersion = app.getCaipVersion();
-
-            log.println(String.format("Caip version of app: %s" , appCaipVersion));
-            log.println(String.format("Caip version of node: %s", nodeCaipVersion));
 
             resyncJobGuid = jobsService.startResyncApplication(expandedAppGuid);
 
