@@ -38,7 +38,10 @@ public class ResyncApplicationCommandTest {
 
     @Test
     public void testResyncApplicationCommand() {
-        String[] sb = new String[]{"resync", "--apikey", TEST_API_KEY, "--app-guid=" + TEST_GUID, "true"};
+        String[] sb = new String[]{
+                "--apikey", TEST_API_KEY,
+                "--app-guid", TEST_GUID
+        };
         resyncAppCmdLine.parseArgs(sb);
         assertEquals(TEST_API_KEY, resyncAppCmd.getSharedOptions().getApiKey());
         assertEquals(TEST_GUID, resyncAppCmd.getAppGuid());
@@ -47,7 +50,7 @@ public class ResyncApplicationCommandTest {
 
     @Test
     public void testResyncApplicationCommand_withAlias() {
-        String[] sb = new String[]{"resync", "--apikey", TEST_API_KEY, "-a", TEST_GUID, "--verbose=false"};
+        String[] sb = new String[]{"--apikey", TEST_API_KEY, "-a", TEST_GUID, "--verbose=false"};
 
         resyncAppCmdLine.parseArgs(sb);
         assertEquals(TEST_API_KEY, resyncAppCmd.getSharedOptions().getApiKey());

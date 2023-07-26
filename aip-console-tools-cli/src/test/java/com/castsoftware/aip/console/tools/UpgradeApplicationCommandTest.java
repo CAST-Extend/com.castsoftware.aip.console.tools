@@ -38,7 +38,10 @@ public class UpgradeApplicationCommandTest {
 
     @Test
     public void testUpgradeApplicationCommand() {
-        String[] sb = new String[]{"upgrade", "--apikey", TEST_API_KEY, "--app-guid=" + TEST_GUID, "true"};
+        String[] sb = new String[]{
+                "--apikey", TEST_API_KEY,
+                "--app-guid", TEST_GUID
+        };
         upgradeAppCmdLine.parseArgs(sb);
         assertEquals(TEST_API_KEY, upgradeAppCmd.getSharedOptions().getApiKey());
         assertEquals(TEST_GUID, upgradeAppCmd.getAppGuid());
@@ -47,7 +50,7 @@ public class UpgradeApplicationCommandTest {
 
     @Test
     public void testUpgradeApplicationCommand_withAlias() {
-        String[] sb = new String[]{"upgrade", "--apikey", TEST_API_KEY, "-a", TEST_GUID, "--verbose=false"};
+        String[] sb = new String[]{"--apikey", TEST_API_KEY, "-a", TEST_GUID, "--verbose=false"};
 
         upgradeAppCmdLine.parseArgs(sb);
         assertEquals(TEST_API_KEY, upgradeAppCmd.getSharedOptions().getApiKey());
