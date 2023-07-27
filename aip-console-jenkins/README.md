@@ -166,6 +166,34 @@ This step will perform the following actions :
 * Checks the application against the provided model.
 * Downloads the report in the provided report path
 
+#### Upgrade
+
+![Menu item to add the upgrade step](doc/images/upgrade_build_steps.png)
+
+The `Upgrade Application` will upgrade the application.
+
+This step requires the following :
+
+* An application name of the application which needs to be upgraded. <u>This application must exist in AIP Console</u>.
+
+This step will perform the following actions :
+
+* Upgrade the application to the available node version
+
+#### Resync
+
+![Menu item to add the resync step](doc/images/resync_build_steps.png)
+
+The `Resync Application` will sync the application.
+
+This step requires the following :
+
+* An application name of the application which needs to be resynced. <u>This application must exist in AIP Console</u>.
+
+This step will perform the following actions :
+
+* Sync the application on the AIP Console
+
 #### Onboard Application
 
 Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST
@@ -349,6 +377,36 @@ The Analyze step provides the following parameters :
 Under `Advanced Settings` you will find the following parameters :
 
 ![Analyze step advanced settings](doc/images/analyze_advanced.png)
+
+* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *Ignore Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
+
+### Upgrade
+![Upgrade application step parameters](doc/images/upgrade_parameters.png)
+The Upgrade step provides the following parameters :
+
+* *Application Name* (**required**): The name of the application for which the upgrade will be run.
+
+Under `Advanced Settings` you will find the following parameters :
+
+![Upgrade step advanced settings](doc/images/upgrade_advanced_settings.png)
+
+* *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
+* *API Key* : The API Key for the URL specified above.
+* *Ignore Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
+* *Connection Timeout*: Timeout in seconds for each calls to AIP Console.
+
+### Resync
+![Resync application step parameters](doc/images/resync_parameters.png)
+The Upgrade step provides the following parameters :
+
+* *Application Name* (**required**): The name of the application for which the resync will be run.
+
+Under `Advanced Settings` you will find the following parameters :
+
+![Upgrade step advanced settings](doc/images/resync_advanced_settings.png)
 
 * *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
 * *API Key* : The API Key for the URL specified above.

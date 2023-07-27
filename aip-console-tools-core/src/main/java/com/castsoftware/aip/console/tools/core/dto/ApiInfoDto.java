@@ -26,7 +26,7 @@ public class ApiInfoDto {
 
     private String apiVersion = "";
 
-    private String castVersion;
+    private String caipVersion;
 
     private Map<String, Set<String>> dependencyMatrix = new HashMap<>();
 
