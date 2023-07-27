@@ -174,7 +174,7 @@ The `Upgrade Application` will upgrade the application.
 
 This step requires the following :
 
-* An application guid of the application which needs to be upgraded. <u>This application must exist in AIP Console</u>.
+* An application name of the application which needs to be upgraded. <u>This application must exist in AIP Console</u>.
 
 This step will perform the following actions :
 
@@ -188,7 +188,7 @@ The `Resync Application` will sync the application.
 
 This step requires the following :
 
-* An application guid of the application which needs to be resynced. <u>This application must exist in AIP Console</u>.
+* An application name of the application which needs to be resynced. <u>This application must exist in AIP Console</u>.
 
 This step will perform the following actions :
 
@@ -381,7 +381,7 @@ Under `Advanced Settings` you will find the following parameters :
 ![Upgrade application step parameters](doc/images/upgrade_parameters.png)
 The Upgrade step provides the following parameters :
 
-* *Application Guid* (**required**): The guid of the application for which the upgrade will be run.
+* *Application Name* (**required**): The name of the application for which the upgrade will be run.
 
 Under `Advanced Settings` you will find the following parameters :
 
@@ -396,7 +396,7 @@ Under `Advanced Settings` you will find the following parameters :
 ![Resync application step parameters](doc/images/resync_parameters.png)
 The Upgrade step provides the following parameters :
 
-* *Application Guid* (**required**): The guid of the application for which the resync will be run.
+* *Application Name* (**required**): The name of the application for which the resync will be run.
 
 Under `Advanced Settings` you will find the following parameters :
 

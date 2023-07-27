@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpgradeApplicationCommandTest {
-    private static final String TEST_GUID = "App-guid";
+    private static final String TEST_APP_NAME = "App-name";
     private static final String TEST_API_KEY = "API-Key";
 
     private AnnotationConfigApplicationContext context;
@@ -40,21 +40,21 @@ public class UpgradeApplicationCommandTest {
     public void testUpgradeApplicationCommand() {
         String[] sb = new String[]{
                 "--apikey", TEST_API_KEY,
-                "--app-guid", TEST_GUID
+                "--app-name", TEST_APP_NAME
         };
         upgradeAppCmdLine.parseArgs(sb);
         assertEquals(TEST_API_KEY, upgradeAppCmd.getSharedOptions().getApiKey());
-        assertEquals(TEST_GUID, upgradeAppCmd.getAppGuid());
+        assertEquals(TEST_APP_NAME, upgradeAppCmd.getAppName());
         assertEquals(true, upgradeAppCmd.getSharedOptions().isVerbose());
     }
 
     @Test
     public void testUpgradeApplicationCommand_withAlias() {
-        String[] sb = new String[]{"--apikey", TEST_API_KEY, "-a", TEST_GUID, "--verbose=false"};
+        String[] sb = new String[]{"--apikey", TEST_API_KEY, "-n", TEST_APP_NAME, "--verbose=false"};
 
         upgradeAppCmdLine.parseArgs(sb);
         assertEquals(TEST_API_KEY, upgradeAppCmd.getSharedOptions().getApiKey());
-        assertEquals(TEST_GUID, upgradeAppCmd.getAppGuid());
+        assertEquals(TEST_APP_NAME, upgradeAppCmd.getAppName());
         assertEquals(false, upgradeAppCmd.getSharedOptions().isVerbose());
     }
 

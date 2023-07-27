@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResyncApplicationCommandTest {
-    private static final String TEST_GUID = "App-guid";
+    private static final String TEST_APP_NAME = "App-name";
     private static final String TEST_API_KEY = "API-Key";
 
     private AnnotationConfigApplicationContext context;
@@ -40,21 +40,21 @@ public class ResyncApplicationCommandTest {
     public void testResyncApplicationCommand() {
         String[] sb = new String[]{
                 "--apikey", TEST_API_KEY,
-                "--app-guid", TEST_GUID
+                "--app-name", TEST_APP_NAME
         };
         resyncAppCmdLine.parseArgs(sb);
         assertEquals(TEST_API_KEY, resyncAppCmd.getSharedOptions().getApiKey());
-        assertEquals(TEST_GUID, resyncAppCmd.getAppGuid());
+        assertEquals(TEST_APP_NAME, resyncAppCmd.getAppName());
         assertEquals(true, resyncAppCmd.getSharedOptions().isVerbose());
     }
 
     @Test
     public void testResyncApplicationCommand_withAlias() {
-        String[] sb = new String[]{"--apikey", TEST_API_KEY, "-a", TEST_GUID, "--verbose=false"};
+        String[] sb = new String[]{"--apikey", TEST_API_KEY, "-n", TEST_APP_NAME, "--verbose=false"};
 
         resyncAppCmdLine.parseArgs(sb);
         assertEquals(TEST_API_KEY, resyncAppCmd.getSharedOptions().getApiKey());
-        assertEquals(TEST_GUID, resyncAppCmd.getAppGuid());
+        assertEquals(TEST_APP_NAME, resyncAppCmd.getAppName());
         assertEquals(false, resyncAppCmd.getSharedOptions().isVerbose());
     }
 

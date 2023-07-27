@@ -11,7 +11,7 @@ import javax.annotation.CheckForNull;
  */
 public class ResyncApplicationAction extends BaseAction implements RunAction2 {
     private Run run;
-    private String appGuid;
+    private String appName;
     private boolean failureIgnored = false;
     private boolean inPlaceMode = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
@@ -20,12 +20,12 @@ public class ResyncApplicationAction extends BaseAction implements RunAction2 {
         return run;
     }
 
-    public String getAppGuid() {
-        return appGuid;
+    public String getAppName() {
+        return appName;
     }
 
-    public void setAppGuid(String appGuid) {
-        this.appGuid = appGuid;
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     public boolean isFailureIgnored() {

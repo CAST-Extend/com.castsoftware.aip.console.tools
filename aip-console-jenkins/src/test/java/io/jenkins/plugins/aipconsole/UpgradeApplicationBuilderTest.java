@@ -17,18 +17,18 @@ public class UpgradeApplicationBuilderTest extends BaseBuilderTest{
     @Before
     public void setUp() throws Exception {
         super.startUp();
-        upgradeApplicationBuilder = new UpgradeApplicationBuilder(BaseBuilderTest.TEST_APP_GUID);
+        upgradeApplicationBuilder = new UpgradeApplicationBuilder(BaseBuilderTest.TEST_APP_NAME);
         MockitoAnnotations.initMocks(this);
         doReturn(ApiInfoDto.builder().apiVersion("2.0.0-SNAPSHOT-256").build())
                 .when(restApiService).getAipConsoleApiInfo();
-        doReturn(TEST_APP).when(applicationService).getApplicationFromGuid(TEST_APP_GUID);
+        doReturn(TEST_APP).when(applicationService).getApplicationFromName(TEST_APP_NAME);
     }
 
     @Test
     public void testUpgradeApplicationToJob() throws Exception {
         FreeStyleProject project = getProjectWithBuilder(upgradeApplicationBuilder);
         project = jenkins.configRoundtrip(project);
-        UpgradeApplicationBuilder job = new UpgradeApplicationBuilder(TEST_APP_GUID);
+        UpgradeApplicationBuilder job = new UpgradeApplicationBuilder(TEST_APP_NAME);
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
 

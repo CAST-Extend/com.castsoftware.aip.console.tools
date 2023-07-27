@@ -176,7 +176,7 @@ To **UpgradeApplicationJob**
 To perform *UpgradeApplicationJob* action you can use following command
 
 ```bash
-java -jar .\aip-console-tools-cli.jar UpgradeApplicationJob -s="Console URL" --apikey "valid.key" -a "my-guid"
+java -jar .\aip-console-tools-cli.jar UpgradeApplicationJob -s="Console URL" --apikey "valid.key" -n "my-app"
 ```
 
 To **ResyncApplicationJob**
@@ -186,7 +186,7 @@ To **ResyncApplicationJob**
 To perform *ResyncApplicationJob* action you can use following command
 
 ```bash
-java -jar .\aip-console-tools-cli.jar ResyncApplicationJob -s="Console URL" --apikey "valid.key" -a "my-guid"
+java -jar .\aip-console-tools-cli.jar ResyncApplicationJob -s="Console URL" --apikey "valid.key" -n "my-app"
 ```
 
 ### Advanced Usage
@@ -493,7 +493,7 @@ Upgrade an application to the available node version.
 
 The available options are :
 
-* `--app-guid` or `-a` (**required**): The application guid.
+* `--app-name` or `-n` (**required**): The application name.
 
 When AIP Console finishes execution, it will return a specific return code, based on the execution.
 
@@ -504,8 +504,8 @@ Here is a detailed list of all error codes that can be returned by the CLI :
 * 1 : API key missing. No API key was provided either in the prompt or in the environment variable.
 * 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper
   value.
-* 6 : Application GUID missing. The upgrade cannot run due to a missing application guid.
-* 7 : Application Not Found. The given Application GUID could not be found.
+* 6 : Application Name missing. The upgrade cannot run due to a missing application name.
+* 7 : Application Not Found. The given Application Name could not be found.
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
 
 ### ResyncApplicationJob
@@ -514,7 +514,7 @@ Resync an application.
 
 The available options are :
 
-* `--app-guid` or `-a` (**required**): The application guid.
+* `--app-name` or `-n` (**required**): The application name.
 
 When AIP Console finishes execution, it will return a specific return code, based on the execution.
 
@@ -525,8 +525,8 @@ Here is a detailed list of all error codes that can be returned by the CLI :
 * 1 : API key missing. No API key was provided either in the prompt or in the environment variable.
 * 2 : Login Error. Unable to login to AIP Console with the given API key. Please check that you provide the proper
   value.
-* 6 : Application GUID missing. The resync cannot run due to a missing application guid.
-* 7 : Application Not Found. The given Application GUID could not be found.
+* 6 : Application Name missing. The resync cannot run due to a missing application name.
+* 7 : Application Not Found. The given Application Name could not be found.
 * 1000 : Unexpected error. This can occur for various reasons, and the standard output should be checked for more information.
 
 

@@ -51,8 +51,8 @@ public class ResyncApplicationCommand implements Callable<Integer> {
     /**
      * options for the upload and job startup
      */
-    @CommandLine.Option(names = {"-a", "--app-guid"}, paramLabel = "APPLICATION_GUID", description = "The guid of the application to upgrade", required = true)
-    private String appGuid;
+    @CommandLine.Option(names = {"-n", "--app-name"}, paramLabel = "APPLICATION_NAME", description = "The name of the application to resync", required = true)
+    private String appName;
 
     @Override
     public Integer call() {
@@ -70,9 +70,9 @@ public class ResyncApplicationCommand implements Callable<Integer> {
         log.info("Sync application command has triggered with log output = '{}'", sharedOptions.isVerbose());
 
         try {
-            ApplicationDto app = applicationService.getApplicationFromGuid(appGuid);
+            ApplicationDto app = applicationService.getApplicationFromName(appName);
 
-            String appName = app.getName();
+            String appGuid = app.getGuid();
 
             String jobGuid = jobsService.startResyncApplication(appGuid);
 

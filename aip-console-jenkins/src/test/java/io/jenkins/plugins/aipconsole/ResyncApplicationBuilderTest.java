@@ -17,18 +17,18 @@ public class ResyncApplicationBuilderTest extends BaseBuilderTest{
     @Before
     public void setUp() throws Exception {
         super.startUp();
-        resyncApplicationBuilder = new ResyncApplicationBuilder(BaseBuilderTest.TEST_APP_GUID);
+        resyncApplicationBuilder = new ResyncApplicationBuilder(BaseBuilderTest.TEST_APP_NAME);
         MockitoAnnotations.initMocks(this);
         doReturn(ApiInfoDto.builder().apiVersion("2.0.0-SNAPSHOT-256").build())
                 .when(restApiService).getAipConsoleApiInfo();
-        doReturn(TEST_APP).when(applicationService).getApplicationFromGuid(TEST_APP_GUID);
+        doReturn(TEST_APP).when(applicationService).getApplicationFromGuid(TEST_APP_NAME);
     }
 
     @Test
     public void testResyncApplicationToJob() throws Exception {
         FreeStyleProject project = getProjectWithBuilder(resyncApplicationBuilder);
         project = jenkins.configRoundtrip(project);
-        ResyncApplicationBuilder job = new ResyncApplicationBuilder(TEST_APP_GUID);
+        ResyncApplicationBuilder job = new ResyncApplicationBuilder(TEST_APP_NAME);
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
 

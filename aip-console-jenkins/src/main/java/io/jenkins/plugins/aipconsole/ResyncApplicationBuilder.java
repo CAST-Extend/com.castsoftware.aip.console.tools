@@ -60,22 +60,22 @@ public class ResyncApplicationBuilder extends BaseActionBuilder implements Simpl
     @Inject
     private ApplicationService applicationService;
 
-    private String appGuid;
+    private String appName;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
     @DataBoundConstructor
-    public ResyncApplicationBuilder(@CheckForNull String appGuid) {
-        this.appGuid = appGuid;
+    public ResyncApplicationBuilder(@CheckForNull String appName) {
+        this.appName = appName;
     }
 
     @CheckForNull
-    public String getAppGuid() {
-        return appGuid;
+    public String getAppName() {
+        return appName;
     }
 
-    public void setAppGuid(@Nullable String appGuid) {
-        this.appGuid = appGuid;
+    public void setAppName(@Nullable String appName) {
+        this.appName = appName;
     }
 
     public boolean isFailureIgnored() {
@@ -148,17 +148,17 @@ public class ResyncApplicationBuilder extends BaseActionBuilder implements Simpl
             return;
         }
         EnvVars vars = run.getEnvironment(listener);
-        String expandedAppGuid = vars.expand(appGuid);
+        String expandedAppName = vars.expand(appName);
 
         String resyncJobGuid;
-        String appName = null;
+        String appGuid = null;
 
         try {
-            ApplicationDto app = applicationService.getApplicationFromGuid(expandedAppGuid);
+            ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
 
-            appName = app.getName();
+            appGuid = app.getGuid();
 
-            resyncJobGuid = jobsService.startResyncApplication(expandedAppGuid);
+            resyncJobGuid = jobsService.startResyncApplication(appGuid);
 
             log.println(ResyncApplicationBuilder_ResyncApplication_info_jobStarted());
 
@@ -174,11 +174,11 @@ public class ResyncApplicationBuilder extends BaseActionBuilder implements Simpl
                 listener.error(ResyncApplicationBuilder_ResyncApplication_error_jobFailed(endState.toString()));
                 run.setResult(defaultResult);
             } else {
-                log.println(ResyncApplicationBuilder_ResyncApplication_info_jobSuccess(appName));
+                log.println(ResyncApplicationBuilder_ResyncApplication_info_jobSuccess(expandedAppName));
                 run.setResult(Result.SUCCESS);
             }
         } catch (JobServiceException e) {
-            listener.error(ResyncApplicationBuilder_ResyncApplication_error_jobServiceException(appName, e.getLocalizedMessage()));
+            listener.error(ResyncApplicationBuilder_ResyncApplication_error_jobServiceException(expandedAppName, e.getLocalizedMessage()));
             run.setResult(defaultResult);
         } catch (ApplicationServiceException e) {
             listener.error(ResyncApplicationBuilder_ResyncApplication_error_unavailable(apiServerUrl));
@@ -192,7 +192,7 @@ public class ResyncApplicationBuilder extends BaseActionBuilder implements Simpl
      * @return The error message based on the issue that was found, null if no issue was found
      */
     private String checkJobParameters() {
-        if (StringUtils.isAnyBlank(appGuid)) {
+        if (StringUtils.isAnyBlank(appName)) {
             return Messages.GenericError_error_missingRequiredParameters();
         }
         String apiServerUrl = getAipConsoleUrl();

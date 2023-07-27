@@ -60,22 +60,22 @@ public class UpgradeApplicationBuilder extends BaseActionBuilder implements Simp
     @Inject
     private ApplicationService applicationService;
 
-    private String appGuid;
+    private String appName;
     private boolean failureIgnored = false;
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
     @DataBoundConstructor
-    public UpgradeApplicationBuilder(@CheckForNull String appGuid) {
-        this.appGuid = appGuid;
+    public UpgradeApplicationBuilder(@CheckForNull String appName) {
+        this.appName = appName;
     }
 
     @CheckForNull
-    public String getAppGuid() {
-        return appGuid;
+    public String getAppName() {
+        return appName;
     }
 
-    public void setAppGuid(@Nullable String appGuid) {
-        this.appGuid = appGuid;
+    public void setAppName(@Nullable String appName) {
+        this.appName = appName;
     }
 
     public boolean isFailureIgnored() {
@@ -148,14 +148,14 @@ public class UpgradeApplicationBuilder extends BaseActionBuilder implements Simp
             return;
         }
         EnvVars vars = run.getEnvironment(listener);
-        String expandedAppGuid = vars.expand(appGuid);
+        String expandedAppName = vars.expand(appName);
 
         String upgradeJobGuid = null;
-        String appName = null;
+        String appGuid = null;
 
         try {
-            ApplicationDto app = applicationService.getApplicationFromGuid(expandedAppGuid);
-            appName = app.getName();
+            ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
+            appGuid = app.getGuid();
 
             String nodeCaipVersion = applicationService.getAipConsoleApiInfo().getCaipVersion();
             String appCaipVersion = app.getCaipVersion();
@@ -163,7 +163,7 @@ public class UpgradeApplicationBuilder extends BaseActionBuilder implements Simp
             log.println(String.format("Caip version of app: %s" , appCaipVersion));
             log.println(String.format("Caip version of node: %s", nodeCaipVersion));
 
-            upgradeJobGuid = jobsService.startUpgradeApplication(expandedAppGuid, appName, appCaipVersion, nodeCaipVersion);
+            upgradeJobGuid = jobsService.startUpgradeApplication(appGuid, expandedAppName, appCaipVersion, nodeCaipVersion);
 
             log.println(UpgradeApplicationBuilder_UpgradeApplication_info_jobStarted());
 
@@ -181,11 +181,11 @@ public class UpgradeApplicationBuilder extends BaseActionBuilder implements Simp
                 listener.error(UpgradeApplicationBuilder_UpgradeApplication_error_jobFailed(endState.toString()));
                 run.setResult(defaultResult);
             } else {
-                log.println(UpgradeApplicationBuilder_UpgradeApplication_info_jobSuccess(appName));
+                log.println(UpgradeApplicationBuilder_UpgradeApplication_info_jobSuccess(expandedAppName));
                 run.setResult(Result.SUCCESS);
             }
         } catch (JobServiceException e) {
-            listener.error(UpgradeApplicationBuilder_UpgradeApplication_error_jobServiceException(appName, e.getLocalizedMessage()));
+            listener.error(UpgradeApplicationBuilder_UpgradeApplication_error_jobServiceException(expandedAppName, e.getLocalizedMessage()));
             run.setResult(defaultResult);
         } catch (ApplicationServiceException e) {
             listener.error(UpgradeApplicationBuilder_UpgradeApplication_error_unavailable(apiServerUrl));
@@ -199,7 +199,7 @@ public class UpgradeApplicationBuilder extends BaseActionBuilder implements Simp
      * @return The error message based on the issue that was found, null if no issue was found
      */
     private String checkJobParameters() {
-        if (StringUtils.isAnyBlank(appGuid)) {
+        if (StringUtils.isAnyBlank(appName)) {
             return Messages.GenericError_error_missingRequiredParameters();
         }
         String apiServerUrl = getAipConsoleUrl();
