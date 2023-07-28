@@ -8,7 +8,6 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
-import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.Secret;
@@ -27,7 +26,6 @@ import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingR
 import static io.jenkins.plugins.aipconsole.Messages.OnboardApplicationDeepAnalysisBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_DeepAnalysisForbidden;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_mode;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled;
@@ -72,19 +70,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
-        super.perform(run, filePath, launcher, listener);
-
-        String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
-        if (getMinVersion() != null && StringUtils.isNotEmpty(apiVersion)) {
-            VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
-            if (serverApiVersion != null && getMinVersion().isHigherThan(serverApiVersion)) {
-                listener.error(OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible("Onboard Application", apiVersion, getMinVersion().toString()));
-                run.setResult(Result.FAILURE);
-                return;
-            }
-        }
-
+    protected void performClient(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         String expandedAppName = environmentVariables.expand(getApplicationName());
         try {
             boolean OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
@@ -141,6 +127,11 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     private static VersionInformation getMinVersion() {
         //This version can be null if failed to convert from string
         return VersionInformation.fromVersionString("2.8.0");
+    }
+
+    @Override
+    protected VersionInformation getFeatureMinVersion() {
+        return getMinVersion();
     }
 
     public String getSnapshotName() {

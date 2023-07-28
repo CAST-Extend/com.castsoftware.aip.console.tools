@@ -6,6 +6,10 @@ public class SemVerUtils {
     private SemVerUtils() {
     }
 
+    public static VersionInformation getMinCompatibleVersion() {
+        return VersionInformation.fromVersionString("2.8.3-funcrel");
+    }
+
     public static boolean isNewerThan115(SemVer semVer) {
         return semVer != null && SemVer.builder()
                 .major(1)

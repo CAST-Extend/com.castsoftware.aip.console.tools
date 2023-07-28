@@ -8,6 +8,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,10 +58,6 @@ public abstract class BasicCollable implements Callable<Integer> {
         return null;
     }
 
-    public static VersionInformation getMinCompatibleVersion() {
-        return VersionInformation.fromVersionString("2.8.3-funcrel");
-    }
-
     public abstract SharedOptions getSharedOptions();
 
     @Override
@@ -82,7 +79,7 @@ public abstract class BasicCollable implements Callable<Integer> {
             VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
             if (serverApiVersion != null) {
                 // is the target server compatible
-                VersionInformation compatibilityVersion = getMinCompatibleVersion();
+                VersionInformation compatibilityVersion = SemVerUtils.getMinCompatibleVersion();
                 if (compatibilityVersion.isHigherThan(serverApiVersion)) {
                     log.error("The CAST Imaging Console version {} is not compatible with this Automation Tools. Please upgrade to version {} or higher."
                             , apiVersion, compatibilityVersion.toString());

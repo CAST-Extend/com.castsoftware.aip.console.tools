@@ -26,21 +26,21 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateApplicationBuilderTest extends BaseBuilderTest {
-    private String TARGET_CSS_SERVER_NAME = "host.docker.internal:2285";
-    private String TARGET_CSS_SERVER_GUID = "b6059ea8-cec9-4e62-86a6-065def8ebb69";
+    private static final String TARGET_CSS_SERVER_NAME = "host.docker.internal:2285";
+    private static final String TARGET_CSS_SERVER_GUID = "b6059ea8-cec9-4e62-86a6-065def8ebb69";
 
     @InjectMocks
     private CreateApplicationBuilder createApplicationBuilder;
 
     @Before
     public void setUp() throws Exception {
-        super.startUp();
-        createApplicationBuilder = new CreateApplicationBuilder(TEST_APP_NAME);
         MockitoAnnotations.initMocks(this);
-        doReturn(ApiInfoDto.builder().apiVersion("2.0.0-SNAPSHOT-256").build())
-                .when(restApiService).getAipConsoleApiInfo();
-        doReturn(TEST_APP).when(applicationService).getApplicationFromGuid(TEST_APP_NAME);
+        createApplicationBuilder.setApplicationName(TEST_APP_NAME);
         createApplicationBuilder.setCssServerName(TARGET_CSS_SERVER_NAME);
+        ApiInfoDto apiInfo = ApiInfoDto.builder().apiVersion("2.10.0-SNAPSHOT-256").build();
+        doReturn(apiInfo).when(restApiService).getAipConsoleApiInfo();
+        doReturn(apiInfo).when(applicationService).getAipConsoleApiInfo();
+        doReturn(TEST_APP).when(applicationService).getApplicationFromGuid(TEST_APP_NAME);
     }
 
     @Test

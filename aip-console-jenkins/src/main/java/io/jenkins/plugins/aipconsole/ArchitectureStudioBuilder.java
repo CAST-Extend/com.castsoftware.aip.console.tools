@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.Set;
 
 import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_DescriptorImpl_displayName;
-import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_DescriptorImpl_feature_incompatible;
 import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_DescriptorImpl_success;
 import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_download;
 import static io.jenkins.plugins.aipconsole.Messages.ArchitectureStudioBuilder_ModelChecker_error_application;
@@ -83,20 +82,8 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws
+    public void performClient(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws
             InterruptedException, IOException {
-        super.perform(run, filePath, launcher, listener);
-
-        //check for min version
-        String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
-        if (getMinVersion() != null && StringUtils.isNotEmpty(apiVersion)) {
-            VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
-            if (serverApiVersion != null && getMinVersion().isHigherThan(serverApiVersion)) {
-                listener.error(ArchitectureStudioBuilder_DescriptorImpl_feature_incompatible("Model Checker", apiVersion, getMinVersion().toString()));
-                run.setResult(Result.FAILURE);
-                return;
-            }
-        }
 
         EnvVars vars = run.getEnvironment(listener);
         String expandedAppName = vars.expand(getApplicationName());
@@ -194,20 +181,37 @@ public class ArchitectureStudioBuilder extends  CommonActionBuilder {
         return VersionInformation.fromVersionString("2.8.0");
     }
 
-    public String getModelName() { return modelName; }
+    @Override
+    protected VersionInformation getFeatureMinVersion() {
+        return getMinVersion();
+    }
+
+    public String getModelName() {
+        return modelName;
+    }
 
     @DataBoundSetter
-    public void setModelName(@CheckForNull String modelName) { this.modelName = modelName; }
+    public void setModelName(@CheckForNull String modelName) {
+        this.modelName = modelName;
+    }
 
-    public String getUploadFilePath() { return uploadFilePath; }
+    public String getUploadFilePath() {
+        return uploadFilePath;
+    }
 
     @DataBoundSetter
-    public void setUploadFilePath(@Nullable String uploadFilePath) { this.uploadFilePath = uploadFilePath; }
+    public void setUploadFilePath(@Nullable String uploadFilePath) {
+        this.uploadFilePath = uploadFilePath;
+    }
 
-    public String getReportPath() { return reportPath; }
+    public String getReportPath() {
+        return reportPath;
+    }
 
     @DataBoundSetter
-    public void setReportPath(@Nullable String reportPath) { this.reportPath = reportPath; }
+    public void setReportPath(@Nullable String reportPath) {
+        this.reportPath = reportPath;
+    }
 
     @Override
     public ArchitectureStudioBuilder.ArchitectureStudioDescriptorImpl getDescriptor() {
