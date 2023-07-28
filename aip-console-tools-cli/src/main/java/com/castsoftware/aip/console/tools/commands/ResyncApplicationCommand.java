@@ -2,25 +2,19 @@ package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import lombok.AllArgsConstructor;
+import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @CommandLine.Command(
@@ -32,18 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class ResyncApplicationCommand implements Callable<Integer> {
-
-    @Autowired
-    private JobsService jobsService;
-
-    @Autowired
-    private RestApiService restApiService;
-
-    @Autowired
-    private ApplicationService applicationService;
+public class ResyncApplicationCommand extends BasicCollable {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -54,19 +37,12 @@ public class ResyncApplicationCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-n", "--app-name"}, paramLabel = "APPLICATION_NAME", description = "The name of the application to resync", required = true)
     private String appName;
 
-    @Override
-    public Integer call() {
-        try {
-            if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
-                restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
-            }
-            restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
-        } catch (ApiKeyMissingException e) {
-            return Constants.RETURN_NO_PASSWORD;
-        } catch (ApiCallException e) {
-            return Constants.RETURN_LOGIN_ERROR;
-        }
+    protected ResyncApplicationCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+        super(restApiService, jobsService, uploadService, applicationService);
+    }
 
+    @Override
+    protected Integer processCallCommand() throws Exception {
         log.info("Sync application command has triggered with log output = '{}'", sharedOptions.isVerbose());
 
         try {
@@ -90,6 +66,16 @@ public class ResyncApplicationCommand implements Callable<Integer> {
         } catch (ApplicationServiceException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected VersionInformation getMinVersion() {
+        return null;
+    }
+
+    @Override
+    public SharedOptions getSharedOptions() {
+        return sharedOptions;
     }
 }
 

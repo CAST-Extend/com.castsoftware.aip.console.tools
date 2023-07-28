@@ -9,15 +9,15 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
+import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,8 +32,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -49,11 +47,8 @@ import java.util.function.Function;
 @Slf4j
 @Getter
 @Setter
-public class SnapshotCommand implements Callable<Integer> {
+public class SnapshotCommand extends BasicCollable {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    private final RestApiService restApiService;
-    private final JobsService jobsService;
-    private final ApplicationService applicationService;
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
@@ -85,30 +80,17 @@ public class SnapshotCommand implements Callable<Integer> {
             defaultValue = "true", fallbackValue = "true")
     private boolean consolidation = true;
 
-    public SnapshotCommand(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
-        this.restApiService = restApiService;
-        this.jobsService = jobsService;
-        this.applicationService = applicationService;
+    protected SnapshotCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+        super(restApiService, jobsService, uploadService, applicationService);
     }
 
 
     @Override
-    public Integer call() throws Exception {
+    protected Integer processCallCommand() throws Exception {
         // Runs snapshot + upload
         if (StringUtils.isBlank(applicationName)) {
             log.error("No application name provided. Exiting.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
-        }
-
-        try {
-            if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
-                restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
-            }
-            restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
-        } catch (ApiKeyMissingException e) {
-            return Constants.RETURN_NO_PASSWORD;
-        } catch (ApiCallException e) {
-            return Constants.RETURN_LOGIN_ERROR;
         }
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
 
@@ -240,5 +222,15 @@ public class SnapshotCommand implements Callable<Integer> {
                 log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
             }
         });
+    }
+
+    @Override
+    protected VersionInformation getMinVersion() {
+        return null;
+    }
+
+    @Override
+    public SharedOptions getSharedOptions() {
+        return sharedOptions;
     }
 }

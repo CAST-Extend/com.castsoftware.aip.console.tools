@@ -127,4 +127,8 @@ public class PublishToImagingCommand extends BasicCollable {
         return MIN_VERSION;
     }
 
+    @Override
+    public SharedOptions getSharedOptions() {
+        return sharedOptions;
+    }
 }

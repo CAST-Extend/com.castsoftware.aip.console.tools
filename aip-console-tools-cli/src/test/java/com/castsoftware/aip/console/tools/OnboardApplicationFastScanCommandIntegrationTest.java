@@ -2,7 +2,6 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.BasicCollable;
 import com.castsoftware.aip.console.tools.commands.OnboardApplicationFastScanCommand;
-import com.castsoftware.aip.console.tools.commands.SharedOptions;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
@@ -10,12 +9,9 @@ import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
-import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
-import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -39,7 +35,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -106,7 +101,6 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
-
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.4.9-funcrel").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
@@ -115,7 +109,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_SERVER_VERSION_NOT_COMPATIBLE));
+        assertThat(exitCode, is(Constants.RETURN_BAD_SERVER_VERSION));
     }
 
     @Test
@@ -126,10 +120,6 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doThrow(ApiCallException.class).when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doThrow(ApplicationServiceException.class).when(applicationService).isOnboardingSettingsEnabled();
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
@@ -151,10 +141,6 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doThrow(ApiCallException.class).when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doThrow(ApplicationServiceException.class).when(applicationService).isOnboardingSettingsEnabled();
         when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
@@ -176,10 +162,6 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(false).when(applicationService).isOnboardingSettingsEnabled();
 
@@ -200,10 +182,6 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--node-name", TestConstants.TEST_NODE,
                 "--sleep-duration", "6"};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
@@ -243,10 +221,6 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--node-name", TestConstants.TEST_NODE,
                 "--sleep-duration", "6"};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
@@ -273,10 +247,6 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE}; //default
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
@@ -297,10 +267,6 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 

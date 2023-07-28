@@ -1,24 +1,20 @@
 package com.castsoftware.aip.console.tools.commands;
 
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
+import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
+import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import lombok.AllArgsConstructor;
+import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @CommandLine.Command(
@@ -30,15 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateApplicationCommand implements Callable<Integer> {
-
-    @Autowired
-    private JobsService jobsService;
-
-    @Autowired
-    private RestApiService restApiService;
+public class CreateApplicationCommand extends BasicCollable {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -75,19 +63,17 @@ public class CreateApplicationCommand implements Callable<Integer> {
     @CommandLine.Unmatched
     private List<String> unmatchedOptions;
 
-    @Override
-    public Integer call() {
-        try {
-            if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
-                restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
-            }
-            restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
-        } catch (ApiKeyMissingException e) {
-            return Constants.RETURN_NO_PASSWORD;
-        } catch (ApiCallException e) {
-            return Constants.RETURN_LOGIN_ERROR;
-        }
+    protected CreateApplicationCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+        super(restApiService, jobsService, uploadService, applicationService);
+    }
 
+    @Override
+    public SharedOptions getSharedOptions() {
+        return sharedOptions;
+    }
+
+    @Override
+    public Integer processCallCommand() throws Exception {
         log.info("Create application command has triggered with log output = '{}'", sharedOptions.isVerbose());
         //For backward compatibility
         boolean noHistory = noVersionHistory || inPlaceMode;
@@ -110,5 +96,10 @@ public class CreateApplicationCommand implements Callable<Integer> {
         } catch (JobServiceException e) {
             return Constants.RETURN_JOB_FAILED;
         }
+    }
+
+    @Override
+    protected VersionInformation getMinVersion() {
+        return null;
     }
 }

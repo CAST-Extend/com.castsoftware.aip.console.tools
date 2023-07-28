@@ -1,6 +1,5 @@
 package com.castsoftware.aip.console.tools.commands;
 
-import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
@@ -9,8 +8,6 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
@@ -21,6 +18,7 @@ import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,8 +29,6 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 @Component
@@ -45,21 +41,11 @@ import java.util.function.Function;
 @Slf4j
 @Getter
 @Setter
-public class AddVersionCommand implements Callable<Integer> {
-    private final RestApiService restApiService;
-    private final JobsService jobsService;
-    private final UploadService uploadService;
-    private final ApplicationService applicationService;
+public class AddVersionCommand extends BasicCollable {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
-    public AddVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
-        this.restApiService = restApiService;
-        this.jobsService = jobsService;
-        this.uploadService = uploadService;
-        this.applicationService = applicationService;
-    }
 
     /**
      * The application name to look for on AIP Console
@@ -186,21 +172,12 @@ public class AddVersionCommand implements Callable<Integer> {
 
     private JobRequestBuilder builder;
 
-    @Override
-    public Integer call() {
-        ApiInfoDto apiInfo = null;
-        try {
-            if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
-                restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
-            }
-            restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
-            apiInfo = restApiService.getAipConsoleApiInfo();
-        } catch (ApiKeyMissingException e) {
-            return Constants.RETURN_NO_PASSWORD;
-        } catch (ApiCallException e) {
-            return Constants.RETURN_LOGIN_ERROR;
-        }
+    protected AddVersionCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+        super(restApiService, jobsService, uploadService, applicationService);
+    }
 
+    @Override
+    protected Integer processCallCommand() throws Exception {
         log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
         log.info("[Debug options] Show Sql is '{}'", showSql);
         log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
@@ -328,5 +305,15 @@ public class AddVersionCommand implements Callable<Integer> {
                 log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
             }
         });
+    }
+
+    @Override
+    protected VersionInformation getMinVersion() {
+        return null; // for this feature to run on all server versions
+    }
+
+    @Override
+    public SharedOptions getSharedOptions() {
+        return sharedOptions;
     }
 }

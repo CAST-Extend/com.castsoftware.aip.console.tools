@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.CreateApplicationCommand;
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.DatabaseConnectionSettingsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -120,5 +121,32 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    public void testCreateApplicationCommand_OnIncompatibleServerVersion() throws JobServiceException {
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "-n", TestConstants.TEST_CREATRE_APP,
+                "--inplace-mode",
+                "--domain-name", TestConstants.TEST_DOMAIN};
+
+        // gives the existing application
+        JobExecutionDto jobStatus = new JobExecutionDto();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(JobState.COMPLETED);
+        jobStatus.setCreatedDate(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.4.9-funcrel").build();
+        when(restApiService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
+        when(applicationService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
+
+        when(jobsService.startCreateApplication(any(String.class), eq(null), any(String.class), anyBoolean(), any(String.class), eq(null))).thenReturn(TestConstants.TEST_JOB_GUID);
+        when(jobsService.pollAndWaitForJobFinished(any(String.class), any(Function.class), anyBoolean())).thenReturn(Constants.RETURN_OK);
+
+        runStringArgs(createApplicationCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(exitCode, is(Constants.RETURN_BAD_SERVER_VERSION));
     }
 }

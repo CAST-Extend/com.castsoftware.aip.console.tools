@@ -72,7 +72,7 @@ public abstract class AipConsoleToolsCliBaseTest {
         Files.createDirectories(sflPath);
         zippedSourcesPath = sflPath.resolve("fake_sources.zip");
         zippedSourcesPath.toFile().createNewFile();
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.4.9-funcrel").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(BasicCollable.getMinCompatibleVersion().toString()).build();
         when(restApiService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
         when(applicationService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
         defaultArgs = new String[]{"--apikey",
