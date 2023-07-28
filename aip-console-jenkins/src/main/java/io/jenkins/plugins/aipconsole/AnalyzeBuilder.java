@@ -9,15 +9,13 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -28,8 +26,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
-import jenkins.tasks.SimpleBuildStep;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -46,7 +42,6 @@ import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_Analyze_error_appGuid;
@@ -55,7 +50,7 @@ import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_Analyze_erro
 import static io.jenkins.plugins.aipconsole.Messages.AnalyzeBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
-public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep {
+public class AnalyzeBuilder extends CommonActionBuilder {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     @Inject
@@ -85,20 +80,24 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
         this.applicationName = applicationName;
     }
 
+    @Override
     @CheckForNull
     public String getApplicationName() {
         return applicationName;
     }
 
+    @Override
     public void setApplicationName(@CheckForNull String applicationName) {
         this.applicationName = applicationName;
     }
 
+    @Override
     @Nullable
     public String getApplicationGuid() {
         return applicationGuid;
     }
 
+    @Override
     public void setApplicationGuid(@Nullable String applicationGuid) {
         this.applicationGuid = applicationGuid;
     }
@@ -148,10 +147,12 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
         return consolidation;
     }
 
+    @Override
     public long getTimeout() {
         return timeout;
     }
 
+    @Override
     @DataBoundSetter
     public void setTimeout(long timeout) {
         this.timeout = timeout;
@@ -172,7 +173,7 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void performClient(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
 
@@ -183,36 +184,6 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
             return;
         }
 
-        // Check the services have been properly initialized
-        if (!ObjectUtils.allNotNull(apiService, jobsService, applicationService)) {
-            // Manually setup Guice Injector using Module (Didn't find any way to make this automatically)
-            Injector injector = Guice.createInjector(new AipConsoleModule());
-            // Guice can automatically inject those, but then findbugs, not seeing the change,
-            // will fail the build considering they will provoke an NPE
-            // So, to avoid this, set them explicitly (if they were not set)
-            apiService = injector.getInstance(RestApiService.class);
-            jobsService = injector.getInstance(JobsService.class);
-            applicationService = injector.getInstance(ApplicationService.class);
-        }
-
-        String apiServerUrl = getAipConsoleUrl();
-        String apiKey = Secret.toString(getApiKey());
-        String username = getDescriptor().getAipConsoleUsername();
-        // Job level timeout different from default ? use it, else use the global config level timeout
-        long actualTimeout = (timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout());
-
-        try {
-            // update timeout of HTTP Client if different from default
-            if (actualTimeout != Constants.DEFAULT_HTTP_TIMEOUT) {
-                apiService.setTimeout(actualTimeout, TimeUnit.SECONDS);
-            }
-            // Authentication (if username is null or empty, we'll authenticate with api key
-            apiService.validateUrlAndKey(apiServerUrl, username, apiKey);
-        } catch (ApiCallException e) {
-            listener.error(Messages.GenericError_error_accessDenied(apiServerUrl));
-            run.setResult(defaultResult);
-            return;
-        }
         EnvVars vars = run.getEnvironment(listener);
         String expandedAppName = vars.expand(applicationName);
         String caipVersion = null;
@@ -318,6 +289,11 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
         }
     }
 
+    @Override
+    protected VersionInformation getFeatureMinVersion() {
+        return null;
+    }
+
     private JobState pollJob(String jobGuid, PrintStream log) throws JobServiceException {
         return jobsService.pollAndWaitForJobFinished(jobGuid,
                 jobStatusWithSteps -> log.println(
@@ -341,7 +317,8 @@ public class AnalyzeBuilder extends BaseActionBuilder implements SimpleBuildStep
      *
      * @return The error message based on the issue that was found, null if no issue was found
      */
-    private String checkJobParameters() {
+    @Override
+    protected String checkJobParameters() {
         if (StringUtils.isAnyBlank(applicationName)) {
             return Messages.GenericError_error_missingRequiredParameters();
         }

@@ -29,9 +29,9 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
 
     @Before
     public void setUp() throws Exception {
-        super.startUp();
         deepAnalysisBuilder = new OnboardApplicationDeepAnalysisBuilder(BaseBuilderTest.TEST_APP_NAME);
         MockitoAnnotations.initMocks(this);
+        super.startUp();
     }
 
     @Test

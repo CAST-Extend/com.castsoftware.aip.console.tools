@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.services.AipConsoleService;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
@@ -7,20 +8,26 @@ import com.castsoftware.aip.console.tools.core.services.ArchitectureStudioServic
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import com.google.common.collect.Lists;
 import hudson.model.FreeStyleProject;
 import hudson.tasks.Builder;
 import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 public class BaseBuilderTest {
     protected static final String TEST_URL = "http://localhost:8081";
@@ -61,10 +68,16 @@ public class BaseBuilderTest {
     @Mock
     protected AipConsoleService aipConsoleService;
 
+    @Before
     public void startUp() throws Exception {
         AipConsoleGlobalConfiguration config = AipConsoleGlobalConfiguration.get();
         config.setAipConsoleUrl(TEST_URL);
         config.setApiKey(Secret.fromString(TEST_KEY));
+        MockitoAnnotations.initMocks(this);
+        // despite this caution we still need to stub all mocks in the context of each test.
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(SemVerUtils.getMinCompatibleVersion().toString()).build();
+        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
+        when(applicationService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
     }
 
     protected Path createTempFileAndGetPath(String fileName) throws IOException {
