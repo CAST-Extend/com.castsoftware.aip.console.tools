@@ -1,12 +1,12 @@
 package com.castsoftware.aip.console.tools.core.dto.jobs;
 
-import java.util.Set;
+import java.util.List;
 
 public class LogContentDto {
     private boolean endOfFile;
     private int nbLines;
     private int startOffset;
-    private Set<LogLine> lines;
+    private List<LogLine> lines;
 
     public boolean isEndOfFile() {
         return endOfFile;
@@ -32,11 +32,11 @@ public class LogContentDto {
         this.startOffset = startOffset;
     }
 
-    public Set<LogLine> getLines() {
+    public List<LogLine> getLines() {
         return lines;
     }
 
-    public void setLines(Set<LogLine> lines) {
+    public void setLines(List<LogLine> lines) {
         this.lines = lines;
     }
 }
