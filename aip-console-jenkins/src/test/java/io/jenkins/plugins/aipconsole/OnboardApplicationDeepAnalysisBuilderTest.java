@@ -29,8 +29,7 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
 
     @Before
     public void setUp() throws Exception {
-        super.startUp();
-        deepAnalysisBuilder = new OnboardApplicationDeepAnalysisBuilder(BaseBuilderTest.TEST_APP_NAME);
+        deepAnalysisBuilder.setApplicationName(BaseBuilderTest.TEST_APP_NAME);
         MockitoAnnotations.initMocks(this);
     }
 
@@ -48,7 +47,7 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
     public void testDeepAnalysis_OnExistingApplication_NotFastScanWorkflow() throws Exception {
         FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.9.0-SNAPSHOT").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
@@ -75,7 +74,7 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
     public void testDeepAnalysis_WhenFastScanRequired() throws Exception {
         FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.3-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();

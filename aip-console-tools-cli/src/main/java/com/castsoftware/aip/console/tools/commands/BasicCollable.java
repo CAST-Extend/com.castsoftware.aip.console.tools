@@ -8,6 +8,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,7 +42,8 @@ public abstract class BasicCollable implements Callable<Integer> {
     protected abstract Integer processCallCommand() throws Exception;
 
     /**
-     * Used for feature compatibility validation
+     * Used for feature compatibility validation.
+     * Return null if you want feature to run for all Server versions
      *
      * @return Minimum accepted version for feature to work
      */
@@ -73,12 +75,21 @@ public abstract class BasicCollable implements Callable<Integer> {
 
         ApiInfoDto apiInfoDto = applicationService.getAipConsoleApiInfo();
         String apiVersion = apiInfoDto.getApiVersion();
-        if (getMinVersion() != null && StringUtils.isNotEmpty(apiVersion)) {
+        if (StringUtils.isNotEmpty(apiVersion)) {
             VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
-            if (serverApiVersion != null && getMinVersion().isHigherThan(serverApiVersion)) {
-                log.error("This feature {} is not compatible with the CAST Imaging Console version {}. Please upgrade to minimum {} version."
-                        , "Onboard Application", apiVersion, getMinVersion().toString());
-                return Constants.RETURN_SERVER_VERSION_NOT_COMPATIBLE;
+            if (serverApiVersion != null) {
+                // is the target server compatible
+                VersionInformation compatibilityVersion = SemVerUtils.getMinCompatibleVersion();
+                if (compatibilityVersion.isHigherThan(serverApiVersion)) {
+                    log.error("The CAST Imaging Console version {} is not compatible with this Automation Tools. Please upgrade to version {} or higher."
+                            , apiVersion, compatibilityVersion.toString());
+                    return Constants.RETURN_BAD_SERVER_VERSION;
+                }
+                if (getMinVersion() != null && getMinVersion().isHigherThan(serverApiVersion)) {
+                    log.error("This feature is not compatible with the CAST Imaging Console version {}. Please upgrade to minimum version {}."
+                            , apiVersion, getMinVersion().toString());
+                    return Constants.RETURN_SERVER_VERSION_NOT_COMPATIBLE;
+                }
             }
         }
 

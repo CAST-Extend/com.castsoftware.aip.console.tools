@@ -2,7 +2,6 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.BasicCollable;
 import com.castsoftware.aip.console.tools.commands.OnboardApplicationDeepAnalysisCommand;
-import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
@@ -70,7 +69,6 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
 
     ApplicationDto applicationDto;
 
-    private static final String CONSOLE_API_VERSION = "2.8.0-SNAPSHOT-133";
     @Override
     protected void additionalStartup() throws IOException {
         super.additionalStartup();
@@ -86,10 +84,6 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
                 "--module-option", "ONE_PER_AU"
         };
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(CONSOLE_API_VERSION).build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
@@ -134,10 +128,6 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(CONSOLE_API_VERSION).build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
@@ -156,10 +146,6 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(CONSOLE_API_VERSION).build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        when(restApiService.getForEntity("/api/", ApiInfoDto.class)).thenReturn(apiInfoDto);
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 

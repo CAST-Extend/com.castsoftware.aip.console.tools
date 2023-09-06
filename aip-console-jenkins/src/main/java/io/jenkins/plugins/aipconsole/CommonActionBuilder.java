@@ -7,6 +7,8 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
+import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import hudson.EnvVars;
@@ -28,11 +30,13 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_DescriptorImpl_bad_server_version;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDenied;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noApiKey;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noServerUrl;
 
-public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuildStep {
+public abstract class CommonActionBuilder extends BaseActionBuilder implements SimpleBuildStep {
     @Inject
     protected JobsService jobsService;
 
@@ -134,9 +138,14 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
         return defaultResult;
     }
 
+    protected abstract VersionInformation getFeatureMinVersion();
+
+    protected abstract void performClient(@Nonnull Run<?, ?> var1, @Nonnull FilePath var2, @Nonnull Launcher var3, @Nonnull TaskListener var4) throws InterruptedException, IOException;
+
+
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws
-            InterruptedException, IOException{
+            InterruptedException, IOException {
         logger = listener.getLogger();
         environmentVariables = run.getEnvironment(listener);
 
@@ -178,5 +187,25 @@ public class CommonActionBuilder extends BaseActionBuilder implements SimpleBuil
             listener.error(GenericError_error_accessDenied(apiServerUrl));
             run.setResult(defaultResult);
         }
+
+        String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
+        if (StringUtils.isNotEmpty(apiVersion)) {
+            VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
+            if (serverApiVersion != null) {
+                // is the target server compatible
+                VersionInformation compatibilityVersion = SemVerUtils.getMinCompatibleVersion();
+                if (compatibilityVersion.isHigherThan(serverApiVersion)) {
+                    listener.error(GenericError_DescriptorImpl_bad_server_version(apiVersion, compatibilityVersion.toString()));
+                    run.setResult(Result.FAILURE);
+                    return;
+                }
+                if (getFeatureMinVersion() != null && getFeatureMinVersion().isHigherThan(serverApiVersion)) {
+                    listener.error(GenericError_DescriptorImpl_feature_notCompatible(apiVersion, getFeatureMinVersion().toString()));
+                    run.setResult(Result.FAILURE);
+                    return;
+                }
+            }
+        }
+        performClient(run, workspace, launcher, listener);
     }
 }

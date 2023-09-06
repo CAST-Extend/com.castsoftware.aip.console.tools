@@ -10,8 +10,6 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
-import com.castsoftware.aip.console.tools.core.exceptions.ApiKeyMissingException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
@@ -32,7 +30,6 @@ import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -105,21 +102,10 @@ public class AnalyzeCommand extends BasicCollable {
     }
 
     @Override
-    public Integer processCallCommand() throws Exception {
+    protected Integer processCallCommand() throws Exception {
         if (StringUtils.isBlank(applicationName)) {
             log.error("No application name provided. Exiting.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
-        }
-
-        try {
-            if (sharedOptions.getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
-                restApiService.setTimeout(sharedOptions.getTimeout(), TimeUnit.SECONDS);
-            }
-            restApiService.validateUrlAndKey(sharedOptions.getFullServerRootUrl(), sharedOptions.getUsername(), sharedOptions.getApiKeyValue());
-        } catch (ApiKeyMissingException e) {
-            return Constants.RETURN_NO_PASSWORD;
-        } catch (ApiCallException e) {
-            return Constants.RETURN_LOGIN_ERROR;
         }
         String applicationGuid;
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
@@ -232,5 +218,10 @@ public class AnalyzeCommand extends BasicCollable {
                 log.error("Cannot cancel the job on AIP Console. Please cancel it manually.", e);
             }
         });
+    }
+
+    @Override
+    public SharedOptions getSharedOptions() {
+        return sharedOptions;
     }
 }

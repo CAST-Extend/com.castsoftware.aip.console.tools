@@ -1,5 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
+import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
@@ -32,9 +33,11 @@ public class AnalyzeBuilderTest extends BaseBuilderTest {
 
     @Before
     public void setUp() throws Exception {
-        super.startUp();
         analyzeBuilder = new AnalyzeBuilder(BaseBuilderTest.TEST_APP_NAME);
         MockitoAnnotations.initMocks(this);
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.9.0-SNAPSHOT").build();
+        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
+        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         doReturn(BaseBuilderTest.TEST_APP).when(applicationService).getApplicationFromGuid(BaseBuilderTest.TEST_APP_NAME);
         when(applicationService.getApplicationFromGuid(TEST_APP_GUID)).thenReturn(BaseBuilderTest.TEST_APP);
     }

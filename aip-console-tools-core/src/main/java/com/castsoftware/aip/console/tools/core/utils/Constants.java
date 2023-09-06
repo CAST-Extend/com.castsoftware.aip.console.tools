@@ -38,6 +38,7 @@ public class Constants {
     public static final int RETURN_ONBOARD_DEEP_ANALYSIS_FORBIDDEN = 26;
 
     public static final int RETURN_ARCHITECTURE_MODEL_NOT_FOUND = 27;
+    public static final int RETURN_BAD_SERVER_VERSION = 28;
 
     public static final String DEFAULT_DOMAIN = "-";
 

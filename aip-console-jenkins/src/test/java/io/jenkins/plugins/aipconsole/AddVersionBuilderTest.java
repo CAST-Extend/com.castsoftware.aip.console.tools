@@ -58,11 +58,11 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
 
     @Before
     public void setUp() throws Exception {
-        super.startUp();
         addVersionBuilder = new AddVersionBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         MockitoAnnotations.initMocks(this);
-        doReturn(ApiInfoDto.builder().apiVersion("1.12.0-DEV").build())
-                .when(restApiService).getAipConsoleApiInfo();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.9.0-SNAPSHOT").build();
+        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
+        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         doReturn(BaseBuilderTest.TEST_APP).when(applicationService).getApplicationFromGuid(BaseBuilderTest.TEST_APP_NAME);
         doReturn(BaseBuilderTest.TEST_APP).when(applicationService).getApplicationFromGuid(BaseBuilderTest.TEST_APP_GUID);
     }

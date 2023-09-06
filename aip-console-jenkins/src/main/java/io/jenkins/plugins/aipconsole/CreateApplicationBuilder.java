@@ -4,10 +4,9 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.aip.console.tools.core.services.JobsService;
-import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.LogUtils;
+import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import hudson.Extension;
@@ -19,7 +18,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.Secret;
 import io.jenkins.plugins.aipconsole.config.AipConsoleGlobalConfiguration;
-import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jvnet.localizer.ResourceBundleHolder;
@@ -49,16 +47,11 @@ import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
  * Builder to run a "Create application" step.
  * It'll create a new application on AIP Console with the given name
  */
-public class CreateApplicationBuilder extends BaseActionBuilder implements SimpleBuildStep {
+public class CreateApplicationBuilder extends CommonActionBuilder {
 
     // Holder for dynamic loading of step name translations
     private final static ResourceBundleHolder holder = ResourceBundleHolder.get(io.jenkins.plugins.aipconsole.Messages.class);
     private final static String MESSAGES_STEP_KEY_PREFIX = "CreateApplicationBuilder.jobSteps.";
-
-    @Inject
-    private RestApiService apiService;
-    @Inject
-    private JobsService jobsService;
 
     private String applicationName;
 
@@ -84,8 +77,15 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
         this.applicationName = applicationName;
     }
 
+    @Override
     public String getApplicationName() {
         return applicationName;
+    }
+
+    @Override
+    @DataBoundSetter
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
     public boolean isFailureIgnored() {
@@ -106,20 +106,24 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
         this.failureIgnored = failureIgnored;
     }
 
+    @Override
     public long getTimeout() {
         return timeout;
     }
 
+    @Override
     @DataBoundSetter
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
 
+    @Override
     @Nullable
     public String getNodeName() {
         return nodeName;
     }
 
+    @Override
     @DataBoundSetter
     public void setNodeName(@Nullable String nodeName) {
         this.nodeName = nodeName;
@@ -135,14 +139,21 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
         this.cssServerName = cssServerName;
     }
 
+    @Override
     @Nullable
     public String getDomainName() {
         return domainName;
     }
 
+    @Override
     @DataBoundSetter
     public void setDomainName(@Nullable String domainName) {
         this.domainName = domainName;
+    }
+
+    @Override
+    protected VersionInformation getFeatureMinVersion() {
+        return null;
     }
 
     @Override
@@ -151,7 +162,7 @@ public class CreateApplicationBuilder extends BaseActionBuilder implements Simpl
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void performClient(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
         Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
 

@@ -9,6 +9,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -72,7 +73,7 @@ public abstract class AipConsoleToolsCliBaseTest {
         Files.createDirectories(sflPath);
         zippedSourcesPath = sflPath.resolve("fake_sources.zip");
         zippedSourcesPath.toFile().createNewFile();
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.4.9-funcrel").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(SemVerUtils.getMinCompatibleVersion().toString()).build();
         when(restApiService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
         when(applicationService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
         defaultArgs = new String[]{"--apikey",

@@ -57,8 +57,6 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
                 "--app-name", TestConstants.TEST_CREATRE_APP
         };
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.1-funcrel").build();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         doReturn(getTestApplicationMock()).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATRE_APP);
         doReturn(false).when(applicationService).isOnboardingSettingsEnabled();
 
@@ -73,8 +71,6 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP};
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.1-funcrel").build();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         doReturn(null).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATRE_APP);
 
         runStringArgs(publishToImagingCommand, args);

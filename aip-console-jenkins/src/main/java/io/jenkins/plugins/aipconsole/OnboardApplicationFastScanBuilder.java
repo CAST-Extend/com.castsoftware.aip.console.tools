@@ -14,7 +14,6 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
-import com.castsoftware.aip.console.tools.core.utils.FileUtils;
 import com.castsoftware.aip.console.tools.core.utils.LogUtils;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.Extension;
@@ -48,7 +47,6 @@ import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanForbidden;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_displayName;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionAboutToStart;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_actionDone;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
@@ -140,19 +138,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
-        super.perform(run, filePath, launcher, listener);
-
-        String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
-        if (getMinVersion() != null && StringUtils.isNotEmpty(apiVersion)) {
-            VersionInformation serverApiVersion = VersionInformation.fromVersionString(apiVersion);
-            if (serverApiVersion != null && getMinVersion().isHigherThan(serverApiVersion)) {
-                listener.error(OnbordingApplicationBuilder_DescriptorImpl_feature_notCompatible("Onboard Application", apiVersion, getMinVersion().toString()));
-                run.setResult(Result.FAILURE);
-                return;
-            }
-        }
-
+    protected void performClient(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         String expandedAppName = environmentVariables.expand(getApplicationName());
         String expandedFilePath = environmentVariables.expand(getFilePath());
         String expandedDomainName = environmentVariables.expand(getDomainName());
@@ -243,6 +229,11 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
     private static VersionInformation getMinVersion() {
         //This version can be null if failed to convert from string
         return VersionInformation.fromVersionString("2.8.0");
+    }
+
+    @Override
+    protected VersionInformation getFeatureMinVersion() {
+        return getMinVersion();
     }
 
     public String getExclusionPatterns() {
