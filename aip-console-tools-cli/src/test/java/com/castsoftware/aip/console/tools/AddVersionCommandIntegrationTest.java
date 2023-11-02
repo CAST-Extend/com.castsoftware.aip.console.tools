@@ -3,6 +3,8 @@ package com.castsoftware.aip.console.tools;
 import com.castsoftware.aip.console.tools.commands.AddVersionCommand;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
+import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
@@ -12,6 +14,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,6 +69,8 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         addVersionCommand.setNodeName(null);
         addVersionCommand.setVersionName(null);
         addVersionCommand.setCssServerName(null);
+
+        AipConsoleToolsCliBaseTest.simplifiedModeApp.setVersion(null);
     }
 
     @Test
@@ -93,6 +98,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         // gives the existing application
         prepareJobExecution();
         createJobStatus(JobState.COMPLETED);
+        addApplicationDetails();
 
         runStringArgs(addVersionCommand, args);
 
@@ -115,7 +121,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         // gives the existing application
         prepareJobExecution();
         createJobStatus(JobState.COMPLETED);
-
+        addApplicationDetails();
         runStringArgs(addVersionCommand, args);
 
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
@@ -203,6 +209,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
         when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
+        addApplicationDetails();
 
         JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
@@ -255,6 +262,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
         when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
+        addApplicationDetails();
 
         JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
@@ -307,6 +315,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
         when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
+        addApplicationDetails();
 
         JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
@@ -340,6 +349,74 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         assertEquals(Constants.PROCESS_IMAGING, endStep); //so that Console will move up to publish to health
 
         assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    @Test
+    public void testAddVersionCommand_WithImaging_BatVersionStatus() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "-f", zippedSourcesPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--domain-name", TestConstants.TEST_DOMAIN,
+                "--node-name", TestConstants.TEST_NODE
+                , "--process-imaging"
+        };
+
+        testAddVersionCommand_DefaultConsolidationWithImaging();
+        addApplicationDetails(VersionStatus.DELIVERED, true);
+        runStringArgs(addVersionCommand, args);
+
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+    
+    @Test
+    public void testAddVersionCommand_Onboarded_WithImaging_RightVersionStatus() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "-f", zippedSourcesPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--domain-name", TestConstants.TEST_DOMAIN,
+                "--node-name", TestConstants.TEST_NODE
+                , "--process-imaging"
+        };
+
+        testAddVersionCommand_DefaultConsolidationWithImaging();
+        addApplicationDetails(VersionStatus.ANALYSIS_DATA_PREPARED, true);
+        when(applicationService.publishToImaging(any(String.class), any(CliLogPollingProviderImpl.class))).thenReturn(TestConstants.TEST_APP_GUID);
+        runStringArgs(addVersionCommand, args);
+
+        assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    @Test
+    public void testAddVersionCommand_Onboarded_WithImagingFailed_RightVersionStatus() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
+        String[] args = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "-f", zippedSourcesPath.toString(),
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--domain-name", TestConstants.TEST_DOMAIN,
+                "--node-name", TestConstants.TEST_NODE
+                , "--process-imaging"
+        };
+
+        testAddVersionCommand_DefaultConsolidationWithImaging();
+        addApplicationDetails(VersionStatus.ANALYSIS_DATA_PREPARED, true);
+        when(applicationService.publishToImaging(any(String.class), any(CliLogPollingProviderImpl.class))).thenReturn(null);
+        runStringArgs(addVersionCommand, args);
+
+        assertThat(exitCode, is(Constants.RETURN_ONBOARD_OPERATION_FAILED));
+    }
+
+    private void addApplicationDetails(VersionStatus status, boolean onboardeFlag) throws ApplicationServiceException {
+        VersionDto versionDto = Mockito.mock(VersionDto.class);
+        when(versionDto.getStatus()).thenReturn(status);
+        AipConsoleToolsCliBaseTest.simplifiedModeApp.setVersion(versionDto);
+        AipConsoleToolsCliBaseTest.simplifiedModeApp.setOnboarded(onboardeFlag);
+        when(applicationService.getApplicationDetails(TestConstants.TEST_APP_GUID)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
+    }
+
+    private void addApplicationDetails() throws ApplicationServiceException {
+        addApplicationDetails(VersionStatus.FULLY_ANALYZED, false);
     }
 
     @Test
@@ -387,6 +464,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         DebugOptionsDto debugOptions = Mockito.mock(DebugOptionsDto.class);
         when(debugOptions.isActivateAmtMemoryProfile()).thenReturn(false);
         when(applicationService.getDebugOptions(TestConstants.TEST_APP_GUID)).thenReturn(debugOptions);
+        addApplicationDetails();
 
         JobExecutionDto jobStatus = new JobExecutionDto();
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);

@@ -74,7 +74,7 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
     public void testDeepAnalysis_WhenFastScanRequired() throws Exception {
         FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.3-SNAPSHOT-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.9.1-hotfix-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
