@@ -122,6 +122,8 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         prepareJobExecution();
         createJobStatus(JobState.COMPLETED);
         addApplicationDetails();
+        when(applicationService.publishToImaging(any(String.class), any(CliLogPollingProviderImpl.class))).thenReturn(TestConstants.TEST_APP_GUID);
+
         runStringArgs(addVersionCommand, args);
 
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
@@ -323,6 +325,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         jobStatus.setCreatedDate(new Date());
         jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
+        when(applicationService.publishToImaging(any(String.class), any(CliLogPollingProviderImpl.class))).thenReturn(TestConstants.TEST_APP_GUID);
 
         runStringArgs(addVersionCommand, args);
 
@@ -352,7 +355,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     }
 
     @Test
-    public void testAddVersionCommand_WithImaging_BatVersionStatus() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
+    public void testAddVersionCommand_WithImaging_BadVersionStatus() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String[] args = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
@@ -368,7 +371,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
 
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
-    
+
     @Test
     public void testAddVersionCommand_Onboarded_WithImaging_RightVersionStatus() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String[] args = new String[]{"--apikey",

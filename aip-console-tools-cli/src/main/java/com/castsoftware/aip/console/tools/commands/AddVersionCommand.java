@@ -292,7 +292,7 @@ public class AddVersionCommand extends BasicCollable {
                 VersionDto versionDto = applicationDto.getVersion();
                 if (!statuses.contains(versionDto.getStatus().toString())) {
                     log.error("Application version not in the status that allows application data to be published to CAST Imaging: actual status is " + versionDto.getStatus().toString());
-                } else if (applicationDto.isOnboarded() && processImaging) {
+                } else if (processImaging) {
                     log.info("Triggering Publish to Imaging for: {}", applicationDto.getName());
                     CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
                     String appGuid = applicationService.publishToImaging(applicationGuid, cliLogPolling);
