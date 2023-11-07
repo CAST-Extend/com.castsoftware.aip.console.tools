@@ -5,13 +5,18 @@ import com.castsoftware.aip.console.tools.commands.OnboardApplicationFastScanCom
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
+import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
+import com.castsoftware.aip.console.tools.core.dto.FastScanProperties;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.services.ApplicationServiceImpl;
+import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -20,6 +25,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ReflectionUtils;
 import picocli.CommandLine;
 
@@ -46,6 +52,8 @@ import static org.mockito.Mockito.when;
 public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     @InjectMocks
     private OnboardApplicationFastScanCommand fastScanCommand;
+    @InjectMocks
+    private ApplicationServiceImpl applicationServiceImpl;
 
     @Override
     protected void initializePrivateMocks() {
@@ -87,6 +95,10 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
     protected void additionalStartup() throws IOException {
         super.additionalStartup();
 
+        ReflectionTestUtils.setField(applicationServiceImpl, "restApiService", restApiService);
+        ReflectionTestUtils.setField(applicationServiceImpl, "jobService", jobsService);
+        ReflectionTestUtils.setField(applicationServiceImpl, "uploadService", uploadService);
+
         uploadPath = folder.getRoot().toPath().resolve("upload");
         Files.createDirectories(uploadPath);
         applicationDto = ApplicationDto.builder()
@@ -127,6 +139,9 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
 
+        doThrow(ApiCallException.class).when(restApiService).getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class);
+        when(applicationService.fastScan(any(FastScanProperties.class))).then(i -> applicationServiceImpl.fastScan(i.getArgument(0)));
+
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
@@ -148,6 +163,9 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
 
+        doThrow(ApiCallException.class).when(restApiService).getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class);
+        when(applicationService.fastScan(any(FastScanProperties.class))).then(i -> applicationServiceImpl.fastScan(i.getArgument(0)));
+
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
@@ -164,6 +182,9 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
 
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(false).when(applicationService).isOnboardingSettingsEnabled();
+
+        when(restApiService.getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class)).thenReturn(false);
+        when(applicationService.fastScan(any(FastScanProperties.class))).then(i -> applicationServiceImpl.fastScan(i.getArgument(0)));
 
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
@@ -213,7 +234,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
     }
 
     @Test
-    public void testOnboardApplicationFastScan_OnAnExistingNonOnboardeApplication() throws Exception {
+    public void testOnboardApplicationFastScan_OnAnExistingNonOnboardedApplication() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
@@ -233,6 +254,12 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
+
+        Applications applications = new Applications();
+        applications.setApplications(applicationDto != null ? Sets.newHashSet(applicationDto) : Sets.newHashSet());
+        when(restApiService.getForEntity(ApiEndpointHelper.getApplicationsPath(), Applications.class)).thenReturn(applications);
+        when(restApiService.getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class)).thenReturn(true);
+        when(applicationService.fastScan(any(FastScanProperties.class))).then(i -> applicationServiceImpl.fastScan(i.getArgument(0)));
 
         runStringArgs(fastScanCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();

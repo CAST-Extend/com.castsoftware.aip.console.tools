@@ -59,8 +59,8 @@ public class ApiIntegrationConfig {
     }
 
     @Bean
-    public ApplicationService applicationService(@Autowired RestApiService restApiService, @Autowired JobsService jobsService) {
-        return new ApplicationServiceImpl(restApiService, jobsService);
+    public ApplicationService applicationService(@Autowired RestApiService restApiService, JobsService jobsService, @Autowired UploadService uploadService) {
+        return new ApplicationServiceImpl(restApiService, jobsService, uploadService);
     }
 
     @Bean

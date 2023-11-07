@@ -1,7 +1,9 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.core.dto.DeepAnalyzeProperties;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.FastScanProperties;
+import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -12,7 +14,6 @@ import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -20,15 +21,15 @@ import java.io.File;
 
 @Component
 @CommandLine.Command(
-        name = "FastScan",
+        name = "OnboardApplication",
         mixinStandardHelpOptions = true,
-        aliases = {"Fast-Scan"},
-        description = "Creates an application or uses an existing application to manage source code using a modern workflow in CAST Imaging Console."
+        aliases = {"Onboard-Application"},
+        description = "Creates an application with Fast-Scan to manage source code using a modern workflow. Performs the Deep-Analyze and then Publish data to CAST Imaging Console."
 )
 @Slf4j
 @Getter
 @Setter
-public class OnboardApplicationFastScanCommand extends BasicCollable {
+public class OnboardApplicationCommand extends BasicCollable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
             description = "The Name of the application to analyze",
@@ -55,27 +56,33 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
             , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
     private ExclusionRuleType[] exclusionRules;
 
+    @CommandLine.Option(names = {"-S", "--snapshot-name"},
+            paramLabel = "SNAPSHOT_NAME",
+            description = "The name of the snapshot to create")
+    private String snapshotName;
+
+    @CommandLine.Option(names = "--module-option"
+            , description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno (default: ${DEFAULT-VALUE})")
+    private ModuleGenerationType moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
+
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
-    //This version can be null if failed to convert from string
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
 
-    public OnboardApplicationFastScanCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+    public OnboardApplicationCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
     }
 
     @Override
-    public Integer processCallCommand() throws Exception {
-        if (StringUtils.isBlank(applicationName)) {
-            log.error("Application name should not be empty.");
-            return Constants.RETURN_APPLICATION_INFO_MISSING;
-        }
+    protected Integer processCallCommand() throws Exception {
 
         if (filePath == null) {
             log.error("A valid file path required to perform the FAST SCAN operation");
             return Constants.RETURN_MISSING_FILE;
         }
+        CliLogPollingProviderImpl logPollingProvider = new CliLogPollingProviderImpl(jobsService,
+                getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
         FastScanProperties fastScanProperties = FastScanProperties.builder()
                 .applicationName(applicationName)
                 .exclusionPatterns(exclusionPatterns)
@@ -83,12 +90,28 @@ public class OnboardApplicationFastScanCommand extends BasicCollable {
                 .filePath(filePath)
                 .verbose(sharedOptions.isVerbose())
                 .sleepDuration(sharedOptions.getSleepDuration())
-                .logPollingProvider(new CliLogPollingProviderImpl(jobsService,
-                        getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration()))
+                .logPollingProvider(logPollingProvider)
                 .build();
-        return applicationService.fastScan(fastScanProperties);
+
+        int exitCode = applicationService.fastScan(fastScanProperties);
+        if (exitCode == Constants.RETURN_OK) {
+            //Deep Analyze
+            DeepAnalyzeProperties deepAnalyzeProperties = DeepAnalyzeProperties.builder()
+                    .applicationName(applicationName)
+                    .moduleGenerationType(moduleGenerationType)
+                    .snapshotName(snapshotName)
+                    .sleepDuration(sharedOptions.getSleepDuration())
+                    .verbose(sharedOptions.isVerbose())
+                    .logPollingProvider(logPollingProvider)
+                    .build();
+            exitCode = applicationService.deepAnalyze(deepAnalyzeProperties);
+            if (exitCode == Constants.RETURN_OK) {
+                
+            }
+        }
+        return exitCode;
     }
-    
+
     @Override
     protected VersionInformation getMinVersion() {
         return MIN_VERSION;

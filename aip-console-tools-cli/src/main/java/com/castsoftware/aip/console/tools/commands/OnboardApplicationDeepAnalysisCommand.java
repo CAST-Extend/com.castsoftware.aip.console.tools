@@ -1,8 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
-import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.DeepAnalyzeProperties;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
-import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -59,65 +58,15 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
             log.error("Application name should not be empty.");
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
-
-        log.info("Deep-Analysis args:");
-        log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tmodule generation type: %s%n\tsleep: %d%n", applicationName, StringUtils.isEmpty(snapshotName) ? "Auto assigned" : snapshotName, moduleGenerationType.toString(), getSharedOptions().getSleepDuration()));
-
-        Thread shutdownHook = null;
-        try {
-            boolean OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
-            if (!OnBoardingModeWasOn) {
-                log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
-                return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
-            }
-
-            log.info("Searching for application '{}' on CAST Imaging Console", applicationName);
-            String existingAppGuid = null;
-            ApplicationDto app = applicationService.getApplicationFromName(applicationName);
-            if (app != null) {
-                existingAppGuid = app.getGuid();
-                app = applicationService.getApplicationDetails(existingAppGuid);
-            }
-
-            boolean deepAnalysisCondition = (app != null) && app.isOnboarded();
-            if (!deepAnalysisCondition) {
-                if (app != null && !app.isOnboarded()) {
-                    log.info("The existing application has not been created using the Fast-Scan workflow.\n" +
-                            "The 'Deep-Analysis' operation will not be applied");
-                    return Constants.RETURN_ONBOARD_DEEP_ANALYSIS_FORBIDDEN;
-                }
-
-                log.error("Unable to trigger Deep-Analysis. The actual conditions required Fast-Scan to be running first.");
-                return Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED;
-            }
-
-            log.info("About to trigger new workflow for: 'Deep-Analysis' ");
-            if (StringUtils.isNotEmpty(getSnapshotName())) {
-                log.info("  With snapshot name: " + getSnapshotName());
-            }
-            String caipVersion = app.getCaipVersion();
-            String targetNode = app.getTargetNode();
-
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
-
-            //Run Analysis
-            if (!applicationService.isImagingAvailable()) {
-                log.info("The 'Deep Analysis' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging.");
-                return Constants.RETURN_RUN_ANALYSIS_DISABLED;
-            }
-
-            applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, snapshotName, moduleGenerationType, getSharedOptions().isVerbose(), cliLogPolling);
-        } catch (ApplicationServiceException e) {
-            return Constants.RETURN_APPLICATION_INFO_MISSING;
-        } finally {
-            // Remove shutdown hook after execution
-            // This is to avoid exceptions during job execution to
-            if (shutdownHook != null) {
-                Runtime.getRuntime().removeShutdownHook(shutdownHook);
-            }
-        }
-
-        return Constants.RETURN_OK;
+        DeepAnalyzeProperties deepAnalyzeProperties = DeepAnalyzeProperties.builder()
+                .applicationName(applicationName)
+                .moduleGenerationType(moduleGenerationType)
+                .snapshotName(snapshotName)
+                .sleepDuration(sharedOptions.getSleepDuration())
+                .verbose(sharedOptions.isVerbose())
+                .logPollingProvider(new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration()))
+                .build();
+        return applicationService.deepAnalyze(deepAnalyzeProperties);
     }
 
     @Override
