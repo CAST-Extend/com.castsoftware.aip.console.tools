@@ -106,7 +106,9 @@ public class OnboardApplicationCommand extends BasicCollable {
                     .build();
             exitCode = applicationService.deepAnalyze(deepAnalyzeProperties);
             if (exitCode == Constants.RETURN_OK) {
-                
+                long duration = sharedOptions.getSleepDuration();
+                boolean verbose = getSharedOptions().isVerbose();
+                exitCode = applicationService.publishToImaging(applicationName, duration, verbose, logPollingProvider);
             }
         }
         return exitCode;

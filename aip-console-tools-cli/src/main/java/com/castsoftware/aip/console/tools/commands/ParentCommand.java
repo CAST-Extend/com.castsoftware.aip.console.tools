@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
                 OnboardApplicationFastScanCommand.class,
                 OnboardApplicationDeepAnalysisCommand.class,
                 PublishToImagingCommand.class,
+                OnboardApplicationCommand.class,
                 ArchitectureStudioCommand.class,
                 UpgradeApplicationCommand.class,
                 ResyncApplicationCommand.class

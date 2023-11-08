@@ -140,6 +140,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 log.info("Fast-Scan done successfully");
             } else {
                 log.info("Fast-Scan not completed successfully");
+                return Constants.RETURN_JOB_FAILED;
             }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
@@ -197,8 +198,14 @@ public class ApplicationServiceImpl implements ApplicationService {
                 return Constants.RETURN_RUN_ANALYSIS_DISABLED;
             }
 
-            runDeepAnalysis(existingAppGuid, targetNode, caipVersion, properties.getSnapshotName()
+            String jobStatus = runDeepAnalysis(existingAppGuid, targetNode, caipVersion, properties.getSnapshotName()
                     , properties.getModuleGenerationType(), properties.isVerbose(), properties.getLogPollingProvider());
+            if (jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
+                log.info("Deep-Analyze done successfully");
+            } else {
+                log.error("Deep-Analyze didn't completed successfully.");
+                return Constants.RETURN_JOB_FAILED;
+            }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
@@ -252,18 +259,22 @@ public class ApplicationServiceImpl implements ApplicationService {
                 }
                 requestBuilder.processImaging(true);
 
-                String appGuid = runDeepAnalysis(requestBuilder.build(), logPollingProvider);
-                if (StringUtils.isEmpty(appGuid)) {
-                    log.error("Something went wrong while Publishing to Imaging.");
+                String jobStatus = runDeepAnalysis(requestBuilder.build(), logPollingProvider);
+                if (jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
+                    log.info("Publishing to Imaging done successfully");
+                } else {
+                    log.error("Publishing to Imaging not completed successfully");
                     return Constants.RETURN_JOB_FAILED;
                 }
                 return Constants.RETURN_OK;
             }
 
-            String appGuid = publishToImaging(applicationDto.getGuid(), logPollingProvider);
-
-            if (StringUtils.isEmpty(appGuid)) {
-                return Constants.RETURN_ONBOARD_OPERATION_FAILED;
+            String jobStatus = publishToImaging(applicationDto.getGuid(), logPollingProvider);
+            if (jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
+                log.info("Publish to CAST Imaging done successfully");
+            } else {
+                log.error("\"Publish to CAST Imaging didn't completed successfully.");
+                return Constants.RETURN_JOB_FAILED;
             }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;

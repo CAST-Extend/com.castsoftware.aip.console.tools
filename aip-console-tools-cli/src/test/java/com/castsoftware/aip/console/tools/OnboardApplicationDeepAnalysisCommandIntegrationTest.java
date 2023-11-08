@@ -9,6 +9,13 @@ import com.castsoftware.aip.console.tools.core.dto.DeepAnalyzeProperties;
 import com.castsoftware.aip.console.tools.core.dto.ImagingSettingsDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
+import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
+import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationServiceImpl;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
@@ -27,7 +34,12 @@ import picocli.CommandLine;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -99,37 +111,7 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
                 "--module-option", "ONE_PER_AU"
         };
 
-        doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
-        doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
-
-        //first scan/ Refresh sources content done
-        applicationDto.setOnboarded(true);
-        applicationDto.setSchemaPrefix("ShouldHave_One");
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
-        VersionDto existingVersion = Mockito.mock(VersionDto.class);
-        when(existingVersion.getGuid()).thenReturn(TestConstants.TEST_OBR_VERSION_GUID);
-        when(existingVersion.getName()).thenReturn(TestConstants.TEST_OBR_VERSION_NAME);
-        when(existingVersion.isImagingDone()).thenReturn(true);
-        applicationDto.setVersion(existingVersion);
-        applicationDto.setImagingTenant("default"); //something different suit also
-        doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
-
-        ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
-        when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
-        when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
-        when(applicationService.isImagingAvailable()).thenReturn(true);
-
-        Applications applications = new Applications();
-        applications.setApplications(Sets.newHashSet(applicationDto));
-        when(restApiService.getForEntity(ApiEndpointHelper.getApplicationsPath(), Applications.class)).thenReturn(applications);
-
-        when(restApiService.getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class)).thenReturn(true);
-        ImagingSettingsDto imagingDto = Mockito.mock(ImagingSettingsDto.class);
-        when(imagingDto.isValid()).thenReturn(true);
-        when(restApiService.getForEntity(ApiEndpointHelper.getImagingSettingsEndPoint(), ImagingSettingsDto.class)).thenReturn(imagingDto);
-        when(restApiService.getForEntity(ApiEndpointHelper.getApplicationPath(TestConstants.TEST_APP_GUID), ApplicationDto.class)).thenReturn(applicationDto);
-        when(applicationService.deepAnalyze(any(DeepAnalyzeProperties.class))).then(i -> applicationServiceImpl.deepAnalyze(i.getArgument(0)));
-
+        mockDeepAnalyzeWithJobState(JobState.COMPLETED);
         runStringArgs(deepAnalysisCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
@@ -147,6 +129,77 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
         // Now check the argument passed to the CLI has been taken into account
         assertThat(deepAnalysisCommand.getModuleGenerationType(), is(ModuleGenerationType.ONE_PER_AU));
         assertThat(exitCode, is(Constants.RETURN_OK));
+    }
+
+    @Test
+    public void testDeepAnalysis_JobFailed() throws Exception {
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--module-option", "ONE_PER_AU"
+        };
+
+        mockDeepAnalyzeWithJobState(JobState.FAILED);
+        runStringArgs(deepAnalysisCommand, args);
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+
+        //Checks that the initial value set for the module type is full content
+        List<CommandLine.Model.ArgSpec> argsSpec = spec.args();
+        for (CommandLine.Model.ArgSpec cmdArg : argsSpec) {
+            CommandLine.Model.OptionSpec optionSpec = (CommandLine.Model.OptionSpec) cmdArg;
+            if (StringUtils.equalsAny("--module-option", optionSpec.names())) {
+                assertThat(optionSpec.hasInitialValue(), is(true));
+                assertThat(optionSpec.initialValue(), is(ModuleGenerationType.FULL_CONTENT));
+                break;
+            }
+        }
+        // Now check the argument passed to the CLI has been taken into account
+        assertThat(deepAnalysisCommand.getModuleGenerationType(), is(ModuleGenerationType.ONE_PER_AU));
+        assertThat(exitCode, is(Constants.RETURN_JOB_FAILED));
+    }
+
+    private void mockDeepAnalyzeWithJobState(JobState jobState) throws JobServiceException, ApiCallException, ApplicationServiceException {
+        doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
+        doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
+
+        //first scan/ Refresh sources content done
+        applicationDto.setOnboarded(true);
+        applicationDto.setSchemaPrefix("ShouldHave_One");
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+
+        VersionDto existingVersion = Mockito.mock(VersionDto.class);
+        when(existingVersion.getGuid()).thenReturn(TestConstants.TEST_OBR_VERSION_GUID);
+        when(existingVersion.getName()).thenReturn(TestConstants.TEST_OBR_VERSION_NAME);
+        when(existingVersion.isImagingDone()).thenReturn(true);
+        when(existingVersion.getVersionDate()).thenReturn(LocalDateTime.now());
+        when(existingVersion.getStatus()).thenReturn(VersionStatus.DELIVERED);
+        applicationDto.setVersion(existingVersion);
+        applicationDto.setImagingTenant("default"); //something different suit also
+        doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
+
+        ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
+        when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
+        when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
+        when(applicationService.isImagingAvailable()).thenReturn(true);
+
+        Applications applications = new Applications();
+        applications.setApplications(Sets.newHashSet(applicationDto));
+        when(restApiService.getForEntity(ApiEndpointHelper.getApplicationsPath(), Applications.class)).thenReturn(applications);
+        when(restApiService.getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class)).thenReturn(true);
+        ImagingSettingsDto imagingDto = Mockito.mock(ImagingSettingsDto.class);
+        when(imagingDto.isValid()).thenReturn(true);
+        when(restApiService.getForEntity(ApiEndpointHelper.getImagingSettingsEndPoint(), ImagingSettingsDto.class)).thenReturn(imagingDto);
+        when(restApiService.getForEntity(ApiEndpointHelper.getApplicationPath(TestConstants.TEST_APP_GUID), ApplicationDto.class)).thenReturn(applicationDto);
+        when(applicationService.deepAnalyze(any(DeepAnalyzeProperties.class))).then(i -> applicationServiceImpl.deepAnalyze(i.getArgument(0)));
+        when(jobsService.startDeepAnalysis(any(ScanAndReScanApplicationJobRequest.class))).thenReturn(TestConstants.TEST_JOB_GUID);
+
+        JobExecutionDto jobStatus = new JobExecutionDto();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(jobState);
+        jobStatus.setCreatedDate(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
+        when(jobsService.pollAndWaitForJobFinished(anyString(), any(Consumer.class), any(Consumer.class), any(Function.class), any(Supplier.class))).thenReturn(jobStatus.getState().toString());
     }
 
     @Test
