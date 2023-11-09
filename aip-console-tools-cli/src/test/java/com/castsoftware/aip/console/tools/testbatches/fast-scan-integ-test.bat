@@ -36,7 +36,7 @@ echo ----------------------------
 echo -- Onboard application to CAST Imaging Console --
 echo -- FAST-SCAN
 echo OPTIONS= %MORE_OPTIONS%
-echo java -jar aip-console-tools-cli.jar Onboard-Application --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
+echo java -jar aip-console-tools-cli.jar FAst-Scan --server-url="%SERVER_URL%" --apikey="%API_KEY%" --timeout=5000 ^
      	--app-name="%APP_NAME%" --verbose=%VERBOSE% ^
      	%MORE_OPTIONS%
 echo --------------------------------
