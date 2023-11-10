@@ -3,7 +3,6 @@ package com.castsoftware.aip.console.tools.core.services;
 import com.castsoftware.aip.console.tools.core.dto.architecturestudio.ArchitectureModelDto;
 import com.castsoftware.aip.console.tools.core.dto.architecturestudio.ArchitectureModelLinkDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CheckModelReportRequest;
-import com.castsoftware.aip.console.tools.core.dto.jobs.CheckModelUploadRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.PathRequest;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
@@ -32,6 +31,7 @@ public class ArchitectureStudioServiceImpl implements ArchitectureStudioService 
         this.restApiService = restApiService;
     }
 
+    @Override
     public Set<ArchitectureModelDto> getArchitectureModels() throws ApplicationServiceException {
         try {
             String modelUrl = ApiEndpointHelper.getArchitectureModelUrl();
@@ -42,6 +42,7 @@ public class ArchitectureStudioServiceImpl implements ArchitectureStudioService 
         }
     }
 
+    @Override
     public Response uploadArchitectureModel(String filePath, Boolean isTemplate) throws ApplicationServiceException {
         try {
             File file = new File(filePath);
@@ -59,6 +60,7 @@ public class ArchitectureStudioServiceImpl implements ArchitectureStudioService 
         }
     }
 
+    @Override
     public Set<ArchitectureModelLinkDto> modelChecker(String appGuid, String path, String caipVersion) throws ApiCallException {
 
         PathRequest pathRequest = PathRequest
@@ -72,6 +74,7 @@ public class ArchitectureStudioServiceImpl implements ArchitectureStudioService 
         );
     }
 
+    @Override
     public void downloadCheckedModelReport(String appGuid, String modelName, Integer metricId, String description, Integer transactionId, Set<ArchitectureModelLinkDto> modelChecker, String reportPath) throws Exception {
 
         CheckModelReportRequest checkModelReportRequest = CheckModelReportRequest

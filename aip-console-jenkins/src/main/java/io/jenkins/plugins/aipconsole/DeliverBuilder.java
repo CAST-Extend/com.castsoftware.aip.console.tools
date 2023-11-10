@@ -3,7 +3,6 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
-import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -452,12 +451,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 log.println(AddVersionBuilder_AddVersion_info_startUpload(FilenameUtils.getName(resolvedFilePath)));
 
                 //call api to check if the folder exists
-                try {
-                    FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(resolvedFilePath)).build();
-                    apiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
-                } catch (ApiCallException e) {
+                if (!applicationService.checkServerFoldersExists(resolvedFilePath)) {
                     listener.error("Unable to find the file " + resolvedFilePath + " in the source.folder.location");
-                    e.printStackTrace(log);
                     run.setResult(defaultResult);
                     return;
                 }
@@ -597,7 +592,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
         String reportFile = versionName + "-report-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm")) + ".xml";
         try {
-            String content = apiService.getForEntity("/api/applications/" + appGuid + "/versions/" + versionGuid + "/dmt-report/download", String.class);
+            String content = applicationService.downloadDeliveryReport(appGuid, versionGuid, reportFile);
             workspace.child(reportFile).write(content, StandardCharsets.UTF_8.toString());
             log.println("Version delivery report saved in workspace " + reportFile);
         } catch (IOException | InterruptedException e) {

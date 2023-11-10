@@ -18,6 +18,7 @@ import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DeliveryPackageDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverPackageRequest;
+import com.castsoftware.aip.console.tools.core.dto.jobs.FileCommandRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
@@ -32,6 +33,7 @@ import lombok.extern.java.Log;
 import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,6 +67,26 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public ApiInfoDto getAipConsoleApiInfo() {
         return restApiService.getAipConsoleApiInfo();
+    }
+
+    @Override
+    public boolean checkServerFoldersExists(String pathToCheck) {
+        try {
+            FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(pathToCheck)).build();
+            restApiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
+        } catch (ApiCallException e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String downloadDeliveryReport(String appGuid, String versionGuid, String reportFilename) throws ApplicationServiceException {
+        try {
+            return restApiService.getForEntity("/api/applications/" + appGuid + "/versions/" + versionGuid + "/dmt-report/download", String.class);
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Failed to download the delivery report", e);
+        }
     }
 
     @Override

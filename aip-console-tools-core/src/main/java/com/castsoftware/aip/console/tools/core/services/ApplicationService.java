@@ -13,6 +13,7 @@ import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
+import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
@@ -23,6 +24,10 @@ import java.util.function.Consumer;
 
 public interface ApplicationService {
     ApiInfoDto getAipConsoleApiInfo();
+
+    boolean checkServerFoldersExists(String pathToCheck);
+
+    String downloadDeliveryReport(String appGuid, String versionGuid, String reportFilename) throws ApiCallException, ApplicationServiceException;
 
     String getApplicationGuidFromName(String applicationName) throws ApplicationServiceException;
 

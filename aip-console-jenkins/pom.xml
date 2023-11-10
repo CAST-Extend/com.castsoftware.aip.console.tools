@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.25</version>
+        <version>3.57</version>
         <relativePath/>
     </parent>
     <groupId>com.castsoftware.aip.jenkins</groupId>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>structs</artifactId>
-            <version>1.7</version>
+            <version>1.10</version>
         </dependency>
         <dependency>
             <groupId>com.castsoftware.aip.console.tools</groupId>
@@ -67,10 +67,6 @@
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -107,7 +103,7 @@
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>
                 <artifactId>maven-hpi-plugin</artifactId>
-                <version>${hpi-plugin.version}</version>
+                <!-- version>${hpi-plugin.version}</version -->
                 <configuration>
                     <minimumJavaVersion>${java.level}</minimumJavaVersion>
                     <pluginFirstClassLoader>true</pluginFirstClassLoader>
