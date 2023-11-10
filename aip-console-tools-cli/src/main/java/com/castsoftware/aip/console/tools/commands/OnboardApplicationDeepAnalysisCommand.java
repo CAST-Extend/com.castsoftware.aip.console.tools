@@ -26,7 +26,7 @@ import picocli.CommandLine;
 @Slf4j
 @Getter
 @Setter
-public class OnboardApplicationDeepAnalysisCommand extends BasicCollable {
+public class OnboardApplicationDeepAnalysisCommand extends BasicCallable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
             description = "The Name of the application to analyze",

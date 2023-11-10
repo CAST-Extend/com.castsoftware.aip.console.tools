@@ -43,12 +43,14 @@ public class ApplicationServiceImplTest {
 
     @Mock
     private JobsService jobsService;
+    @Mock
+    private UploadService uploadService;
 
     private ApplicationService applicationService;
 
     @Before
     public void setUp() {
-        this.applicationService = new ApplicationServiceImpl(restApiService, jobsService);
+        applicationService = new ApplicationServiceImpl(restApiService, jobsService, uploadService);
     }
 
     @Test(expected = ApplicationServiceException.class)

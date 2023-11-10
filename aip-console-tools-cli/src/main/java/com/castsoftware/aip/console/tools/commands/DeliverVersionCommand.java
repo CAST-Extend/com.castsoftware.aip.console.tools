@@ -42,7 +42,7 @@ import java.util.function.Function;
 @Slf4j
 @Getter
 @Setter
-public class DeliverVersionCommand extends BasicCollable {
+public class DeliverVersionCommand extends BasicCallable {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;

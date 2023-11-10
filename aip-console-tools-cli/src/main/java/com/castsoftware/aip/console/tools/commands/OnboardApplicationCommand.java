@@ -29,7 +29,7 @@ import java.io.File;
 @Slf4j
 @Getter
 @Setter
-public class OnboardApplicationCommand extends BasicCollable {
+public class OnboardApplicationCommand extends BasicCallable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
             description = "The Name of the application to analyze",
@@ -38,7 +38,7 @@ public class OnboardApplicationCommand extends BasicCollable {
 
     @CommandLine.Option(names = {"-f", "--file"},
             paramLabel = "FILE",
-            description = "A local zip or tar.gz file OR a path to a folder on the node where the source if saved")
+            description = "A local zip or tar.gz file OR a path to a folder on the node where the source is saved")
     private File filePath;
 
     @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME",
@@ -81,6 +81,13 @@ public class OnboardApplicationCommand extends BasicCollable {
             log.error("A valid file path required to perform the FAST SCAN operation");
             return Constants.RETURN_MISSING_FILE;
         }
+
+        if (!applicationService.isOnboardingSettingsEnabled()) {
+            log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
+            //applicationService.setEnableOnboarding(true);
+            return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
+        }
+
         CliLogPollingProviderImpl logPollingProvider = new CliLogPollingProviderImpl(jobsService,
                 getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
         FastScanProperties fastScanProperties = FastScanProperties.builder()

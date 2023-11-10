@@ -56,13 +56,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     private JobsService jobService;
     private UploadService uploadService;
 
-    public ApplicationServiceImpl(RestApiService restApiService, JobsService jobsService) {
+    public ApplicationServiceImpl(RestApiService restApiService, JobsService jobsService, UploadService uploadService) {
         this.restApiService = restApiService;
         jobService = jobsService;
-    }
-
-    public ApplicationServiceImpl(RestApiService restApiService, JobsService jobsService, UploadService uploadService) {
-        this(restApiService, jobsService);
         this.uploadService = uploadService;
     }
 
@@ -154,9 +150,9 @@ public class ApplicationServiceImpl implements ApplicationService {
         log.info("Deep-Analyze command will perform application '{}' deep analysis: verbose= '{}'"
                 , properties.getApplicationName(), properties.isVerbose());
         log.info("Deep-Analysis args:");
-        log.info(String.format("\tApplication: %s%n\tsnapshot name: %s%n\tmodule generation type: %s%n\tsleep: %d%n"
+        log.info("Application: {}\nsnapshot name: {}\nmodule generation type: {}\nsleep: {}\n"
                 , properties.getApplicationName(), StringUtils.isEmpty(properties.getSnapshotName()) ? "Auto assigned" : properties.getSnapshotName()
-                , properties.getModuleGenerationType().toString(), properties.getSleepDuration()));
+                , properties.getModuleGenerationType().toString(), properties.getSleepDuration());
 
         try {
             boolean OnBoardingModeWasOn = isOnboardingSettingsEnabled();

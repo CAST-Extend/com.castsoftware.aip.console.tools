@@ -33,9 +33,7 @@ import picocli.CommandLine;
 import java.io.File;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Component
 @CommandLine.Command(
@@ -47,7 +45,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Getter
 @Setter
-public class AddVersionCommand extends BasicCollable {
+public class AddVersionCommand extends BasicCallable {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -286,11 +284,10 @@ public class AddVersionCommand extends BasicCollable {
 
                 //Check Fast-Scan workflow pre-conditions and trigger publish to imaging
                 ApplicationDto applicationDto = applicationService.getApplicationDetails(applicationGuid);
-                Set<String> statuses = EnumSet.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED,
-                                VersionStatus.SNAPSHOT_DONE, VersionStatus.FULLY_ANALYZED, VersionStatus.ANALYZED).stream()
-                        .map(VersionStatus::toString).collect(Collectors.toSet());
+                EnumSet<VersionStatus> statuses = EnumSet.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED,
+                        VersionStatus.SNAPSHOT_DONE, VersionStatus.FULLY_ANALYZED, VersionStatus.ANALYZED);
                 VersionDto versionDto = applicationDto.getVersion();
-                if (!statuses.contains(versionDto.getStatus().toString())) {
+                if (!statuses.contains(versionDto.getStatus())) {
                     log.error("Application version not in the status that allows application data to be published to CAST Imaging: actual status is " + versionDto.getStatus().toString());
                 } else if (processImaging) {
                     log.info("Triggering Publish to Imaging for: {}", applicationDto.getName());

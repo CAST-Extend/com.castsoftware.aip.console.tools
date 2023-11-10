@@ -1,6 +1,6 @@
 package com.castsoftware.aip.console.tools;
 
-import com.castsoftware.aip.console.tools.commands.BasicCollable;
+import com.castsoftware.aip.console.tools.commands.BasicCallable;
 import com.castsoftware.aip.console.tools.commands.OnboardApplicationDeepAnalysisCommand;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
@@ -79,11 +79,11 @@ public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipCon
     }
 
     @Override
-    protected void assignMockedBeans(BasicCollable command) {
+    protected void assignMockedBeans(BasicCallable command) {
         super.assignMockedBeans(command);
 
         //We need upload for this test
-        Class<? extends BasicCollable> commandClass = command.getClass();
+        Class<? extends BasicCallable> commandClass = command.getClass();
         Field uploadServiceField = ReflectionUtils.findField(commandClass, "uploadService");
         ReflectionUtils.makeAccessible(uploadServiceField);
         ReflectionUtils.setField(uploadServiceField, command, uploadService);

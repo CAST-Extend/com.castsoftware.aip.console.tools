@@ -22,7 +22,7 @@ import picocli.CommandLine;
 @Slf4j
 @Getter
 @Setter
-public class PublishToImagingCommand extends BasicCollable {
+public class PublishToImagingCommand extends BasicCallable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
             description = "The Name of the application to analyze",

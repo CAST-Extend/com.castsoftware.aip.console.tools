@@ -28,7 +28,7 @@ import java.io.File;
 @Slf4j
 @Getter
 @Setter
-public class OnboardApplicationFastScanCommand extends BasicCollable {
+public class OnboardApplicationFastScanCommand extends BasicCallable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
             description = "The Name of the application to analyze",
