@@ -26,7 +26,7 @@ import picocli.CommandLine;
 @Slf4j
 @Getter
 @Setter
-public class ResyncApplicationCommand extends BasicCollable {
+public class ResyncApplicationCommand extends BasicCallable {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;

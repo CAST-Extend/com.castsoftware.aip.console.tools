@@ -138,6 +138,7 @@ The *Onboard Application* feature is using following strategies in a separated c
   required by providing the sources file.
 - *Deep-Analyze: to trigger the analysis after the Fast-Scan has been performed. This also manage to upload data to CAST
   imaging depending on the available configuration.
+- *Publish-Imaging* to publish existing application data to CAST-Imaging
 
 To perform that action you can inspire from the following command (see advanced usage for more details):
 
@@ -157,6 +158,23 @@ To perform *Publish-Imaging* action you can use following command
 
 ```bash
 java -jar .\aip-console-tools-cli.jar Publish-Imaging --apikey="valid.key" -n "my app" --verbose"
+```
+
+To perform all-in-one operation **Onboard-Application**
+
+- all parameters required for *Fast-Scan* command should be provided
+- all parameters required for *Deep-Analyze* command should be provided
+- all parameters required for *Publish-Imaging* command should be provided
+  To trigger this All-in-one command, you just have to customize the CLI given bellow
+
+```bash
+java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid key" -s "http://lfolap1.corp.castsoftware.com:8081" -n "APP name" -f="zip file full path" --domain-name="Some Domain name" --snapshot-name="SNAP name" --sleep-duration 5 --module-option="one_per_techno""
+```
+
+If you whish to redirect the above command output to a file that you can read back afterword, proceed as follows
+
+```bash
+java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid key" -s "http://lfolap1.corp.castsoftware.com:8081" -n "APP name" -f="zip file full path" --domain-name="Some Domain name" --snapshot-name="SNAP name" --sleep-duration 5 --module-option="one_per_techno" > my_outpout_file_full_path.txt"
 ```
 
 To **ArchitectureStudioModelChecker**
@@ -441,6 +459,34 @@ Publish or upload an existing application data to CAST Imaging
 The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
+
+### Onboard-Application (All-in-one)
+
+The available options are :
+
+* `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
+* `--app-name` or `-n` (**required**): The application name.
+* `--file` or `-f`: **required** only when performing the FIRST_SCAN. Represents either the local zip or tar.gz file
+  full path
+  to the sources or a relative path using the Source Folder Location configured
+* `--node-name`  (**optional**): The name of the node on which the application will be created
+* `--domain-name`  (**optional**): A domain is a group of applications. You may use domain to sort/filter applications.
+  Will be created if it doesn't exists. No domain will be assigned if left empty
+* `--exclude-patterns` or `-exclude` (**optional**): File patterns(glob pattern) to exclude in the delivery, separated
+  with comma
+* `--exclusion-rules`  (**optional**): Project's exclusion rules, separated with comma.
+* `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **1s**).
+* `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
+* `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
+  module.
+  Possible value is one of: full_content, one_per_au, one_per_techno
+
+```bash
+java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid key" -s "http://lfolap1.corp.castsoftware.com:8081" -n "APP name" -f="zip file full path" --domain-name="Some Domain name" --snapshot-name="SNAP name" --sleep-duration 5 --module-option="one_per_techno"
+```
+
+## Execution results
 
 When AIP Console finishes execution, it will return a specific return code, based on the execution.
 

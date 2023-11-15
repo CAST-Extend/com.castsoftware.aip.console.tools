@@ -4,6 +4,8 @@ import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
+import com.castsoftware.aip.console.tools.core.dto.VersionDto;
+import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobExecutionDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
@@ -20,6 +22,7 @@ import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
+import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,7 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Function;
 
@@ -41,7 +45,7 @@ import java.util.function.Function;
 @Slf4j
 @Getter
 @Setter
-public class AddVersionCommand extends BasicCollable {
+public class AddVersionCommand extends BasicCallable {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -276,7 +280,25 @@ public class AddVersionCommand extends BasicCollable {
                     log.info("[Debug options] Amt Profiling file download URL: {}",
                             sharedOptions.getFullServerRootUrl() + ApiEndpointHelper.getAmtProfilingDownloadUrl(applicationGuid));
                 }
-                log.info("Job completed successfully.");
+                log.info("{}: Job completed successfully.", builder.buildJobRequest().getJobType().getLabel());
+
+                //Check Fast-Scan workflow pre-conditions and trigger publish to imaging
+                ApplicationDto applicationDto = applicationService.getApplicationDetails(applicationGuid);
+                EnumSet<VersionStatus> statuses = EnumSet.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED,
+                        VersionStatus.SNAPSHOT_DONE, VersionStatus.FULLY_ANALYZED, VersionStatus.ANALYZED);
+                VersionDto versionDto = applicationDto.getVersion();
+                if (!statuses.contains(versionDto.getStatus())) {
+                    log.error("Application version not in the status that allows application data to be published to CAST Imaging: actual status is " + versionDto.getStatus().toString());
+                } else if (processImaging) {
+                    log.info("Triggering Publish to Imaging for: {}", applicationDto.getName());
+                    CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
+                    String appGuid = applicationService.publishToImaging(applicationGuid, cliLogPolling);
+
+                    if (StringUtils.isEmpty(appGuid)) {
+                        return Constants.RETURN_ONBOARD_OPERATION_FAILED;
+                    }
+                }
+
                 return Constants.RETURN_OK;
             }
 

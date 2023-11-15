@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 @Setter
-public class UpgradeApplicationCommand extends BasicCollable {
+public class UpgradeApplicationCommand extends BasicCallable {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;

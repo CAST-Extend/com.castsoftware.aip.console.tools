@@ -21,13 +21,13 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @Setter
 @Slf4j
-public abstract class BasicCollable implements Callable<Integer> {
+public abstract class BasicCallable implements Callable<Integer> {
     protected final RestApiService restApiService;
     protected final JobsService jobsService;
     protected final UploadService uploadService;
     protected final ApplicationService applicationService;
 
-    protected BasicCollable(RestApiService restApiService, JobsService jobsService
+    protected BasicCallable(RestApiService restApiService, JobsService jobsService
             , UploadService uploadService, ApplicationService applicationService) {
         this.applicationService = applicationService;
         this.jobsService = jobsService;
@@ -35,7 +35,7 @@ public abstract class BasicCollable implements Callable<Integer> {
         this.restApiService = restApiService;
     }
 
-    protected BasicCollable(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
+    protected BasicCallable(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         this(restApiService, jobsService, null, applicationService);
     }
 

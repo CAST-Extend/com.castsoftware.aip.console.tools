@@ -1,27 +1,16 @@
 package com.castsoftware.aip.console.tools.commands;
 
-import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
-import com.castsoftware.aip.console.tools.core.dto.VersionDto;
-import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
-import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
-import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
-import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
-
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @CommandLine.Command(
@@ -33,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Getter
 @Setter
-public class PublishToImagingCommand extends BasicCollable {
+public class PublishToImagingCommand extends BasicCallable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
             description = "The Name of the application to analyze",
@@ -50,76 +39,12 @@ public class PublishToImagingCommand extends BasicCollable {
 
     @Override
     protected Integer processCallCommand() throws Exception {
-        log.info("Publishing application '{}' data to CAST Imaging with verbose= '{}'", getApplicationName(), getSharedOptions().isVerbose());
-        Thread shutdownHook = null;
-        try {
-            log.info("Searching for application '{}' on CAST Imaging Console", getApplicationName());
-            ApplicationDto applicationDto = applicationService.getApplicationFromName(getApplicationName());
-            if (applicationDto == null) {
-                log.error("No action to perform: application '{}' does not exist.", getApplicationName());
-                return Constants.RETURN_APPLICATION_NOT_FOUND;
-            }
+        long duration = sharedOptions.getSleepDuration();
+        boolean verbose = getSharedOptions().isVerbose();
+        CliLogPollingProviderImpl logPollingProvider = new CliLogPollingProviderImpl(jobsService, verbose, duration);
 
-            if (!applicationService.isOnboardingSettingsEnabled()) {
-                log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
-                //applicationService.setEnableOnboarding(true);
-                return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
-            }
-            Set<VersionDto> versions = applicationService.getApplicationVersion(applicationDto.getGuid());
-            if (versions == null || versions.isEmpty()) {
-                log.error("No version for the given application. Make sure at least one version has been delivered");
-                return Constants.RETURN_APPLICATION_NO_VERSION;
-            }
-
-            applicationDto = applicationService.getApplicationDetails(applicationDto.getGuid());
-            Set<String> statuses = EnumSet.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED,
-                            VersionStatus.SNAPSHOT_DONE, VersionStatus.FULLY_ANALYZED, VersionStatus.ANALYZED).stream()
-                    .map(VersionStatus::toString).collect(Collectors.toSet());
-            VersionDto versionDto = applicationDto.getVersion();
-            if (!statuses.contains(versionDto.getStatus().toString())) {
-                log.error("Application version not in the status that allows application data to be published to CAST Imaging: actual status is " + versionDto.getStatus().toString());
-                return Constants.RETURN_ONBOARD_VERSION_STATUS_INVALID;
-            }
-
-            CliLogPollingProviderImpl cliLogPolling = new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
-            //TODO: refactor after release to get separated workflows
-            if (applicationDto.isOnboarded()) {
-                log.info("Triggering Publish to Imaging for an application using Fast-Scan workflow.");
-                ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
-                        .appGuid(applicationDto.getGuid());
-                String targetNode = applicationDto.getTargetNode();
-                if (StringUtils.isNotEmpty(targetNode)) {
-                    requestBuilder.targetNode(targetNode);
-                }
-                String caipVersion = applicationDto.getCaipVersion();
-                if (StringUtils.isNotEmpty(caipVersion)) {
-                    requestBuilder.caipVersion(caipVersion);
-                }
-                requestBuilder.processImaging(true);
-
-                String appGuid = applicationService.runDeepAnalysis(requestBuilder.build(), cliLogPolling);
-                if (StringUtils.isEmpty(appGuid)) {
-                    log.error("Something went wrong while Publishing to Imaging.");
-                    return Constants.RETURN_JOB_FAILED;
-                }
-                return Constants.RETURN_OK;
-            }
-
-            String appGuid = applicationService.publishToImaging(applicationDto.getGuid(), cliLogPolling);
-
-            if (StringUtils.isEmpty(appGuid)) {
-                return Constants.RETURN_ONBOARD_OPERATION_FAILED;
-            }
-        } catch (ApplicationServiceException e) {
-            return Constants.RETURN_APPLICATION_INFO_MISSING;
-        } finally {
-            // Remove shutdown hook after execution
-            // This is to avoid exceptions during job execution to
-            if (shutdownHook != null) {
-                Runtime.getRuntime().removeShutdownHook(shutdownHook);
-            }
-        }
-        return Constants.RETURN_OK;
+        return applicationService.publishToImaging(applicationName, duration, verbose, logPollingProvider);
+                
     }
 
     @Override
