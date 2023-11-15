@@ -13,7 +13,6 @@ import lombok.extern.java.Log;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.apache.commons.fileupload.FileUploadBase;
-import org.springframework.http.MediaType;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -48,7 +47,7 @@ public class ArchitectureStudioServiceImpl implements ArchitectureStudioService 
             File file = new File(filePath);
             String uploadModelUrl = ApiEndpointHelper.getArchitectureUploadModelEndpoint();
             Map<String, String> contentHeaderMap = new HashMap<>();
-            contentHeaderMap.put(FileUploadBase.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+            contentHeaderMap.put(FileUploadBase.CONTENT_TYPE, "application/json");
             contentHeaderMap.put(FileUploadBase.CONTENT_DISPOSITION, "form-data; name=\"file\"; filename=\"" + file.getName() + "\"");
 
             Map<String, Map<String, String>> headers = new HashMap<>();

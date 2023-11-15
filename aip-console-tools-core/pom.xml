@@ -81,10 +81,6 @@
             <artifactId>commons-fileupload</artifactId>
             <scope>compile</scope>
         </dependency>
-         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-        </dependency>
     </dependencies>
 
 </project>
