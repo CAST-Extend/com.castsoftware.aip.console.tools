@@ -47,7 +47,7 @@ import java.util.function.Function;
 @Slf4j
 @Getter
 @Setter
-public class SnapshotCommand extends BasicCollable {
+public class SnapshotCommand extends BasicCallable {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     @CommandLine.Mixin
     private SharedOptions sharedOptions;

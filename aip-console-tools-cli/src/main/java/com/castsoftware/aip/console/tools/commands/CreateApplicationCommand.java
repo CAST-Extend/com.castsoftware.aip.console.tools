@@ -26,7 +26,7 @@ import java.util.List;
 @Slf4j
 @Getter
 @Setter
-public class CreateApplicationCommand extends BasicCollable {
+public class CreateApplicationCommand extends BasicCallable {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;

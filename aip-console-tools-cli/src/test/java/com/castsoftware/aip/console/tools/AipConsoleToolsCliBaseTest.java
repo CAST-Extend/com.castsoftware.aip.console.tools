@@ -1,6 +1,6 @@
 package com.castsoftware.aip.console.tools;
 
-import com.castsoftware.aip.console.tools.commands.BasicCollable;
+import com.castsoftware.aip.console.tools.commands.BasicCallable;
 import com.castsoftware.aip.console.tools.commands.SharedOptions;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
@@ -131,8 +131,8 @@ public abstract class AipConsoleToolsCliBaseTest {
         folder.delete();
     }
 
-    protected void assignMockedBeans(BasicCollable command) {
-        Class<? extends BasicCollable> commandClass = command.getClass();
+    protected void assignMockedBeans(BasicCallable command) {
+        Class<? extends BasicCallable> commandClass = command.getClass();
         Field jobsServiceField = ReflectionUtils.findField(commandClass, "jobsService");
         ReflectionUtils.makeAccessible(jobsServiceField);
         ReflectionUtils.setField(jobsServiceField, command, jobsService);

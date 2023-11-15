@@ -4,9 +4,11 @@ import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
+import com.castsoftware.aip.console.tools.core.dto.DeepAnalyzeProperties;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.DomainDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
+import com.castsoftware.aip.console.tools.core.dto.FastScanProperties;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.VersionDto;
 import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
@@ -16,6 +18,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplication
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
+import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 
 import java.util.Date;
 import java.util.Set;
@@ -23,6 +26,12 @@ import java.util.function.Consumer;
 
 public interface ApplicationService {
     ApiInfoDto getAipConsoleApiInfo();
+
+    int fastScan(FastScanProperties fastScanProperties) throws JobServiceException, PackagePathInvalidException, UploadException;
+
+    int deepAnalyze(DeepAnalyzeProperties properties) throws JobServiceException;
+
+    int publishToImaging(String applicationName, long sleepDuration, boolean verbose, LogPollingProvider logPollingProvider);
 
     String getApplicationGuidFromName(String applicationName) throws ApplicationServiceException;
 

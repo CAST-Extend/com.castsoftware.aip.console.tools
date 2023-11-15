@@ -31,7 +31,7 @@ import java.util.Set;
 @Slf4j
 @Getter
 @Setter
-public class ArchitectureStudioCommand extends BasicCollable{
+public class ArchitectureStudioCommand extends BasicCallable {
 
     @Autowired
     private ArchitectureStudioService architectureStudioService;
