@@ -84,8 +84,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         String applicationGuid;
         try {
-            boolean OnBoardingModeWasOn = isOnboardingSettingsEnabled();
-            if (!OnBoardingModeWasOn) {
+            if (!isOnboardingSettingsEnabled()) {
                 log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
                 return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
             }

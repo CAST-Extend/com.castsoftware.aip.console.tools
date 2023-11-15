@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -104,7 +103,7 @@ public class ImportSettingsCommand implements Callable<Integer> {
 
         Integer exitCode = Constants.RETURN_OK;
         Map<String, String> contentHeaderMap = new HashMap<>();
-        contentHeaderMap.put(FileUploadBase.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        contentHeaderMap.put(FileUploadBase.CONTENT_TYPE, "application/json");
         contentHeaderMap.put(FileUploadBase.CONTENT_DISPOSITION, "form-data; name=\"file\"; filename=\"" + filePath.getName() + "\"");
 
         Map<String, Map<String, String>> headers = new HashMap<>();
