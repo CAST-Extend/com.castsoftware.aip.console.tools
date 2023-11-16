@@ -14,14 +14,9 @@ import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceExce
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
-import com.castsoftware.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.aip.console.tools.core.services.JobsService;
-import com.castsoftware.aip.console.tools.core.services.RestApiService;
-import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -72,17 +67,6 @@ import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 public class AddVersionBuilder extends CommonActionBuilder {
 
     public static final int BUFFER_SIZE = 10 * 1024 * 1024;
-    @Inject
-    private JobsService jobsService;
-
-    @Inject
-    private UploadService uploadService;
-
-    @Inject
-    private RestApiService apiService;
-
-    @Inject
-    private ApplicationService applicationService;
 
     private String applicationName;
     private String applicationGuid;
@@ -352,10 +336,8 @@ public class AddVersionBuilder extends CommonActionBuilder {
             return;
         }
 
-        String apiServerUrl = getAipConsoleUrl();
-        EnvVars vars = run.getEnvironment(listener);
         // Parse variables in application name
-        String variableAppName = vars.expand(applicationName);
+        String variableAppName = environmentVariables.expand(applicationName);
         boolean inplaceMode = false;
 
         try {
@@ -369,7 +351,7 @@ public class AddVersionBuilder extends CommonActionBuilder {
             return;
         }
 
-        String resolvedFilePath = vars.expand(filePath);
+        String resolvedFilePath = environmentVariables.expand(filePath);
         String fileExt = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(resolvedFilePath);
         FilePath workspaceFile = null;
         if (StringUtils.equalsAnyIgnoreCase(fileExt, "zip", "tgz", "tar.gz")) {
@@ -385,8 +367,8 @@ public class AddVersionBuilder extends CommonActionBuilder {
         String fileName = UUID.randomUUID().toString();
         String caipVersion = null;
         ApplicationDto app = null;
+        String apiServerUrl = getAipConsoleUrl();
         try {
-
             // Get the GUID from AIP Console
             if (StringUtils.isBlank(applicationGuid)) {
                 if (!autoCreate) {
@@ -395,8 +377,8 @@ public class AddVersionBuilder extends CommonActionBuilder {
                     return;
                 }
 
-                String expandedDomainName = vars.expand(domainName);
-                String expandedNodeName = vars.expand(nodeName);
+                String expandedDomainName = environmentVariables.expand(domainName);
+                String expandedNodeName = environmentVariables.expand(nodeName);
                 String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
 
                 log.println(AddVersionBuilder_AddVersion_info_appNotFoundAutoCreate(variableAppName));
@@ -473,8 +455,8 @@ public class AddVersionBuilder extends CommonActionBuilder {
         String jobGuid = null;
         try {
             // Create a value for versionName
-            String resolvedVersionName = vars.expand(versionName);
-            String resolvedSnapshotName = vars.expand(snapshotName);
+            String resolvedVersionName = environmentVariables.expand(versionName);
+            String resolvedSnapshotName = environmentVariables.expand(snapshotName);
 
             if (StringUtils.isBlank(resolvedVersionName)) {
                 DateFormat formatVersionName = new SimpleDateFormat("yyMMdd.HHmmss");

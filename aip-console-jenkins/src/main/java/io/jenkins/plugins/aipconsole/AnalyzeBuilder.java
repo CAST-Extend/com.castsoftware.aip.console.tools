@@ -11,12 +11,8 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
-import com.castsoftware.aip.console.tools.core.services.ApplicationService;
-import com.castsoftware.aip.console.tools.core.services.JobsService;
-import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -52,16 +48,6 @@ import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
 public class AnalyzeBuilder extends CommonActionBuilder {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
-    @Inject
-    private JobsService jobsService;
-
-    @Inject
-    private RestApiService apiService;
-
-    @Inject
-    private ApplicationService applicationService;
-
     @CheckForNull
     private String applicationName;
     @Nullable
@@ -184,8 +170,7 @@ public class AnalyzeBuilder extends CommonActionBuilder {
             return;
         }
 
-        EnvVars vars = run.getEnvironment(listener);
-        String expandedAppName = vars.expand(applicationName);
+        String expandedAppName = environmentVariables.expand(applicationName);
         String caipVersion = null;
 
         try {
@@ -201,7 +186,7 @@ public class AnalyzeBuilder extends CommonActionBuilder {
         String jobGuid = null;
 
         try {
-            String resolvedVersionName = vars.expand(versionName);
+            String resolvedVersionName = environmentVariables.expand(versionName);
             ApplicationDto app = applicationService.getApplicationFromGuid(applicationGuid);
             Set<VersionDto> versions = applicationService.getApplicationVersion(applicationGuid);
             // Get the version name
