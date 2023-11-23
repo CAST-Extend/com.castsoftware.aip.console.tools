@@ -73,8 +73,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     protected void performClient(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         String expandedAppName = environmentVariables.expand(getApplicationName());
         try {
-            boolean OnBoardingModeWasOn = applicationService.isOnboardingSettingsEnabled();
-            if (!OnBoardingModeWasOn) {
+            if (!applicationService.isOnboardingSettingsEnabled()) {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_mode("OFF"));
                 run.setResult(getDefaultResult());
                 return;
