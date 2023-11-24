@@ -663,8 +663,17 @@ public class ApplicationServiceImpl implements ApplicationService {
             Set<String> ignorePatterns = StringUtils.isEmpty(exclusions.getExcludePatterns()) ?
                     Exclusions.getDefaultIgnorePatterns() : Arrays.stream(exclusions.getExcludePatterns().split(",")).collect(Collectors.toSet());
             if (apiInfoDto.isEnablePackagePathCheck() && previousVersion != null && rescan) {
+                ////////////////////////////////////////////////////////////
+                //Only performed if running the legacy workflow.
+                // So checked application status only when previous conditions met
+                ////////////////////////////////////////////////////////////
+                ApplicationDto applicationDto = getApplicationFromGuid(appGuid);
+                if (applicationDto == null || !applicationDto.isOnboarded()) {
+                    log.info("Applying packages path check rules (legacy workflow) ");
+                    packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid(), throwPackagePathCheckError);
+                }
+
                 log.info("Copy configuration from the previous version: " + previousVersion.getName());
-                packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid(), throwPackagePathCheckError);
                 if (StringUtils.isEmpty(exclusions.getExcludePatterns()) && previousVersion.getDeliveryConfiguration() != null) {
                     ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
                     exclusions.setExclusionRules(previousVersion.getDeliveryConfiguration().getExclusionRules());
