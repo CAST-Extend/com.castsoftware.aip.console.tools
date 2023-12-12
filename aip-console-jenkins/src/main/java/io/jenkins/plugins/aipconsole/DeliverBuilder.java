@@ -100,7 +100,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     private boolean cloneVersion = false;
     private boolean blueprint = false;
-    private boolean enableSecurityAssessment = false;
 
     @Nullable
     private String versionName = "";
@@ -178,19 +177,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     public boolean isBlueprint() {
         return blueprint;
-    }
-
-    @DataBoundSetter
-    public void setEnableSecurityAssessment(boolean enableFlag) {
-        enableSecurityAssessment = enableFlag;
-    }
-
-    public boolean getEnableSecurityAssessment() {
-        return isSecurityAssessmentEnabled();
-    }
-
-    public boolean isSecurityAssessmentEnabled() {
-        return enableSecurityAssessment;
     }
 
     @DataBoundSetter
@@ -272,13 +258,17 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         this.nodeName = nodeName;
     }
 
-    public boolean isEnableSecurityDataflow() {
+    public boolean isSecurityDataflowEnabled() {
         return enableSecurityDataflow;
     }
 
     @DataBoundSetter
     public void setEnableSecurityDataflow(boolean enableSecurityDataflow) {
         this.enableSecurityDataflow = enableSecurityDataflow;
+    }
+
+    public boolean getEnableSecurityDataflow() {
+        return isSecurityDataflowEnabled();
     }
 
     @DataBoundSetter
@@ -522,7 +512,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityDataflowEnabled());
 
             String expandedExclusionPatterns = vars.expand(exclusionPatterns);
             log.println("Exclusion patterns : " + expandedExclusionPatterns);
