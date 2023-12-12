@@ -279,8 +279,7 @@ The available options are :
   format `yyyy-MM-ddTHH:mm:ss` (example `2022-07-11T07:22:46`). <br>Depending on Console 's timezone, this can be
   displayed differently
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. This setting will
-  operate for both technologies JEE and DOTNET as well. <u>Has no impact
-  when cloning a version</u>.
+  operate for both technologies JEE and DOTNET as well.
 * `--enable-data-safety-investigation` or `--enable-data-safety` (optional): Enables the data safety investigation
   objective for this version.
 * `--process-imaging` (optional): Sharing data with the configured Imaging instance linked to AIP Console.
@@ -337,8 +336,7 @@ The available options are :
 * `--auto-discover`: will discover new technologies and install new extensions during rescan, to disable when run
   consistency check
 * `--enable-security-dataflow` (optional): Enables the Security Dataflow objective for this version. This setting will
-  operate for both technologies JEE and DOTNET as well.<u>Has no impact
-  when cloning a version</u>.
+  operate for both technologies JEE and DOTNET as well.
 * `--enable-data-safety-investigation` or `--enable-data-safety` (optional): Enables the data safety investigation
   objective for this version.
 * `--backup` or `-b` (optional): Enables backup creation before delivering a new version.

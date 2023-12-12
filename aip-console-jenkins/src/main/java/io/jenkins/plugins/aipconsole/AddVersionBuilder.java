@@ -75,7 +75,6 @@ public class AddVersionBuilder extends CommonActionBuilder {
     private String cssServerName;
     private boolean cloneVersion = true;
     private boolean blueprint = false;
-    private boolean enableSecurityAssessment = false;
 
     @Nullable
     private String versionName = "";
@@ -158,19 +157,6 @@ public class AddVersionBuilder extends CommonActionBuilder {
         return blueprint;
     }
 
-    @DataBoundSetter
-    public void setEnableSecurityAssessment(boolean enableFlag) {
-        enableSecurityAssessment = enableFlag;
-    }
-
-    public boolean getEnableSecurityAssessment() {
-        return isSecurityAssessmentEnabled();
-    }
-
-    public boolean isSecurityAssessmentEnabled() {
-        return enableSecurityAssessment;
-    }
-
     public boolean isCloneVersion() {
         return cloneVersion;
     }
@@ -240,13 +226,17 @@ public class AddVersionBuilder extends CommonActionBuilder {
         this.nodeName = nodeName;
     }
 
-    public boolean isEnableSecurityDataflow() {
+    public boolean isSecurityDataflowEnabled() {
         return enableSecurityDataflow;
     }
 
     @DataBoundSetter
     public void setEnableSecurityDataflow(boolean enableSecurityDataflow) {
         this.enableSecurityDataflow = enableSecurityDataflow;
+    }
+
+    public boolean getEnableSecurityDataflow() {
+        return isSecurityDataflowEnabled();
     }
 
     @DataBoundSetter
@@ -504,7 +494,7 @@ public class AddVersionBuilder extends CommonActionBuilder {
             }
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityDataflowEnabled());
             applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
             applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
