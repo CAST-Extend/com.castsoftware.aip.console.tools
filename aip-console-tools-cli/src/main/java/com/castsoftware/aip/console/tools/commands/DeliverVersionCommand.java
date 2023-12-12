@@ -122,11 +122,13 @@ public class DeliverVersionCommand extends BasicCallable {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", defaultValue = "false")
     private boolean blueprint;
 
+    /* It's same as enable-security-dataflow*/
+    /*
     @CommandLine.Option(names = {"-security-assessment", "--enable-security-assessment"},
             description = "Enable/Disable Security Assessment for this version"
                     + " if specified without parameter: ${FALLBACK-VALUE}",
             fallbackValue = "true", defaultValue = "false")
-    private boolean enableSecurityAssessment;
+    private boolean enableSecurityAssessment;*/
 
     @CommandLine.Option(names = "--backup-name",
             paramLabel = "BACKUP_NAME",
@@ -227,7 +229,7 @@ public class DeliverVersionCommand extends BasicCallable {
             }
 
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
-            builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
+            builder.objectives(VersionObjective.SECURITY, enableSecurityDataflow);
             Exclusions exclusions = Exclusions.builder().excludePatterns(exclusionPatterns).build();
             if (exclusionRules != null && exclusionRules.length > 0) {
                 exclusions.setInitialExclusionRules(exclusionRules);
@@ -237,7 +239,7 @@ public class DeliverVersionCommand extends BasicCallable {
             if (StringUtils.isNotBlank(deliveryConfigGuid)) {
                 builder.deliveryConfigGuid(deliveryConfigGuid);
             }
-            
+
             log.info("Update JEE and DOTNET security dataflow settings to: {}", enableSecurityDataflow);
             applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
             applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
