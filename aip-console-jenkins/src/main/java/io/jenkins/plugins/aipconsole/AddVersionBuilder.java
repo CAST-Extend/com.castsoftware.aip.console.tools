@@ -497,6 +497,8 @@ public class AddVersionBuilder extends CommonActionBuilder {
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
             requestBuilder.objectives(VersionObjective.SECURITY, expandedSecurityDataflow);
+
+            log.println("Update JEE and DOTNET security dataflow settings to: " + expandedSecurityDataflow);
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
