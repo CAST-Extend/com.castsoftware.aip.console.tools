@@ -82,7 +82,7 @@ public class AddVersionBuilder extends CommonActionBuilder {
     private boolean failureIgnored = false;
     @Nullable
     private String nodeName = "";
-    private boolean enableSecurityDataflow = false;
+    private boolean securityDataflow = false;
     private boolean enableDataSafety = false;
 
     private boolean backupApplicationEnabled = false;
@@ -226,17 +226,17 @@ public class AddVersionBuilder extends CommonActionBuilder {
         this.nodeName = nodeName;
     }
 
-    public boolean isSecurityDataflowEnabled() {
-        return enableSecurityDataflow;
+    public boolean isSecurityDataflow() {
+        return securityDataflow;
     }
 
     @DataBoundSetter
-    public void setEnableSecurityDataflow(boolean enableSecurityDataflow) {
-        this.enableSecurityDataflow = enableSecurityDataflow;
+    public void setSecurityDataflow(boolean securityDataflow) {
+        this.securityDataflow = securityDataflow;
     }
 
-    public boolean getEnableSecurityDataflow() {
-        return isSecurityDataflowEnabled();
+    public boolean getSecurityDataflow() {
+        return isSecurityDataflow();
     }
 
     @DataBoundSetter
@@ -493,10 +493,12 @@ public class AddVersionBuilder extends CommonActionBuilder {
                 applicationService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), !applicationHasVersion);
             }
 
+            boolean expandedSecurityDataflow = Boolean.valueOf(run.getEnvironment(listener).get("SECURITY_DATAFLOW"));
+
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityDataflowEnabled());
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
+            requestBuilder.objectives(VersionObjective.SECURITY, expandedSecurityDataflow);
+            applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
+            applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);
