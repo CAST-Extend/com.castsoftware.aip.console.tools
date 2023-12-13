@@ -100,7 +100,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     private boolean cloneVersion = false;
     private boolean blueprint = false;
-    private boolean enableSecurityAssessment = false;
 
     @Nullable
     private String versionName = "";
@@ -108,7 +107,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     private boolean failureIgnored = false;
     @Nullable
     private String nodeName = "";
-    private boolean enableSecurityDataflow = false;
+    private boolean securityDataflow = false;
     private boolean enableDataSafety = false;
 
     private boolean backupApplicationEnabled = false;
@@ -178,19 +177,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
 
     public boolean isBlueprint() {
         return blueprint;
-    }
-
-    @DataBoundSetter
-    public void setEnableSecurityAssessment(boolean enableFlag) {
-        enableSecurityAssessment = enableFlag;
-    }
-
-    public boolean getEnableSecurityAssessment() {
-        return isSecurityAssessmentEnabled();
-    }
-
-    public boolean isSecurityAssessmentEnabled() {
-        return enableSecurityAssessment;
     }
 
     @DataBoundSetter
@@ -272,13 +258,13 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         this.nodeName = nodeName;
     }
 
-    public boolean isEnableSecurityDataflow() {
-        return enableSecurityDataflow;
+    public boolean isSecurityDataflow() {
+        return securityDataflow;
     }
 
     @DataBoundSetter
-    public void setEnableSecurityDataflow(boolean enableSecurityDataflow) {
-        this.enableSecurityDataflow = enableSecurityDataflow;
+    public void setSecurityDataflow(boolean securityDataflow) {
+        this.securityDataflow = securityDataflow;
     }
 
     @DataBoundSetter
@@ -381,6 +367,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         }
 
         EnvVars vars = run.getEnvironment(listener);
+
         String expandedAppName = vars.expand(applicationName);
         boolean inPlaceMode;
         try {
@@ -521,8 +508,10 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             if (inPlaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
+            boolean expandedSecurityDataflow = Boolean.valueOf(vars.get("SECURITY_DATAFLOW"));
+
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
+            requestBuilder.objectives(VersionObjective.SECURITY, expandedSecurityDataflow);
 
             String expandedExclusionPatterns = vars.expand(exclusionPatterns);
             log.println("Exclusion patterns : " + expandedExclusionPatterns);
@@ -530,8 +519,9 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             Exclusions exclusions = Exclusions.builder().excludePatterns(expandedExclusionPatterns).build();
             requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion));
 
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
+            log.println("Update JEE and DOTNET security dataflow settings to: " + expandedSecurityDataflow);
+            applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
+            applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);

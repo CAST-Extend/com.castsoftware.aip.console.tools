@@ -23,7 +23,7 @@ public class DeliverAction extends BaseAction implements RunAction2 {
     private String cssServerName;
     private boolean cloneVersion = false;
     private boolean blueprint = false;
-    private boolean enableSecurityAssessment = false;
+    private boolean securityDataflow = false;
     private boolean enableDataSafety;
 
     @Nullable
@@ -109,12 +109,12 @@ public class DeliverAction extends BaseAction implements RunAction2 {
         this.blueprint = blueprint;
     }
 
-    public boolean isSecurityAssessmentEnabled() {
-        return enableSecurityAssessment;
+    public boolean isSecurityDataflow() {
+        return securityDataflow;
     }
 
-    public void setSecurityAssessment(boolean enableFlag) {
-        enableSecurityAssessment = enableFlag;
+    public void setSecurityDataflow(boolean securityDataflow) {
+        this.securityDataflow = securityDataflow;
     }
 
     public void setEnableDataSafety(boolean flag) {

@@ -75,7 +75,6 @@ public class AddVersionBuilder extends CommonActionBuilder {
     private String cssServerName;
     private boolean cloneVersion = true;
     private boolean blueprint = false;
-    private boolean enableSecurityAssessment = false;
 
     @Nullable
     private String versionName = "";
@@ -83,7 +82,7 @@ public class AddVersionBuilder extends CommonActionBuilder {
     private boolean failureIgnored = false;
     @Nullable
     private String nodeName = "";
-    private boolean enableSecurityDataflow = false;
+    private boolean securityDataflow = false;
     private boolean enableDataSafety = false;
 
     private boolean backupApplicationEnabled = false;
@@ -158,19 +157,6 @@ public class AddVersionBuilder extends CommonActionBuilder {
         return blueprint;
     }
 
-    @DataBoundSetter
-    public void setEnableSecurityAssessment(boolean enableFlag) {
-        enableSecurityAssessment = enableFlag;
-    }
-
-    public boolean getEnableSecurityAssessment() {
-        return isSecurityAssessmentEnabled();
-    }
-
-    public boolean isSecurityAssessmentEnabled() {
-        return enableSecurityAssessment;
-    }
-
     public boolean isCloneVersion() {
         return cloneVersion;
     }
@@ -240,13 +226,17 @@ public class AddVersionBuilder extends CommonActionBuilder {
         this.nodeName = nodeName;
     }
 
-    public boolean isEnableSecurityDataflow() {
-        return enableSecurityDataflow;
+    public boolean isSecurityDataflow() {
+        return securityDataflow;
     }
 
     @DataBoundSetter
-    public void setEnableSecurityDataflow(boolean enableSecurityDataflow) {
-        this.enableSecurityDataflow = enableSecurityDataflow;
+    public void setSecurityDataflow(boolean securityDataflow) {
+        this.securityDataflow = securityDataflow;
+    }
+
+    public boolean getSecurityDataflow() {
+        return isSecurityDataflow();
     }
 
     @DataBoundSetter
@@ -503,10 +493,14 @@ public class AddVersionBuilder extends CommonActionBuilder {
                 applicationService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), !applicationHasVersion);
             }
 
+            boolean expandedSecurityDataflow = Boolean.valueOf(run.getEnvironment(listener).get("SECURITY_DATAFLOW"));
+
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
-            requestBuilder.objectives(VersionObjective.SECURITY, isSecurityAssessmentEnabled());
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
-            applicationService.updateSecurityDataflow(applicationGuid, enableSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
+            requestBuilder.objectives(VersionObjective.SECURITY, expandedSecurityDataflow);
+
+            log.println("Update JEE and DOTNET security dataflow settings to: " + expandedSecurityDataflow);
+            applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
+            applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
             log.println("Job request : " + requestBuilder.buildJobRequest().toString());
             jobGuid = jobsService.startAddVersionJob(requestBuilder);

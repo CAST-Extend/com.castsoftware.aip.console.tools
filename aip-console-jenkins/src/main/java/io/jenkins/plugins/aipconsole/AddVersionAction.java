@@ -23,7 +23,7 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     private String cssServerName;
     private boolean cloneVersion = true;
     private boolean blueprint = false;
-    private boolean enableSecurityAssessment = false;
+    private boolean securityDataflow = false;
 
     @Nullable
     private String versionName;
@@ -184,12 +184,12 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     public void setBlueprint(boolean blueprint) {
         this.blueprint = blueprint;
     }
-    public boolean isSecurityAssessmentEnabled() {
-        return enableSecurityAssessment;
+    public boolean isSecurityDataflow() {
+        return securityDataflow;
     }
 
-    public void setSecurityAssessment(boolean enableFlag) {
-        enableSecurityAssessment = enableFlag;
+    public void setSecurityDataflow(boolean enableFlag) {
+        this.securityDataflow = enableFlag;
     }
 
     @Nullable

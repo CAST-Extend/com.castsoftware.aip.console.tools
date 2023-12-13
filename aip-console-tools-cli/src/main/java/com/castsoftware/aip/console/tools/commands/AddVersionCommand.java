@@ -131,11 +131,12 @@ public class AddVersionCommand extends BasicCallable {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", defaultValue = "false")
     private boolean blueprint;
 
+    /*
     @CommandLine.Option(names = {"-security-assessment", "--enable-security-assessment"},
             description = "Enable/Disable Security Assessment for this version"
                     + " if specified without parameter: ${FALLBACK-VALUE}",
             fallbackValue = "true", defaultValue = "false")
-    private boolean enableSecurityAssessment;
+    private boolean enableSecurityAssessment;*/
 
     /**
      * Name of the backup
@@ -231,7 +232,7 @@ public class AddVersionCommand extends BasicCallable {
             }
 
             builder.objectives(VersionObjective.BLUEPRINT, blueprint);
-            builder.objectives(VersionObjective.SECURITY, enableSecurityAssessment);
+            builder.objectives(VersionObjective.SECURITY, enableSecurityDataflow);
 
             applicationService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, !cloneVersion);
 

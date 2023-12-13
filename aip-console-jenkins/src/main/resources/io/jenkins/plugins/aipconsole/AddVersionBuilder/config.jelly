@@ -22,7 +22,7 @@
     <f:entry title="${%snapshotName}" field="snapshotName" description="${%snapshotName.descr}">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%enableSecurity}" field="enableSecurityDataflow" description="${%enableSecurity.descr}">
+    <f:entry title="${%securityDataflow}" field="securityDataflow" description="${%securityDataflow.descr}">
         <f:checkbox/>
     </f:entry>
     <f:entry title="${%enableDataSafety}" field="enableDataSafety" description="${%enableDataSafety.descr}">
@@ -49,9 +49,6 @@
         <f:entry title="${%blueprint}" field="blueprint" description="${%blueprint.descr}">
             <f:checkbox field="blueprint" value="${blueprint}" default="false"/>
         </f:entry>
-        <f:entry title="${%securityAssessment}" field="enableSecurityAssessment" description="${%securityAssessment.descr}">
-             <f:checkbox default="false"/>
-         </f:entry>
        <f:entry title="${%backup}" field="backupApplicationEnabled" description="${%backup.descr}">
             <f:checkbox/>
         </f:entry>
