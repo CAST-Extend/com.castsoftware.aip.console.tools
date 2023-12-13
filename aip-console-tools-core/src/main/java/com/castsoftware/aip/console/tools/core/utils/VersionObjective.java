@@ -28,7 +28,7 @@ public enum VersionObjective {
     @Override
     @JsonValue
     public String toString() {
-        return name().toLowerCase();
+        return name();
     }
 
     public static EnumSet<VersionObjective> fromStrings(String... strings) {

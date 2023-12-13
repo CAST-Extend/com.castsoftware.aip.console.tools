@@ -28,9 +28,6 @@
     <f:entry title="${%autoDiscover}" field="autoDiscover" description="${%autoDiscover.descr}">
         <f:checkbox field="autoDiscover" default="true" value="${autoDiscover}"/>
     </f:entry>
-    <f:entry title="${%enableSecurity}" field="enableSecurityDataflow" description="${%enableSecurity.descr}">
-        <f:checkbox/>
-    </f:entry>
     <f:entry title="${%enableDataSafety}" field="enableDataSafety" description="${%enableDataSafety.descr}">
         <f:checkbox field="enableDataSafety" default="false" value="${enableDataSafety}"/>
     </f:entry>
@@ -46,6 +43,9 @@
         </f:entry>
         <f:entry title="${%blueprint}" field="blueprint" description="${%blueprint.descr}">
             <f:checkbox field="blueprint" value="${blueprint}" default="false"/>
+        </f:entry>
+        <f:entry title="${%enableSecurityDataflow}" field="securityDataflow" description="${%enableSecurityDataflow.descr}">
+            <f:checkbox/>
         </f:entry>
         <f:entry title="${%backup}" field="backupApplicationEnabled" description="${%backup.descr}">
             <f:checkbox/>
