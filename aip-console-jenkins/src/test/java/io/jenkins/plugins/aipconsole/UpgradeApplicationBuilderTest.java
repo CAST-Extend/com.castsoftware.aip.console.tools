@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import hudson.model.FreeStyleProject;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,10 +17,10 @@ public class UpgradeApplicationBuilderTest extends BaseBuilderTest{
 
     @Before
     public void setUp() throws Exception {
-        super.startUp();
         upgradeApplicationBuilder = new UpgradeApplicationBuilder(BaseBuilderTest.TEST_APP_NAME);
         MockitoAnnotations.initMocks(this);
-        doReturn(ApiInfoDto.builder().apiVersion("2.0.0-SNAPSHOT-256").build())
+        ApiInfoDto apiInfo = ApiInfoDto.builder().apiVersion(SemVerUtils.getMinCompatibleVersion().toString()).build();
+        doReturn(ApiInfoDto.builder().apiVersion(apiInfo.getApiVersion()).build())
                 .when(restApiService).getAipConsoleApiInfo();
         doReturn(TEST_APP).when(applicationService).getApplicationFromName(TEST_APP_NAME);
     }

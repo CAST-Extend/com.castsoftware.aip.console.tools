@@ -3,6 +3,7 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.DatabaseConnectionSettingsDto;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import org.junit.Before;
@@ -37,7 +38,7 @@ public class CreateApplicationBuilderTest extends BaseBuilderTest {
         MockitoAnnotations.initMocks(this);
         createApplicationBuilder.setApplicationName(TEST_APP_NAME);
         createApplicationBuilder.setCssServerName(TARGET_CSS_SERVER_NAME);
-        ApiInfoDto apiInfo = ApiInfoDto.builder().apiVersion("2.10.0-SNAPSHOT-256").build();
+        ApiInfoDto apiInfo = ApiInfoDto.builder().apiVersion(SemVerUtils.getMinCompatibleVersion().toString()).build();
         doReturn(apiInfo).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfo).when(applicationService).getAipConsoleApiInfo();
         doReturn(TEST_APP).when(applicationService).getApplicationFromGuid(TEST_APP_NAME);

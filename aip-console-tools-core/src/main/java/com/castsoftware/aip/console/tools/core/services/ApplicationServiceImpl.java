@@ -502,7 +502,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public boolean isOnboardingSettingsEnabled() throws ApplicationServiceException {
         try {
-            return restApiService.getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class);
+            JsonDto<Boolean> answer = restApiService.getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), JsonDto.class);
+            return answer.getData();
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to retrieve the onboarding mode settings", e);
         }

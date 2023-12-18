@@ -31,6 +31,7 @@ import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_DescriptorImpl_bad_server_version;
+import static io.jenkins.plugins.aipconsole.Messages.GenericError_DescriptorImpl_feature_maxVersion_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_DescriptorImpl_feature_notCompatible;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDenied;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noApiKey;
@@ -140,6 +141,10 @@ public abstract class CommonActionBuilder extends BaseActionBuilder implements S
 
     protected abstract VersionInformation getFeatureMinVersion();
 
+    protected VersionInformation getFeatureMaxVersion() {
+        return null;
+    }
+
     protected abstract void performClient(@Nonnull Run<?, ?> var1, @Nonnull FilePath var2, @Nonnull Launcher var3, @Nonnull TaskListener var4) throws InterruptedException, IOException;
 
 
@@ -201,6 +206,11 @@ public abstract class CommonActionBuilder extends BaseActionBuilder implements S
                 }
                 if (getFeatureMinVersion() != null && getFeatureMinVersion().isHigherThan(serverApiVersion)) {
                     listener.error(GenericError_DescriptorImpl_feature_notCompatible(apiVersion, getFeatureMinVersion().toString()));
+                    run.setResult(Result.FAILURE);
+                    return;
+                }
+                if (getFeatureMaxVersion() != null && getFeatureMaxVersion().isLowerThan(serverApiVersion)) {
+                    listener.error(GenericError_DescriptorImpl_feature_maxVersion_notCompatible(apiVersion, getFeatureMaxVersion().toString()));
                     run.setResult(Result.FAILURE);
                     return;
                 }

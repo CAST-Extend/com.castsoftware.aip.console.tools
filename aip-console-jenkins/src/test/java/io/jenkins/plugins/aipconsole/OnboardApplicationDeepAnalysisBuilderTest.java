@@ -2,6 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -47,7 +48,7 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
     public void testDeepAnalysis_OnExistingApplication_NotFastScanWorkflow() throws Exception {
         FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.9.0-SNAPSHOT").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(SemVerUtils.getMinCompatibleVersion().toString()).build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
@@ -74,7 +75,7 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
     public void testDeepAnalysis_WhenFastScanRequired() throws Exception {
         FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.9.1-hotfix-133").build();
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(SemVerUtils.getMinCompatibleVersion().toString()).build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();

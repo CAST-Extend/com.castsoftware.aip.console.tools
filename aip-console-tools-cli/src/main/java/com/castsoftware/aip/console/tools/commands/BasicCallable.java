@@ -90,6 +90,13 @@ public abstract class BasicCallable implements Callable<Integer> {
                             , apiVersion, getMinVersion().toString());
                     return Constants.RETURN_SERVER_VERSION_NOT_COMPATIBLE;
                 }
+                if (getMaxVersion() != null && getMaxVersion().isLowerThan(serverApiVersion)) {
+                    log.error("This feature is not compatible with the CAST Imaging Console version {}." +
+                                    " The highest supported version is {}." +
+                                    " Please download the related version."
+                            , apiVersion, getMaxVersion().toString());
+                    return Constants.RETURN_SERVER_VERSION_NOT_COMPATIBLE;
+                }
             }
         }
 
