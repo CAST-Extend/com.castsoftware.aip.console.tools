@@ -60,6 +60,7 @@ public class OnboardApplicationFastScanCommand extends BasicCallable {
 
     //This version can be null if failed to convert from string
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
+    private static final VersionInformation MAX_VERSION = VersionInformation.fromVersionString("2.10.4");
 
     public OnboardApplicationFastScanCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
@@ -88,9 +89,14 @@ public class OnboardApplicationFastScanCommand extends BasicCallable {
                 .build();
         return applicationService.fastScan(fastScanProperties);
     }
-    
+
     @Override
     protected VersionInformation getMinVersion() {
         return MIN_VERSION;
+    }
+
+    @Override
+    protected VersionInformation getMaxVersion() {
+        return MAX_VERSION;
     }
 }

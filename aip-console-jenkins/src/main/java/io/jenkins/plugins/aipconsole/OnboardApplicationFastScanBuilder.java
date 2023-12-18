@@ -231,6 +231,15 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
         return VersionInformation.fromVersionString("2.8.0");
     }
 
+    private static VersionInformation getMaxVersion() {
+        return VersionInformation.fromVersionString("2.10.4");
+    }
+
+    @Override
+    protected VersionInformation getFeatureMaxVersion() {
+        return getMaxVersion();
+    }
+
     @Override
     protected VersionInformation getFeatureMinVersion() {
         return getMinVersion();

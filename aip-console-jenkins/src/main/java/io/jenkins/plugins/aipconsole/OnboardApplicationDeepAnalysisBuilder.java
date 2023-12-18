@@ -128,9 +128,18 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
         return VersionInformation.fromVersionString("2.8.0");
     }
 
+    private static VersionInformation getMaxVersion() {
+        return VersionInformation.fromVersionString("2.10.4");
+    }
+
     @Override
     protected VersionInformation getFeatureMinVersion() {
         return getMinVersion();
+    }
+
+    @Override
+    protected VersionInformation getFeatureMaxVersion() {
+        return getMaxVersion();
     }
 
     public String getSnapshotName() {
