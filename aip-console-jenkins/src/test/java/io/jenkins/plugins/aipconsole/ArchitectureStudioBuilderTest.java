@@ -5,6 +5,7 @@ import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.architecturestudio.ArchitectureModelDto;
 import com.castsoftware.aip.console.tools.core.dto.architecturestudio.ArchitectureModelLinkDto;
 import com.castsoftware.aip.console.tools.core.dto.architecturestudio.Category;
+import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import org.junit.Before;
@@ -28,9 +29,12 @@ public class ArchitectureStudioBuilderTest extends BaseBuilderTest{
 
     @Before
     public void setUp() throws Exception {
-        super.startUp();
         architectureStudioBuilder = new ArchitectureStudioBuilder(BaseBuilderTest.TEST_APP_NAME);
         MockitoAnnotations.initMocks(this);
+
+        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(SemVerUtils.getMinCompatibleVersion().toString()).build();
+        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
+        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
     }
 
     @Test
@@ -66,16 +70,12 @@ public class ArchitectureStudioBuilderTest extends BaseBuilderTest{
         architectureStudioBuilder.setUploadFilePath(BaseBuilderTest.TEST_UPLOAD_FILE_PATH);
         architectureStudioBuilder.setReportPath(BaseBuilderTest.TEST_REPORT_PATH);
 
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.9.0-SNAPSHOT-1997").build();
         when(architectureStudioService.getArchitectureModels()).thenReturn(expectedModels);
-
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         when(applicationService.getApplicationFromName(BaseBuilderTest.TEST_APP_NAME)).thenReturn(applicationDto);
 
         when(applicationService.getApplicationFromName(BaseBuilderTest.TEST_APP_NAME)).thenReturn(applicationDto);
         doNothing().when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
-        when(architectureStudioService.modelChecker(BaseBuilderTest.TEST_APP_GUID, "path", apiInfoDto.getApiVersion())).thenReturn(modelChecker);
+        when(architectureStudioService.modelChecker(BaseBuilderTest.TEST_APP_GUID, "path", applicationService.getAipConsoleApiInfo().getApiVersion())).thenReturn(modelChecker);
 
         doNothing().when(architectureStudioService).downloadCheckedModelReport(
                 BaseBuilderTest.TEST_APP_GUID,
