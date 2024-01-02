@@ -28,7 +28,6 @@ import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_mode;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled;
 
 public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     final static boolean runAnalysis = true;
@@ -104,18 +103,14 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
             boolean verbose = getDescriptor().configuration.isVerbose();
             JenkinsLogPollingProviderServiceImpl jnksLogPollingProvider = new JenkinsLogPollingProviderServiceImpl(jobsService, run, listener, verbose, getSleepDuration());
 
-            //Run Analysis or Deep analysis
-            if (!applicationService.isImagingAvailable()) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_runAnalysis_disabled());
-            } else {
-                String expandedSsnapshotName = environmentVariables.expand(getSnapshotName());
-                ModuleGenerationType moduleType = ModuleGenerationType.FULL_CONTENT; //default
-                if (StringUtils.isNotEmpty(moduleGenerationType)) {
-                    moduleType = ModuleGenerationType.fromString(moduleGenerationType);
-                }
-
-                applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
+            //WEBITOOLS-214: Run Analysis or Deep analysis even when no Imaging available
+            String expandedSsnapshotName = environmentVariables.expand(getSnapshotName());
+            ModuleGenerationType moduleType = ModuleGenerationType.FULL_CONTENT; //default
+            if (StringUtils.isNotEmpty(moduleGenerationType)) {
+                moduleType = ModuleGenerationType.fromString(moduleGenerationType);
             }
+
+            applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
         } catch (ApplicationServiceException e) {
             e.printStackTrace(logger);
             run.setResult(getDefaultResult());

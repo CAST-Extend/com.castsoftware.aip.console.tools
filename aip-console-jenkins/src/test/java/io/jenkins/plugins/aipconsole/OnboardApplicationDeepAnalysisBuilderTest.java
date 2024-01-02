@@ -37,6 +37,8 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
     @Test
     public void testOnboardApplicationDeepAnalysisJob() throws Exception {
         FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
+        doReturn(false).when(applicationService).isImagingAvailable();
+
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
         OnboardApplicationDeepAnalysisBuilder expectedResults = new OnboardApplicationDeepAnalysisBuilder(TEST_APP_NAME);
@@ -52,6 +54,7 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
+        doReturn(false).when(applicationService).isImagingAvailable();
 
         ApplicationDto applicationDto = ApplicationDto.builder()
                 .guid(BaseBuilderTest.TEST_APP_GUID)
