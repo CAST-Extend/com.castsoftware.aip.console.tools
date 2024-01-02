@@ -123,6 +123,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     private boolean autoDiscover = true;
     private boolean setAsCurrent = false;
 
+    protected EnvVars environmentVariables;
+
     @DataBoundConstructor
     public DeliverBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
@@ -324,6 +326,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         PrintStream log = listener.getLogger();
+        environmentVariables = run.getEnvironment(listener);
         Result defaultResult = failureIgnored ? Result.UNSTABLE : Result.FAILURE;
         boolean applicationHasVersion = cloneVersion;
         boolean isUpload = false;
@@ -496,7 +499,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 log.println(DeliverBuilder_Deliver_info_startDeliverCloneJob(expandedAppName));
             }
             ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
-            boolean expandedSecurityDataflow = isSecurityDataflow() || Boolean.valueOf(run.getEnvironment(listener).get("SECURITY_DATAFLOW"));
+            boolean expandedSecurityDataflow = isSecurityDataflowEnabled();
 
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion());
             requestBuilder.releaseAndSnapshotDate(new Date())
@@ -522,7 +525,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             Exclusions exclusions = Exclusions.builder().excludePatterns(expandedExclusionPatterns).build();
             requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion));
 
-            //Settings.Option.Dataflow.info
             log.println(Settings_Option_Dataflow_info(expandedSecurityDataflow));
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
@@ -569,12 +571,16 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         }
     }
 
+    private boolean isSecurityDataflowEnabled() {
+        return isSecurityDataflow() || Boolean.valueOf(environmentVariables.get("SECURITY_DATAFLOW"));
+    }
+
     /**
      * Download the DMT report to the jenkins workspace
      *
-     * @param workspace source file
-     * @param appGuid host application GUID
-     * @param versionName the version name
+     * @param workspace    source file
+     * @param appGuid      host application GUID
+     * @param versionName  the version name
      * @param taskListener log provider
      */
     private void downloadDeliveryReport(FilePath workspace, String appGuid, String versionName, TaskListener taskListener) throws ApplicationServiceException, ApiCallException {

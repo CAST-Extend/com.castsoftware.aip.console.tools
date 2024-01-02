@@ -464,7 +464,7 @@ public class AddVersionBuilder extends CommonActionBuilder {
                 log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(variableAppName));
             }
 
-            boolean expandedSecurityDataflow = isSecurityDataflow() || Boolean.valueOf(run.getEnvironment(listener).get("SECURITY_DATAFLOW"));
+            boolean expandedSecurityDataflow = isSecurityDataflowEnabled();
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, caipVersion)
                     .nodeName(app.getTargetNode())
                     .releaseAndSnapshotDate(new Date())
@@ -541,6 +541,10 @@ public class AddVersionBuilder extends CommonActionBuilder {
             e.printStackTrace(listener.getLogger());
             run.setResult(defaultResult);
         }
+    }
+
+    private boolean isSecurityDataflowEnabled() {
+        return isSecurityDataflow() || Boolean.valueOf(environmentVariables.get("SECURITY_DATAFLOW"));
     }
 
     /**
