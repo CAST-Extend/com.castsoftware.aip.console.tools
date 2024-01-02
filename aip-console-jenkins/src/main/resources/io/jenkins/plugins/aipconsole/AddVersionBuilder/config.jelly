@@ -23,7 +23,7 @@
         <f:textbox/>
     </f:entry>
     <f:entry title="${%securityDataflow}" field="securityDataflow" description="${%securityDataflow.descr}">
-        <f:checkbox/>
+        <f:checkbox field="securityDataflow" default="false" value="${securityDataflow}"/>
     </f:entry>
     <f:entry title="${%enableDataSafety}" field="enableDataSafety" description="${%enableDataSafety.descr}">
         <f:checkbox field="enableDataSafety" default="false" value="${enableDataSafety}"/>

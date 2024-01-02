@@ -45,7 +45,7 @@
             <f:checkbox field="blueprint" value="${blueprint}" default="false"/>
         </f:entry>
         <f:entry title="${%securityDataflow}" field="securityDataflow" description="${%securityDataflow.descr}">
-            <f:checkbox/>
+            <f:checkbox field="securityDataflow" default="false" value="${securityDataflow}"/>
         </f:entry>
         <f:entry title="${%backup}" field="backupApplicationEnabled" description="${%backup.descr}">
             <f:checkbox/>

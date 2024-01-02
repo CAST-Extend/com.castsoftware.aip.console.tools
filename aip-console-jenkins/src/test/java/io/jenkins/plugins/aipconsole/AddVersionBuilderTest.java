@@ -75,6 +75,7 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         AddVersionBuilder job = new AddVersionBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         job.setDomainName("");
         job.setCssServerName("");
+        job.setSecurityDataflow(false);
         job.setModuleGenerationType(ModuleGenerationType.PRESERVE_CONFIGURED.toString());
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
@@ -84,10 +85,12 @@ public class AddVersionBuilderTest extends BaseBuilderTest{
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(addVersionBuilder);
         addVersionBuilder.setApiKey(Secret.fromString("Z-Y-X"));
+        addVersionBuilder.setSecurityDataflow(true);
         //addVersionBuilder.setAipConsoleUrl("http://localhost:8083");
         AddVersionBuilder job = new AddVersionBuilder(BaseBuilderTest.TEST_APP_NAME, BaseBuilderTest.TEST_ARCHIVE_NAME);
         job.setApiKey(Secret.fromString("Z-Y-X"));
         job.setAipConsoleUrl(addVersionBuilder.getDescriptor().getAipConsoleUrl());
+        job.setSecurityDataflow(true);
         jenkins.assertEqualDataBoundBeans(job, project.getBuildersList().get(0));
     }
 
