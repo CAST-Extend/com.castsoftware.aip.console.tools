@@ -14,7 +14,7 @@
     <packaging>hpi</packaging>
     <properties>
         <!-- Console Tools version -->
-        <revision>2.11.0-SNAPSHOT</revision>
+        <revision>3.0.0-SNAPSHOT</revision>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <jenkins.version>2.60.3</jenkins.version>
         <!-- The 2.303.3 version doesn't work properly by now, and needs slight more works for adoption -->
