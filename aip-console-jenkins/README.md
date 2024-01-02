@@ -234,6 +234,7 @@ You can use these environment variables on the following fields in each jobs (wh
 * Model Name
 * Report Path
 * Upload File Path
+* Security dataflow
 
 You can manually add environment variables to a build or use global jenkins environment variables (see [the jenkins documentation](https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables))
 
@@ -288,7 +289,8 @@ The Add Version step provides the following parameters :
   * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${BUILD_NUMBER}` will be
     replaced by the current jobs' build number.
 * *Enable Security Dataflow*: Enables the Security Objective for this version. This setting will operate for both
-  technologies JEE and DOTNET as well.<u>Has no effect if `Rescan` is checked</u>.
+  technologies JEE and DOTNET as well. This option can be set using <u>SECURITY_DATAFLOW</u> environment variable.
+  Option <u>Has no effect if `Rescan` is checked</u>.
 * *Enable Data Safety Investigation*: Enables the data safety investigation
   objective for the version.
 * *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Preserve Configured" (
@@ -339,7 +341,8 @@ The Deliver Source step provides similar parameters to the Add Version step :
   the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no
   version exists, it will run an Add version job instead.
 * *Enable Security Dataflow*: Enables the Security Objective for this version. This setting will operate for both
-  technologies JEE and DOTNET as well, and it will be ignored if `Rescan` is checked.
+  technologies JEE and DOTNET as well. This oprion can be set using <u>SECURITY_DATAFLOW</u> environment variable.
+  Option will be ignored if `Rescan` is checked.
 * *Enable Data Safety Investigation*: Enables the data safety investigation
   objective for the version.
 
