@@ -77,6 +77,7 @@ import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingR
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noApiKey;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noServerUrl;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
+import static io.jenkins.plugins.aipconsole.Messages.Settings_Option_Dataflow_info;
 
 public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep {
     public static final int BUFFER_SIZE = 10 * 1024 * 1024;
@@ -495,12 +496,15 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
                 log.println(DeliverBuilder_Deliver_info_startDeliverCloneJob(expandedAppName));
             }
             ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
+            boolean expandedSecurityDataflow = isSecurityDataflow() || Boolean.valueOf(run.getEnvironment(listener).get("SECURITY_DATAFLOW"));
+
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion());
             requestBuilder.releaseAndSnapshotDate(new Date())
                     .nodeName(app.getTargetNode())
                     .endStep(Constants.DELIVER_VERSION)
                     .versionName(resolvedVersionName)
                     .objectives(VersionObjective.DATA_SAFETY, isEnableDataSafety())
+                    .objectives(VersionObjective.SECURITY, expandedSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .autoDiscover(autoDiscover);
@@ -508,7 +512,6 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             if (inPlaceMode || isSetAsCurrent()) {
                 requestBuilder.endStep(Constants.SET_CURRENT_STEP_NAME);
             }
-            boolean expandedSecurityDataflow = Boolean.valueOf(vars.get("SECURITY_DATAFLOW"));
 
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
             requestBuilder.objectives(VersionObjective.SECURITY, expandedSecurityDataflow);
@@ -519,7 +522,8 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             Exclusions exclusions = Exclusions.builder().excludePatterns(expandedExclusionPatterns).build();
             requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion));
 
-            log.println("Update JEE and DOTNET security dataflow settings to: " + expandedSecurityDataflow);
+            //Settings.Option.Dataflow.info
+            log.println(Settings_Option_Dataflow_info(expandedSecurityDataflow));
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 

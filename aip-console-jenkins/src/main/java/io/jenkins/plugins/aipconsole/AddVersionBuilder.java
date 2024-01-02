@@ -63,6 +63,7 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_Descripto
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_cssInfo;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
+import static io.jenkins.plugins.aipconsole.Messages.Settings_Option_Dataflow_info;
 
 public class AddVersionBuilder extends CommonActionBuilder {
 
@@ -462,11 +463,14 @@ public class AddVersionBuilder extends CommonActionBuilder {
             } else {
                 log.println(AddVersionBuilder_AddVersion_info_startAddVersionJob(variableAppName));
             }
+
+            boolean expandedSecurityDataflow = isSecurityDataflow() || Boolean.valueOf(run.getEnvironment(listener).get("SECURITY_DATAFLOW"));
             JobRequestBuilder requestBuilder = JobRequestBuilder.newInstance(applicationGuid, fileName, applicationHasVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, caipVersion)
                     .nodeName(app.getTargetNode())
                     .releaseAndSnapshotDate(new Date())
                     .versionName(resolvedVersionName)
                     .objectives(VersionObjective.DATA_SAFETY, isEnableDataSafety())
+                    .objectives(VersionObjective.SECURITY, expandedSecurityDataflow)
                     .backupApplication(backupApplicationEnabled)
                     .backupName(backupName)
                     .processImaging(processImaging);
@@ -493,12 +497,11 @@ public class AddVersionBuilder extends CommonActionBuilder {
                 applicationService.updateModuleGenerationType(applicationGuid, requestBuilder, ModuleGenerationType.fromString(moduleGenerationType), !applicationHasVersion);
             }
 
-            boolean expandedSecurityDataflow = Boolean.valueOf(run.getEnvironment(listener).get("SECURITY_DATAFLOW"));
-
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
             requestBuilder.objectives(VersionObjective.SECURITY, expandedSecurityDataflow);
 
-            log.println("Update JEE and DOTNET security dataflow settings to: " + expandedSecurityDataflow);
+            //Settings.Option.Dataflow.info
+            log.println(Settings_Option_Dataflow_info(expandedSecurityDataflow));
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
