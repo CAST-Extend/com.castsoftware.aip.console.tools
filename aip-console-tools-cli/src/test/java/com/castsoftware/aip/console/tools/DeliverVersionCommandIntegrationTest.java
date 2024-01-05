@@ -200,7 +200,7 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(cliToTest.getUnmatchedArguments(), hasSize(1));
         assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_OK));
+        assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
     }
 
     @Test
