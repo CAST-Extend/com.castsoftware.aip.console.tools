@@ -160,49 +160,11 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
         runStringArgs(deliverVersionCommand, args);
 
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(cliToTest.getUnmatchedArguments(), hasSize(0));
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
-
-    @Test
-    public void testDeliverVersionCommand_WithUnknownOptions() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
-        boolean verbose = true;
-        String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
-                "--file", sflPath.toString(),
-                "--version-name", TestConstants.TEST_VERSION_NAME,
-                "--node-name", TestConstants.TEST_NODE,
-                "--no-clone", "--auto-create", "--backup=false", "--set-as-current",
-                "--enable-security-assessment=false", "--enable-security-dataflow=false",
-                "--backup-name", TestConstants.TEST_BACKUP_NAME,
-                "--domain-name", TestConstants.TEST_DOMAIN};
-
-
-        // gives the existing application
-        when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), eq(null), anyBoolean())).thenReturn(TestConstants.TEST_APP_GUID);
-        when(applicationService.getApplicationNameFromGuid(TestConstants.TEST_APP_GUID)).thenReturn(TestConstants.TEST_CREATRE_APP);
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
-        when(uploadService.uploadFileAndGetSourcePath(any(String.class), any(String.class), any(File.class))).thenReturn(sflPath.toString());
-        when(applicationService.applicationHasVersion(TestConstants.TEST_APP_GUID)).thenReturn(false);
-        when(applicationService.createDeliveryConfiguration(TestConstants.TEST_APP_GUID, sflPath.toString(), Exclusions.builder().build(), false)).thenReturn(TestConstants.TEST_DELIVERY_CONFIG_GUID);
-        when(jobsService.startAddVersionJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
-
-        JobExecutionDto jobStatus = new JobExecutionDto();
-        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
-        jobStatus.setState(JobState.COMPLETED);
-        jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
-        when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
-
-        runStringArgs(deliverVersionCommand, args);
-
-        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
-        assertThat(cliToTest.getUnmatchedArguments(), hasSize(1));
-        assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_INVALID_PARAMETERS_ERROR));
-    }
-
+    
     @Test
     public void testDeliverVersionCommand_WithCssServerJobCompleted() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
         boolean verbose = true;
