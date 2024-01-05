@@ -71,6 +71,8 @@ public class Constants {
     public static final String RENAME_SNAPSHOT = "rename-snapshot";
     public static final String REFERENCE_FINDER = "reference_finder";
     public static final String RECOMPUTE_SNAPSHOT_INDICATORS = "recompute-snapshot-indicators";
+    public static final String RECOMPUTE_APPLICATION_INDICATORS = "recompute-application-indicators";
+
     public static final String RECOMPUTE_CHECKSUMS = "recompute-checksums";
     public static final String ANALYZE_EXEC_GROUP = "analyze-exec-group";
     public static final String RUN_ANALYZE_UNITS = ANALYZE_EXEC_GROUP;

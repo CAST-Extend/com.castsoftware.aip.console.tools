@@ -213,8 +213,6 @@ public class ApiEndpointHelper {
                 return getJobsEndpoint() + ANALYZE_SECURITY_DATAFLOW;
             case RESCAN_APPLICATION:
                 return getJobsEndpoint() + RESYNC_APPLICATION;
-            case UPLOAD_SNAPSHOT_VERSION:
-                return getJobsEndpoint() + RESYNC_APPLICATION;
             case SHERLOCK_BACKUP:
                 return getJobsEndpoint() + SHERLOCK_BACKUP_ENDPOINT;
             case RESTORE:
