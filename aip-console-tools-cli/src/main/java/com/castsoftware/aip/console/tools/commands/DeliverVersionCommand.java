@@ -123,12 +123,11 @@ public class DeliverVersionCommand extends BasicCallable {
     private boolean blueprint;
 
     /* It's same as enable-security-dataflow*/
-    /*
     @CommandLine.Option(names = {"-security-assessment", "--enable-security-assessment"},
             description = "Enable/Disable Security Assessment for this version"
                     + " if specified without parameter: ${FALLBACK-VALUE}",
-            fallbackValue = "true", defaultValue = "false")
-    private boolean enableSecurityAssessment;*/
+            fallbackValue = "true", defaultValue = "false", hidden = true)
+    private boolean enableSecurityAssessment;
 
     @CommandLine.Option(names = "--backup-name",
             paramLabel = "BACKUP_NAME",

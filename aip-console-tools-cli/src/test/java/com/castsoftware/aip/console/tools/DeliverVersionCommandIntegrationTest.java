@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.function.Function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -159,10 +160,11 @@ public class DeliverVersionCommandIntegrationTest extends AipConsoleToolsCliBase
         runStringArgs(deliverVersionCommand, args);
 
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(cliToTest.getUnmatchedArguments(), hasSize(0));
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_OK));
     }
-
+    
     @Test
     public void testDeliverVersionCommand_WithCssServerJobCompleted() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
         boolean verbose = true;
