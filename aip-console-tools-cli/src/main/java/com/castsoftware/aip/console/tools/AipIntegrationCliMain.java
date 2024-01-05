@@ -12,6 +12,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Profile;
 import picocli.CommandLine;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,6 +29,12 @@ public class AipIntegrationCliMain implements CommandLineRunner {
 
     @Value("${picocli.usage.width:120}")
     private int consoleUsageWidth;
+
+    private List<String> unExpectedParameters;
+
+    protected List<String> getUnExpectedParameters() {
+        return unExpectedParameters;
+    }
 
     public static void main(String... args) {
         new SpringApplicationBuilder(AipIntegrationCliMain.class)
@@ -52,7 +59,13 @@ public class AipIntegrationCliMain implements CommandLineRunner {
                         .orElse(Constants.RETURN_OK);
             } else {
                 // Help message was shown
-                result = result = cli.getUnmatchedArguments().isEmpty() ? 0:1;
+                //Call to getUnmatchedArguments() seems to clear the content
+                unExpectedParameters = new ArrayList<>(cli.getUnmatchedArguments());
+                if (cli.getExecutionResult() == null) {
+                    result = Constants.RETURN_INVALID_PARAMETERS_ERROR;
+                } else {
+                    result = unExpectedParameters.isEmpty() ? 0 : 1;
+                }
             }
         } catch (Throwable t) {
             log.error("Could not run AIP integration tool", t);
