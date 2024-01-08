@@ -4,6 +4,7 @@ import com.castsoftware.aip.console.tools.commands.ParentCommand;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.factories.SpringAwareCommandFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -46,7 +47,9 @@ public class AipIntegrationCliMain implements CommandLineRunner {
     public void run(String... args) throws Exception {
         Integer result;
 
+        String VERSION_OPTION = "--version";
         try {
+            String[] argsOptions = args;
             CommandLine cli = new CommandLine(parentCommand, springAwareCommandFactory);
             cli.setUsageHelpWidth(consoleUsageWidth);
 
@@ -62,7 +65,8 @@ public class AipIntegrationCliMain implements CommandLineRunner {
                 //Call to getUnmatchedArguments() seems to clear the content
                 unExpectedParameters = new ArrayList<>(cli.getUnmatchedArguments());
                 if (cli.getExecutionResult() == null) {
-                    result = Constants.RETURN_INVALID_PARAMETERS_ERROR;
+                    boolean askForVersion = argsOptions.length == 1 ? StringUtils.equalsIgnoreCase(VERSION_OPTION, argsOptions[0]) : false;
+                    result = askForVersion ? 0 : Constants.RETURN_INVALID_PARAMETERS_ERROR;
                 } else {
                     result = unExpectedParameters.isEmpty() ? 0 : 1;
                 }
