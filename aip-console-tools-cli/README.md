@@ -1,5 +1,11 @@
 ## AIP Console tools CLI
 
+### General considerations
+
+As this CLI based on running command followed with some options, in case an unknown option passed to a command then the
+CLI will return exit code **16**
+This means an *invalid parameter* found (*unsupported parameter*)
+
 ### Objectives
 
 The purpose of the AIP Console Tools CLI is to provide methods to start Application analysis without needing to interact

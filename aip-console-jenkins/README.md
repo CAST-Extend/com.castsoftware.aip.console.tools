@@ -6,13 +6,21 @@ This Jenkins Plugin for AIP Console allows users to automate application source 
 
 This plugin requires the following :
 
-* Jenkins version 2.60.3 or above
+* a Jenkins installation ()
 * An installation of AIP Console 2.X that is accessible and configured.
 * A means of Authentication using :
   * For Enterprise installations, an API Token for the user that will run the CLI (
     check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
   * For AIP Console Standalone, a username and password. Check the `Authentication with username (AIP Console Standalone)` section in Other Topics, towards the end of this document.
 * The ability to generate an archive for your source code OR a configured location in AIP Console where your source will be stored/updated.
+
+### Regarding Jenkins Versions
+
+This plugin is built targetting Jenkins version 2.60.3, a version released in 2017. This means that it is the bare minimum version required to install this plugin. **However**, because this plugin depends on other components that have been moved from being Jenkins components to being Plugins not included in the Jenkins directly, but rather installed through the Plugins Manager of Jenkins. Therefore, installing AIP Console Tools Jenkins Plugin might also download dependencies like Pipeline Steps.
+
+The Plugins Manager of Jenkins requires access to a dedicated site (https://updates.jenkins.io/), which provides lists of plugins and their dependencies for Jenkins. However, it limits the numbers of supported Jenkins releases on a regular basis. As of 19/01/2024, the oldest compatible version is 2.375.1 (LTS) and 2.377 (Weekly). This means that the installation of plugins would only be possible on these versions if you are using the default update site. For older versions, you would have to set up a custom update sites tailored to your version of Jenkins, though updating to a newer one would be preferable, to correct issues and CVEs.
+
+Note that the latest compatible LTS would change regularly, as new LTS releases are available for Jenkins.
 
 ### Installation (and Update)
 
