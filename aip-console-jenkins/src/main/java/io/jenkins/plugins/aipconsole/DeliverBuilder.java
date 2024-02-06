@@ -72,12 +72,12 @@ import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_Cr
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_cssInfo;
 import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_Deliver_info_startDeliverCloneJob;
 import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_DescriptorImpl_displayName;
+import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_DescriptorImpl_updateDotnetJavaSettings;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_accessDenied;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noApiKey;
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_noServerUrl;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
-import static io.jenkins.plugins.aipconsole.Messages.Settings_Option_Dataflow_info;
 
 public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep {
     public static final int BUFFER_SIZE = 10 * 1024 * 1024;
@@ -525,7 +525,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
             Exclusions exclusions = Exclusions.builder().excludePatterns(expandedExclusionPatterns).build();
             requestBuilder.deliveryConfigGuid(applicationService.createDeliveryConfiguration(applicationGuid, fileName, exclusions, applicationHasVersion));
 
-            log.println(Settings_Option_Dataflow_info(expandedSecurityDataflow));
+            log.println(DeliverBuilder_DescriptorImpl_updateDotnetJavaSettings(expandedSecurityDataflow));
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
