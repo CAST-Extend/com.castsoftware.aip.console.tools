@@ -189,10 +189,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             String caipVersion = app.getCaipVersion();
             String targetNode = app.getTargetNode();
 
-            //Run Analysis
+            //Process Imaging
             if (!isImagingAvailable()) {
-                log.info("The 'Deep Analysis' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging.");
-                return Constants.RETURN_RUN_ANALYSIS_DISABLED;
+                log.warn("The 'Publish to Imaging' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging.");
             }
 
             String jobStatus = runDeepAnalysis(existingAppGuid, targetNode, caipVersion, properties.getSnapshotName()

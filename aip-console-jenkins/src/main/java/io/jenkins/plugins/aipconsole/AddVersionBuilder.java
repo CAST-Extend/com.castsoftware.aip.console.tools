@@ -62,8 +62,8 @@ import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_AddVersio
 import static io.jenkins.plugins.aipconsole.Messages.AddVersionBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
 import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_cssInfo;
+import static io.jenkins.plugins.aipconsole.Messages.DeliverBuilder_DescriptorImpl_updateDotnetJavaSettings;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
-import static io.jenkins.plugins.aipconsole.Messages.Settings_Option_Dataflow_info;
 
 public class AddVersionBuilder extends CommonActionBuilder {
 
@@ -500,7 +500,7 @@ public class AddVersionBuilder extends CommonActionBuilder {
             requestBuilder.objectives(VersionObjective.BLUEPRINT, isBlueprint());
             requestBuilder.objectives(VersionObjective.SECURITY, expandedSecurityDataflow);
 
-            log.println(Settings_Option_Dataflow_info(expandedSecurityDataflow));
+            log.println(DeliverBuilder_DescriptorImpl_updateDotnetJavaSettings(expandedSecurityDataflow));
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.JEE_TECHNOLOGY_PATH);
             applicationService.updateSecurityDataflow(applicationGuid, expandedSecurityDataflow, Constants.DOTNET_TECHNOLOGY_PATH);
 
