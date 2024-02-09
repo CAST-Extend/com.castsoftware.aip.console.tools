@@ -22,8 +22,8 @@
     <f:entry title="${%snapshotName}" field="snapshotName" description="${%snapshotName.descr}">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%securityDataflow}" field="securityDataflow" description="${%securityDataflow.descr}">
-        <f:checkbox field="securityDataflow" default="false" value="${securityDataflow}"/>
+    <f:entry title="${%securityDataflow}" field="enableSecurityDataflow" description="${%securityDataflow.descr}">
+        <f:checkbox field="enableSecurityDataflow" default="false" value="${enableSecurityDataflow}"/>
     </f:entry>
     <f:entry title="${%enableDataSafety}" field="enableDataSafety" description="${%enableDataSafety.descr}">
         <f:checkbox field="enableDataSafety" default="false" value="${enableDataSafety}"/>

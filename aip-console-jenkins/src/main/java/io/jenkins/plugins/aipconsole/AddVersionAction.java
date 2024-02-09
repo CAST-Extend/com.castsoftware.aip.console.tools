@@ -24,6 +24,7 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     private boolean cloneVersion = true;
     private boolean blueprint = false;
     private boolean securityDataflow = false;
+    private boolean enableSecurityDataflow = false; //Backward compatibility
 
     @Nullable
     private String versionName;
@@ -184,12 +185,26 @@ public class AddVersionAction extends BaseAction implements RunAction2 {
     public void setBlueprint(boolean blueprint) {
         this.blueprint = blueprint;
     }
+
     public boolean isSecurityDataflow() {
         return securityDataflow;
     }
 
     public void setSecurityDataflow(boolean enableFlag) {
-        this.securityDataflow = enableFlag;
+        securityDataflow = enableFlag;
+    }
+
+    public boolean isEnableSecurityDataflow() {
+        return getEnableSecurityDataflow();
+    }
+
+    public void setEnableSecurityDataflow(boolean enableFlag) {
+        enableSecurityDataflow = enableFlag;
+        setSecurityDataflow(enableFlag);
+    }
+
+    public boolean getEnableSecurityDataflow() {
+        return enableSecurityDataflow;
     }
 
     @Nullable
