@@ -24,6 +24,7 @@ public class DeliverAction extends BaseAction implements RunAction2 {
     private boolean cloneVersion = false;
     private boolean blueprint = false;
     private boolean securityDataflow = false;
+    private boolean enableSecurityDataflow = false; //Backward compatibility
     private boolean enableDataSafety;
 
     @Nullable
@@ -111,6 +112,19 @@ public class DeliverAction extends BaseAction implements RunAction2 {
 
     public boolean isSecurityDataflow() {
         return securityDataflow;
+    }
+
+    public boolean isEnableSecurityDataflow() {
+        return getEnableSecurityDataflow();
+    }
+
+    public void setEnableSecurityDataflow(boolean enableFlag) {
+        enableSecurityDataflow = enableFlag;
+        setSecurityDataflow(enableFlag);
+    }
+
+    public boolean getEnableSecurityDataflow() {
+        return enableSecurityDataflow;
     }
 
     public void setSecurityDataflow(boolean securityDataflow) {

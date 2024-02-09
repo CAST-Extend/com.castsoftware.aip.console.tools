@@ -84,6 +84,8 @@ public class AddVersionBuilder extends CommonActionBuilder {
     @Nullable
     private String nodeName = "";
     private boolean securityDataflow = false;
+    private boolean enableSecurityDataflow = false; //Backward compatibility
+
     private boolean enableDataSafety = false;
 
     private boolean backupApplicationEnabled = false;
@@ -231,13 +233,26 @@ public class AddVersionBuilder extends CommonActionBuilder {
         return securityDataflow;
     }
 
-    @DataBoundSetter
     public void setSecurityDataflow(boolean securityDataflow) {
         this.securityDataflow = securityDataflow;
     }
 
     public boolean getSecurityDataflow() {
         return isSecurityDataflow();
+    }
+
+    public boolean isEnableSecurityDataflow() {
+        return getEnableSecurityDataflow();
+    }
+
+    public boolean getEnableSecurityDataflow() {
+        return enableSecurityDataflow;
+    }
+
+    @DataBoundSetter
+    public void setEnableSecurityDataflow(boolean enableFlag) {
+        enableSecurityDataflow = enableFlag;
+        setSecurityDataflow(enableFlag);
     }
 
     @DataBoundSetter
@@ -543,7 +558,7 @@ public class AddVersionBuilder extends CommonActionBuilder {
     }
 
     private boolean isSecurityDataflowEnabled() {
-        return isSecurityDataflow() || Boolean.valueOf(environmentVariables.get("SECURITY_DATAFLOW"));
+        return isEnableSecurityDataflow() || Boolean.valueOf(environmentVariables.get("SECURITY_DATAFLOW"));
     }
 
     /**

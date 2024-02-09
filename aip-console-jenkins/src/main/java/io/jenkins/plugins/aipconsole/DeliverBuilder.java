@@ -109,6 +109,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     @Nullable
     private String nodeName = "";
     private boolean securityDataflow = false;
+    private boolean enableSecurityDataflow = false; //Backward compatibility
     private boolean enableDataSafety = false;
 
     private boolean backupApplicationEnabled = false;
@@ -265,9 +266,22 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
         return securityDataflow;
     }
 
-    @DataBoundSetter
     public void setSecurityDataflow(boolean securityDataflow) {
         this.securityDataflow = securityDataflow;
+    }
+
+    public boolean isEnableSecurityDataflow() {
+        return getEnableSecurityDataflow();
+    }
+
+    public boolean getEnableSecurityDataflow() {
+        return enableSecurityDataflow;
+    }
+
+    @DataBoundSetter
+    public void setEnableSecurityDataflow(boolean enableFlag) {
+        enableSecurityDataflow = enableFlag;
+        setSecurityDataflow(enableFlag);
     }
 
     @DataBoundSetter
@@ -572,7 +586,7 @@ public class DeliverBuilder extends BaseActionBuilder implements SimpleBuildStep
     }
 
     private boolean isSecurityDataflowEnabled() {
-        return isSecurityDataflow() || Boolean.valueOf(environmentVariables.get("SECURITY_DATAFLOW"));
+        return isEnableSecurityDataflow() || Boolean.valueOf(environmentVariables.get("SECURITY_DATAFLOW"));
     }
 
     /**
