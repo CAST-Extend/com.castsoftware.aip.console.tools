@@ -126,8 +126,7 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
                 }
             }
 
-            logger.println(expandedIncludeFastScan + " - expandedIncludeFastScan");
-            logger.println(_sourcePath + " - _sourcePath");
+            logger.println("Fast scan included: " + expandedIncludeFastScan);
 
             if (firstScan || app == null || !app.isOnboarded()) {
 
