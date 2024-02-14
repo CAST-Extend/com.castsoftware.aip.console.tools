@@ -23,6 +23,10 @@ public class ScanAndReScanApplicationJobRequest {
     @Builder.Default
     private boolean publishToEngineering = false;
 
+    private boolean includeFastScan;
+
+    private String sourcePath;
+
     private String moduleGenerationType;
 
     public ScanAndReScanApplicationJobRequest moduleGenerationType(ModuleGenerationType generationType) {

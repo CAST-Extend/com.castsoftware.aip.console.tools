@@ -16,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
+import java.io.File;
+
 @Component
 @CommandLine.Command(
         name = "DeepAnalyze",
@@ -45,6 +47,15 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCallable {
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
+    @CommandLine.Option(names = "--include-fast-scan", description = "If provided, fast-scan will run before deep analysis. The application should already be analysed to enable this option."
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "false")
+    private boolean includeFastScan = false;
+
+    @CommandLine.Option(names = {"-f", "--file"},
+            paramLabel = "FILE",
+            description = "A local zip or tar.gz file OR a path to a folder on the node where the source is saved, it should be the same as the one provided for fast scan in previous analysis")
+    private File sourcePath;
+
     //This version can be null if failed to convert from string
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
 
@@ -63,6 +74,8 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCallable {
                 .moduleGenerationType(moduleGenerationType)
                 .snapshotName(snapshotName)
                 .sleepDuration(sharedOptions.getSleepDuration())
+                .includeFastScan(includeFastScan)
+                .sourcePath(sourcePath)
                 .verbose(sharedOptions.isVerbose())
                 .logPollingProvider(new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration()))
                 .build();

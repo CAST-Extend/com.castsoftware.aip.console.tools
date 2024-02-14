@@ -43,6 +43,7 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
         Object builtProject = project.getBuildersList().get(0);
         OnboardApplicationDeepAnalysisBuilder expectedResults = new OnboardApplicationDeepAnalysisBuilder(TEST_APP_NAME);
         expectedResults.setSnapshotName("");
+        expectedResults.setSourcePath("");
         jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
     }
 

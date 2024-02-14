@@ -5,12 +5,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.File;
+
 @Getter
 @Setter
 @Builder
 public class DeepAnalyzeProperties {
     private String applicationName;
     private String snapshotName;
+    private boolean includeFastScan;
+    private File sourcePath;
     @Builder.Default
     private ModuleGenerationType moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
     private long sleepDuration;
