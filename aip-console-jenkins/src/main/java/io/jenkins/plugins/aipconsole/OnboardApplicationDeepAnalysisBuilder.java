@@ -116,6 +116,9 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
                 app = applicationService.getApplicationDetails(existingAppGuid);
                 firstScan = app == null || app.getVersion() == null || StringUtils.isEmpty(app.getVersion().getGuid()) || !app.isOnboarded();
             }
+
+            logger.println("Fast scan included: " + expandedIncludeFastScan);
+
             String _sourcePath = "";
             if(Boolean.valueOf(expandedIncludeFastScan)){
                 _sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedSourcePath).toFile(), existingAppGuid);
@@ -125,8 +128,6 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
                     logger.println("Application should be analyzed to include fast scan in deep analysis. Deep analysis will continue without fast scan");
                 }
             }
-
-            logger.println("Fast scan included: " + expandedIncludeFastScan);
 
             if (firstScan || app == null || !app.isOnboarded()) {
 
