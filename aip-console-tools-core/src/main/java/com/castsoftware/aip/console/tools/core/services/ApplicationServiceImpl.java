@@ -175,9 +175,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             String sourcePath = "";
 
             if(includeFastScan && properties.getSourcePath() != null && !properties.getSourcePath().toString().equalsIgnoreCase("")){
-                sourcePath = uploadService.uploadFileAndGetSourcePath(app.getName(), app.getGuid(), properties.getSourcePath());
 
                 if(app.getVersion().getStatus() == VersionStatus.ANALYZED) {
+                    sourcePath = uploadService.uploadFileAndGetSourcePath(app.getName(), app.getGuid(), properties.getSourcePath());
                     log.info("Fast Scan will be done before running deep analysis");
                 } else {
                     log.info("Application should be analyzed to include fast scan in deep analysis. Deep analysis will continue without fast scan");

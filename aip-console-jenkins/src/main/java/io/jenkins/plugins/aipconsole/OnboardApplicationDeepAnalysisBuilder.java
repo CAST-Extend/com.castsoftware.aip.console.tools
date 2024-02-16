@@ -123,9 +123,9 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
 
             String _sourcePath = "";
             if(_includeFastScan && expandedSourcePath != null && !expandedSourcePath.equalsIgnoreCase("")){
-                _sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedSourcePath).toFile(), existingAppGuid);
 
                 if(app.getVersion().getStatus() == VersionStatus.ANALYZED) {
+                    _sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedSourcePath).toFile(), existingAppGuid);
                     logger.println(OnbordingApplicationBuilder_DescriptorImpl_includeFastScan_info());
                 } else {
                     logger.println(OnbordingApplicationBuilder_DescriptorImpl_includeFastScan_notAnalyzed_info());
