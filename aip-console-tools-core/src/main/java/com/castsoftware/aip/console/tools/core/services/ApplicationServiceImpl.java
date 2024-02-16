@@ -512,7 +512,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     public String runDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         log.info("Starting job to perform Deep Analysis action (Run Analysis) ");
         try {
-            log.info(fastScanRequest.toString());
             String jobGuid = jobService.startDeepAnalysis(fastScanRequest);
             log.info("Deep Analysis running job GUID= " + jobGuid);
             return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
