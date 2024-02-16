@@ -48,6 +48,22 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
     }
 
     @Test
+    public void testOnboardApplicationDeepAnalysisJobWithFastScan() throws Exception {
+        FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
+        deepAnalysisBuilder.setIncludeFastScan(true);
+        deepAnalysisBuilder.setSourcePath(BaseBuilderTest.TEST_UPLOAD_FILE_PATH);
+        doReturn(false).when(applicationService).isImagingAvailable();
+
+        project = jenkins.configRoundtrip(project);
+        Object builtProject = project.getBuildersList().get(0);
+        OnboardApplicationDeepAnalysisBuilder expectedResults = new OnboardApplicationDeepAnalysisBuilder(TEST_APP_NAME);
+        expectedResults.setSnapshotName("");
+        expectedResults.setIncludeFastScan(true);
+        expectedResults.setSourcePath(BaseBuilderTest.TEST_UPLOAD_FILE_PATH);
+        jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
+    }
+
+    @Test
     public void testDeepAnalysis_OnExistingApplication_NotFastScanWorkflow() throws Exception {
         FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
 

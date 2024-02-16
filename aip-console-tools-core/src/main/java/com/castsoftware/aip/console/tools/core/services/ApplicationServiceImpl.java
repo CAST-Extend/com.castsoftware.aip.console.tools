@@ -173,7 +173,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
             boolean includeFastScan = properties.isIncludeFastScan();
             String sourcePath = "";
-            if(includeFastScan){
+
+            if(includeFastScan && properties.getSourcePath() != null && !properties.getSourcePath().toString().equalsIgnoreCase("")){
                 sourcePath = uploadService.uploadFileAndGetSourcePath(app.getName(), app.getGuid(), properties.getSourcePath());
 
                 if(app.getVersion().getStatus() == VersionStatus.ANALYZED) {
@@ -181,6 +182,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                 } else {
                     log.info("Application should be analyzed to include fast scan in deep analysis. Deep analysis will continue without fast scan");
                 }
+            } else if (includeFastScan && (sourcePath == null || sourcePath.equalsIgnoreCase(""))) {
+                log.info("Source path not found");
             }
 
             boolean deepAnalysisCondition = (app != null) && app.isOnboarded();
@@ -219,7 +222,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         } catch (UploadException e) {
-            throw new RuntimeException(e);
+            return Constants.RETURN_UPLOAD_ERROR;
         }
 
         return Constants.RETURN_OK;
@@ -509,6 +512,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public String runDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         log.info("Starting job to perform Deep Analysis action (Run Analysis) ");
         try {
+            log.info(fastScanRequest.toString());
             String jobGuid = jobService.startDeepAnalysis(fastScanRequest);
             log.info("Deep Analysis running job GUID= " + jobGuid);
             return logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
