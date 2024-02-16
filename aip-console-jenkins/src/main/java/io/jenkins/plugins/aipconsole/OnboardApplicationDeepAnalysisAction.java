@@ -18,6 +18,10 @@ public class OnboardApplicationDeepAnalysisAction extends BaseAction implements 
 
     private String moduleGenerationType;
 
+    private boolean includeFastScan = false;
+
+    private String sourcePath;
+
     private long timeout = Constants.DEFAULT_HTTP_TIMEOUT;
 
     private long sleepDuration = Constants.DEFAULT_SLEEP_DURATION;

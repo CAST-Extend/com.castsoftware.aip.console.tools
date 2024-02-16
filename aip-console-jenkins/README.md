@@ -460,6 +460,11 @@ Under `Advanced Settings` you will find the following parameters :
   field is empty.
 * *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "
   Analysis Unit module" or "Technology Module".
+* *Include fast scan* : If enabled, fast scan will be done before running deep analysis(defaulted to **False**).
+* *File/Folder path* (**required-if include fast scan is enabled**): The source code that will be used. You can provide either the file full path or a
+  relative path:
+  * File full path to a File path on the Jenkins Node where the job will be run: ZIP, TGZ or TAR.GZ file
+  * Relative path to the configured Source Folder Location
 * *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ### Fast Scan
@@ -476,7 +481,7 @@ Under `Advanced Settings` you will find the following parameters :
 * *File/Folder path* (**required**): The source code that will be used. You can provide either the file full path or a
   relative path:
   * File full path to a File path on the Jenkins Node where the job will be run: ZIP, TGZ or TAR.GZ file
-  * Relative path to the conbfigured Source Folder Location
+  * Relative path to the configured Source Folder Location
   * **NOTE**: Any environment variable specified in this field will be expanded. For example, `${WORKSPACE}` will be
     replaced by the current jobs' workspace path.
 * *Exclusion patterns* : List of file patterns to exclude in the delivery, separated by a comma. Each patterns needs to
@@ -537,7 +542,7 @@ Next time you run a Build using the AIP Console Jenkins Plugin, log messages of 
 
 #### Pipeline Scripts
 
-Every steps defined above mcan be used in a Pipeline Job or using a Jenkinsfile.
+Every steps defined above can be used in a Pipeline Job or using a Jenkinsfile.
 
 Rather than detail every step here, you can quickly generate the required syntax using the integrated "Pipeline Syntax" command in Jenkins, to generate a snippet based on a selected step and associated parameters.
 

@@ -151,9 +151,10 @@ public class ApplicationServiceImpl implements ApplicationService {
         log.info("Deep-Analyze command will perform application '{}' deep analysis: verbose= '{}'"
                 , properties.getApplicationName(), properties.isVerbose());
         log.info("Deep-Analysis args:");
-        log.info("Application: {}\nsnapshot name: {}\nmodule generation type: {}\nsleep: {}\n"
+        log.info("\nApplication: {}\nsnapshot name: {}\nmodule generation type: {}\ninclude fast scan: {} \nsource path: {}\nsleep: {}\n"
                 , properties.getApplicationName(), StringUtils.isEmpty(properties.getSnapshotName()) ? "Auto assigned" : properties.getSnapshotName()
-                , properties.getModuleGenerationType().toString(), properties.getSleepDuration());
+                , properties.getModuleGenerationType().toString(), properties.isIncludeFastScan()
+                , properties.getSourcePath(),  properties.getSleepDuration());
 
         try {
             boolean OnBoardingModeWasOn = isOnboardingSettingsEnabled();
@@ -168,6 +169,21 @@ public class ApplicationServiceImpl implements ApplicationService {
             if (app != null) {
                 existingAppGuid = app.getGuid();
                 app = getApplicationDetails(existingAppGuid);
+            }
+
+            boolean includeFastScan = properties.isIncludeFastScan();
+            String sourcePath = "";
+
+            if(includeFastScan && properties.getSourcePath() != null && !properties.getSourcePath().toString().equalsIgnoreCase("")){
+
+                if(app.getVersion().getStatus() == VersionStatus.ANALYZED) {
+                    sourcePath = uploadService.uploadFileAndGetSourcePath(app.getName(), app.getGuid(), properties.getSourcePath());
+                    log.info("Fast Scan will be done before running deep analysis");
+                } else {
+                    log.info("Application should be analyzed to include fast scan in deep analysis. Deep analysis will continue without fast scan");
+                }
+            } else if (includeFastScan && (sourcePath == null || sourcePath.equalsIgnoreCase(""))) {
+                log.info("Source path not found");
             }
 
             boolean deepAnalysisCondition = (app != null) && app.isOnboarded();
@@ -195,15 +211,18 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
 
             String jobStatus = runDeepAnalysis(existingAppGuid, targetNode, caipVersion, properties.getSnapshotName()
-                    , properties.getModuleGenerationType(), properties.isVerbose(), properties.getLogPollingProvider());
+                    , properties.getModuleGenerationType(), properties.isVerbose(), properties.isIncludeFastScan()
+                    , sourcePath, properties.getLogPollingProvider());
             if (jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
                 log.info("Deep-Analyze done successfully");
             } else {
-                log.error("Deep-Analyze didn't completed successfully.");
+                log.error("Deep-Analyze didn't complete successfully.");
                 return Constants.RETURN_JOB_FAILED;
             }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
+        } catch (UploadException e) {
+            return Constants.RETURN_UPLOAD_ERROR;
         }
 
         return Constants.RETURN_OK;
@@ -464,9 +483,13 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
     
     @Override
-    public String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+    public String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion
+            , String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, boolean includeFastScan
+            , String sourcePath, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
-                .appGuid(applicationGuid);
+                .appGuid(applicationGuid)
+                .includeFastScan(includeFastScan)
+                .sourcePath(sourcePath);
         if (StringUtils.isNotEmpty(targetNode)) {
             requestBuilder.targetNode(targetNode);
         }
