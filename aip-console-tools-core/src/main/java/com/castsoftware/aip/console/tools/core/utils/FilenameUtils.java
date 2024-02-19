@@ -2,9 +2,6 @@ package com.castsoftware.aip.console.tools.core.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 public class FilenameUtils {
     private FilenameUtils() {
         // NOP
@@ -15,5 +12,15 @@ public class FilenameUtils {
             return "tar.gz";
         }
         return org.apache.commons.io.FilenameUtils.getExtension(filename);
+    }
+
+    public static String getFileName(String filename) {
+        int lastBackslashIndex = filename.lastIndexOf("\\");
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex > lastBackslashIndex && dotIndex < filename.length() - 1) {
+            return filename.substring(lastBackslashIndex + 1, dotIndex);
+        } else {
+            return filename.substring(lastBackslashIndex + 1);
+        }
     }
 }
