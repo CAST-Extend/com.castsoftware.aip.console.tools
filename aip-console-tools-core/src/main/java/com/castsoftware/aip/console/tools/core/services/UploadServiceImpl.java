@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -83,8 +82,9 @@ public class UploadServiceImpl implements UploadService {
         String sourcePath;
         final String[] uploadedFilePath = new String[1];
         String archiveExtension = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath.getName());
+        String fileName = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileName(filePath.getName());
         if (StringUtils.equalsAnyIgnoreCase(archiveExtension, Constants.ALLOWED_ARCHIVE_EXTENSIONS)) {
-            sourcePath = UUID.randomUUID().toString() + "." + archiveExtension;
+            sourcePath = fileName + "." + archiveExtension;
             try (InputStream stream = Files.newInputStream(filePath.toPath())) {
                 long fileSize = filePath.length();
                 if (!uploadInputStreamForOnboarding(applicationGuid, sourcePath, fileSize, stream, (targetPath) -> uploadedFilePath[0] = targetPath)) {
@@ -106,8 +106,9 @@ public class UploadServiceImpl implements UploadService {
         ApiInfoDto apiInfo = restApiService.getAipConsoleApiInfo();
         String sourcePath;
         String archiveExtension = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath.getName());
+        String fileName = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileName(filePath.getName());
         if (StringUtils.equalsAnyIgnoreCase(archiveExtension, Constants.ALLOWED_ARCHIVE_EXTENSIONS)) {
-            sourcePath = UUID.randomUUID().toString() + "." + archiveExtension;
+            sourcePath = fileName + "." + archiveExtension;
             try (InputStream stream = Files.newInputStream(filePath.toPath())) {
                 long fileSize = filePath.length();
                 if (!uploadInputStream(appGuid, sourcePath, fileSize, stream, false)) {
