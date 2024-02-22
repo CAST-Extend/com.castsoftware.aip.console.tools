@@ -98,7 +98,7 @@ public class UploadServiceImpl implements UploadService {
         }
 
         //call api to check if the folder exists
-        return checkServerFolder(filePath);
+        return checkServerFolder(fileName);
     }
 
     @Override
@@ -120,14 +120,14 @@ public class UploadServiceImpl implements UploadService {
                 throw new UploadException(e);
             }
         }
-        return checkServerFolder(filePath);
+        return checkServerFolder(fileName);
     }
 
-    private String checkServerFolder(File filePath) throws UploadException {
+    private String checkServerFolder(String filename) throws UploadException {
         try {
-            FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath.toPath()).build();
+            FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filename).build();
             restApiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
-            return "sources:" + filePath.toPath();
+            return "sources:" + filename;
         } catch (ApiCallException e) {
             throw new UploadException("Unable to check remote location of provided folder.", e);
         }
