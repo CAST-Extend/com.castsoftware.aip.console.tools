@@ -13,12 +13,6 @@
             <option value="one_per_techno">Technology module</option>
         </select>
     </f:entry>
-    <f:entry title="${%sourcePath}" field="sourcePath" description="${%sourcePath.descr}">
-        <f:textbox/>
-    </f:entry>
-    <f:entry title="${%includeFastScan}" field="includeFastScan" description="${%includeFastScan.descr}">
-        <f:checkbox/>
-    </f:entry>
     <f:entry title="${%sleepDuration}" field="sleepDuration" description="${%sleepDuration.descr}">
         <f:number default="15"/>
     </f:entry>

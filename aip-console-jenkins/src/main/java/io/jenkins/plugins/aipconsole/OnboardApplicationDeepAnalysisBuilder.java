@@ -2,9 +2,7 @@ package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
-import com.castsoftware.aip.console.tools.core.dto.VersionStatus;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
-import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import hudson.Extension;
 import hudson.FilePath;
@@ -23,15 +21,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
-import java.nio.file.Paths;
 
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.OnboardApplicationDeepAnalysisBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_DeepAnalysisForbidden;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_includeFastScan_info;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_includeFastScan_noSourcePath;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_includeFastScan_notAnalyzed_info;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_mode;
 
@@ -40,10 +34,6 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     @Nullable
     private String snapshotName;
     private long sleepDuration;
-
-    private boolean includeFastScan = false;
-
-    private String sourcePath;
 
     private String moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
 
@@ -64,24 +54,6 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
         return super.checkJobParameters();
     }
 
-    public boolean isIncludeFastScan() {
-        return includeFastScan;
-    }
-
-    @DataBoundSetter
-    public void setIncludeFastScan(boolean includeFastScan) {
-        this.includeFastScan = includeFastScan;
-    }
-
-    public String getSourcePath() {
-        return sourcePath;
-    }
-
-    @DataBoundSetter
-    public void setSourcePath(String sourcePath) {
-        this.sourcePath = sourcePath;
-    }
-
     public long getSleepDuration() {
         return sleepDuration;
     }
@@ -99,8 +71,6 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     @Override
     protected void performClient(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         String expandedAppName = environmentVariables.expand(getApplicationName());
-        String expandedSourcePath = environmentVariables.get("FILE_PATH");
-        String expandedIncludeFastScan = environmentVariables.get("INCLUDE_FAST_SCAN");
         try {
             if (!applicationService.isOnboardingSettingsEnabled()) {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_mode("OFF"));
@@ -116,22 +86,6 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
                 existingAppGuid = app.getGuid();
                 app = applicationService.getApplicationDetails(existingAppGuid);
                 firstScan = app == null || app.getVersion() == null || StringUtils.isEmpty(app.getVersion().getGuid()) || !app.isOnboarded();
-            }
-
-            boolean _includeFastScan = Boolean.valueOf(expandedIncludeFastScan);
-            logger.println("Fast scan included: " + _includeFastScan);
-
-            String _sourcePath = "";
-            if(_includeFastScan && expandedSourcePath != null && !expandedSourcePath.equalsIgnoreCase("")){
-
-                if(app.getVersion().getStatus() == VersionStatus.ANALYZED) {
-                    _sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedSourcePath).toFile(), existingAppGuid);
-                    logger.println(OnbordingApplicationBuilder_DescriptorImpl_includeFastScan_info());
-                } else {
-                    logger.println(OnbordingApplicationBuilder_DescriptorImpl_includeFastScan_notAnalyzed_info());
-                }
-            } else if (_includeFastScan && (expandedSourcePath == null || expandedSourcePath.equalsIgnoreCase(""))) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_includeFastScan_noSourcePath());
             }
 
             if (firstScan || app == null || !app.isOnboarded()) {
@@ -156,14 +110,8 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
                 moduleType = ModuleGenerationType.fromString(moduleGenerationType);
             }
 
-            applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion
-                    , expandedSsnapshotName, moduleType, verbose
-                    , _includeFastScan, _sourcePath, jnksLogPollingProvider);
+            applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
         } catch (ApplicationServiceException e) {
-            e.printStackTrace(logger);
-            run.setResult(getDefaultResult());
-            return;
-        } catch (UploadException e) {
             e.printStackTrace(logger);
             run.setResult(getDefaultResult());
             return;
