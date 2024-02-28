@@ -450,10 +450,6 @@ java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app"
 * `--module-option` (optional) Generates a user defined module option forr either technology module or analysis unit
   module.
   Possible value is one of: full_content, one_per_au, one_per_techno
-* `--include-fast-scan` (optional): Used to run fast scan before deep analysis.
-* `--file` or `-f`: **required** only when --include-fast-scan is set to true. Represents either the local zip or tar.gz file
-  full path
-  to the sources or a relative path using the Source Folder Location configured
 * `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ```bash
