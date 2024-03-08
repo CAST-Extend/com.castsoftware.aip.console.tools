@@ -29,7 +29,7 @@ import java.io.File;
 @Slf4j
 @Getter
 @Setter
-public class FasctScanCommand extends BasicCallable {
+public class FastScanCommand extends BasicCallable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
             description = "The Name of the application to scan",
@@ -62,7 +62,7 @@ public class FasctScanCommand extends BasicCallable {
     //This version can be null if failed to convert from string
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
 
-    public FasctScanCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+    public FastScanCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
     }
 

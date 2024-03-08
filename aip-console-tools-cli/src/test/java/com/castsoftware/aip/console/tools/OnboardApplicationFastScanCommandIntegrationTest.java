@@ -1,7 +1,7 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.BasicCallable;
-import com.castsoftware.aip.console.tools.commands.FasctScanCommand;
+import com.castsoftware.aip.console.tools.commands.FastScanCommand;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
 public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     @InjectMocks
-    private FasctScanCommand fastScanCommand;
+    private FastScanCommand fastScanCommand;
     @InjectMocks
     private ApplicationServiceImpl applicationServiceImpl;
 

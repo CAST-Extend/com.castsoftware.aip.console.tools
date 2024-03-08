@@ -25,7 +25,7 @@ import java.util.concurrent.Callable;
                 DeliverVersionCommand.class,
                 SnapshotCommand.class,
                 ImportSettingsCommand.class,
-                FasctScanCommand.class,
+                FastScanCommand.class,
                 OnboardApplicationDeepAnalysisCommand.class,
                 PublishToImagingCommand.class,
                 OnboardApplicationCommand.class,
