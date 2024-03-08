@@ -1,7 +1,7 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.BasicCallable;
-import com.castsoftware.aip.console.tools.commands.OnboardApplicationFastScanCommand;
+import com.castsoftware.aip.console.tools.commands.FasctScanCommand;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
 public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     @InjectMocks
-    private OnboardApplicationFastScanCommand fastScanCommand;
+    private FasctScanCommand fastScanCommand;
     @InjectMocks
     private ApplicationServiceImpl applicationServiceImpl;
 
@@ -90,8 +90,10 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         //We need upload for this test
         Class<? extends BasicCallable> commandClass = command.getClass();
         Field uploadServiceField = ReflectionUtils.findField(commandClass, "uploadService");
-        ReflectionUtils.makeAccessible(uploadServiceField);
-        ReflectionUtils.setField(uploadServiceField, command, uploadService);
+        if (uploadServiceField != null) {
+            ReflectionUtils.makeAccessible(uploadServiceField);
+            ReflectionUtils.setField(uploadServiceField, command, uploadService);
+        }
     }
 
     private Path uploadPath;
@@ -225,7 +227,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         when(applicationService.isImagingAvailable()).thenReturn(false);
         when(applicationService.discoverPackagesAndCreateDeliveryConfiguration(
                 anyString(), anyString(), any(Exclusions.class), any(VersionStatus.class), anyBoolean(),
-                ArgumentMatchers.<Consumer<DeliveryConfigurationDto>>any(), anyBoolean()))
+                ArgumentMatchers.any(), anyBoolean()))
                 .then(invocationOnMock -> {
                     Consumer<DeliveryConfigurationDto> arg = invocationOnMock.getArgument(5);
                     arg.accept(DeliveryConfigurationDto.builder().build());
@@ -325,7 +327,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
         when(applicationService.discoverPackagesAndCreateDeliveryConfiguration(
                 anyString(), anyString(), any(Exclusions.class), any(VersionStatus.class), anyBoolean(),
-                ArgumentMatchers.<Consumer<DeliveryConfigurationDto>>any(), anyBoolean()))
+                ArgumentMatchers.any(), anyBoolean()))
                 .then(invocationOnMock -> {
                     Consumer<DeliveryConfigurationDto> arg = invocationOnMock.getArgument(5);
                     arg.accept(DeliveryConfigurationDto.builder().build());
@@ -389,7 +391,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
         when(applicationService.discoverPackagesAndCreateDeliveryConfiguration(
                 anyString(), anyString(), any(Exclusions.class), any(VersionStatus.class), anyBoolean(),
-                ArgumentMatchers.<Consumer<DeliveryConfigurationDto>>any(), anyBoolean()))
+                ArgumentMatchers.any(), anyBoolean()))
                 .then(invocationOnMock -> {
                     Consumer<DeliveryConfigurationDto> arg = invocationOnMock.getArgument(5);
                     arg.accept(DeliveryConfigurationDto.builder().build());

@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationCommonDetailsDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
@@ -39,17 +40,19 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class ApplicationServiceImpl implements ApplicationService {
@@ -77,40 +80,31 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public int fastScan(FastScanProperties fastScanProperties) throws JobServiceException, PackagePathInvalidException, UploadException {
-        log.info("Fast-Scan command will manage '{}' source code using a modern workflow: verbose= '{}'"
-                , fastScanProperties.getApplicationName(), fastScanProperties.isVerbose());
-
+        String applicationName = fastScanProperties.getApplicationName();
         log.info("Fast-Scan args:");
-        log.info(String.format("\tApplication: %s%n\tFile: %s%n\tsleep: %d%n", fastScanProperties.getApplicationName()
-                , fastScanProperties.getFilePath().getAbsolutePath(), fastScanProperties.getSleepDuration()));
+        log.info(String.format("\tApplication: %s%n\tFile: %s%n\tverbose: %s%n\tsleep: %d%n"
+                , applicationName, fastScanProperties.getFilePath().getAbsolutePath()
+                , fastScanProperties.isVerbose(), fastScanProperties.getSleepDuration()));
 
         String applicationGuid;
         try {
-            if (!isOnboardingSettingsEnabled()) {
-                log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
-                return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
-            }
 
-            log.info("Searching for application '{}' on CAST Imaging Console", fastScanProperties.getApplicationName());
-            ApplicationDto app = getApplicationFromName(fastScanProperties.getApplicationName());
-            String sourcePath = uploadService.uploadFileForOnboarding(fastScanProperties.getFilePath(), app != null ? app.getGuid() : null);
-            log.info("uploaded sources successfully: " + sourcePath);
+            log.info("Searching for application '{}' on CAST Imaging Console", applicationName);
+            ApplicationCommonDetailsDto applicationCommonDetailsDto = getApplicationDetailsFromName(applicationName);
+            String sourcePath = uploadService.uploadFileForOnboarding(
+                    fastScanProperties.getFilePath()
+                    , applicationCommonDetailsDto != null ? applicationCommonDetailsDto.getGuid() : null);
+            log.info("Uploaded sources successfully, source path: " + sourcePath);
 
-            if (app == null) {
-                applicationGuid = onboardApplication(fastScanProperties.getApplicationName()
+            if (applicationCommonDetailsDto == null) {
+                applicationGuid = onboardApplication(applicationName
                         , fastScanProperties.getDomainName(), fastScanProperties.isVerbose(), sourcePath);
-                log.info("Onboard Application job has started: application GUID= " + applicationGuid);
+                log.info("Onboard Application job has started, application ID: " + applicationGuid);
+                //Refresh application information even when app was existing
+                applicationCommonDetailsDto = getApplicationDetailsFromName(applicationName);
             }
 
-            //Refresh application information even app was existing
-            app = getApplicationFromName(fastScanProperties.getApplicationName());
-            if (!app.isOnboarded()) {
-                log.info("The existing application has not been created using the Fast-Scan workflow.\n" +
-                        "The 'Fast-Scan' operation will not be applied");
-                return Constants.RETURN_ONBOARD_FAST_SCAN_FORBIDDEN;
-            }
-
-            applicationGuid = app.getGuid();
+            applicationGuid = applicationCommonDetailsDto.getGuid();
             ApplicationOnboardingDto applicationOnboardingDto = getApplicationOnboarding(applicationGuid);
             String caipVersion = applicationOnboardingDto.getCaipVersion();
             String targetNode = applicationOnboardingDto.getTargetNode();
@@ -233,8 +227,8 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
 
             applicationDto = getApplicationDetails(applicationDto.getGuid());
-            Set<String> statuses = EnumSet.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED,
-                            VersionStatus.SNAPSHOT_DONE, VersionStatus.FULLY_ANALYZED, VersionStatus.ANALYZED).stream()
+            Set<String> statuses = Stream.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED,
+                            VersionStatus.SNAPSHOT_DONE, VersionStatus.FULLY_ANALYZED, VersionStatus.ANALYZED)
                     .map(VersionStatus::toString).collect(Collectors.toSet());
             VersionDto versionDto = applicationDto.getVersion();
             if (!statuses.contains(versionDto.getStatus().toString())) {
@@ -325,15 +319,24 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new ApplicationServiceException("Unable to get an application with GUID: " + applicationGuid, e);
         }
     }
-
+    
     @Override
     public ApplicationDto getApplicationFromName(String applicationName) throws ApplicationServiceException {
-        Applications applications = getApplications();
         return getApplications()
                 .getApplications()
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(a -> StringUtils.equalsAnyIgnoreCase(applicationName, a.getName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public ApplicationCommonDetailsDto getApplicationDetailsFromName(String applicationName) throws ApplicationServiceException {
+        List<ApplicationCommonDetailsDto> applicationCommonDetails = getApplicationCommonDetails();
+        return applicationCommonDetails.stream()
+                .filter(Objects:: nonNull)
+                .filter(app -> StringUtils.equalsAnyIgnoreCase(applicationName, app.getName()))
                 .findFirst()
                 .orElse(null);
     }
@@ -598,7 +601,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public void updateAmtProfileDebugOption(String appGuid, boolean amtProfile) {
         try {
             //--------------------------------------------------------------
-            //The PUT shouldn't returned anything than void.class, but doing so clashed as object mapper is trying to map
+            //The PUT shouldn't return anything than void.class, but doing so clashed as object mapper is trying to map
             //Some response body. The response interpreter here does behave as expected.
             //Using String.class prevents from type clash (!#?)
             //--------------------------------------------------------------
@@ -648,9 +651,10 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public String discoverPackagesAndCreateDeliveryConfiguration(String appGuid, String sourcePath, Exclusions exclusions,
-                                                                 VersionStatus status, boolean rescan, Consumer<DeliveryConfigurationDto> deliveryConfigConsumer
-            , boolean throwPackagePathCheckError) throws JobServiceException, PackagePathInvalidException {
+    public String discoverPackagesAndCreateDeliveryConfiguration(String appGuid
+            , String sourcePath, Exclusions exclusions
+            , VersionStatus status, boolean rescan, Consumer<DeliveryConfigurationDto> deliveryConfigConsumer
+            , boolean throwPackagePathCheckError) throws JobServiceException {
         ApiInfoDto apiInfoDto = restApiService.getAipConsoleApiInfo();
         String flag = apiInfoDto.isEnablePackagePathCheck() ? "enabled" : "disabled";
         log.info("enable.package.path.check option is " + flag);
@@ -663,23 +667,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .max(Comparator.comparing(VersionDto::getVersionDate)).orElse(null);
             Set<String> ignorePatterns = StringUtils.isEmpty(exclusions.getExcludePatterns()) ?
                     Exclusions.getDefaultIgnorePatterns() : Arrays.stream(exclusions.getExcludePatterns().split(",")).collect(Collectors.toSet());
-            if (apiInfoDto.isEnablePackagePathCheck() && previousVersion != null && rescan) {
-                ////////////////////////////////////////////////////////////
-                //Only performed if running the legacy workflow.
-                // So checked application status only when previous conditions met
-                ////////////////////////////////////////////////////////////
-                ApplicationDto applicationDto = getApplicationFromGuid(appGuid);
-                if (applicationDto == null || !applicationDto.isOnboarded()) {
-                    log.info("Applying packages path check rules (legacy workflow) ");
-                    packages = discoverPackages(appGuid, sourcePath, previousVersion.getGuid(), throwPackagePathCheckError);
-                }
 
-                log.info("Copy configuration from the previous version: " + previousVersion.getName());
-                if (StringUtils.isEmpty(exclusions.getExcludePatterns()) && previousVersion.getDeliveryConfiguration() != null) {
-                    ignorePatterns = previousVersion.getDeliveryConfiguration().getIgnorePatterns();
-                    exclusions.setExclusionRules(previousVersion.getDeliveryConfiguration().getExclusionRules());
-                }
-            }
             DeliveryConfigurationDto deliveryConfigurationDto = DeliveryConfigurationDto.builder()
                     .ignorePatterns(ignorePatterns)
                     .exclusionRules(exclusions.getExclusionRules())
@@ -688,7 +676,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             if (deliveryConfigConsumer != null) {
                 deliveryConfigConsumer.accept(deliveryConfigurationDto);
             }
-            log.info("Exclusion patterns: " + deliveryConfigurationDto.getIgnorePatterns().stream().collect(Collectors.joining(", ")));
+            log.info("Exclusion patterns: " + String.join(", ", deliveryConfigurationDto.getIgnorePatterns()));
             log.info("Project exclusion rules: " + deliveryConfigurationDto.getExclusionRules().stream().map(ExclusionRuleDto::getRule).collect(Collectors.joining(", ")));
             BaseDto response = restApiService.postForEntity("/api/applications/" + appGuid + "/delivery-configuration", deliveryConfigurationDto, BaseDto.class);
             log.debug("Delivery configuration response " + response);
@@ -736,9 +724,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             Response resp = restApiService.exchangeForResponse("POST", "/api/applications/" + appGuid + "/delivery-configuration/discover-packages",
                     DiscoverPackageRequest.builder().previousVersionGuid(previousVersionGuid).sourcePath(sourcePath).build());
             int status = resp.code();
-            Response packageReponse = null;
+            Response packageResponse = null;
             if (status == 200) {
-                packageReponse = resp;
+                packageResponse = resp;
             } else if (status == 202) {
                 PendingResultDto resultDto = restApiService.mapResponse(resp, PendingResultDto.class);
                 while (status != 200) {
@@ -747,14 +735,14 @@ public class ApplicationServiceImpl implements ApplicationService {
                     status = response.code();
 
                     if (status == 200) {
-                        packageReponse = response;
+                        packageResponse = response;
                         break;
                     }
                     Thread.sleep(5000);
                 }
             }
-            if (packageReponse != null) {
-                Set<DeliveryPackageDto> packages = restApiService.mapResponse(packageReponse, new TypeReference<Set<DeliveryPackageDto>>() {
+            if (packageResponse != null) {
+                Set<DeliveryPackageDto> packages = restApiService.mapResponse(packageResponse, new TypeReference<Set<DeliveryPackageDto>>() {
                 });
 
                 ApplicationDto app = getApplicationFromGuid(appGuid);
@@ -766,6 +754,18 @@ public class ApplicationServiceImpl implements ApplicationService {
             return Collections.emptySet();
         } catch (ApiCallException | InterruptedException | ApplicationServiceException e) {
             throw new JobServiceException("Error discovering packages", e);
+        }
+    }
+
+    private List<ApplicationCommonDetailsDto> getApplicationCommonDetails() throws ApplicationServiceException {
+        try {
+            List<ApplicationCommonDetailsDto> result = restApiService.getForEntity(
+                    ApiEndpointHelper.getApplicationsCommonDetailsPath()
+                    , new TypeReference<List<ApplicationCommonDetailsDto>>() {});
+
+            return result == null ? new ArrayList<>() : result;
+        } catch (ApiCallException e) {
+            throw new ApplicationServiceException("Unable to get applications list", e);
         }
     }
 }

@@ -23,21 +23,22 @@ import java.io.File;
         name = "FastScan",
         mixinStandardHelpOptions = true,
         aliases = {"Fast-Scan"},
+        //edit description to match v3
         description = "Creates an application or uses an existing application to manage source code using a modern workflow in CAST Imaging Console."
 )
 @Slf4j
 @Getter
 @Setter
-public class OnboardApplicationFastScanCommand extends BasicCallable {
+public class FasctScanCommand extends BasicCallable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
-            description = "The Name of the application to analyze",
+            description = "The Name of the application to scan",
             required = true)
     private String applicationName;
 
-    @CommandLine.Option(names = {"-f", "--file"},
-            paramLabel = "FILE",
-            description = "A local zip or tar.gz file OR a path to a folder on the node where the source if saved")
+    @CommandLine.Option(names = {"-f", "--file-path"},
+            paramLabel = "FILE_PATH",
+            description = "A local .zip, .tar or .gz file OR a path to a folder on the node where the source is saved(Ensure your file contains: database scripts, properties files, libraries or archives, source code, etc.)")
     private File filePath;
 
     @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME",
@@ -61,7 +62,7 @@ public class OnboardApplicationFastScanCommand extends BasicCallable {
     //This version can be null if failed to convert from string
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
 
-    public OnboardApplicationFastScanCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+    public FasctScanCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
     }
 
@@ -73,7 +74,7 @@ public class OnboardApplicationFastScanCommand extends BasicCallable {
         }
 
         if (filePath == null) {
-            log.error("A valid file path required to perform the FAST SCAN operation");
+            log.error("A valid file path required to perform the Fast Scan operation");
             return Constants.RETURN_MISSING_FILE;
         }
         FastScanProperties fastScanProperties = FastScanProperties.builder()

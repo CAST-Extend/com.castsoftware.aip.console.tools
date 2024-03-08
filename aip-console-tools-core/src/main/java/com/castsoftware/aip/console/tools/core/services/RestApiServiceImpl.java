@@ -52,6 +52,7 @@ import java.util.logging.Level;
 
 import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_CAIP_VERSION;
 import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_TARGET_NODE;
+import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_X_API_KEY;
 
 @Log
 public class RestApiServiceImpl implements RestApiService {
@@ -285,6 +286,7 @@ public class RestApiServiceImpl implements RestApiService {
     private <T> T exchangeForEntity(String method, String endpoint, Object entity, JavaType javaType) throws ApiCallException {
         RequestBody body = HttpMethod.requiresRequestBody(method) ? getRequestBodyForEntity(entity) : null;
         Request.Builder requestBuilder = getRequestBuilder(endpoint)
+                .addHeader(PARAM_X_API_KEY, key)
                 .method(method, body);
 
         String caipVersion = null;
