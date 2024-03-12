@@ -55,7 +55,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {AipConsoleToolsCliIntegrationTest.class})
 @ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
-public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
+public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
     @InjectMocks
     private FastScanCommand fastScanCommand;
     @InjectMocks
@@ -81,6 +81,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
         fastScanCommand.setDomainName(null);
         fastScanCommand.setFilePath(null);
         fastScanCommand.setNodeName(null);
+        fastScanCommand.setDomainName(null);
     }
 
     @Override
@@ -115,9 +116,9 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
     }
 
     @Test
-    public void testOnboardApplicationFastScan_WithNotCompatibleVersion() throws Exception {
-        String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+    public void testFastScan_WithNotCompatibleVersion() throws Exception {
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
@@ -133,7 +134,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
     }
 
     @Test
-    public void testOnboardApplicationFastScan_WithCompatibleVersion() throws Exception {
+    public void testFastScan_WithCompatibleVersion() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
@@ -157,7 +158,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
     }
 
     @Test
-    public void testOnboardApplicationFastScan_WithRelativePath() throws Exception {
+    public void testFastScan_WithRelativePath() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", sourceFolderPath.toString(),
@@ -181,7 +182,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
     }
 
     @Test
-    public void testOnboardApplicationFastScan_OnboardingDisabled() throws Exception {
+    public void testFastScan_OnboardingDisabled() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
@@ -203,7 +204,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
 
 
     @Test
-    public void testOnboardApplicationFastScan_WithoutExistingVersion() throws Exception {
+    public void testFastScan_WithoutExistingVersion() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
@@ -242,7 +243,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
     }
 
     @Test
-    public void testOnboardApplicationFastScan_OnAnExistingNonOnboardedApplication() throws Exception {
+    public void testFastScan_OnAnExistingNonOnboardedApplication() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
@@ -276,7 +277,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
     }
 
     @Test
-    public void testOnboardApplicationFastScan_WithoutSourcesProvided() throws Exception {
+    public void testFastScan_WithoutSourcesProvided() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -295,7 +296,7 @@ public class OnboardApplicationFastScanCommandIntegrationTest extends AipConsole
     }
 
     @Test
-    public void testOnboardApplicationFastScan_OnRefreshSourcesContent() throws Exception {
+    public void testFastScan_OnRefreshSourcesContent() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
                 "--app-name", TestConstants.TEST_CREATRE_APP,
                 "-f", zippedSourcesPath.toString(),
