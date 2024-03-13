@@ -87,6 +87,11 @@ public class FastScanBuilder extends CommonActionBuilder {
     }
 
     @Override
+    public String getFilePath() {
+        return filePath;
+    }
+
+    @Override
     @DataBoundSetter
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
