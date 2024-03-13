@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-public class OnboardApplicationFastScanAction extends BaseAction implements RunAction2 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OnboardApplicationFastScanAction.class);
+public class FastScanAction extends BaseAction implements RunAction2 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FastScanAction.class);
     @CheckForNull
     private String applicationName;
     @Nullable
@@ -21,8 +21,6 @@ public class OnboardApplicationFastScanAction extends BaseAction implements RunA
     private String nodeName;
     @Nullable
     private String domainName;
-    @CheckForNull
-    private String onboardStrategy;
     private long sleepDuration = Constants.DEFAULT_SLEEP_DURATION;
 
     @Nullable
@@ -31,7 +29,7 @@ public class OnboardApplicationFastScanAction extends BaseAction implements RunA
 
     private transient Run run;
 
-    public OnboardApplicationFastScanAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
+    public FastScanAction(@CheckForNull String applicationName, @CheckForNull String filePath) {
         this.applicationName = applicationName;
         this.filePath = filePath;
     }
@@ -55,7 +53,7 @@ public class OnboardApplicationFastScanAction extends BaseAction implements RunA
     @CheckForNull
     @Override
     public String getDisplayName() {
-        return Messages.OnbordingApplicationBuilder_DescriptorImpl_displayName();
+        return Messages.FastScanApplicationBuilder_DescriptorImpl_displayName();
     }
 
     @CheckForNull

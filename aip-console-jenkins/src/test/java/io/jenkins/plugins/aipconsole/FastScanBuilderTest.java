@@ -29,9 +29,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
+public class FastScanBuilderTest extends BaseBuilderTest {
     @InjectMocks
-    private OnboardApplicationFastScanBuilder fastScanBuilder;
+    private FastScanBuilder fastScanBuilder;
 
     Path testSourcesPath;
 
@@ -42,7 +42,7 @@ public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
 
     private void createFastScanBuilderFilePath(String sourcesPath) throws Exception {
         testSourcesPath = createTempFileAndGetPath(sourcesPath);
-        fastScanBuilder = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
+        fastScanBuilder = new FastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         MockitoAnnotations.initMocks(this);
     }
     
@@ -52,7 +52,7 @@ public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
         FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
-        OnboardApplicationFastScanBuilder expectedResults = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
+        FastScanBuilder expectedResults = new FastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         expectedResults.setDomainName("");
         jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
     }
@@ -63,7 +63,7 @@ public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
         FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
-        OnboardApplicationFastScanBuilder expectedResults = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
+        FastScanBuilder expectedResults = new FastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         expectedResults.setDomainName("");
         jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
     }

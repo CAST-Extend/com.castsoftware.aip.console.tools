@@ -30,17 +30,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_emptyApiKey;
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_emptyUrl;
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobFailed;
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_jobServiceException;
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_error_unavailable;
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_cssInfo;
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_jobStarted;
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_startJob;
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_CreateApplication_info_success;
-import static io.jenkins.plugins.aipconsole.Messages.CreateApplicationBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 
 /**
@@ -176,12 +165,10 @@ public class CreateApplicationBuilder extends CommonActionBuilder {
         long actualTimeout = timeout != Constants.DEFAULT_HTTP_TIMEOUT ? timeout : getDescriptor().getTimeout();
 
         if (StringUtils.isBlank(apiServerUrl)) {
-            listener.error(CreateApplicationBuilder_CreateApplication_error_emptyUrl());
             run.setResult(Result.NOT_BUILT);
             return;
         }
         if (StringUtils.isBlank(apiKey)) {
-            listener.error(CreateApplicationBuilder_CreateApplication_error_emptyApiKey());
             run.setResult(Result.NOT_BUILT);
             return;
         }
@@ -204,12 +191,9 @@ public class CreateApplicationBuilder extends CommonActionBuilder {
             }
 
             String expandedCssServerName = run.getEnvironment(listener).expand(cssServerName);
-            log.println(CreateApplicationBuilder_CreateApplication_info_cssInfo(expandedAppName, StringUtils.isEmpty(expandedCssServerName) ? "default" : expandedCssServerName));
 
-            log.println(CreateApplicationBuilder_CreateApplication_info_startJob());
             String createJobGuid = jobsService.startCreateApplication(expandedAppName, expandedNodeName, expandedDomainName, inPlaceMode, null, expandedCssServerName);
-            log.println(CreateApplicationBuilder_CreateApplication_info_jobStarted());
-            Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
+           Consumer<LogContentDto> pollingCallback = (!getDescriptor().configuration.isVerbose()) ? null :
                     logContentDto -> {
                         logContentDto.getLines().forEach(logLine -> log.println(LogUtils.replaceAllSensitiveInformation(logLine.getContent())));
                     };
@@ -223,17 +207,13 @@ public class CreateApplicationBuilder extends CommonActionBuilder {
                     }, null);
 
             if (endState != JobState.COMPLETED) {
-                listener.error(CreateApplicationBuilder_CreateApplication_error_jobFailed(endState.toString()));
-                run.setResult(defaultResult);
+                 run.setResult(defaultResult);
             } else {
-                log.println(CreateApplicationBuilder_CreateApplication_info_success(expandedAppName, applicationGuid));
                 run.setResult(Result.SUCCESS);
             }
         } catch (JobServiceException e) {
-            listener.error(CreateApplicationBuilder_CreateApplication_error_jobServiceException(expandedAppName, e.getLocalizedMessage()));
             run.setResult(defaultResult);
         } catch (ApiCallException e) {
-            listener.error(CreateApplicationBuilder_CreateApplication_error_unavailable(apiServerUrl));
             run.setResult(defaultResult);
         }
     }
@@ -253,7 +233,7 @@ public class CreateApplicationBuilder extends CommonActionBuilder {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return CreateApplicationBuilder_DescriptorImpl_displayName();
+            return "";
         }
 
         @Override
