@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.util.concurrent.Future;
 
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_DescriptorImpl_bad_server_version;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanForbidden;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,7 +32,7 @@ public class FastScanBuilderTest extends BaseBuilderTest {
     @InjectMocks
     private FastScanBuilder fastScanBuilder;
 
-    Path testSourcesPath;
+    private Path testSourcesPath;
 
     @Before
     public void setUp() throws Exception {
@@ -45,58 +44,29 @@ public class FastScanBuilderTest extends BaseBuilderTest {
         fastScanBuilder = new FastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         MockitoAnnotations.initMocks(this);
     }
-    
+
     @Test
-    public void testOnboardingApplicationFastScanJob() throws Exception {
+    public void testFastScanJob() throws Exception {
         createFastScanBuilderFilePath(BaseBuilderTest.TEST_ARCHIVE_NAME);
         FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
         FastScanBuilder expectedResults = new FastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         expectedResults.setDomainName("");
+        expectedResults.setNodeName("");
         jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
     }
 
     @Test
-    public void testOnboardingApplicationFastScanJobWithRelativePath() throws Exception {
+    public void testFastScanJobWithRelativePath() throws Exception {
         createFastScanBuilderFilePath(BaseBuilderTest.TEST_FOLDER_NAME);
         FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
         FastScanBuilder expectedResults = new FastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         expectedResults.setDomainName("");
+        expectedResults.setNodeName("");
         jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
-    }
-
-    @Test
-    public void testFastScan_OnAnExistingNonOnboardApplication() throws Exception {
-        createFastScanBuilderFilePath(BaseBuilderTest.TEST_ARCHIVE_NAME);
-        FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
-
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(SemVerUtils.getMinCompatibleVersion().toString()).build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-
-        ApiInfoDto infoDto = applicationService.getAipConsoleApiInfo();
-        doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
-
-        ApplicationDto applicationDto = ApplicationDto.builder()
-                .guid(BaseBuilderTest.TEST_APP_GUID)
-                .name(BaseBuilderTest.TEST_APP_NAME).build();
-
-        applicationDto.setOnboarded(false);
-        when(applicationService.getApplicationFromName(BaseBuilderTest.TEST_APP_NAME)).thenReturn(applicationDto);
-
-        doNothing().when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
-        doReturn(BaseBuilderTest.TEST_APP_GUID).when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
-        doReturn(true).when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
-        //Should work without imaging
-        when(applicationService.isImagingAvailable()).thenReturn(false);
-
-        Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
-        FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
-
-        jenkins.assertLogContains(OnbordingApplicationBuilder_DescriptorImpl_FastScanForbidden(), build);
     }
 
     @Test
