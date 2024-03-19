@@ -28,9 +28,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FastScanBuilderTest extends BaseBuilderTest {
+public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
     @InjectMocks
-    private FastScanBuilder fastScanBuilder;
+    private OnboardApplicationFastScanBuilder onboardApplicationFastScanBuilder;
 
     private Path testSourcesPath;
 
@@ -41,17 +41,17 @@ public class FastScanBuilderTest extends BaseBuilderTest {
 
     private void createFastScanBuilderFilePath(String sourcesPath) throws Exception {
         testSourcesPath = createTempFileAndGetPath(sourcesPath);
-        fastScanBuilder = new FastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
+        onboardApplicationFastScanBuilder = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void testFastScanJob() throws Exception {
         createFastScanBuilderFilePath(BaseBuilderTest.TEST_ARCHIVE_NAME);
-        FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
+        FreeStyleProject project = getProjectWithBuilder(onboardApplicationFastScanBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
-        FastScanBuilder expectedResults = new FastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
+        OnboardApplicationFastScanBuilder expectedResults = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         expectedResults.setDomainName("");
         expectedResults.setNodeName("");
         jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
@@ -60,10 +60,10 @@ public class FastScanBuilderTest extends BaseBuilderTest {
     @Test
     public void testFastScanJobWithRelativePath() throws Exception {
         createFastScanBuilderFilePath(BaseBuilderTest.TEST_FOLDER_NAME);
-        FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
+        FreeStyleProject project = getProjectWithBuilder(onboardApplicationFastScanBuilder);
         project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
-        FastScanBuilder expectedResults = new FastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
+        OnboardApplicationFastScanBuilder expectedResults = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         expectedResults.setDomainName("");
         expectedResults.setNodeName("");
         jenkins.assertEqualDataBoundBeans(expectedResults, builtProject);
@@ -72,7 +72,7 @@ public class FastScanBuilderTest extends BaseBuilderTest {
     @Test
     public void testFastScan_OnBadServerVersion() throws Exception {
         createFastScanBuilderFilePath(BaseBuilderTest.TEST_ARCHIVE_NAME);
-        FreeStyleProject project = getProjectWithBuilder(fastScanBuilder);
+        FreeStyleProject project = getProjectWithBuilder(onboardApplicationFastScanBuilder);
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.8.0-SNAPSHOT-133").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();

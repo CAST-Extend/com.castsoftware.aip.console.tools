@@ -59,7 +59,7 @@ import static io.jenkins.plugins.aipconsole.Messages.FastScanApplicationBuilder_
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_changed;
 import static io.jenkins.plugins.aipconsole.Messages.JobsSteps_jobServiceException;
 
-public class FastScanBuilder extends CommonActionBuilder {
+public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
 
     private final static ResourceBundleHolder holder = ResourceBundleHolder.get(io.jenkins.plugins.aipconsole.Messages.class);
     private final static String MESSAGES_STEP_KEY_PREFIX = "FastScanApplicationBuilder.jobSteps.";
@@ -76,7 +76,7 @@ public class FastScanBuilder extends CommonActionBuilder {
     private String domainName;
 
     @DataBoundConstructor
-    public FastScanBuilder(String applicationName, String filePath) {
+    public OnboardApplicationFastScanBuilder(String applicationName, String filePath) {
         this.applicationName = applicationName;
         this.filePath = filePath;
     }
