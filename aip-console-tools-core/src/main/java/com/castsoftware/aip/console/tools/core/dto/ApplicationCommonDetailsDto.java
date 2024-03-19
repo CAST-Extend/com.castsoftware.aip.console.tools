@@ -1,5 +1,7 @@
 package com.castsoftware.aip.console.tools.core.dto;
 
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,6 +9,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
+@EqualsAndHashCode
 public class ApplicationCommonDetailsDto {
 
     private String name;

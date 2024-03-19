@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -52,7 +53,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 public class ApplicationServiceImpl implements ApplicationService {
@@ -227,9 +227,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
 
             applicationDto = getApplicationDetails(applicationDto.getGuid());
-            Set<String> statuses = Stream.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED,
-                            VersionStatus.SNAPSHOT_DONE, VersionStatus.FULLY_ANALYZED, VersionStatus.ANALYZED)
-                    .map(VersionStatus::toString).collect(Collectors.toSet());
+            Set<String> statuses = EnumSet.of(VersionStatus.ANALYSIS_DATA_PREPARED, VersionStatus.IMAGING_PROCESSED,
+                    VersionStatus.SNAPSHOT_DONE, VersionStatus.FULLY_ANALYZED, VersionStatus.ANALYZED)
+                    .stream().map(VersionStatus::toString).collect(Collectors.toSet());
             VersionDto versionDto = applicationDto.getVersion();
             if (!statuses.contains(versionDto.getStatus().toString())) {
                 log.error("Application version not in the status that allows application data to be published to CAST Imaging: actual status is " + versionDto.getStatus().toString());
