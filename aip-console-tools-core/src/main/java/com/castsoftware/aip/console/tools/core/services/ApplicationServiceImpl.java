@@ -145,33 +145,19 @@ public class ApplicationServiceImpl implements ApplicationService {
         log.info("Deep-Analyze command will perform application '{}' deep analysis: verbose= '{}'"
                 , properties.getApplicationName(), properties.isVerbose());
         log.info("Deep-Analysis args:");
-        log.info("Application: {}\nsnapshot name: {}\nmodule generation type: {}\nsleep: {}\n"
+        log.info("\nApplication: {}\nsnapshot name: {}\nmodule generation type: {}\nprocess imaging: {}\nsleep: {}\n"
                 , properties.getApplicationName(), StringUtils.isEmpty(properties.getSnapshotName()) ? "Auto assigned" : properties.getSnapshotName()
-                , properties.getModuleGenerationType().toString(), properties.getSleepDuration());
+                , properties.getModuleGenerationType().toString(), properties.isProcessImaging(), properties.getSleepDuration());
 
         try {
-            boolean OnBoardingModeWasOn = isOnboardingSettingsEnabled();
-            if (!OnBoardingModeWasOn) {
-                log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
-                return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
-            }
-
-            log.info("Searching for application '{}' on CAST Imaging Console", properties.getApplicationName());
+            boolean isProcessImaging = properties.isProcessImaging();
+            String applicationName = properties.getApplicationName();
+            log.info("Searching for application '{}' on CAST Imaging Console", applicationName);
             String existingAppGuid = null;
-            ApplicationDto app = getApplicationFromName(properties.getApplicationName());
-            if (app != null) {
-                existingAppGuid = app.getGuid();
-                app = getApplicationDetails(existingAppGuid);
-            }
-
-            boolean deepAnalysisCondition = (app != null) && app.isOnboarded();
-            if (!deepAnalysisCondition) {
-                if (app != null && !app.isOnboarded()) {
-                    log.info("The existing application has not been created using the Fast-Scan workflow.\n" +
-                            "The 'Deep-Analysis' operation will not be applied");
-                    return Constants.RETURN_ONBOARD_DEEP_ANALYSIS_FORBIDDEN;
-                }
-
+            ApplicationCommonDetailsDto applicationCommonDetailsDto = getApplicationDetailsFromName(applicationName);
+            if (applicationCommonDetailsDto != null) {
+                existingAppGuid = applicationCommonDetailsDto.getGuid();
+            } else {
                 log.error("Unable to trigger Deep-Analysis. The actual conditions required Fast-Scan to be running first.");
                 return Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED;
             }
@@ -180,16 +166,17 @@ public class ApplicationServiceImpl implements ApplicationService {
             if (StringUtils.isNotEmpty(properties.getSnapshotName())) {
                 log.info("  With snapshot name: " + properties.getSnapshotName());
             }
-            String caipVersion = app.getCaipVersion();
-            String targetNode = app.getTargetNode();
+            ApplicationOnboardingDto applicationOnboardingDto = getApplicationOnboarding(existingAppGuid);
+            String caipVersion = applicationOnboardingDto.getCaipVersion();
+            String targetNode = applicationOnboardingDto.getTargetNode();
 
             //Run Analysis
-            if (!isImagingAvailable()) {
-                log.info("The 'Deep Analysis' action is disabled because Imaging settings are missing from CAST AIP Console for Imaging.");
-                return Constants.RETURN_RUN_ANALYSIS_DISABLED;
+            if (isProcessImaging && !isImagingAvailable()) {
+                log.info("Imaging settings are unavailable, views won't be generated");
+                isProcessImaging = false;
             }
 
-            String jobStatus = runDeepAnalysis(existingAppGuid, targetNode, caipVersion, properties.getSnapshotName()
+            String jobStatus = runDeepAnalysis(existingAppGuid, targetNode, caipVersion, isProcessImaging, properties.getSnapshotName()
                     , properties.getModuleGenerationType(), properties.isVerbose(), properties.getLogPollingProvider());
             if (jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
                 log.info("Deep-Analyze done successfully");
@@ -468,7 +455,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
     
     @Override
-    public String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
+    public String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion
+            , boolean isProcessImaging, String snapshotName
+            , ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
                 .appGuid(applicationGuid);
         if (StringUtils.isNotEmpty(targetNode)) {
@@ -486,6 +475,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 && (moduleGenerationType != ModuleGenerationType.FULL_CONTENT)) {
             requestBuilder.moduleGenerationType(moduleGenerationType.toString());
         }
+        requestBuilder.processImaging(isProcessImaging);
         return runDeepAnalysis(requestBuilder.build(), logPollingProvider);
     }
 

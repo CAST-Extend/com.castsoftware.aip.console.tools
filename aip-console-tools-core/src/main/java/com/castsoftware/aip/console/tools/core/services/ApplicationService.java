@@ -91,7 +91,9 @@ public interface ApplicationService {
 
     boolean isImagingAvailable() throws ApplicationServiceException;
 
-    String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
+    String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion,boolean isProcessImaging
+            , String snapshotName, ModuleGenerationType moduleGenerationType
+            , boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
     String runDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 

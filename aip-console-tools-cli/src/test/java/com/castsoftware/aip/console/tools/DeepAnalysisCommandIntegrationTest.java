@@ -1,7 +1,7 @@
 package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.BasicCallable;
-import com.castsoftware.aip.console.tools.commands.OnboardApplicationDeepAnalysisCommand;
+import com.castsoftware.aip.console.tools.commands.DeepAnalysisCommand;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
@@ -53,9 +53,9 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {AipConsoleToolsCliIntegrationTest.class})
 @ActiveProfiles(TestConstants.PROFILE_INTEGRATION_TEST)
-public class OnboardApplicationDeepAnalysisCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
+public class DeepAnalysisCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     @InjectMocks
-    private OnboardApplicationDeepAnalysisCommand deepAnalysisCommand;
+    private DeepAnalysisCommand deepAnalysisCommand;
     @InjectMocks
     private ApplicationServiceImpl applicationServiceImpl;
 

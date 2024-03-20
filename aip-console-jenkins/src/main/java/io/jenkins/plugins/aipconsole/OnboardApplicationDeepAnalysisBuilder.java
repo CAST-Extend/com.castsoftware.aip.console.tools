@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aipconsole;
 
-import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationCommonDetailsDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
@@ -24,16 +25,16 @@ import java.io.IOException;
 
 import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingRequiredParameters;
 import static io.jenkins.plugins.aipconsole.Messages.OnboardApplicationDeepAnalysisBuilder_DescriptorImpl_displayName;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_DeepAnalysisForbidden;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_mode;
 
 public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     final static boolean runAnalysis = true;
     @Nullable
     private String snapshotName;
     private long sleepDuration;
+
+    private boolean processImaging = false;
 
     private String moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
 
@@ -44,6 +45,14 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
 
     public String getModuleGenerationType() {
         return moduleGenerationType;
+    }
+
+    public boolean isProcessImaging() {
+        return processImaging;
+    }
+
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
     }
 
     @Override
@@ -71,52 +80,51 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     @Override
     protected void performClient(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         String expandedAppName = environmentVariables.expand(getApplicationName());
+        boolean isProcessImagingEnabled = isProcessImagingEnabled();
         try {
-            if (!applicationService.isOnboardingSettingsEnabled()) {
-                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_mode("OFF"));
-                run.setResult(getDefaultResult());
-                return;
-            }
-
             logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup(expandedAppName));
             String existingAppGuid = null;
-            boolean firstScan = true;
-            ApplicationDto app = applicationService.getApplicationFromName(expandedAppName);
+            ApplicationCommonDetailsDto app = applicationService.getApplicationDetailsFromName(expandedAppName);
             if (app != null) {
                 existingAppGuid = app.getGuid();
-                app = applicationService.getApplicationDetails(existingAppGuid);
-                firstScan = app == null || app.getVersion() == null || StringUtils.isEmpty(app.getVersion().getGuid()) || !app.isOnboarded();
             }
 
-            if (firstScan || app == null || !app.isOnboarded()) {
+            ApplicationOnboardingDto applicationOnboardingDto = applicationService.getApplicationOnboarding(existingAppGuid);
 
-                logger.println((app != null && !app.isOnboarded())
-                        ? OnbordingApplicationBuilder_DescriptorImpl_DeepAnalysisForbidden()
-                        : OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired());
+            //on-boarding
+            boolean firstScan = applicationOnboardingDto.isDiscoveryDone();
+
+            if (firstScan || app == null) {
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired());
                 run.setResult(getDefaultResult());
                 return;
             }
 
-            //on-boarding
-            String caipVersion = app.getCaipVersion();
-            String targetNode = app.getTargetNode();
+            String caipVersion = applicationOnboardingDto.getCaipVersion();
+            String targetNode = applicationOnboardingDto.getTargetNode();
+
             boolean verbose = getDescriptor().configuration.isVerbose();
+
             JenkinsLogPollingProviderServiceImpl jnksLogPollingProvider = new JenkinsLogPollingProviderServiceImpl(jobsService, run, listener, verbose, getSleepDuration());
 
-            //WEBITOOLS-214: Run Analysis or Deep analysis even when no Imaging available
             String expandedSsnapshotName = environmentVariables.expand(getSnapshotName());
             ModuleGenerationType moduleType = ModuleGenerationType.FULL_CONTENT; //default
             if (StringUtils.isNotEmpty(moduleGenerationType)) {
                 moduleType = ModuleGenerationType.fromString(moduleGenerationType);
             }
 
-            applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
+            applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, isProcessImagingEnabled, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
         } catch (ApplicationServiceException e) {
             e.printStackTrace(logger);
             run.setResult(getDefaultResult());
             return;
         }
     }
+
+    private boolean isProcessImagingEnabled() {
+        return isProcessImaging() || Boolean.valueOf(environmentVariables.get("PROCESS_IMAGING"));
+    }
+
 
     private static VersionInformation getMinVersion() {
         //This version can be null if failed to convert from string

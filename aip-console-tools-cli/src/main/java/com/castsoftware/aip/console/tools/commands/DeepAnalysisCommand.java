@@ -21,12 +21,12 @@ import picocli.CommandLine;
         name = "DeepAnalyze",
         mixinStandardHelpOptions = true,
         aliases = {"Deep-Analyze"},
-        description = "Performs a Deep Analysis for an existing application using a modern workflow in CAST Imaging Console."
+        description = "Performs a Deep Analysis for an existing application in CAST Imaging Console."
 )
 @Slf4j
 @Getter
 @Setter
-public class OnboardApplicationDeepAnalysisCommand extends BasicCallable {
+public class DeepAnalysisCommand extends BasicCallable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
             description = "The Name of the application to analyze",
@@ -42,13 +42,18 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCallable {
             , description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno (default: ${DEFAULT-VALUE})")
     private ModuleGenerationType moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
 
+    @CommandLine.Option(names = {"--process-imaging"},
+            description = "If true then views will be generated." + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "false")
+    private boolean processImaging = false;
+
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
     //This version can be null if failed to convert from string
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
 
-    public OnboardApplicationDeepAnalysisCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+    public DeepAnalysisCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
     }
 
@@ -62,6 +67,7 @@ public class OnboardApplicationDeepAnalysisCommand extends BasicCallable {
                 .applicationName(applicationName)
                 .moduleGenerationType(moduleGenerationType)
                 .snapshotName(snapshotName)
+                .processImaging(processImaging)
                 .sleepDuration(sharedOptions.getSleepDuration())
                 .verbose(sharedOptions.isVerbose())
                 .logPollingProvider(new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration()))

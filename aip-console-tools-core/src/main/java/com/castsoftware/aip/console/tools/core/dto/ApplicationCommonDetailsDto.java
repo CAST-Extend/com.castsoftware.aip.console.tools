@@ -1,16 +1,14 @@
 package com.castsoftware.aip.console.tools.core.dto;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
+import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
-@Builder
-@EqualsAndHashCode
 public class ApplicationCommonDetailsDto {
 
     private String name;
@@ -24,5 +22,6 @@ public class ApplicationCommonDetailsDto {
     private Long numberOfObjects;
     private Long numberOfLinks;
     private int nbOfAlerts;
+    private Set<JobType> latestJobs;
 
 }
