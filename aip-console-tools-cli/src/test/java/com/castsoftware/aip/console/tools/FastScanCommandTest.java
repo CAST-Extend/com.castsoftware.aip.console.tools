@@ -112,13 +112,13 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
         Files.createDirectories(uploadPath);
         applicationDto = ApplicationDto.builder()
                 .guid(TestConstants.TEST_APP_GUID)
-                .name(TestConstants.TEST_CREATRE_APP).build();
+                .name(TestConstants.TEST_CREATE_APP).build();
     }
 
     @Test
     public void testFastScan_WithNotCompatibleVersion() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
@@ -136,14 +136,14 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
     @Test
     public void testFastScan_WithCompatibleVersion() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
 
         doThrow(ApiCallException.class).when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doThrow(ApplicationServiceException.class).when(applicationService).isOnboardingSettingsEnabled();
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationDto);
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
@@ -160,14 +160,14 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
     @Test
     public void testFastScan_WithRelativePath() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "-f", sourceFolderPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
 
         doThrow(ApiCallException.class).when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doThrow(ApplicationServiceException.class).when(applicationService).isOnboardingSettingsEnabled();
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationDto);
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
         when(applicationService.getApplicationOnboarding(TestConstants.TEST_APP_GUID)).thenReturn(onboardedAppDto);
@@ -184,7 +184,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
     @Test
     public void testFastScan_OnboardingDisabled() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
@@ -206,7 +206,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
     @Test
     public void testFastScan_WithoutExistingVersion() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE,
@@ -215,11 +215,11 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationDto);
         applicationDto.setOnboarded(true);
         doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
 
-        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATRE_APP).resolve("main_sources");
+        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATE_APP).resolve("main_sources");
         doReturn(sourcesPath.toString()).when(uploadService).uploadFileForOnboarding(zippedSourcesPath.toFile(), TestConstants.TEST_APP_GUID);
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
@@ -245,7 +245,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
     @Test
     public void testFastScan_OnAnExistingNonOnboardedApplication() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE,
@@ -254,11 +254,11 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationDto);
         applicationDto.setOnboarded(false);
         doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
 
-        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATRE_APP).resolve("main_sources");
+        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATE_APP).resolve("main_sources");
         doReturn(sourcesPath.toString()).when(uploadService).uploadFileForOnboarding(zippedSourcesPath.toFile(), TestConstants.TEST_APP_GUID);
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
@@ -279,14 +279,14 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
     @Test
     public void testFastScan_WithoutSourcesProvided() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE}; //default
 
         doNothing().when(restApiService).validateUrlAndKey(anyString(), anyString(), anyString());
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationDto);
         doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
 
         runStringArgs(fastScanCommand, args);
@@ -298,7 +298,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
     @Test
     public void testFastScan_OnRefreshSourcesContent() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
@@ -307,7 +307,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
         //To trigger refresh sources content
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationDto);
         VersionDto existingVersion = Mockito.mock(VersionDto.class);
         when(existingVersion.getGuid()).thenReturn(TestConstants.TEST_OBR_VERSION_GUID);
         when(existingVersion.getName()).thenReturn(TestConstants.TEST_OBR_VERSION_NAME);
@@ -320,7 +320,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
         applicationDto.setOnboarded(true);
         doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
 
-        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATRE_APP).resolve("main_sources");
+        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATE_APP).resolve("main_sources");
         doReturn(sourcesPath.toString()).when(uploadService).uploadFileForOnboarding(zippedSourcesPath.toFile(), TestConstants.TEST_APP_GUID);
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
@@ -349,7 +349,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Consumer.class), any(Consumer.class), any(Function.class), any(Supplier.class))).thenReturn(JobState.COMPLETED.toString());
 
@@ -362,7 +362,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
     @Test
     public void testFastScan_JobExecutionFailed() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
                 "--node-name", TestConstants.TEST_NODE};
@@ -371,7 +371,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
         //To trigger refresh sources content
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationDto);
         VersionDto existingVersion = Mockito.mock(VersionDto.class);
         when(existingVersion.getGuid()).thenReturn(TestConstants.TEST_OBR_VERSION_GUID);
         when(existingVersion.getName()).thenReturn(TestConstants.TEST_OBR_VERSION_NAME);
@@ -384,7 +384,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
         applicationDto.setOnboarded(true);
         doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
 
-        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATRE_APP).resolve("main_sources");
+        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATE_APP).resolve("main_sources");
         doReturn(sourcesPath.toString()).when(uploadService).uploadFileForOnboarding(zippedSourcesPath.toFile(), TestConstants.TEST_APP_GUID);
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
@@ -413,7 +413,7 @@ public class FastScanCommandTest extends AipConsoleToolsCliBaseTest {
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.FAILED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Consumer.class), any(Consumer.class), any(Function.class), any(Supplier.class))).thenReturn(jobStatus.getState().toString());
 

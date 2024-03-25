@@ -20,7 +20,7 @@ public class AddVersionCommandTest extends AipCommandTest<AddVersionCommand> {
     @Test
     public void testAddVersionCommand_WithDefaultParams() {
         String[] sb = new String[]{"add", "--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--file", TEST_SRC_FOLDER,
                 "--version-name", TEST_VERSION_NAME,
                 "--no-clone", "--copy-previous-config",
@@ -31,7 +31,7 @@ public class AddVersionCommandTest extends AipCommandTest<AddVersionCommand> {
 
         aipCommandLine.parseArgs(sb);
         assertEquals(TestConstants.TEST_API_KEY, aipCommand.getSharedOptions().getApiKey());
-        assertEquals(TestConstants.TEST_CREATRE_APP, aipCommand.getApplicationName());
+        assertEquals(TestConstants.TEST_CREATE_APP, aipCommand.getApplicationName());
         assertEquals(TEST_DOMAIN, aipCommand.getDomainName());
         assertEquals(TEST_BACKUP_NAME, aipCommand.getBackupName());
         assertEquals(TEST_VERSION_NAME, aipCommand.getVersionName());
@@ -46,7 +46,7 @@ public class AddVersionCommandTest extends AipCommandTest<AddVersionCommand> {
     @Test
     public void testAddVersionCommand_WithAliases() {
         String[] sb = new String[]{"add", "--apikey",
-                TestConstants.TEST_API_KEY, "-n", TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "-n", TestConstants.TEST_CREATE_APP,
                 "-f", TEST_SRC_FOLDER, "-v", TEST_VERSION_NAME,
                 "-a", TEST_APP_GUID,
                 "--new-configuration", "-c",
@@ -58,7 +58,7 @@ public class AddVersionCommandTest extends AipCommandTest<AddVersionCommand> {
 
         aipCommandLine.parseArgs(sb);
         assertEquals(TestConstants.TEST_API_KEY, aipCommand.getSharedOptions().getApiKey());
-        assertEquals(TestConstants.TEST_CREATRE_APP, aipCommand.getApplicationName());
+        assertEquals(TestConstants.TEST_CREATE_APP, aipCommand.getApplicationName());
         assertEquals(TEST_DOMAIN, aipCommand.getDomainName());
         assertEquals(TEST_APP_GUID, aipCommand.getApplicationGuid());
         assertEquals(TEST_BACKUP_NAME, aipCommand.getBackupName());
@@ -75,14 +75,14 @@ public class AddVersionCommandTest extends AipCommandTest<AddVersionCommand> {
     @Test
     public void testAddVersionCommand_WithSomeMissingParams() {
         String[] sb = new String[]{"add", "--apikey",
-                TestConstants.TEST_API_KEY, "-n", TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "-n", TestConstants.TEST_CREATE_APP,
                 "-f", TEST_SRC_FOLDER, "-v", TEST_VERSION_NAME,
                 "-a", TEST_APP_GUID,
                 "-c", "--auto-create", "-b"};
 
         aipCommandLine.parseArgs(sb);
         assertEquals(TestConstants.TEST_API_KEY, aipCommand.getSharedOptions().getApiKey());
-        assertEquals(TestConstants.TEST_CREATRE_APP, aipCommand.getApplicationName());
+        assertEquals(TestConstants.TEST_CREATE_APP, aipCommand.getApplicationName());
         assertEquals(true, StringUtils.isEmpty(aipCommand.getDomainName()));
         assertEquals(TEST_APP_GUID, aipCommand.getApplicationGuid());
         assertEquals(true, StringUtils.isEmpty(aipCommand.getBackupName()));

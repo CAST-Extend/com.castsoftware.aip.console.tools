@@ -63,11 +63,11 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testSnapshotCommand_WhenAnalysisNotDone() throws ApplicationServiceException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--process-imaging"};
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(TestConstants.TEST_APP);
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
         versionDto.setStatus(VersionStatus.ACCEPTED);
@@ -83,18 +83,18 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testSnapshotCommand_WhenFastScanWorkFlow_JobFailed() throws ApplicationServiceException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--snapshot-name", "SNAP-Name-here",
                 "--process-imaging"};
 
         ApplicationDto applicationDto = ApplicationDto.builder()
                 .guid(TestConstants.TEST_APP_GUID)
-                .name(TestConstants.TEST_CREATRE_APP)
+                .name(TestConstants.TEST_CREATE_APP)
                 .onboarded(true)
                 .schemaPrefix("ShouldHave_One").build();
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationDto);
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
         versionDto.setStatus(VersionStatus.ANALYSIS_DONE);
@@ -111,18 +111,18 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testSnapshotCommand_WhenFastScanWorkFlow_JobSucceeded() throws ApplicationServiceException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--snapshot-name", "SNAP-Name-here",
                 "--process-imaging"};
 
         ApplicationDto applicationDto = ApplicationDto.builder()
                 .guid(TestConstants.TEST_APP_GUID)
-                .name(TestConstants.TEST_CREATRE_APP)
+                .name(TestConstants.TEST_CREATE_APP)
                 .onboarded(true)
                 .schemaPrefix("ShouldHave_One").build();
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationDto);
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
         versionDto.setStatus(VersionStatus.ANALYSIS_DONE);
@@ -140,11 +140,11 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testSnapshotCommand_JobCompleted() throws ApplicationServiceException, JobServiceException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--process-imaging"};
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(TestConstants.TEST_APP);
         //Set<VersionDto> versions =
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
@@ -156,7 +156,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 
         runStringArgs(snapshotCommand, args);
@@ -170,11 +170,11 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testSnapshotCommand_JobFailed() throws ApplicationServiceException, JobServiceException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--process-imaging"};
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(TestConstants.TEST_APP);
         //Set<VersionDto> versions =
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
@@ -186,7 +186,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.STOPPED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 
         runStringArgs(snapshotCommand, args);
@@ -197,7 +197,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     }
 
     private void prepareForJobStatus(JobState state) throws ApplicationServiceException, JobServiceException {
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(TestConstants.TEST_APP);
 
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
@@ -209,7 +209,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(state);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
     }
 
@@ -217,7 +217,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testSnapshotCommand_WithConsolidation() throws ApplicationServiceException, JobServiceException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--process-imaging=false", "--upload-application"};
 
@@ -244,7 +244,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testSnapshotCommand_WithoutConsolidation() throws ApplicationServiceException, JobServiceException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--process-imaging=false", "--consolidation=false"};
 
@@ -272,7 +272,7 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testSnapshotCommand_WithJustImaging() throws ApplicationServiceException, JobServiceException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--process-imaging", "--consolidation=false"};
 

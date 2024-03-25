@@ -10,7 +10,7 @@ public class SnapshotCommandTest extends AipCommandTest<SnapshotCommand> {
     @Test
     public void testSnapshotCommand_WithDefaultParams() {
         String[] sb = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "-S", TestConstants.TEST_SNAPSHOT_NAME,
                 "--process-imaging",
@@ -18,7 +18,7 @@ public class SnapshotCommandTest extends AipCommandTest<SnapshotCommand> {
 
         aipCommandLine.parseArgs(sb);
         assertEquals(TestConstants.TEST_API_KEY, aipCommand.getSharedOptions().getApiKey());
-        assertEquals(TestConstants.TEST_CREATRE_APP, aipCommand.getApplicationName());
+        assertEquals(TestConstants.TEST_CREATE_APP, aipCommand.getApplicationName());
         assertEquals(TestConstants.TEST_VERSION_NAME, aipCommand.getVersionName());
         assertEquals(TestConstants.TEST_SNAPSHOT_NAME, aipCommand.getSnapshotName());
         assertEquals(true, aipCommand.getSharedOptions().isVerbose());

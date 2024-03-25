@@ -40,7 +40,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Paths;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -162,7 +161,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 return Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED;
             }
 
-            log.info("About to trigger new workflow for: 'Deep-Analysis' ");
+            log.info("About to trigger deep-analysis for application: {}", applicationName);
             if (StringUtils.isNotEmpty(properties.getSnapshotName())) {
                 log.info("  With snapshot name: " + properties.getSnapshotName());
             }
@@ -753,7 +752,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     ApiEndpointHelper.getApplicationsCommonDetailsPath()
                     , new TypeReference<List<ApplicationCommonDetailsDto>>() {});
 
-            return result == null ? new ArrayList<>() : result;
+            return result == null ? null : result;
         } catch (ApiCallException e) {
             throw new ApplicationServiceException("Unable to get applications list", e);
         }

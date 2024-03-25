@@ -70,7 +70,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         boolean verbose = true;
         String[] args = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--no-clone", "--auto-create", "--enable-security-dataflow", "--backup"
                 , "-S"};
@@ -88,9 +88,9 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         boolean verbose = true;
         String[] args = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-S"};
-        when(applicationService.getApplicationGuidFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(null);
+        when(applicationService.getApplicationGuidFromName(TestConstants.TEST_CREATE_APP)).thenReturn(null);
 
         runStringArgs(analyzeCommand, args);
 
@@ -105,9 +105,9 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         String[] args = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-S"};
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(TestConstants.TEST_APP);
         //Set<VersionDto> versions =
         when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Collections.emptySet());
 
@@ -124,9 +124,9 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         String[] args = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-S"};
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(TestConstants.TEST_APP);
         VersionDto versionDto = new VersionDto();
         versionDto.setName("The-Current-Version");
         when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
@@ -143,9 +143,9 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         boolean verbose = true;
         String[] args = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-S"};
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(TestConstants.TEST_APP);
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
         versionDto.setStatus(VersionStatus.DELIVERING);
@@ -162,11 +162,11 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testAnalyzeCommand_JobCompleted() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "-S", "--process-imaging"};
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(TestConstants.TEST_APP);
         //Set<VersionDto> versions =
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
@@ -181,7 +181,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 
         runStringArgs(analyzeCommand, args);
@@ -195,11 +195,11 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testAnalyzeCommand_JobCanceled() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "-S", "--process-imaging"};
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(TestConstants.TEST_APP);
         //Set<VersionDto> versions =
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
@@ -214,7 +214,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.CANCELED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 
         runStringArgs(analyzeCommand, args);
@@ -228,12 +228,12 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
     public void testAnalyzeCommand_WithModulePreserveConfigured() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "-S", "--process-imaging",
                 "--module-option", ModuleGenerationType.PRESERVE_CONFIGURED.toString()};
 
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(TestConstants.TEST_APP);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(TestConstants.TEST_APP);
         //Set<VersionDto> versions =
         VersionDto versionDto = new VersionDto();
         versionDto.setName(TestConstants.TEST_VERSION_NAME);
@@ -248,7 +248,7 @@ public class AnalyzeCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
 
         runStringArgs(analyzeCommand, args);

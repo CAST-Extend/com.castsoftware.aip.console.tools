@@ -27,6 +27,7 @@ import static io.jenkins.plugins.aipconsole.Messages.GenericError_error_missingR
 import static io.jenkins.plugins.aipconsole.Messages.OnboardApplicationDeepAnalysisBuilder_DescriptorImpl_displayName;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
 import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_applicationLookup;
+import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_label_scanMode;
 
 public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
     final static boolean runAnalysis = true;
@@ -86,13 +87,14 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
             String existingAppGuid = null;
             ApplicationCommonDetailsDto app = applicationService.getApplicationDetailsFromName(expandedAppName);
             if (app != null) {
+                logger.println(OnbordingApplicationBuilder_DescriptorImpl_label_scanMode(expandedAppName));
                 existingAppGuid = app.getGuid();
             }
 
             ApplicationOnboardingDto applicationOnboardingDto = applicationService.getApplicationOnboarding(existingAppGuid);
 
             //on-boarding
-            boolean firstScan = applicationOnboardingDto.isDiscoveryDone();
+            boolean firstScan = !applicationOnboardingDto.isDiscoveryDone();
 
             if (firstScan || app == null) {
                 logger.println(OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired());

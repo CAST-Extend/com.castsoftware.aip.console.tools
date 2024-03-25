@@ -78,7 +78,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         String[] args = defaultArgs;
         // No existing application
         when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), eq(null), anyBoolean())).thenReturn(null);
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
 
         runStringArgs(addVersionCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
@@ -89,7 +89,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     @Test
     public void testAddVersionCommand_SimplifiedDeliveryWithFileProvided() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -112,7 +112,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     public void testAddVersionCommand_RunAddVersionJobCompleted() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", sflPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -135,7 +135,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     public void testAddVersionCommand_RunAddVersionJobCanceled() throws ApplicationServiceException, UploadException, JobServiceException, PackagePathInvalidException {
         boolean verbose = true;
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", sflPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -169,7 +169,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(status);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
         return jobStatus;
     }
@@ -192,7 +192,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     @Test
     public void testAddVersionCommand_NoConsolidationWithoutImaging() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -217,7 +217,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
 
         runStringArgs(addVersionCommand, args);
@@ -245,7 +245,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     @Test
     public void testAddVersionCommand_DefaultConsolidationWithoutImaging() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -270,7 +270,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
 
         runStringArgs(addVersionCommand, args);
@@ -298,7 +298,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     @Test
     public void testAddVersionCommand_DefaultConsolidationWithImaging() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -323,7 +323,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
         when(applicationService.publishToImaging(any(String.class), any(CliLogPollingProviderImpl.class))).thenReturn(TestConstants.TEST_APP_GUID);
 
@@ -357,7 +357,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     @Test
     public void testAddVersionCommand_WithImaging_BadVersionStatus() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -375,7 +375,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     @Test
     public void testAddVersionCommand_Onboarded_WithImaging_RightVersionStatus() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -394,7 +394,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     @Test
     public void testAddVersionCommand_Onboarded_WithImagingFailed_RightVersionStatus() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -425,7 +425,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     @Test
     public void testAddVersionCommand_InvalidModuleType() throws ApplicationServiceException {
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -433,7 +433,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
                 "--node-name", TestConstants.TEST_NODE};
         // No existing application
         when(applicationService.getOrCreateApplicationFromName(anyString(), anyBoolean(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(null);
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(AipConsoleToolsCliBaseTest.simplifiedModeApp);
 
         runStringArgs(addVersionCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
@@ -446,7 +446,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
     public void testAddVersionCommand_WithVersionDate() throws ApplicationServiceException, JobServiceException, UploadException, PackagePathInvalidException {
         String versionDateString = "2022-07-11T07:22:46";
         String[] args = new String[]{"--apikey",
-                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -473,7 +473,7 @@ public class AddVersionCommandIntegrationTest extends AipConsoleToolsCliBaseTest
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(applicationService.getVersionDate(versionDateString)).thenReturn(new Date(1657516966000L));
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
 

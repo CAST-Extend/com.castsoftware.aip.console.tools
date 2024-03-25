@@ -47,7 +47,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
     @Test
     public void testCreateApplicationCommand_SimplifiedDeliveryMode_DefaultNode() throws JobServiceException {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "-n", TestConstants.TEST_CREATRE_APP,
+                "-n", TestConstants.TEST_CREATE_APP,
                 "--inplace-mode",
                 "--domain-name", TestConstants.TEST_DOMAIN};
 
@@ -56,7 +56,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
 
         when(jobsService.startCreateApplication(any(String.class), eq(null), any(String.class), anyBoolean(), any(String.class), eq(null))).thenReturn(TestConstants.TEST_JOB_GUID);
         when(jobsService.pollAndWaitForJobFinished(any(String.class), any(Function.class), anyBoolean())).thenReturn(Constants.RETURN_OK);
@@ -72,7 +72,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
     public void testCreateApplicationCommand_SimplifiedDeliveryMode_WithCssServer() throws JobServiceException, ApiCallException {
         String TARGET_CSS_SERVER_NAME="host.docker.internal:2285";
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "-n", TestConstants.TEST_CREATRE_APP,
+                "-n", TestConstants.TEST_CREATE_APP,
                 "--inplace-mode",
                 "--domain-name", TestConstants.TEST_DOMAIN
         , "--css-server",TARGET_CSS_SERVER_NAME};
@@ -82,7 +82,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
 
         DatabaseConnectionSettingsDto oneDb = new DatabaseConnectionSettingsDto();
         oneDb.setDatabaseName("postgres"); oneDb.setGuid("b6059ea8-cec9-4e62-86a6-065def8ebb69");
@@ -102,7 +102,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
     @Test
     public void testCreateApplicationCommand_SimplifiedDeliveryMode_DefaultNodeCanceled() throws JobServiceException {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "-n", TestConstants.TEST_CREATRE_APP,
+                "-n", TestConstants.TEST_CREATE_APP,
                 "--inplace-mode",
                 "--domain-name", TestConstants.TEST_DOMAIN};
 
@@ -111,7 +111,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.CANCELED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
 
         when(jobsService.startCreateApplication(any(String.class), eq(null), any(String.class), anyBoolean(), any(String.class), eq(null))).thenReturn(TestConstants.TEST_JOB_GUID);
         when(jobsService.pollAndWaitForJobFinished(any(String.class), any(Function.class), anyBoolean())).thenReturn(Constants.RETURN_OK);
@@ -125,7 +125,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
 
     public void testCreateApplicationCommand_OnIncompatibleServerVersion() throws JobServiceException {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "-n", TestConstants.TEST_CREATRE_APP,
+                "-n", TestConstants.TEST_CREATE_APP,
                 "--inplace-mode",
                 "--domain-name", TestConstants.TEST_DOMAIN};
 
@@ -134,7 +134,7 @@ public class CreateApplicationCommandIntegrationTest extends AipConsoleToolsCliB
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(JobState.COMPLETED);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.4.9-funcrel").build();
         when(restApiService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);

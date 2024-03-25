@@ -69,7 +69,7 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
         ReflectionTestUtils.setField(applicationServiceImpl, "uploadService", uploadService);
         applicationDto = ApplicationDto.builder()
                 .guid(TestConstants.TEST_APP_GUID)
-                .name(TestConstants.TEST_CREATRE_APP).build();
+                .name(TestConstants.TEST_CREATE_APP).build();
     }
 
     @Override
@@ -81,13 +81,13 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
     @Test
     public void testPublishToImagingCommand_invalidParameter() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "-f", zippedSourcesPath.toString()}; //not expected
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion("2.5.2-funcrel").build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        doReturn(getTestApplicationMock()).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATRE_APP);
+        doReturn(getTestApplicationMock()).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATE_APP);
         initializeApplicationServiceMocks(getTestApplicationMock(), false);
 
         runStringArgs(publishToImagingCommand, args);
@@ -99,10 +99,10 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
     @Test
     public void testPublishToImagingCommand_OnboardApplicationSettingsOFF() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP
+                "--app-name", TestConstants.TEST_CREATE_APP
         };
 
-        doReturn(getTestApplicationMock()).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATRE_APP);
+        doReturn(getTestApplicationMock()).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATE_APP);
         doReturn(false).when(applicationService).isOnboardingSettingsEnabled();
         initializeApplicationServiceMocks(getTestApplicationMock(), false);
 
@@ -126,9 +126,9 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
     @Test
     public void testPublishToImagingCommand_ApplicationNotExists() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP};
+                "--app-name", TestConstants.TEST_CREATE_APP};
 
-        doReturn(null).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATRE_APP);
+        doReturn(null).when(applicationService).getApplicationFromName(TestConstants.TEST_CREATE_APP);
         initializeApplicationServiceMocks(null, false);
         runStringArgs(publishToImagingCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
@@ -139,7 +139,7 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
     @Test
     public void testPublishToImagingCommand() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP};
+                "--app-name", TestConstants.TEST_CREATE_APP};
 
         mockPublishToImagingCommand(true, JobState.COMPLETED);
         initializeApplicationServiceMocks(applicationDto, true);
@@ -153,7 +153,7 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
     @Test
     public void testPublishToImagingCommand_JobFailed() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP};
+                "--app-name", TestConstants.TEST_CREATE_APP};
 
         mockPublishToImagingCommand(true, JobState.FAILED);
         initializeApplicationServiceMocks(applicationDto, true);
@@ -167,7 +167,7 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
     @Test
     public void testPublishToImagingCommand_NonOnboardedApplication() throws Exception {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP};
+                "--app-name", TestConstants.TEST_CREATE_APP};
 
         mockPublishToImagingCommand(false, JobState.COMPLETED);
         when(jobsService.startPublishToImaging(TestConstants.TEST_APP_GUID, null, null)).thenReturn(TestConstants.TEST_JOB_GUID);
@@ -193,7 +193,7 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
         applicationDto.setVersion(existingVersion);
         applicationDto.setImagingTenant("default"); //something different suit also
         doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationDto);
 
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
@@ -211,7 +211,7 @@ public class PublishToImagingCommandIntegrationTest extends AipConsoleToolsCliBa
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(jobState);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Consumer.class), any(Consumer.class), any(Function.class), any(Supplier.class))).thenReturn(jobStatus.getState().toString());
     }

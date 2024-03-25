@@ -19,7 +19,7 @@ public class DeliverVersionCommandTest extends AipCommandTest<DeliverVersionComm
     @Test
     public void testDeliverVersionCommand_WithDefaultParams() {
         String[] sb = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--file", TEST_SRC_FOLDER, "--verbose=false",
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--no-clone",
@@ -30,7 +30,7 @@ public class DeliverVersionCommandTest extends AipCommandTest<DeliverVersionComm
 
         aipCommandLine.parseArgs(sb);
         assertEquals(TestConstants.TEST_API_KEY, aipCommand.getSharedOptions().getApiKey());
-        assertEquals(TestConstants.TEST_CREATRE_APP, aipCommand.getApplicationName());
+        assertEquals(TestConstants.TEST_CREATE_APP, aipCommand.getApplicationName());
         assertEquals(TestConstants.TEST_DOMAIN, aipCommand.getDomainName());
         assertEquals(TEST_BACKUP_NAME, aipCommand.getBackupName());
         assertEquals(TestConstants.TEST_VERSION_NAME, aipCommand.getVersionName());
@@ -45,7 +45,7 @@ public class DeliverVersionCommandTest extends AipCommandTest<DeliverVersionComm
     public void testDeliverVersionCommand_ExclusionsParams() {
         String rules = "EXCLUDE_EMPTY_PROJECTS,PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB,EXCLUDE_TEST_CODE";
         String[] sb = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--file", TEST_SRC_FOLDER, "--verbose=false",
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--no-clone",
@@ -58,7 +58,7 @@ public class DeliverVersionCommandTest extends AipCommandTest<DeliverVersionComm
 
         aipCommandLine.parseArgs(sb);
         assertEquals(TestConstants.TEST_API_KEY, aipCommand.getSharedOptions().getApiKey());
-        assertEquals(TestConstants.TEST_CREATRE_APP, aipCommand.getApplicationName());
+        assertEquals(TestConstants.TEST_CREATE_APP, aipCommand.getApplicationName());
         assertEquals(TestConstants.TEST_DOMAIN, aipCommand.getDomainName());
         assertEquals(TEST_BACKUP_NAME, aipCommand.getBackupName());
         assertEquals(TestConstants.TEST_VERSION_NAME, aipCommand.getVersionName());
@@ -76,7 +76,7 @@ public class DeliverVersionCommandTest extends AipCommandTest<DeliverVersionComm
     public void testDeliverVersionCommand_EmptyProjectExclusionRules() {
         String rules = "";
         String[] sb = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--file", TEST_SRC_FOLDER, "--verbose=false",
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--no-clone",

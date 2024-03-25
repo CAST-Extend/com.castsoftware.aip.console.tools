@@ -14,13 +14,13 @@ public class ArchitectureStudioCommandTest extends AipCommandTest<ArchitectureSt
     public void testArchitectureStudio_withDefaultParams(){
         String[] sb = new String[]{
                 "--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "--model-name", "Demo",
                 "--file-path", "path"
         };
 
         aipCommandLine.parseArgs(sb);
-        assertEquals(TestConstants.TEST_CREATRE_APP, aipCommand.getApplicationName());
+        assertEquals(TestConstants.TEST_CREATE_APP, aipCommand.getApplicationName());
     }
 
 }
