@@ -49,7 +49,7 @@ public class OnboardApplicationFastScanBuilderTest extends BaseBuilderTest {
     public void testFastScanJob() throws Exception {
         createFastScanBuilderFilePath(BaseBuilderTest.TEST_ARCHIVE_NAME);
         FreeStyleProject project = getProjectWithBuilder(onboardApplicationFastScanBuilder);
-        project = jenkins.configRoundtrip(project);
+       project = jenkins.configRoundtrip(project);
         Object builtProject = project.getBuildersList().get(0);
         OnboardApplicationFastScanBuilder expectedResults = new OnboardApplicationFastScanBuilder(BaseBuilderTest.TEST_APP_NAME, testSourcesPath.toString());
         expectedResults.setDomainName("");
