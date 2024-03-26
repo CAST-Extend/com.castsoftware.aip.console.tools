@@ -36,8 +36,8 @@ public class OnboardApplicationCommand extends BasicCallable {
             required = true)
     private String applicationName;
 
-    @CommandLine.Option(names = {"-f", "--file"},
-            paramLabel = "FILE",
+    @CommandLine.Option(names = {"-f", "--file-path"},
+            paramLabel = "FILE_PATH",
             description = "A local zip or tar.gz file OR a path to a folder on the node where the source is saved")
     private File filePath;
 
@@ -97,7 +97,8 @@ public class OnboardApplicationCommand extends BasicCallable {
                 .filePath(filePath)
                 .verbose(sharedOptions.isVerbose())
                 .sleepDuration(sharedOptions.getSleepDuration())
-                .logPollingProvider(logPollingProvider)
+                .logPollingProvider(new CliLogPollingProviderImpl(jobsService,
+                        getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration()))
                 .build();
 
         int exitCode = applicationService.fastScan(fastScanProperties);
@@ -107,12 +108,13 @@ public class OnboardApplicationCommand extends BasicCallable {
                     .applicationName(applicationName)
                     .moduleGenerationType(moduleGenerationType)
                     .snapshotName(snapshotName)
+                    .processImaging(false)
                     .sleepDuration(sharedOptions.getSleepDuration())
                     .verbose(sharedOptions.isVerbose())
-                    .logPollingProvider(logPollingProvider)
+                    .logPollingProvider(new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration()))
                     .build();
             exitCode = applicationService.deepAnalyze(deepAnalyzeProperties);
-            if (exitCode == Constants.RETURN_OK) {
+            if (exitCode == Constants.RETURN_OK ) {
                 long duration = sharedOptions.getSleepDuration();
                 boolean verbose = getSharedOptions().isVerbose();
                 exitCode = applicationService.publishToImaging(applicationName, duration, verbose, logPollingProvider);

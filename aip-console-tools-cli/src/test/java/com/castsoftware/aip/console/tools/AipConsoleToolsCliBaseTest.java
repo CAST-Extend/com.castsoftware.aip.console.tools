@@ -54,7 +54,7 @@ public abstract class AipConsoleToolsCliBaseTest {
     protected ApplicationService applicationService;
 
     protected CommandLine cliToTest;
-    protected static final ApplicationDto simplifiedModeApp = ApplicationDto.builder().guid(TestConstants.TEST_APP_GUID).name(TestConstants.TEST_CREATRE_APP).inPlaceMode(true).build();
+    protected static final ApplicationDto simplifiedModeApp = ApplicationDto.builder().guid(TestConstants.TEST_APP_GUID).name(TestConstants.TEST_CREATE_APP).inPlaceMode(true).build();
     protected String[] defaultArgs;
     protected Path sflPath;
     protected Path zippedSourcesPath;
@@ -78,7 +78,7 @@ public abstract class AipConsoleToolsCliBaseTest {
         when(applicationService.getAipConsoleApiInfo()).thenReturn(apiInfoDto);
         defaultArgs = new String[]{"--apikey",
                 TestConstants.TEST_API_KEY,
-                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--app-name=" + TestConstants.TEST_CREATE_APP,
                 "--file", sflPath.toString(),
                 "--version-name", TestConstants.TEST_VERSION_NAME,
                 "--no-clone", "--copy-previous-config",
@@ -148,7 +148,7 @@ public abstract class AipConsoleToolsCliBaseTest {
 
     protected ApplicationDto getTestApplicationMock() {
         ApplicationDto applicationDto = Mockito.mock(ApplicationDto.class);
-        when(applicationDto.getName()).thenReturn(TestConstants.TEST_CREATRE_APP);
+        when(applicationDto.getName()).thenReturn(TestConstants.TEST_CREATE_APP);
         when(applicationDto.getGuid()).thenReturn(TestConstants.TEST_APP_GUID);
         return applicationDto;
     }

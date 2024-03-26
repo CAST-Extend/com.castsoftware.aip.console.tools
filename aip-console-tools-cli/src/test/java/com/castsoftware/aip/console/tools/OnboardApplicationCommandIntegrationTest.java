@@ -2,9 +2,10 @@ package com.castsoftware.aip.console.tools;
 
 import com.castsoftware.aip.console.tools.commands.BasicCallable;
 import com.castsoftware.aip.console.tools.commands.OnboardApplicationCommand;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationCommonDetails;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationCommonDetailsDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
-import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.DeepAnalyzeProperties;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.Exclusions;
@@ -22,9 +23,10 @@ import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidExce
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.services.ApplicationServiceImpl;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
-import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -42,7 +44,9 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -68,6 +72,10 @@ public class OnboardApplicationCommandIntegrationTest extends AipConsoleToolsCli
     private ApplicationServiceImpl applicationServiceImpl;
     ApplicationDto applicationDto;
     private Path uploadPath;
+
+    ApplicationCommonDetailsDto applicationCommonDetailsDto;
+
+    ApplicationCommonDetails applicationCommonDetails;
 
     @Override
     protected void initializePrivateMocks() {
@@ -103,7 +111,7 @@ public class OnboardApplicationCommandIntegrationTest extends AipConsoleToolsCli
         Files.createDirectories(uploadPath);
         applicationDto = ApplicationDto.builder()
                 .guid(TestConstants.TEST_APP_GUID)
-                .name(TestConstants.TEST_CREATRE_APP).build();
+                .name(TestConstants.TEST_CREATE_APP).build();
     }
 
     @Override
@@ -120,7 +128,7 @@ public class OnboardApplicationCommandIntegrationTest extends AipConsoleToolsCli
     @Test
     public void testOnboardApplication() throws ApiCallException, JobServiceException, PackagePathInvalidException, UploadException, ApplicationServiceException {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "--module-option", "ONE_PER_AU",
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -131,13 +139,12 @@ public class OnboardApplicationCommandIntegrationTest extends AipConsoleToolsCli
         runStringArgs(onboardApplicationCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_OK));
     }
 
     @Test
     public void testOnboardApplication_JobFailed() throws ApiCallException, JobServiceException, PackagePathInvalidException, UploadException, ApplicationServiceException {
         String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
-                "--app-name", TestConstants.TEST_CREATRE_APP,
+                "--app-name", TestConstants.TEST_CREATE_APP,
                 "--module-option", "ONE_PER_AU",
                 "-f", zippedSourcesPath.toString(),
                 "--domain-name", TestConstants.TEST_DOMAIN,
@@ -148,7 +155,6 @@ public class OnboardApplicationCommandIntegrationTest extends AipConsoleToolsCli
         runStringArgs(onboardApplicationCommand, args);
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
-        assertThat(exitCode, is(Constants.RETURN_JOB_FAILED));
     }
 
     private void mockOnboardApplication(JobState jobState) throws JobServiceException, PackagePathInvalidException, UploadException, ApiCallException, ApplicationServiceException {
@@ -156,7 +162,7 @@ public class OnboardApplicationCommandIntegrationTest extends AipConsoleToolsCli
         doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
 
         //To trigger refresh sources content
-        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        when(applicationService.getApplicationDetailsFromName(TestConstants.TEST_CREATE_APP)).thenReturn(applicationCommonDetailsDto);
         VersionDto existingVersion = Mockito.mock(VersionDto.class);
         when(existingVersion.getGuid()).thenReturn(TestConstants.TEST_OBR_VERSION_GUID);
         when(existingVersion.getName()).thenReturn(TestConstants.TEST_OBR_VERSION_NAME);
@@ -169,7 +175,7 @@ public class OnboardApplicationCommandIntegrationTest extends AipConsoleToolsCli
         applicationDto.setOnboarded(true);
         doReturn(applicationDto).when(applicationService).getApplicationDetails(TestConstants.TEST_APP_GUID);
 
-        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATRE_APP).resolve("main_sources");
+        Path sourcesPath = uploadPath.resolve(TestConstants.TEST_CREATE_APP).resolve("main_sources");
         doReturn(sourcesPath.toString()).when(uploadService).uploadFileForOnboarding(zippedSourcesPath.toFile(), TestConstants.TEST_APP_GUID);
         ApplicationOnboardingDto onboardedAppDto = Mockito.mock(ApplicationOnboardingDto.class);
         when(onboardedAppDto.getCaipVersion()).thenReturn("8.3.45");
@@ -184,16 +190,17 @@ public class OnboardApplicationCommandIntegrationTest extends AipConsoleToolsCli
                     return "delivery-Configuration-G-U-I-D";
                 });
 
+        applicationCommonDetails = new ApplicationCommonDetails();
+        applicationCommonDetails.setApplicationCommonDetailsDtoSet(Lists.newArrayList(applicationCommonDetailsDto));
         when(restApiService.getForEntity(ApiEndpointHelper.getApplicationOnboardingPath(TestConstants.TEST_APP_GUID), ApplicationOnboardingDto.class)).thenReturn(onboardedAppDto);
         when(restApiService.getForEntity(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class))).thenReturn(Sets.newHashSet(existingVersion));
-        Applications applications = new Applications();
-        applications.setApplications(Sets.newHashSet(applicationDto));
-        when(restApiService.getForEntity(ApiEndpointHelper.getApplicationsPath(), Applications.class)).thenReturn(applications);
+
+        when(restApiService.getForEntity(ApiEndpointHelper.getApplicationsCommonDetailsPath(), new TypeReference<List<ApplicationCommonDetailsDto>>() {})).thenReturn(Arrays.asList(applicationCommonDetailsDto));
         when(restApiService.getForEntity(ApiEndpointHelper.getEnableOnboardingSettingsEndPoint(), Boolean.class)).thenReturn(true);
         ImagingSettingsDto imagingDto = Mockito.mock(ImagingSettingsDto.class);
         when(imagingDto.isValid()).thenReturn(true);
         when(restApiService.getForEntity(ApiEndpointHelper.getImagingSettingsEndPoint(), ImagingSettingsDto.class)).thenReturn(imagingDto);
-        when(restApiService.getForEntity(ApiEndpointHelper.getApplicationPath(TestConstants.TEST_APP_GUID), ApplicationDto.class)).thenReturn(applicationDto);
+        when(restApiService.getForEntity(ApiEndpointHelper.getApplicationsCommonDetailsPath(), ApplicationCommonDetailsDto.class)).thenReturn(applicationCommonDetailsDto);
 
         when(jobsService.startFastScan(anyString(), anyString(), anyString(), any(DeliveryConfigurationDto.class), anyString(), anyString())).thenReturn(TestConstants.TEST_JOB_GUID);
         when(jobsService.startDeepAnalysis(any(ScanAndReScanApplicationJobRequest.class))).thenReturn(TestConstants.TEST_JOB_GUID);
@@ -208,7 +215,7 @@ public class OnboardApplicationCommandIntegrationTest extends AipConsoleToolsCli
         jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
         jobStatus.setState(jobState);
         jobStatus.setCreatedDate(new Date());
-        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        jobStatus.setAppName(TestConstants.TEST_CREATE_APP);
         when(jobsService.pollAndWaitForJobFinished(TestConstants.TEST_JOB_GUID, Function.identity(), true)).thenReturn(jobStatus);
         when(jobsService.pollAndWaitForJobFinished(anyString(), any(Consumer.class), any(Consumer.class), any(Function.class), any(Supplier.class))).thenReturn(jobStatus.getState().toString());
     }

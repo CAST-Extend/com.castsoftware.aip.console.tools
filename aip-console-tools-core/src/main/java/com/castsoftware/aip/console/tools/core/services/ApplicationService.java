@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.services;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
+import com.castsoftware.aip.console.tools.core.dto.ApplicationCommonDetailsDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
@@ -90,7 +91,9 @@ public interface ApplicationService {
 
     boolean isImagingAvailable() throws ApplicationServiceException;
 
-    String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion, String snapshotName, ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
+    String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion,boolean isProcessImaging
+            , String snapshotName, ModuleGenerationType moduleGenerationType
+            , boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
     String runDeepAnalysis(ScanAndReScanApplicationJobRequest fastScanRequest, LogPollingProvider logPollingProvider) throws ApplicationServiceException;
 
@@ -172,4 +175,5 @@ public interface ApplicationService {
 
     void updateModuleGenerationType(String applicationGuid, JobRequestBuilder builder, ModuleGenerationType generationType, boolean firstVersion);
 
+    ApplicationCommonDetailsDto getApplicationDetailsFromName(String applicationName) throws ApplicationServiceException;
 }

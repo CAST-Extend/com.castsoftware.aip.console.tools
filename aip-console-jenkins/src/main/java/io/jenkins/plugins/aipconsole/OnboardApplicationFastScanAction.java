@@ -21,8 +21,6 @@ public class OnboardApplicationFastScanAction extends BaseAction implements RunA
     private String nodeName;
     @Nullable
     private String domainName;
-    @CheckForNull
-    private String onboardStrategy;
     private long sleepDuration = Constants.DEFAULT_SLEEP_DURATION;
 
     @Nullable
@@ -55,7 +53,7 @@ public class OnboardApplicationFastScanAction extends BaseAction implements RunA
     @CheckForNull
     @Override
     public String getDisplayName() {
-        return Messages.OnbordingApplicationBuilder_DescriptorImpl_displayName();
+        return Messages.FastScanApplicationBuilder_DescriptorImpl_displayName();
     }
 
     @CheckForNull

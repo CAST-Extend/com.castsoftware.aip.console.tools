@@ -162,5 +162,6 @@ public class Constants {
     public static final long DEFAULT_HTTP_TIMEOUT = 90L;
     public static final long DEFAULT_SLEEP_DURATION = 15L; //(15s)
     public static final String EXECUTION_PROFILE_DEFAULT = "default";
+    public static final String PARAM_X_API_KEY = "X-API-KEY";
 }
 

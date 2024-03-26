@@ -11,6 +11,7 @@ import lombok.Setter;
 public class DeepAnalyzeProperties {
     private String applicationName;
     private String snapshotName;
+    private boolean processImaging;
     @Builder.Default
     private ModuleGenerationType moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
     private long sleepDuration;

@@ -15,6 +15,8 @@ public class OnboardApplicationDeepAnalysisAction extends BaseAction implements 
     private String applicationName;
     @Nullable
     private String snapshotName;
+    @Nullable
+    private boolean processImaging = false;
 
     private String moduleGenerationType;
 
@@ -33,6 +35,14 @@ public class OnboardApplicationDeepAnalysisAction extends BaseAction implements 
 
     public void setModuleGenerationType(@CheckForNull String moduleGenerationType) {
         this.moduleGenerationType = moduleGenerationType;
+    }
+
+    public boolean isProcessImaging() {
+        return processImaging;
+    }
+
+    public void setProcessImaging(boolean processImaging) {
+        this.processImaging = processImaging;
     }
 
     @Override

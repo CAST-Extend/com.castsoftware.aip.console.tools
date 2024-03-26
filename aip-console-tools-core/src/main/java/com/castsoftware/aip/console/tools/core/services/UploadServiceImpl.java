@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -83,8 +82,9 @@ public class UploadServiceImpl implements UploadService {
         String sourcePath;
         final String[] uploadedFilePath = new String[1];
         String archiveExtension = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath.getName());
+        String fileName = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileName(filePath.getName());
         if (StringUtils.equalsAnyIgnoreCase(archiveExtension, Constants.ALLOWED_ARCHIVE_EXTENSIONS)) {
-            sourcePath = UUID.randomUUID().toString() + "." + archiveExtension;
+            sourcePath = fileName + "." + archiveExtension;
             try (InputStream stream = Files.newInputStream(filePath.toPath())) {
                 long fileSize = filePath.length();
                 if (!uploadInputStreamForOnboarding(applicationGuid, sourcePath, fileSize, stream, (targetPath) -> uploadedFilePath[0] = targetPath)) {
@@ -98,7 +98,7 @@ public class UploadServiceImpl implements UploadService {
         }
 
         //call api to check if the folder exists
-        return checkServerFolder(filePath);
+        return checkServerFolder(fileName);
     }
 
     @Override
@@ -106,8 +106,9 @@ public class UploadServiceImpl implements UploadService {
         ApiInfoDto apiInfo = restApiService.getAipConsoleApiInfo();
         String sourcePath;
         String archiveExtension = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileExtension(filePath.getName());
+        String fileName = com.castsoftware.aip.console.tools.core.utils.FilenameUtils.getFileName(filePath.getName());
         if (StringUtils.equalsAnyIgnoreCase(archiveExtension, Constants.ALLOWED_ARCHIVE_EXTENSIONS)) {
-            sourcePath = UUID.randomUUID().toString() + "." + archiveExtension;
+            sourcePath = fileName + "." + archiveExtension;
             try (InputStream stream = Files.newInputStream(filePath.toPath())) {
                 long fileSize = filePath.length();
                 if (!uploadInputStream(appGuid, sourcePath, fileSize, stream, false)) {
@@ -119,14 +120,14 @@ public class UploadServiceImpl implements UploadService {
                 throw new UploadException(e);
             }
         }
-        return checkServerFolder(filePath);
+        return checkServerFolder(fileName);
     }
 
-    private String checkServerFolder(File filePath) throws UploadException {
+    private String checkServerFolder(String fileName) throws UploadException {
         try {
-            FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + filePath.toPath()).build();
+            FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + fileName).build();
             restApiService.postForEntity("/api/server-folders", fileCommandRequest, String.class);
-            return "sources:" + filePath.toPath();
+            return "sources:" + fileName;
         } catch (ApiCallException e) {
             throw new UploadException("Unable to check remote location of provided folder.", e);
         }
@@ -170,7 +171,7 @@ public class UploadServiceImpl implements UploadService {
         ChunkedUploadDto dto;
         try {
             log.info("Creating a new upload for application");
-            log.fine("Params : " + createUploadEndpoint + "\n" + request.toString());
+            log.fine("Params : " + createUploadEndpoint + "\n" + request);
             dto = restApiService.postForEntity(createUploadEndpoint, request, ChunkedUploadDto.class);
         } catch (ApiCallException e) {
             log.log(Level.SEVERE, "Error while trying to create upload", e);
