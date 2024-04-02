@@ -65,7 +65,7 @@ public class ArchitectureStudioCommand extends BasicCallable {
             required = true)
     private String filePath;
 
-    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
+    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("3.0.0");
 
     public ArchitectureStudioCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);

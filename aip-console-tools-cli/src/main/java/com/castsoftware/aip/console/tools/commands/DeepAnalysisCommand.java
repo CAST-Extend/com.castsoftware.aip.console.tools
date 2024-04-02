@@ -51,7 +51,7 @@ public class DeepAnalysisCommand extends BasicCallable {
     private SharedOptions sharedOptions;
 
     //This version can be null if failed to convert from string
-    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
+    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("3.0.0");
 
     public DeepAnalysisCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);

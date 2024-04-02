@@ -68,7 +68,7 @@ public class OnboardApplicationCommand extends BasicCallable {
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
-    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.8.0");
+    private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("3.0.0");
 
     public OnboardApplicationCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
