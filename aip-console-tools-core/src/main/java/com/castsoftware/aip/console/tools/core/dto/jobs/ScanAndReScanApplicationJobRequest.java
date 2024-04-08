@@ -15,7 +15,7 @@ public class ScanAndReScanApplicationJobRequest {
     private String snapshotName;
 
     @Builder.Default
-    private boolean runAnalysis = false;
+    private boolean runAnalysis = true;
     @Builder.Default
     private boolean uploadApplication = false;
     @Builder.Default

@@ -7,7 +7,7 @@ public class SemVerUtils {
     }
 
     public static VersionInformation getMinCompatibleVersion() {
-        return VersionInformation.fromVersionString("2.11.0-funcrel");
+        return VersionInformation.fromVersionString("3.0.0-funcrel");
     }
 
     public static boolean isNewerThan115(SemVer semVer) {

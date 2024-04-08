@@ -2,8 +2,7 @@ package com.castsoftware.aip.console.tools.core.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import static org.apache.commons.io.FilenameUtils.getName;
 
 public class FilenameUtils {
     private FilenameUtils() {
@@ -15,5 +14,9 @@ public class FilenameUtils {
             return "tar.gz";
         }
         return org.apache.commons.io.FilenameUtils.getExtension(filename);
+    }
+
+    public static String getFileName(String filename) {
+        return org.apache.commons.io.FilenameUtils.removeExtension(getName(filename));
     }
 }

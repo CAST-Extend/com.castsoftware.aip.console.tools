@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 public class ApiEndpointHelper {
 
     private static final String ROOT_PATH = "/api";
+
+    private static final String COMMON_ROOT_PATH = "/api/common";
     private static final String URL_SETTINGS_PATH = ROOT_PATH + "/settings";
     private static final String APPLICATIONS_ENDPOINT = "/applications";
     private static final String JOBS_ENDPOINT = "/jobs";
@@ -239,5 +241,9 @@ public class ApiEndpointHelper {
         assert jobGuid != null && !jobGuid.isEmpty();
 
         return getJobsEndpoint() + "/" + jobGuid;
+    }
+
+    public static String getApplicationsCommonDetailsPath() {
+        return COMMON_ROOT_PATH + APPLICATIONS_ENDPOINT;
     }
 }

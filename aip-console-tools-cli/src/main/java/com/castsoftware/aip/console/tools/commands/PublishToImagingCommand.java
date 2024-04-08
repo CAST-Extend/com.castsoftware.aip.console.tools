@@ -31,7 +31,7 @@ public class PublishToImagingCommand extends BasicCallable {
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
-    private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("2.5.0");
+    private final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("3.0.0");
 
     protected PublishToImagingCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);

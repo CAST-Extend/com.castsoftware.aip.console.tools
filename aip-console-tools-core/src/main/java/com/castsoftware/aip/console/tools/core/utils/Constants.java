@@ -20,8 +20,7 @@ public class Constants {
     public static final int RETURN_SOURCE_FOLDER_NOT_FOUND = 8;
     public static final int RETURN_APPLICATION_NO_VERSION = 9;
     public static final int RETURN_APPLICATION_VERSION_NOT_FOUND = 10;
-    public static final int RETURN_INPLACE_MODE_ERROR = 11;
-    // Keep ordinal to 9 fro backward compatibility
+    // Keep ordinal to 9 for backward compatibility
     public static final int RETURN_VERSION_WITH_ANALYSIS_DONE_NOT_FOUND = 9;
 
     public static final int RETURN_IMPORT_SETTINGS_ERROR = 15;
@@ -162,5 +161,6 @@ public class Constants {
     public static final long DEFAULT_HTTP_TIMEOUT = 90L;
     public static final long DEFAULT_SLEEP_DURATION = 15L; //(15s)
     public static final String EXECUTION_PROFILE_DEFAULT = "default";
+    public static final String PARAM_X_API_KEY = "X-API-KEY";
 }
 

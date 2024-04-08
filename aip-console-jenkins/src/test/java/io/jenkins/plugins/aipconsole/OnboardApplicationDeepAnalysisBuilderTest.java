@@ -1,7 +1,6 @@
 package io.jenkins.plugins.aipconsole;
 
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
-import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -14,8 +13,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.InputStream;
 import java.util.concurrent.Future;
 
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_DeepAnalysisForbidden;
-import static io.jenkins.plugins.aipconsole.Messages.OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,45 +44,12 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
     }
 
     @Test
-    public void testDeepAnalysis_OnExistingApplication_NotFastScanWorkflow() throws Exception {
-        FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
-
-        ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(SemVerUtils.getMinCompatibleVersion().toString()).build();
-        doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
-        doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
-        doReturn(false).when(applicationService).isImagingAvailable();
-
-        ApplicationDto applicationDto = ApplicationDto.builder()
-                .guid(BaseBuilderTest.TEST_APP_GUID)
-                .name(BaseBuilderTest.TEST_APP_NAME).build();
-
-        applicationDto.setOnboarded(false);
-        when(applicationService.getApplicationFromName(BaseBuilderTest.TEST_APP_NAME)).thenReturn(applicationDto);
-        when(applicationService.getApplicationDetails(BaseBuilderTest.TEST_APP_GUID)).thenReturn(applicationDto);
-
-        doNothing().when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
-        doReturn(BaseBuilderTest.TEST_APP_GUID).when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
-        doReturn(true).when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
-
-        Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
-        FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
-
-        jenkins.assertLogContains(OnbordingApplicationBuilder_DescriptorImpl_DeepAnalysisForbidden(), build);
-    }
-
-    @Test
     public void testDeepAnalysis_WhenFastScanRequired() throws Exception {
         FreeStyleProject project = getProjectWithBuilder(deepAnalysisBuilder);
 
         ApiInfoDto apiInfoDto = ApiInfoDto.builder().apiVersion(SemVerUtils.getMinCompatibleVersion().toString()).build();
         doReturn(apiInfoDto).when(restApiService).getAipConsoleApiInfo();
         doReturn(apiInfoDto).when(applicationService).getAipConsoleApiInfo();
-        doReturn(true).when(applicationService).isOnboardingSettingsEnabled();
-
-        ApplicationDto applicationDto = ApplicationDto.builder()
-                .guid(BaseBuilderTest.TEST_APP_GUID)
-                .name(BaseBuilderTest.TEST_APP_NAME).build();
 
         when(applicationService.getApplicationFromName(BaseBuilderTest.TEST_APP_NAME)).thenReturn(null);
         when(applicationService.getApplicationDetails(BaseBuilderTest.TEST_APP_GUID)).thenReturn(null);
@@ -96,7 +60,5 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
 
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
-
-        jenkins.assertLogContains(OnbordingApplicationBuilder_DescriptorImpl_FastScanRequired(), build);
     }
 }

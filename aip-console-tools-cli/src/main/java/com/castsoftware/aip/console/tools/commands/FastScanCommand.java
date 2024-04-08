@@ -1,9 +1,7 @@
 package com.castsoftware.aip.console.tools.commands;
 
-import com.castsoftware.aip.console.tools.core.dto.DeepAnalyzeProperties;
 import com.castsoftware.aip.console.tools.core.dto.ExclusionRuleType;
 import com.castsoftware.aip.console.tools.core.dto.FastScanProperties;
-import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
@@ -14,6 +12,7 @@ import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
@@ -21,24 +20,25 @@ import java.io.File;
 
 @Component
 @CommandLine.Command(
-        name = "OnboardApplication",
+        name = "FastScan",
         mixinStandardHelpOptions = true,
-        aliases = {"Onboard-Application"},
-        description = "Creates an application with Fast-Scan to manage source code using a modern workflow. Performs the Deep-Analyze and then Publish data to CAST Imaging Console."
+        aliases = {"Fast-Scan"},
+        //edit description to match v3
+        description = "Creates an application or uses an existing application to manage source code using a modern workflow in CAST Imaging Console."
 )
 @Slf4j
 @Getter
 @Setter
-public class OnboardApplicationCommand extends BasicCallable {
+public class FastScanCommand extends BasicCallable {
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
-            description = "The Name of the application to analyze",
+            description = "The Name of the application to scan",
             required = true)
     private String applicationName;
 
     @CommandLine.Option(names = {"-f", "--file-path"},
             paramLabel = "FILE_PATH",
-            description = "A local zip or tar.gz file OR a path to a folder on the node where the source is saved")
+            description = "A local .zip, .tar or .gz file OR a path to a folder on the node where the source is saved(Ensure your file contains: database scripts, properties files, libraries or archives, source code, etc.)")
     private File filePath;
 
     @CommandLine.Option(names = "--node-name", paramLabel = "NODE_NAME",
@@ -56,40 +56,27 @@ public class OnboardApplicationCommand extends BasicCallable {
             , description = "Project's exclusion rules, separated with comma. Valid values: ${COMPLETION-CANDIDATES}")
     private ExclusionRuleType[] exclusionRules;
 
-    @CommandLine.Option(names = {"-S", "--snapshot-name"},
-            paramLabel = "SNAPSHOT_NAME",
-            description = "The name of the snapshot to create")
-    private String snapshotName;
-
-    @CommandLine.Option(names = "--module-option"
-            , description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno (default: ${DEFAULT-VALUE})")
-    private ModuleGenerationType moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
-
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
+    //This version can be null if failed to convert from string
     private static final VersionInformation MIN_VERSION = VersionInformation.fromVersionString("3.0.0");
 
-    public OnboardApplicationCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
+    public FastScanCommand(RestApiService restApiService, JobsService jobsService, UploadService uploadService, ApplicationService applicationService) {
         super(restApiService, jobsService, uploadService, applicationService);
     }
 
     @Override
-    protected Integer processCallCommand() throws Exception {
+    public Integer processCallCommand() throws Exception {
+        if (StringUtils.isBlank(applicationName)) {
+            log.error("Application name should not be empty.");
+            return Constants.RETURN_APPLICATION_INFO_MISSING;
+        }
 
         if (filePath == null) {
-            log.error("A valid file path required to perform the FAST SCAN operation");
+            log.error("A valid file path required to perform the Fast Scan operation");
             return Constants.RETURN_MISSING_FILE;
         }
-
-        if (!applicationService.isOnboardingSettingsEnabled()) {
-            log.info("The 'Onboard Application' mode is OFF on CAST Imaging Console: Set it ON before proceed");
-            //applicationService.setEnableOnboarding(true);
-            return Constants.RETURN_ONBOARD_APPLICATION_DISABLED;
-        }
-
-        CliLogPollingProviderImpl logPollingProvider = new CliLogPollingProviderImpl(jobsService,
-                getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
         FastScanProperties fastScanProperties = FastScanProperties.builder()
                 .applicationName(applicationName)
                 .exclusionPatterns(exclusionPatterns)
@@ -100,29 +87,9 @@ public class OnboardApplicationCommand extends BasicCallable {
                 .logPollingProvider(new CliLogPollingProviderImpl(jobsService,
                         getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration()))
                 .build();
-
-        int exitCode = applicationService.fastScan(fastScanProperties);
-        if (exitCode == Constants.RETURN_OK) {
-            //Deep Analyze
-            DeepAnalyzeProperties deepAnalyzeProperties = DeepAnalyzeProperties.builder()
-                    .applicationName(applicationName)
-                    .moduleGenerationType(moduleGenerationType)
-                    .snapshotName(snapshotName)
-                    .processImaging(false)
-                    .sleepDuration(sharedOptions.getSleepDuration())
-                    .verbose(sharedOptions.isVerbose())
-                    .logPollingProvider(new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration()))
-                    .build();
-            exitCode = applicationService.deepAnalyze(deepAnalyzeProperties);
-            if (exitCode == Constants.RETURN_OK ) {
-                long duration = sharedOptions.getSleepDuration();
-                boolean verbose = getSharedOptions().isVerbose();
-                exitCode = applicationService.publishToImaging(applicationName, duration, verbose, logPollingProvider);
-            }
-        }
-        return exitCode;
+        return applicationService.fastScan(fastScanProperties);
     }
-
+    
     @Override
     protected VersionInformation getMinVersion() {
         return MIN_VERSION;
