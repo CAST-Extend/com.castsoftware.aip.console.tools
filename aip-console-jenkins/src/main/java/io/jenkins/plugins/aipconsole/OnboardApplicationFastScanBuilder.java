@@ -38,6 +38,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -49,8 +50,6 @@ import static io.jenkins.plugins.aipconsole.Messages.FastScanApplicationBuilder_
 import static io.jenkins.plugins.aipconsole.Messages.FastScanApplicationBuilder_DescriptorImpl_label_applicationLookup;
 import static io.jenkins.plugins.aipconsole.Messages.FastScanApplicationBuilder_DescriptorImpl_label_deliveryConfiguration;
 import static io.jenkins.plugins.aipconsole.Messages.FastScanApplicationBuilder_DescriptorImpl_label_deliveryConfiguration_done;
-import static io.jenkins.plugins.aipconsole.Messages.FastScanApplicationBuilder_DescriptorImpl_label_scanMode;
-import static io.jenkins.plugins.aipconsole.Messages.FastScanApplicationBuilder_DescriptorImpl_label_upload;
 import static io.jenkins.plugins.aipconsole.Messages.FastScanApplicationBuilder_DescriptorImpl_label_upload_done;
 import static io.jenkins.plugins.aipconsole.Messages.FastScanApplicationBuilder_DescriptorImpl_label_upload_failed;
 import static io.jenkins.plugins.aipconsole.Messages.FastScanApplicationBuilder_DescriptorImpl_missingFilePath;
@@ -258,20 +257,21 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
             log.println(FastScanApplicationBuilder_DescriptorImpl_label_applicationLookup(expandedAppName));
 
             ApplicationCommonDetailsDto app = applicationService.getApplicationDetailsFromName(expandedAppName);
+            if(app == null){
+                log.println("Application not found, starting new upload");
+                applicationGuid = null;
+            }
+            Path path = Paths.get(expandedFilePath);
+            String sourcePath = uploadService.uploadFileForOnboarding(
+                    path.toFile(), applicationGuid);
 
-            String scanMode = " Fast-scan/Refresh";
-            log.println(FastScanApplicationBuilder_DescriptorImpl_label_scanMode(expandedAppName + scanMode));
+            log.println(FastScanApplicationBuilder_DescriptorImpl_label_upload_done(sourcePath));
 
             boolean verbose = getDescriptor().configuration.isVerbose();
-            applicationGuid = app == null ? null : app.getGuid();
-            String uploadAction = StringUtils.isEmpty(applicationGuid) ? "upload sources" : "refresh sources content";
-            log.println(FastScanApplicationBuilder_DescriptorImpl_label_upload(uploadAction, expandedAppName));
-            String sourcePath = uploadService.uploadFileForOnboarding(Paths.get(expandedFilePath).toFile(), applicationGuid);
-            log.println(FastScanApplicationBuilder_DescriptorImpl_label_upload_done(uploadAction, sourcePath));
 
             if (app == null) {
                 applicationGuid = applicationService.onboardApplication(expandedAppName, expandedDomainName, verbose, sourcePath);
-                app = applicationService.getApplicationDetailsFromName(expandedAppName);
+            } else {
                 applicationGuid = app.getGuid();
             }
 

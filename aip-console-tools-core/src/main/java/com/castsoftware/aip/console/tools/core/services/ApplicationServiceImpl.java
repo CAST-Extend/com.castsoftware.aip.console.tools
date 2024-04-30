@@ -90,6 +90,9 @@ public class ApplicationServiceImpl implements ApplicationService {
 
             log.info("Searching for application '{}' on CAST Imaging Console", applicationName);
             ApplicationCommonDetailsDto applicationCommonDetailsDto = getApplicationDetailsFromName(applicationName);
+            if(applicationCommonDetailsDto == null){
+                log.info("Application not found, starting new upload");
+            }
             String sourcePath = uploadService.uploadFileForOnboarding(
                     fastScanProperties.getFilePath()
                     , applicationCommonDetailsDto != null ? applicationCommonDetailsDto.getGuid() : null);
@@ -99,11 +102,10 @@ public class ApplicationServiceImpl implements ApplicationService {
                 applicationGuid = onboardApplication(applicationName
                         , fastScanProperties.getDomainName(), fastScanProperties.isVerbose(), sourcePath);
                 log.info("Onboard Application job has started, application ID: " + applicationGuid);
-                //Refresh application information even when app was existing
-                applicationCommonDetailsDto = getApplicationDetailsFromName(applicationName);
+            } else {
+                applicationGuid = applicationCommonDetailsDto.getGuid();
             }
 
-            applicationGuid = applicationCommonDetailsDto.getGuid();
             ApplicationOnboardingDto applicationOnboardingDto = getApplicationOnboarding(applicationGuid);
             String caipVersion = applicationOnboardingDto.getCaipVersion();
             String targetNode = applicationOnboardingDto.getTargetNode();
