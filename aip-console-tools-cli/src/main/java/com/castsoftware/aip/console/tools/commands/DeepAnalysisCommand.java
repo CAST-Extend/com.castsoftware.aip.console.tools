@@ -44,8 +44,13 @@ public class DeepAnalysisCommand extends BasicCallable {
 
     @CommandLine.Option(names = {"--process-imaging"},
             description = "If true then views will be generated." + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
+    private boolean processImaging = true;
+
+    @CommandLine.Option(names = {"--publish-engineering"},
+            description = "If true then indicators will be generated." + " if specified without parameter: ${FALLBACK-VALUE}",
             fallbackValue = "false")
-    private boolean processImaging = false;
+    private boolean publishToEngineering = false;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -68,6 +73,7 @@ public class DeepAnalysisCommand extends BasicCallable {
                 .moduleGenerationType(moduleGenerationType)
                 .snapshotName(snapshotName)
                 .processImaging(processImaging)
+                .publishToEngineering(publishToEngineering)
                 .sleepDuration(sharedOptions.getSleepDuration())
                 .verbose(sharedOptions.isVerbose())
                 .logPollingProvider(new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration()))

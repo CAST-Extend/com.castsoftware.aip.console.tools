@@ -152,6 +152,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         try {
             boolean isProcessImaging = properties.isProcessImaging();
+            //boolean isPublishToEngineering = properties.isPublishToEngineering();
+
             String applicationName = properties.getApplicationName();
             log.info("Searching for application '{}' on CAST Imaging Console", applicationName);
             String existingAppGuid = null;
@@ -172,10 +174,13 @@ public class ApplicationServiceImpl implements ApplicationService {
             String targetNode = applicationOnboardingDto.getTargetNode();
 
             //Run Analysis
-            if (isProcessImaging && !isImagingAvailable()) {
+
+            /*
+            if (isPublishToEngineering && !getAipConsoleApiInfo().isDashboardIntegrated()) {
                 log.info("Imaging settings are unavailable, views won't be generated");
                 isProcessImaging = false;
             }
+            */
 
             String jobStatus = runDeepAnalysis(existingAppGuid, targetNode, caipVersion, isProcessImaging, properties.getSnapshotName()
                     , properties.getModuleGenerationType(), properties.isVerbose(), properties.getLogPollingProvider());

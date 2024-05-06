@@ -12,6 +12,7 @@ public class DeepAnalyzeProperties {
     private String applicationName;
     private String snapshotName;
     private boolean processImaging;
+    private boolean publishToEngineering;
     @Builder.Default
     private ModuleGenerationType moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
     private long sleepDuration;
