@@ -32,6 +32,7 @@
         <common-io.version>2.11.0</common-io.version>
         <httpclient.version>4.5.8</httpclient.version>
         <logging.log4j.version>2.17.1</logging.log4j.version>
+        <logging.log4j-api.version>1.7.36</logging.log4j-api.version>
         <google.guava.version>32.1.1-jre</google.guava.version>
         <fileupload.version>1.5</fileupload.version>
     </properties>
@@ -63,7 +64,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.8.1</version>
+                <version>3.9</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
