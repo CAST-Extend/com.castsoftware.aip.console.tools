@@ -13,13 +13,8 @@ import org.mockito.MockitoAnnotations;
 import java.io.InputStream;
 import java.util.concurrent.Future;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
     @InjectMocks
@@ -57,7 +52,6 @@ public class OnboardApplicationDeepAnalysisBuilderTest extends BaseBuilderTest {
         doNothing().when(restApiService).validateUrlAndKey(BaseBuilderTest.TEST_URL, null, BaseBuilderTest.TEST_KEY);
         doReturn(BaseBuilderTest.TEST_APP_GUID).when(applicationService).getApplicationGuidFromName(BaseBuilderTest.TEST_APP_NAME);
         doReturn(true).when(uploadService).uploadInputStream(eq(BaseBuilderTest.TEST_APP_NAME), anyString(), anyLong(), isA(InputStream.class));
-
         Future<FreeStyleBuild> futureBuild = project.scheduleBuild2(0);
         FreeStyleBuild build = jenkins.assertBuildStatus(Result.FAILURE, futureBuild.get());
     }
