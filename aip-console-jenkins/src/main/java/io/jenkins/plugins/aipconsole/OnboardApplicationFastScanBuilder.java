@@ -260,6 +260,8 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
             if(app == null){
                 log.println("Application not found, starting new upload");
                 applicationGuid = null;
+            } else {
+                applicationGuid = app.getGuid();
             }
             Path path = Paths.get(expandedFilePath);
             String sourcePath = uploadService.uploadFileForOnboarding(
