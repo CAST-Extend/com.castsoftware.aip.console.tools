@@ -13,6 +13,12 @@ public class ApplicationCommonDetailsDto {
 
     private String name;
     private String guid;
+    private ApplicationStatus applicationStatus;
+    private boolean snapshotDone;
+    private String appLicense;
+    private boolean dashboardAllowed;
+    private boolean imagingAvailable;
+    private String imagingViewerName;
     private String domainGuid;
     private String domainName;
     private LocalDateTime latestActionDate;
@@ -23,5 +29,4 @@ public class ApplicationCommonDetailsDto {
     private Long numberOfLinks;
     private int nbOfAlerts;
     private Set<JobType> latestJobs;
-
 }
