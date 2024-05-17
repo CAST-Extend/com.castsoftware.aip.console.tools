@@ -228,6 +228,7 @@ public class OnboardApplicationFastScanBuilder extends CommonActionBuilder {
         PrintStream log = listener.getLogger();
 
         if (apiService == null || jobsService == null) {
+            log.println("Alternate Guice.createInjector called...");
             Guice.createInjector(new AipConsoleModule()).injectMembers(this);
         }
 

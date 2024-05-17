@@ -188,9 +188,11 @@ public abstract class CommonActionBuilder extends BaseActionBuilder implements S
             }
             // Authentication (if username is null or empty, we'll authenticate with api key
             apiService.validateUrlAndKey(apiServerUrl, username, apiKey);
+            logger.println("authenticated...");
         } catch (ApiCallException e) {
             listener.error(GenericError_error_accessDenied(apiServerUrl));
             run.setResult(defaultResult);
+            return;
         }
 
         String apiVersion = applicationService.getAipConsoleApiInfo().getApiVersion();
@@ -216,6 +218,8 @@ public abstract class CommonActionBuilder extends BaseActionBuilder implements S
                 }
             }
         }
+
+        logger.println("Running with compatible version: "+apiVersion);
         performClient(run, workspace, launcher, listener);
     }
 }
