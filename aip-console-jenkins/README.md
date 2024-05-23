@@ -7,6 +7,8 @@ This Jenkins Plugin for AIP Console allows users to automate application source 
 This plugin requires the following :
 
 * Jenkins version 2.60.3 or above
+* The tools have been tested with JENKINS installation up to **2.387.1**. If you face some issues using higher version of JENKINS, please report to our support team
+* The **minimum JAVA** version for running this automation tools is: **17**
 * An installation of AIP Console 3.X that is accessible and configured.
 * A means of Authentication using :
   * For Enterprise installations, an API Token for the user that will run the CLI (
