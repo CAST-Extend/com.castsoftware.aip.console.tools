@@ -7,7 +7,7 @@ This Jenkins Plugin for AIP Console allows users to automate application source 
 This plugin requires the following :
 
 * a Jenkins installation ()
-* An installation of AIP Console 2.X that is accessible and configured.
+* An installation of AIP Console 2.X (or higher) that is accessible and configured.
 * A means of Authentication using :
   * For Enterprise installations, an API Token for the user that will run the CLI (
     check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
@@ -16,7 +16,7 @@ This plugin requires the following :
 
 ### Regarding Jenkins Versions
 
-This plugin is built targetting Jenkins version 2.60.3, a version released in 2017. This means that it is the bare minimum version required to install this plugin. **However**, because this plugin depends on other components that have been moved from being Jenkins components to being Plugins not included in the Jenkins directly, but rather installed through the Plugins Manager of Jenkins. Therefore, installing AIP Console Tools Jenkins Plugin might also download dependencies like Pipeline Steps.
+This plugin is built targeting Jenkins version Jenkins 2.361.4 (or higher). This means that it is the bare minimum version required to install this plugin. **However**, because this plugin depends on other components that have been moved from being Jenkins components to being Plugins not included in the Jenkins directly, but rather installed through the Plugins Manager of Jenkins. Therefore, installing AIP Console Tools Jenkins Plugin might also download dependencies like Pipeline Steps.
 
 The Plugins Manager of Jenkins requires access to a dedicated site (https://updates.jenkins.io/), which provides lists of plugins and their dependencies for Jenkins. However, it limits the numbers of supported Jenkins releases on a regular basis. As of 19/01/2024, the oldest compatible version is 2.375.1 (LTS) and 2.377 (Weekly). This means that the installation of plugins would only be possible on these versions if you are using the default update site. For older versions, you would have to set up a custom update sites tailored to your version of Jenkins, though updating to a newer one would be preferable, to correct issues and CVEs.
 
@@ -314,7 +314,6 @@ Under `Advanced Settings` you will find the following parameters :
 * *API Key* : The API Key for the URL specified above.
 * *Copy Configuration*: Copy the configuration of the previous version (also known as rescan). Enabled by default.
 * *Blueprint Objective*: If checked, this will enable the Blueprint Objective during the application analysis.
-* *Security Assessment*: If checked, this will enable the Security Assessment during the application analysis.
 * *Enable backup*: Whether a Backup should be created before creating a new version. **Requires AIP Console 1.16.0 or above**
 * *Name of the backup*: The name of the backup **if** Enabled Backup is checked. **Requires AIP Console 1.16.0 or above**
 * *Publish to Imaging*: Publish to Imaging if Imaging is configured with AIP Console
@@ -348,9 +347,6 @@ The Deliver Source step provides similar parameters to the Add Version step :
 * *Copy configuration from previous version*: Clone the previous version of the application (similar to
   the `Same configuration as previous version` checkbox in the Add Version wizard of AIP Console). If unchecked or no
   version exists, it will run an Add version job instead.
-* *Enable Security Dataflow*: Enables the Security Objective for this version. This setting will operate for both
-  technologies JEE and DOTNET as well. This oprion can be set using <u>SECURITY_DATAFLOW</u> environment variable.
-  Option will be ignored if `Rescan` is checked.
 * *Enable Data Safety Investigation*: Enables the data safety investigation
   objective for the version.
 
@@ -362,7 +358,9 @@ Under `Advanced Settings` you will find the following parameters :
 * *API Key* : The API Key for the URL specified above.
 * *Copy Configuration*: Copy the configuration of the previous version (also known as rescan). Enabled by default.
 * *Blueprint Objective*: If checked, this will enable the Blueprint Objective during the application analysis.
-* *Security Assessment*: If checked, this will enable the Security Assessment during the application analysis.
+* *Enable Security Dataflow*: Enables the Security Objective for this version. This setting will operate for both
+  technologies JEE and DOTNET as well. This oprion can be set using <u>SECURITY_DATAFLOW</u> environment variable.
+  Option will be ignored if `Rescan` is checked.
 * *Enable backup*: Whether a Backup should be created before creating a new version. **Requires AIP Console 1.16.0 or above**
 * *Name of the backup*: The name of the backup **if** Enabled Backup is checked. **Requires AIP Console 1.16.0 or above**
 * *Ignore Analysis Failure*: If checked, if an error occurs when running the step, the job will be marked `UNSTABLE` instead of `FAILED`. This allows running other steps after this one instead of failing the job immediately.
