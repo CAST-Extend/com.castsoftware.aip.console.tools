@@ -215,7 +215,13 @@ java -jar .\aip-console-tools-cli.jar ResyncApplicationJob -s="Console URL" --ap
 
 ### Advanced Usage
 
-When running the CLI, you must specify a command to be run. The list of commands is :
+When running the CLI, you must specify a command to be run.
+To get all available commands you can also run this 
+```bash
+java -jar .\aip-console-tools-cli.jar --help
+```
+
+The list of commands is :
 
 * `CreateApplication` or `new` to create an application on AIP Console
 * `AddVersion` or `add` to create a new version and analyze it
@@ -259,6 +265,11 @@ The available options are :
 #### AddVersion
 
 *alias: add*
+
+To get the complete AddVersion command options details you can run this
+```bash
+java -jar .\aip-console-tools-cli.jar add --help
+```
 
 This command is used to deliver a new version of an application to AIP Console, run an analysis on it and create a snapshot.
 
@@ -318,6 +329,10 @@ The available options are :
 
 This command is used to deliver a new version of an application to AIP Console. It <u>doesn't</u> marks that version as current by default and won't run an analysis.
 
+To get the complete Deliver command options details you can run this
+```bash
+java -jar .\aip-console-tools-cli.jar Deliver --help
+```
 The available options are :
 
 * `--app-name` or `-n` (**required**): The application name.
