@@ -268,7 +268,8 @@ Under `Advanced Settings` you will find the following parameters :
 
 ### Add Version
 
-![Add version step parameter details](doc/images/add_version_parameters.png)
+![Add version step parameter details](
+doc/images/add_version_parameters.png)
 
 The Add Version step provides the following parameters :
 
@@ -352,7 +353,7 @@ The Deliver Source step provides similar parameters to the Add Version step :
 
 Under `Advanced Settings` you will find the following parameters :
 
-![deliver source code step advanced settings](doc/images/deliver_source_advanced.png)
+![deliver-source-code-advdnced-settings](doc/images/deliver-source-code-2.11.7.png)
 
 * *AIP Console URL*: URL to AIP Console should you want to target a different instance that the one specified in the global configuration.
 * *API Key* : The API Key for the URL specified above.
