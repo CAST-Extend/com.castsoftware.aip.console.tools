@@ -43,6 +43,9 @@ public enum JobType {
     UPLOAD_SNAPSHOT_VERSION(Constants.UPLOAD_SNAPSHOT_VERSION, "Unzip previously uploaded source, create version, analyze and create a snapshot"),
 
     RESCAN_APPLICATION(Constants.RESCAN_APPLICATION, "Clone previous version, launch analysis and create snapshot"),
+
+    RENAME_APPLICATION_IN_UNIFIED(Constants.RENAME_APPLICATION, "Rename application"),
+
     DEEP_ANALYSIS(Constants.DEEP_ANALYSIS, "Deep Analysis"),
 
     ADD_VERSION(Constants.ADD_VERSION, "Add a new version"),

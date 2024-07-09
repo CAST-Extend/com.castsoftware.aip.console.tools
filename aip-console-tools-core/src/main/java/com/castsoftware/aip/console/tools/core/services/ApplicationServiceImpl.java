@@ -40,6 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -152,7 +153,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         try {
             boolean isProcessImaging = properties.isProcessImaging();
-            //boolean isPublishToEngineering = properties.isPublishToEngineering();
+            boolean isPublishToEngineering = properties.isPublishToEngineering();
 
             String applicationName = properties.getApplicationName();
             log.info("Searching for application '{}' on CAST Imaging Console", applicationName);
@@ -163,6 +164,10 @@ public class ApplicationServiceImpl implements ApplicationService {
             } else {
                 log.error("Unable to trigger Deep-Analysis. The actual conditions required Fast-Scan to be running first.");
                 return Constants.RETURN_ONBOARD_FAST_SCAN_REQUIRED;
+            }
+
+            if (isPublishToEngineering && StringUtils.isBlank(properties.getSnapshotName())) {
+                properties.setSnapshotName(String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
             }
 
             log.info("About to trigger deep-analysis for application: {}", applicationName);
@@ -182,7 +187,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
             */
 
-            String jobStatus = runDeepAnalysis(existingAppGuid, targetNode, caipVersion, isProcessImaging, properties.getSnapshotName()
+            String jobStatus = runDeepAnalysis(existingAppGuid, targetNode, caipVersion, isProcessImaging, isPublishToEngineering, properties.getSnapshotName()
                     , properties.getModuleGenerationType(), properties.isVerbose(), properties.getLogPollingProvider());
             if (jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
                 log.info("Deep-Analyze done successfully");
@@ -462,7 +467,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     
     @Override
     public String runDeepAnalysis(String applicationGuid, String targetNode, String caipVersion
-            , boolean isProcessImaging, String snapshotName
+            , boolean isProcessImaging, boolean publishToEnginnering, String snapshotName
             , ModuleGenerationType moduleGenerationType, boolean verbose, LogPollingProvider logPollingProvider) throws ApplicationServiceException {
         ScanAndReScanApplicationJobRequest.ScanAndReScanApplicationJobRequestBuilder requestBuilder = ScanAndReScanApplicationJobRequest.builder()
                 .appGuid(applicationGuid);
@@ -482,6 +487,8 @@ public class ApplicationServiceImpl implements ApplicationService {
             requestBuilder.moduleGenerationType(moduleGenerationType.toString());
         }
         requestBuilder.processImaging(isProcessImaging);
+        requestBuilder.publishToEngineering(publishToEnginnering);
+        requestBuilder.uploadApplication(publishToEnginnering);
         return runDeepAnalysis(requestBuilder.build(), logPollingProvider);
     }
 
