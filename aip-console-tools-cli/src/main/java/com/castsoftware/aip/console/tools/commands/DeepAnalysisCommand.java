@@ -49,8 +49,8 @@ public class DeepAnalysisCommand extends BasicCallable {
 
     @CommandLine.Option(names = {"--publish-engineering"},
             description = "If true then indicators will be generated." + " if specified without parameter: ${FALLBACK-VALUE}",
-            fallbackValue = "false")
-    private boolean publishToEngineering = false;
+            fallbackValue = "true")
+    private boolean publishToEngineering = true;
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -71,7 +71,7 @@ public class DeepAnalysisCommand extends BasicCallable {
         DeepAnalyzeProperties deepAnalyzeProperties = DeepAnalyzeProperties.builder()
                 .applicationName(applicationName)
                 .moduleGenerationType(moduleGenerationType)
-                .snapshotName(snapshotName)
+                .snapshotName(StringUtils.trim(snapshotName))
                 .processImaging(processImaging)
                 .publishToEngineering(publishToEngineering)
                 .sleepDuration(sharedOptions.getSleepDuration())

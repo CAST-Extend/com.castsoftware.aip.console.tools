@@ -37,6 +37,9 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
 
     private boolean processImaging = false;
 
+    // This will Upload the application and publish the results to engineering dashboard
+    private boolean publishToEngineering = false;
+
     private String moduleGenerationType = ModuleGenerationType.FULL_CONTENT.toString();
 
     @DataBoundSetter
@@ -52,6 +55,14 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
         return processImaging;
     }
 
+    public boolean isPublishToEngineering() {
+        return publishToEngineering;
+    }
+    @DataBoundSetter
+    public void setPublishToEngineering( boolean isPublishToEngineering){
+        this.publishToEngineering=isPublishToEngineering;
+    }
+    @DataBoundSetter
     public void setProcessImaging(boolean processImaging) {
         this.processImaging = processImaging;
     }
@@ -115,7 +126,8 @@ public class OnboardApplicationDeepAnalysisBuilder extends CommonActionBuilder {
                 moduleType = ModuleGenerationType.fromString(moduleGenerationType);
             }
 
-            applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, isProcessImagingEnabled, expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
+            applicationService.runDeepAnalysis(existingAppGuid, targetNode, caipVersion, isProcessImagingEnabled, isPublishToEngineering()
+                    , expandedSsnapshotName, moduleType, verbose, jnksLogPollingProvider);
         } catch (ApplicationServiceException e) {
             e.printStackTrace(logger);
             run.setResult(getDefaultResult());

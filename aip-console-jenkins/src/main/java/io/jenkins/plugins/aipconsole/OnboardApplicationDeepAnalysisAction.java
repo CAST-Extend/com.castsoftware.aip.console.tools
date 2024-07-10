@@ -3,6 +3,7 @@ package io.jenkins.plugins.aipconsole;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import hudson.model.Run;
 import jenkins.model.RunAction2;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,7 @@ public class OnboardApplicationDeepAnalysisAction extends BaseAction implements 
     private String snapshotName;
     @Nullable
     private boolean processImaging = false;
+    private boolean publishToEngineering = false;
 
     private String moduleGenerationType;
 
@@ -27,6 +29,12 @@ public class OnboardApplicationDeepAnalysisAction extends BaseAction implements 
 
     public OnboardApplicationDeepAnalysisAction(@CheckForNull String applicationName) {
         this.applicationName = applicationName;
+    }
+    public boolean isPublishToEngineering() {
+        return publishToEngineering;
+    }
+    public void setPublishToEngineering( boolean isPublishToEngineering){
+        this.publishToEngineering=isPublishToEngineering;
     }
 
     public String getModuleGenerationType() {
