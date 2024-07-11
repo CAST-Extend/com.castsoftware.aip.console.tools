@@ -115,7 +115,10 @@ public enum JobType {
     RECOMPUTE_CHECKSUMS(Constants.RECOMPUTE_CHECKSUMS, "Recompute checksums"),
 
     RECOMPUTE_SNAPSHOT_INDICATORS(Constants.RECOMPUTE_SNAPSHOT_INDICATORS, "Recompute snapshot indicators"),
-
+    PROCESS_IMAGING("process-imaging", "Upload to CAST-Imaging"),
+    RECOMPUTE_APPLICATION_INDICATORS("recompute-application-indicators", "Recompute application indicators"),
+    IMPORT_APPLICATION_TO_IMAGING_VIEWER("import-application-to-imaging-viewer", "Import application to Imaging Viewer"),
+    DELETE_APPLICATION_FROM_UNIFIED("delete-application-from-unified", "Delete application from Unified"),
     REFERENCE_FINDER(Constants.REFERENCE_FINDER, "Run Reference Finder");
 
     private final String label;
