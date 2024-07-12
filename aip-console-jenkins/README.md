@@ -69,11 +69,12 @@ This command is used to perform the *Fast scan* or to *refresh* the sources cont
 
 **build step**
 
-![build-step-onboard-application](doc/images/build-step-fast-scan.png)
+![build-step-onboard-application](doc/images/imaging-buildSteps.png)
 
 ***job configuration***
-![onboard-application-deep-analysis](doc/images/onboard-application-deep-analysis.png)
-![onboard-application-fast-scan](doc/images/onboard-application-fast-scan.png)
+![onboard-application-fast-scan](doc/images/imaging-FastScan.png)
+
+![onboard-application-deep-analysis](doc/images/imaging-deepAnalyze.png)
 
 ## Advanced Usage
 
@@ -108,7 +109,8 @@ You can manually add environment variables to a build or use global jenkins envi
   field is empty.
 * *Module Generation Type*: How the module generation will be handled by AIP Console. Either "Full Content" (default), "
   Analysis Unit module" or "Technology Module".
-* *Process Imaging*: If selected, uploads the application to the imaging server.
+* *Process Imaging*: If selected, triggers the "Generate Views" step and uploads the application to the Imaging Viewer.
+* *Publish to Engineering Dashboard*: In order to upload the application' results and publish then to the Dashboards, check this option.
 * *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ### Fast Scan
