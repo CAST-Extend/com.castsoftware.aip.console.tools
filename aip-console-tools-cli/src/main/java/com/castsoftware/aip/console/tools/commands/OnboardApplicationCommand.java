@@ -65,6 +65,16 @@ public class OnboardApplicationCommand extends BasicCallable {
             , description = "Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno (default: ${DEFAULT-VALUE})")
     private ModuleGenerationType moduleGenerationType = ModuleGenerationType.FULL_CONTENT;
 
+    @CommandLine.Option(names = {"--process-imaging"},
+            description = "If true then views will be generated." + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
+    private boolean processImaging = true;
+
+    @CommandLine.Option(names = {"--publish-engineering"},
+            description = "If true then indicators will be generated." + " if specified without parameter: ${FALLBACK-VALUE}",
+            fallbackValue = "true")
+    private boolean publishToEngineering = true;
+
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
 
@@ -108,7 +118,8 @@ public class OnboardApplicationCommand extends BasicCallable {
                     .applicationName(applicationName)
                     .moduleGenerationType(moduleGenerationType)
                     .snapshotName(snapshotName)
-                    .processImaging(false)
+                    .processImaging(processImaging)
+                    .publishToEngineering(publishToEngineering)
                     .sleepDuration(sharedOptions.getSleepDuration())
                     .verbose(sharedOptions.isVerbose())
                     .logPollingProvider(new CliLogPollingProviderImpl(jobsService, getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration()))

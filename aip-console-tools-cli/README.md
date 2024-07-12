@@ -28,6 +28,7 @@ You will also need the following :
 
 ### Quick Start
 For any of the command line listed below, you can use *--verbose* argument to decide whether to display API log information or not.
+They can be executed un Linux and Windows environment as well.
 
 #### Onboard Application
 
@@ -43,10 +44,12 @@ The *Onboard Application* feature is using following strategies in a separated c
 
 To perform that action you can inspire from the following command (see advanced usage for more details):
 
+**Fast-Scan command example**
 ```bash
 java -jar .\aip-console-tools-cli.jar Fast-Scan -s="Console URL" --apikey="valid.key" -n "my app" --domain-name="Your Domain" -f "C:\folder\some-location\sources-file.zip" --verbose=false --exclude-patterns="tmp/, temp/, *test, tests, target/, .svn/, .git/, _Macosx/, test/"
 ```
 
+**Deep-Analyze command example**
 ```bash
 java -jar .\aip-console-tools-cli.jar Deep-Analyze -s="Console URL" --apikey="valid.key" -n "my app" --module-option="ONE_PER_AU" --snapshot-name="desired name" --process-imaging=false --verbose=false
 ```
@@ -58,6 +61,7 @@ To perform all-in-one operation **Onboard-Application**
 - all parameters required for *Publish-Imaging* command should be provided
   To trigger this All-in-one command, you just have to customize the CLI given below
 
+**Onboard-Application CLI example**
 ```bash
 java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid key" -s "Console URL" -n "my app" -f="zip file full path" --domain-name="Some Domain name" --snapshot-name="SNAP name" --sleep-duration 5 --module-option="one_per_techno""
 ```
@@ -73,7 +77,7 @@ java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid key" -
 When running the CLI, you must specify a command to be run. The list of commands is :
 
 * `Fast-Scan` to perform a *fast-scan* on the sources contents and optionally do a Deep-Analysis (run the analysis).
-* `Deep-Analysis` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the dashboard and Imaging depending on the operating settings
+* `Deep-Analyze` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the dashboard and Imaging depending on the operating settings
 * `Onboard-Application` to perform an *Onboard-Application* on an existing application. It does run the fast-scan, deep-analysis and publish to the dashboard and Imaging depending on the operating settings.
 
 Each command have a `--help` parameter, providing a list of all parameters available.
@@ -108,9 +112,10 @@ java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app"
 * `--server-url` or `-s` (optional): Specify the URL to your AIP Console server. *default* : localhost:8081
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to AIP Console **OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
-* `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
+* `--snapshot-name` or `-S` (optional): Used to specify the snapshot name other than the default one provided internally.
 * `--module-option` (optional) Generates a user defined module option for either technology module or analysis unit module.Possible value is one of: full_content, one_per_au, one_per_techno.
-* `--process-imaging` (optional) Default: false, if true it will upload the application to CAST Imaging server.
+* `--process-imaging` (optional) Default: true, if true it will trigger Generate Views step and upload the application to CAST Imaging Viewer. If used without value associated then assumes true.
+* `--publish-engineering` (optional) Default: true, if true it will upload the application results and publish them to the Dashboards. If used without value associated then assumes true.
 * `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
 ```bash
@@ -132,10 +137,35 @@ The available options are :
 * `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **1s**).
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
 * `--module-option` (optional) Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno.
+* `--process-imaging` (optional) Default: true, if true it will trigger Generate Views step and upload the application to CAST Imaging Viewer. If used without value associated then assumes true.
+* `--publish-engineering` (optional) Default: true, if true it will upload the application results and publish them to the Dashboards. If used without value associated then assumes true.
 
 ```bash
 java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid key" -s "http://lfolap1.corp.castsoftware.com:8081" -n "APP name" -f="zip file full path" --domain-name="Some Domain name" --snapshot-name="SNAP name" --sleep-duration 5 --module-option="one_per_techno"
 ```
+## Exclusion Rules
+The value of the '--exclusion-rules' parameter it's an array of mnemonics separated with comma (see details bellow)
+
+**Exclusion rules details**
+
+| Mnemonic                                         | Label or Description                                                                       |
+|--------------------------------------------------|--------------------------------------------------------------------------------------------|
+| EXCLUDE_EMPTY_PROJECTS                           | "Exclude all empty projects"                                                               |
+| PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB         | "Exclude ASP .NET web projects when a Visual C#/basic .NET project also exists"            |
+| PREFER_DOT_NET_WEB_TO_ASP                        | "Exclude ASP projects when a .NET web project also exists"                                 |
+| PREFER_FULL_JAVA_PROJECTS_TO_BASIC_JSP           | "Exclude basic JSP projects when a full JEE project also exists for the same web.xml file" |
+| PREFER_MAVEN_TO_ECLIPSE                          | "Exclude Eclipse Java projects when a Maven project also exists"                           |
+| PREFER_ECLIPSE_TO_MAVEN                          | "Exclude Maven Java projects when an Eclipse project also exists"                          |
+| EXCLUDE_EMBEDDED_ECLIPSE_PROJECTS                | "Exclude Eclipse project located inside the output folder of another Eclipse project"      |
+| EXCLUDE_ECLIPSE_PROJECT_WITH_DUPLICATED_NAME     | "Exclude Eclipse project sharing the name of another Eclipse project"                      |
+| EXCLUDE_DUPLICATE_DOT_NET_PROJECT_IN_SAME_FOLDER | "Exclude Duplicate Dot Net project located inside the exactly same source folder."         |
+| EXCLUDE_TEST_CODE                                | "Exclude Test Code"                                                                        |
+
+**Exclusion rules example**
+Passing the --exclusion-rules parameter as an array of mnemonics like in this example
+(no blank space allowed between)
+
+--exclusion-rules="EXCLUDE_EMPTY_PROJECTS,PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB,PREFER_DOT_NET_WEB_TO_ASP,PREFER_FULL_JAVA_PROJECTS_TO_BASIC_JSP,PREFER_MAVEN_TO_ECLIPSE,EXCLUDE_EMBEDDED_ECLIPSE_PROJECTS,EXCLUDE_ECLIPSE_PROJECT_WITH_DUPLICATED_NAME,EXCLUDE_DUPLICATE_DOT_NET_PROJECT_IN_SAME_FOLDER,EXCLUDE_TEST_CODE"
 
 ## Execution results
 
