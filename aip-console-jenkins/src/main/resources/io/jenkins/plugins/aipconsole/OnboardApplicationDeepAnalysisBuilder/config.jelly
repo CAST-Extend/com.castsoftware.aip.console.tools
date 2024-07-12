@@ -6,8 +6,8 @@
     <f:entry title="${%snapshotName}" field="snapshotName" description="${%snapshotName.descr}">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%isProcessImaging}" field="isProcessImaging" description="${%isProcessImaging.descr}">
-        <f:checkbox field="isProcessImaging" value="${isProcessImaging}" default="false"/>
+    <f:entry title="${%processImaging}" field="processImaging" description="${%processImaging.descr}">
+        <f:checkbox field="processImaging" value="${processImaging}" default="false"/>
     </f:entry>
     <f:entry title="${%publishToEngineering}" field="publishToEngineering" description="${%publishToEngineering.descr}">
         <f:checkbox field="publishToEngineering" value="${publishToEngineering}" default="false"/>
