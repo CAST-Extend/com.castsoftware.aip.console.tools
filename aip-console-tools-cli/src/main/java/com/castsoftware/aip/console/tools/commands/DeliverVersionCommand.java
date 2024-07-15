@@ -185,7 +185,7 @@ public class DeliverVersionCommand extends BasicCallable {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
 
-        log.info("The Deliver version command has been triggered with:", sharedOptions.isVerbose());
+        log.info("The Deliver version command has been triggered with:");
         log.info("\t verbose = '{}'", sharedOptions.isVerbose());
         log.info("\t sleep-duration= '{}'", sharedOptions.getSleepDuration());
         String applicationGuid;
@@ -254,7 +254,6 @@ public class DeliverVersionCommand extends BasicCallable {
             Runtime.getRuntime().addShutdownHook(shutdownHook);
             CliLogPollingProviderImpl logPollingProvider = new CliLogPollingProviderImpl(jobsService,
                     getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
-            //JobExecutionDto jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             String jobStatus= logPollingProvider.pollJobLog(jobGuid);
             if (jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
                 log.info("Delivery of application {} was completed successfully.", applicationName);

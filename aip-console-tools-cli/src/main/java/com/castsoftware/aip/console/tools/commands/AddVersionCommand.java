@@ -132,7 +132,7 @@ public class AddVersionCommand extends BasicCallable {
     private boolean blueprint;
 
     @CommandLine.Option(names = {"-security-assessment", "--enable-security-assessment"},
-            description = "Enable/Disable Security Assessment for this version"
+            description = "Enable/Disable Security Assessment for this version;"
                     + " if specified without parameter: ${FALLBACK-VALUE}",
             hidden = true,
             fallbackValue = "true", defaultValue = "false")
