@@ -131,12 +131,12 @@ public class AddVersionCommand extends BasicCallable {
             + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", defaultValue = "false")
     private boolean blueprint;
 
-    /*
     @CommandLine.Option(names = {"-security-assessment", "--enable-security-assessment"},
-            description = "Enable/Disable Security Assessment for this version"
+            description = "Enable/Disable Security Assessment for this version;"
                     + " if specified without parameter: ${FALLBACK-VALUE}",
+            hidden = true,
             fallbackValue = "true", defaultValue = "false")
-    private boolean enableSecurityAssessment;*/
+    private boolean enableSecurityAssessment;
 
     /**
      * Name of the backup
@@ -183,9 +183,16 @@ public class AddVersionCommand extends BasicCallable {
 
     @Override
     protected Integer processCallCommand() throws Exception {
-        log.info("AddVersion version command has triggered with log output = '{}'", sharedOptions.isVerbose());
-        log.info("[Debug options] Show Sql is '{}'", showSql);
-        log.info("[Debug options] AMT Profiling is '{}'", amtProfiling);
+        log.info("AddVersion version command has been triggered with");
+        log.info("\t verbose= '{}'", sharedOptions.isVerbose());
+        log.info("\t sleep-duration= '{}'", sharedOptions.getSleepDuration());
+        log.info("\t [Debug options] Show Sql is '{}'", showSql);
+        log.info("\t [Debug options] AMT Profiling is '{}'", amtProfiling);
+
+        if (processImaging){
+            log.info("You have chosen to upload current application' data to CAST Imaging.");
+            log.info("Please make sure CAST Imaging is installed and linked to the target CAST Console.");
+        }
 
         if (StringUtils.isBlank(applicationName) && StringUtils.isBlank(applicationGuid)) {
             log.error("No application name or application guid provided. Exiting.");
@@ -271,11 +278,13 @@ public class AddVersionCommand extends BasicCallable {
             Thread shutdownHook = getShutdownHookForJobGuid(jobGuid);
             // Register shutdown hook to cancel the job
             Runtime.getRuntime().addShutdownHook(shutdownHook);
+
             JobExecutionDto jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
             // Deregister the shutdown hook since the job is finished and we won't need to cancel it
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
             DebugOptionsDto debugOptions = applicationService.getDebugOptions(applicationGuid);
             applicationService.resetDebugOptions(applicationGuid, oldDebugOptions);
+
             if (JobState.COMPLETED == jobStatus.getState()) {
                 if (debugOptions.isActivateAmtMemoryProfile()) {
                     log.info("[Debug options] Amt Profiling file download URL: {}",

@@ -48,7 +48,7 @@ import static com.castsoftware.aip.console.tools.core.utils.Constants.PARAM_TARG
 
 @Log
 public class JobsServiceImpl implements JobsService {
-    private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(15);
+    private static final long POLL_SLEEP_DURATION = TimeUnit.SECONDS.toMillis(5);
 
     private final RestApiService restApiService;
 

@@ -18,6 +18,7 @@ import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
+import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -184,7 +185,9 @@ public class DeliverVersionCommand extends BasicCallable {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
         }
 
-        log.info("Deliver version command has triggered with log output = '{}'", sharedOptions.isVerbose());
+        log.info("The Deliver version command has been triggered with:");
+        log.info("\t verbose = '{}'", sharedOptions.isVerbose());
+        log.info("\t sleep-duration= '{}'", sharedOptions.getSleepDuration());
         String applicationGuid;
         Thread shutdownHook = null;
 
@@ -249,13 +252,15 @@ public class DeliverVersionCommand extends BasicCallable {
             shutdownHook = getShutdownHookForJobGuid(jobGuid);
 
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            JobExecutionDto jobStatus = jobsService.pollAndWaitForJobFinished(jobGuid, Function.identity(), sharedOptions.isVerbose());
-            if (JobState.COMPLETED == jobStatus.getState()) {
+            CliLogPollingProviderImpl logPollingProvider = new CliLogPollingProviderImpl(jobsService,
+                    getSharedOptions().isVerbose(), getSharedOptions().getSleepDuration());
+            String jobStatus= logPollingProvider.pollJobLog(jobGuid);
+            if (jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
                 log.info("Delivery of application {} was completed successfully.", applicationName);
                 return Constants.RETURN_OK;
             } else {
-                log.error("Job did not complete. Status is '{}' on step '{}'", jobStatus.getState(), jobStatus.getCurrentStep());
-                return jobStatus.getState() == JobState.CANCELED ? Constants.RETURN_JOB_CANCELED : Constants.RETURN_JOB_FAILED;
+                log.error("Job did not complete. Status is '{}'", jobStatus);
+                return jobStatus.equalsIgnoreCase(JobState.CANCELED.toString()) ? Constants.RETURN_JOB_CANCELED : Constants.RETURN_JOB_FAILED;
             }
         } catch (ApplicationServiceException e) {
             return Constants.RETURN_APPLICATION_INFO_MISSING;
