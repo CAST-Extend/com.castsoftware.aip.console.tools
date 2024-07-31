@@ -28,5 +28,5 @@ This project contains 3 modules :
 AIP Console Tools Core and AIP Console Tools CLI will compile fine on Java versions 8 through 12. The source will be compiled to be used with Java 8.
 
 AIP Console Jenkins Plugin will only compile for Java 8. This is due to the baseline version we target (2.60.3) which, while not particularly recent, covers a wider range of users.
-test
+
 If you need to compile the plugin with a different Java version, you can pass the `-Djenkins.version=2.XXX` to the maven command.
