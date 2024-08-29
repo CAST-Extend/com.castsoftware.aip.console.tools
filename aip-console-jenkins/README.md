@@ -37,9 +37,9 @@ To configure the CAST Imaging jenkins plugin, go to the "Configure System" page 
 
 <img src="doc/images/configure_system_menu_item.png" alt="global configuration page location" style="zoom:50%;" />
 
-On this page, go to the **AIP Console global configuration** section and enter the following required elements :
+On this page, go to the **Imaging Console global configuration** section and enter the following required elements :
 
-* *AIP Console URL* : The URL to access the CAST Imaging server. Make sure that this address is accessible from the
+* *Imaging Console URL* : The URL to access the CAST Imaging server. Make sure that this address is accessible from the
   Jenkins Server and the Jenkins Node that might run the plugin as well.
 * *API Key* : The API key that will be used to authenticate to CAST Imaging.
 * *Timeout* : A global timeout setting in seconds before calls to CAST Imaging will be considered in error.
@@ -47,13 +47,13 @@ On this page, go to the **AIP Console global configuration** section and enter t
 
 ![Global configuration page](./doc/images/global_config_page.png)
 
-### Using different AIP Console URL and API Key
+### Using different Imaging Console URL and API Key
 
 Should you require to target a specific AIP Node instance that differs from the global configuration in Jenkins, you can specify the URL and an API Key by opening the "Advanced Settings" options. Note that you will have to manually set them for each build steps that require targeting a specific CAST Imaging Instance.
 
-![Step specific AIP Console URL and API Key configuration](./doc/images/custom_URL_ApiKey.png)
+![Step specific Imaging Console URL and API Key configuration](./doc/images/custom_URL_ApiKey.png)
 
-The AIP Console URL and associated API Key specified in the step details will always be used when running a step. In case they are left empty, the global configuration will be used instead.
+The Imaging Console URL and associated API Key specified in the step details will always be used when running a step. In case they are left empty, the global configuration will be used instead.
 
 ## Quick Start
 
@@ -101,7 +101,7 @@ You can manually add environment variables to a build or use global jenkins envi
 
 ### Deep-Analysis
 
-* *AIP Console URL*: URL to CAST Imaging should you want to target a different instance that the one specified
+* *Imaging Console URL*: URL to CAST Imaging should you want to target a different instance that the one specified
   in the global configuration.
 * *API Key* : The API Key for the URL specified above.
 * *Connection Timeout*: Timeout in seconds for each calls to CAST Imaging.
@@ -116,7 +116,7 @@ You can manually add environment variables to a build or use global jenkins envi
 
 ### Fast Scan
 
-* *AIP Console URL*: URL to CAST Imaging should you want to target a different instance that the one specified
+* *Imaging Console URL*: URL to CAST Imaging should you want to target a different instance that the one specified
   in the global configuration.
 * *API Key* : The API Key for the URL specified above.
 * *Connection Timeout*: Timeout in seconds for each calls to CAST Imaging.

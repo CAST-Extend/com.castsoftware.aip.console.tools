@@ -1,9 +1,9 @@
-## CAST Imaging tools CLI
+## CAST Imaging Console tools CLI
 
 ### Objectives
 
-The purpose of the CAST Imaging Tools CLI is to provide methods to start Application analysis without needing to interact
-directly with the CAST Imaging UI, by leveraging its REST API.
+The purpose of the CAST Imaging Console Tools CLI is to provide methods to start Application analysis without needing to interact
+directly with the CAST Imaging Console UI, by leveraging its REST API.
 
 The CLI can onboard new applications, scan the application and run application deep-analysis. 
 
@@ -14,7 +14,7 @@ AdoptOpenJDK or other validated JVMs (like Amazon Corretto, Azul Zulu, Eclipse O
 
 You will also need the following :
 
-* An installation of CAST Imaging that is accessible and configured.
+* An installation of CAST Imaging Console that is accessible and configured.
 * An API Token for the user that will run the CLI (
   check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
 
@@ -22,8 +22,8 @@ You will also need the following :
 
 [//]: # (  <br/> `--user`="login name here" `--apikey`="password here")
 * Prepare your source code in one of the two following ways :
-  * As a zip or tar.gz archive that will be uploaded to CAST Imaging
-  * As a relative path, pointing to content in the Source Folder location **(SFL)** defined in CAST Imaging like
+  * As a zip or tar.gz archive that will be uploaded to Imaging Console
+  * As a relative path, pointing to content in the Source Folder location **(SFL)** defined in Imaging Console like
     below :
 
 ![source folder location](doc/images/source_folder_location_config.png)
@@ -34,7 +34,7 @@ They can be executed un Linux and Windows environment as well.
 
 #### Onboard Application
 
-To **Onboard Application** using a **file full path**, the process will upload sources on the CAST Imaging server. The file should be accessible from the machine where the batch is executed.
+To **Onboard Application** using a **file full path**, the process will upload sources on the Imaging Console server. The file should be accessible from the machine where the batch is executed.
 
 The *Onboard Application* feature is using following strategies in a separated commands:
 
@@ -88,14 +88,14 @@ Below, is a detail of all available parameters for each command, and how it affe
 
 #### Fast-Scan
 
-Creates an application or uses an existing application to manage source code in CAST Imaging Console.
+Creates an application or uses an existing application to manage source code in Imaging Console.
 
 This command is used to perform the *first scan* or to *refresh* the sources contents before you optionally perform a *Deep Analysis* (run the analysis).
 
 The available options are :
 
-* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default* : localhost:8081
-* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to CAST Imaging **OR** the environment
+* `--server-url` or `-s` (optional): Specify the URL to your Imaging Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to Imaging Console**OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--file` or `-f`: (**required**) Represents either the local zip or tar.gz file full path to the sources or a relative path using the Source Folder Location configured.
 * `--node-name`  (**optional**): The name of the node on which the application will be created
@@ -111,12 +111,12 @@ java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app"
 
 ### Deep Analyze
 
-* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default* : localhost:8081
-* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to CAST Imaging **OR** the environment
+* `--server-url` or `-s` (optional): Specify the URL to your Imaging Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to Imaging Console**OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name other than the default one provided internally.
 * `--module-option` (optional) Generates a user defined module option for either technology module or analysis unit module.Possible value is one of: full_content, one_per_au, one_per_techno.
-* `--process-imaging` (optional) Default: true, if true it will trigger Generate Views step and upload the application to CAST Imaging Viewer. If used without value associated then assumes true.
+* `--process-imaging` (optional) Default: true, if true it will trigger Generate Views step and upload the application to Imaging Console Viewer. If used without value associated then assumes true.
 * `--publish-engineering` (optional) Default: true, if true it will upload the application results and publish them to the Dashboards. If used without value associated then assumes true.
 * `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
 
@@ -128,8 +128,8 @@ java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my a
 
 The available options are :
 
-* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default* : localhost:8081
-* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to CAST Imaging **OR** the environment
+* `--server-url` or `-s` (optional): Specify the URL to your Imaging Console server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to Imaging Console**OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--file-path` or `-f`: **required** only when performing the FIRST_SCAN. Represents either the local zip or tar.gz file full path to the sources or a relative path using the Source Folder Location configured.
 * `--node-name`  (**optional**): The name of the node on which the application will be created
@@ -139,7 +139,7 @@ The available options are :
 * `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **1s**).
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name.
 * `--module-option` (optional) Generates a user defined module option for either technology module or analysis unit module. Possible value is one of: full_content, one_per_au, one_per_techno.
-* `--process-imaging` (optional) Default: true, if true it will trigger Generate Views step and upload the application to CAST Imaging Viewer. If used without value associated then assumes true.
+* `--process-imaging` (optional) Default: true, if true it will trigger Generate Views step and upload the application to Imaging Console Viewer. If used without value associated then assumes true.
 * `--publish-engineering` (optional) Default: true, if true it will upload the application results and publish them to the Dashboards. If used without value associated then assumes true.
 
 ```bash
@@ -171,18 +171,18 @@ Passing the --exclusion-rules parameter as an array of mnemonics like in this ex
 
 ## Execution results
 
-When CAST Imaging finishes execution, it will return a specific return code, based on the execution.
+When Imaging Console finishes execution, it will return a specific return code, based on the execution.
 
 Here is a detailed list of all error codes that can be returned by the CLI :
 
 * 0 : No errors, processing was completed correctly. This is also the return code for`--help` and `--version`
   parameters.
 * 1 : API key missing. No API key was provided either in the prompt or in the environment variable.
-* 2 : Login Error. Unable to login to CAST Imaging with the given API key. Please check that you provide the proper
+* 2 : Login Error. Unable to login to Imaging Console with the given API key. Please check that you provide the proper
   value.
-* 3 : Upload Error. An error occurred during upload to CAST Imaging. Check the standard output to see more details.
+* 3 : Upload Error. An error occurred during upload to Imaging Console. Check the standard output to see more details.
 * 4 : Add Version Job Error. Creation of the Add Version job failed, or AIP CLI is unable to get the status of the running job. Please see the standard output for more details regarding this error.
-* 5 : Job terminated. The Add Version job did not finish in an expected state. Check the standard output or CAST Imaging for more details about the state of the job.
+* 5 : Job terminated. The Add Version job did not finish in an expected state. Check the standard output or Imaging Console for more details about the state of the job.
 * 6 : Application name or GUID missing. The AddVersion job cannot run due to a missing application name or missing application guid.
 * 7 : Application Not Found. The given Application Name or GUID could not be found.
 * 8 : Source Folder Not Found. THe given source folder could not be found on the AIP Node where the application version is delivered
@@ -192,6 +192,6 @@ Here is a detailed list of all error codes that can be returned by the CLI :
 
 ### Authentication
 
-As detailed in the CAST Imaging documentation, you can obtain the API Key from the profile in the CAST Imaging UI.
+As detailed in the CAST Imaging Console documentation, you can obtain the API Key from the profile in the CAST Imaging Console UI.
 
-If you cannot use an API Key, you can authenticate using username and password, by passing the `--user` flag to a command, and set the user's password in the `--apikey` or set it in an environment variable, which name you'll pass to `--apikey:env`
+[//]: # (If you cannot use an API Key, you can authenticate using username and password, by passing the `--user` flag to a command, and set the user's password in the `--apikey` or set it in an environment variable, which name you'll pass to `--apikey:env`)
