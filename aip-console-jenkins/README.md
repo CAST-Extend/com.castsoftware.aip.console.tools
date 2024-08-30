@@ -1,6 +1,6 @@
-## CAST Imaging Tools Jenkins Plugin
+## CAST Imaging Console Tools Jenkins Plugin
 
-This Jenkins Plugin for CAST Imaging allows users to automate application source code delivery and analysis directly within their CI systems. Most elements that can be configured through the CAST Imaging UI can also be configured when using this plugin in your build configurations.
+This Jenkins Plugin for CAST Imaging Console allows users to automate application source code delivery and analysis directly within their CI systems. Most elements that can be configured through the CAST Imaging Console UI can also be configured when using this plugin in your build configurations.
 
 ### Pre-Requisites
 
@@ -9,17 +9,17 @@ This plugin requires the following :
 * Jenkins version 2.60.3 or above
 * The tools have been tested with JENKINS installation up to **2.387.1**. If you face some issues using higher version of JENKINS, please report to our support team
 * The **minimum JAVA** version for running this automation tools is: **17**
-* An installation of CAST Imaging 3.X that is accessible and configured.
+* An installation of CAST Imaging Console 3.X that is accessible and configured.
 * A means of Authentication using :
   * For Enterprise installations, an API Token for the user that will run the CLI (
     check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
 
 [//]: # (  * For AIP Console Standalone, a username and password. Check the `Authentication with username &#40;AIP Console Standalone&#41;` section in Other Topics, towards the end of this document.)
-* The ability to generate an archive for your source code OR a configured location in CAST Imaging where your source will be stored/updated.
+* The ability to generate an archive for your source code OR a configured location in CAST Imaging Console where your source will be stored/updated.
 
 ### Installation (and Update)
 
-To start using CAST Imaging Jenkins Plugin, you must first install the plugin in Jenkins.
+To start using CAST Imaging Console Jenkins Plugin, you must first install the plugin in Jenkins.
 
 To do this, you must go to Manage Plugins page of your Jenkins Server.
 
@@ -33,25 +33,25 @@ Click on Upload and Jenkins should install the plugin.
 
 ### Configuration
 
-To configure the CAST Imaging jenkins plugin, go to the "Configure System" page in the "Manage Jenkins" page.
+To configure the CAST Imaging Console jenkins plugin, go to the "Configure System" page in the "Manage Jenkins" page.
 
 <img src="doc/images/configure_system_menu_item.png" alt="global configuration page location" style="zoom:50%;" />
 
 On this page, go to the **Imaging Console global configuration** section and enter the following required elements :
 
-* *Imaging Console URL* : The URL to access the CAST Imaging server. Make sure that this address is accessible from the
+* *Imaging Console URL* : The URL to access the Imaging Console server. Make sure that this address is accessible from the
   Jenkins Server and the Jenkins Node that might run the plugin as well.
-* *API Key* : The API key that will be used to authenticate to CAST Imaging.
-* *Timeout* : A global timeout setting in seconds before calls to CAST Imaging will be considered in error.
-* *verbose* : When checked, the CAST Imaging logs will also be displayed on the build's log. Uncheck this to prevent displaying the entirety of the CAST Imaging job execution to be displayed during the build.
+* *API Key* : The API key that will be used to authenticate to Imaging Console.
+* *Timeout* : A global timeout setting in seconds before calls to Imaging Console will be considered in error.
+* *verbose* : When checked, the Imaging Console logs will also be displayed on the build's log. Uncheck this to prevent displaying the entirety of the Imaging Console job execution to be displayed during the build.
 
 ![Global configuration page](./doc/images/global_config_page.png)
 
-### Using different Imaging Console URL and API Key
+### Using different CAST Imaging Console URL and API Key
 
-Should you require to target a specific AIP Node instance that differs from the global configuration in Jenkins, you can specify the URL and an API Key by opening the "Advanced Settings" options. Note that you will have to manually set them for each build steps that require targeting a specific CAST Imaging Instance.
+Should you require to target a specific AIP Node instance that differs from the global configuration in Jenkins, you can specify the URL and an API Key by opening the "Advanced Settings" options. Note that you will have to manually set them for each build steps that require targeting a specific CAST Imaging Console Instance.
 
-![Step specific Imaging Console URL and API Key configuration](./doc/images/custom_URL_ApiKey.png)
+![Step specific CAST Imaging Console URL and API Key configuration](./doc/images/custom_URL_ApiKey.png)
 
 The Imaging Console URL and associated API Key specified in the step details will always be used when running a step. In case they are left empty, the global configuration will be used instead.
 
@@ -61,7 +61,7 @@ The following section will focus on running a job, with the basic required param
 
 #### Onboard Application
 
-Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in CAST Imaging.
+Creates an application or uses an existing application to manage source code using a modern on-boarding workflow in Imaging Console.
 
 This command is used to perform the *Fast scan* or to *refresh* the sources contents before optionally perform a *Deep Analysis* (runs the analysis).
 
@@ -101,14 +101,14 @@ You can manually add environment variables to a build or use global jenkins envi
 
 ### Deep-Analysis
 
-* *Imaging Console URL*: URL to CAST Imaging should you want to target a different instance that the one specified
+* *Imaging Console URL*: URL to Imaging Console should you want to target a different instance that the one specified
   in the global configuration.
 * *API Key* : The API Key for the URL specified above.
-* *Connection Timeout*: Timeout in seconds for each calls to CAST Imaging.
+* *Connection Timeout*: Timeout in seconds for each calls to Imaging Console.
 * *Application Name*: Application on which to perform Deep Analysis.
-* *Snapshot Name*: Name of the snapshot. CAST Imaging will automatically assign one to the application if this
+* *Snapshot Name*: Name of the snapshot. Imaging Console will automatically assign one to the application if this
   field is empty.
-* *Module Generation Type*: How the module generation will be handled by CAST Imaging. Either "Full Content" (default), "
+* *Module Generation Type*: How the module generation will be handled by Imaging Console. Either "Full Content" (default), "
   Analysis Unit module" or "Technology Module".
 * *Process Imaging*: If selected, triggers the "Generate Views" step and uploads the application to the Imaging Viewer.
 * *Publish to Engineering Dashboard*: In order to upload the application' results and publish then to the Dashboards, check this option.
@@ -116,10 +116,10 @@ You can manually add environment variables to a build or use global jenkins envi
 
 ### Fast Scan
 
-* *Imaging Console URL*: URL to CAST Imaging should you want to target a different instance that the one specified
+* *Imaging Console URL*: URL to Imaging Console should you want to target a different instance that the one specified
   in the global configuration.
 * *API Key* : The API Key for the URL specified above.
-* *Connection Timeout*: Timeout in seconds for each calls to CAST Imaging.
+* *Connection Timeout*: Timeout in seconds for each calls to Imaging Console.
 * *Application Name*: Application on which to perform Deep Analysis.
 * *Node Name* : The name of an AIP Node Instance. The field can be left empty and CAST Imagine Console will then assign
   one automatically
@@ -160,7 +160,7 @@ You can manually add environment variables to a build or use global jenkins envi
 
 #### Issues and Logging
 
-If you are facing issues with the CAST Imaging Jenkins Plugin, you can provide more details to CAST Support or in a GitHub Ticket by adding a Logger to the Console plugin.
+If you are facing issues with the CAST Imaging Console Jenkins Plugin, you can provide more details to CAST Support or in a GitHub Ticket by adding a Logger to the Console plugin.
 
 To do this, go to **Manage Jenkins** page and then **System Log**
 
@@ -174,7 +174,7 @@ Click Save.
 
 Go back to the **System Log** page and click on the Log Name you defined previously.
 
-Next time you run a Build using the CAST Imaging Jenkins Plugin, log messages of all levels should appear here.
+Next time you run a Build using the CAST Imaging Console Jenkins Plugin, log messages of all levels should appear here.
 
 #### Pipeline Scripts
 
