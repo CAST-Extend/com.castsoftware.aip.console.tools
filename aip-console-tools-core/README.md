@@ -1,12 +1,12 @@
-# CAST Imaging Console Tools Core
+# CAST Imaging Tools Core
 
-This project contains code shared between the `CAST Imaging Console CLI` and the `CAST Imaging Console Jenkins Plugin`.
+This project contains code shared between the `CAST Imaging Tools CLI` and the `CAST Imaging Jenkins Plugin`.
 
 ### Content
 
 In the project, you'll find the following packages:
 
-* `dto`: Java representation of JSON object sent and retrieved from Imaging Console API
+* `dto`: Java representation of JSON object sent and retrieved from CAST Imaging API
 * `services`: The interfaces and implementation for calls to the API.
   * Impl classes : These are the actual implementation for the upload and jobs services that are shared between the
     Jenkins Plugin and the CLI.
