@@ -3,27 +3,27 @@
     <metadata>
         <id>_THE_ID_</id>
         <version>_THE_VERSION_-build_BUILDNO_</version>
-        <title>AIP Console automation tools</title>
+        <title>CAST Imaging - automation tools</title>
         <authors>CAST Product</authors>
         <owners>CAST</owners>
-        <licenseUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/v2/LICENSE</licenseUrl>
+        <licenseUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/v3/LICENSE</licenseUrl>
         <projectUrl>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/wiki/2.3</projectUrl>
         <iconUrl>https://raw.githubusercontent.com/CAST-Extend/com.castsoftware.aip.console.tools/master/nuget/logo_console.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Package containing the AIP Console Jenkins Plugin and AIP Console Tools CLI.
+        <description>Package containing the CAST Imaging Jenkins Plugin and CAST Imaging Tools CLI.
 
-            These components aims to help automating application on-boarding and/or analysis in AIP Console.
+            These components aims to help automating application on-boarding and/or analysis in CAST Imaging.
 
-            If you need more details about the AIP Console Jenkins Plugin, you can check the following page :
-            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/v2/aip-console-jenkins/README.md
+            If you need more details about the CAST Imaging Jenkins Plugin, you can check the following page :
+            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/v3/aip-console-jenkins/README.md
 
-            If you need details about the AIP Console Tools CLI, you can find them here :
-            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/v2/aip-console-tools-cli/README.md
+            If you need details about the CAST Imaging Tools CLI, you can find them here :
+            https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/blob/v3/aip-console-tools-cli/README.md
         </description>
         <releaseNotes>https://github.com/CAST-Extend/com.castsoftware.aip.console.tools/releases</releaseNotes>
 		<tags>aipconsole</tags>
 		<dependencies>
-			<dependency id="CAIP" version="8.3.0" />
+			<dependency id="CAIP" version="8.4.0" />
 		</dependencies>
     </metadata>
 </package>
