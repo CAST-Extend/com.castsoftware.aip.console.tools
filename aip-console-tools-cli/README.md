@@ -18,9 +18,6 @@ You will also need the following :
 * An API Token for the user that will run the CLI (
   check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
 
-[//]: # (* For the Console Standalone server you must provide following two parameters)
-
-[//]: # (  <br/> `--user`="login name here" `--apikey`="password here")
 * Prepare your source code in one of the two following ways :
   * As a zip or tar.gz archive that will be uploaded to CAST Imaging
   * As a relative path, pointing to content in the Source Folder location **(SFL)** defined in CAST Imaging like

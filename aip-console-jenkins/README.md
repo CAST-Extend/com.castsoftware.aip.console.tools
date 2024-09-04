@@ -14,7 +14,6 @@ This plugin requires the following :
   * For Enterprise installations, an API Token for the user that will run the CLI (
     check [here for details on obtaining a token](https://doc.castsoftware.com/display/AIPCONSOLE/AIP+Console+-+User+Profile+options))
 
-[//]: # (  * For AIP Console Standalone, a username and password. Check the `Authentication with username &#40;AIP Console Standalone&#41;` section in Other Topics, towards the end of this document.)
 * The ability to generate an archive for your source code OR a configured location in CAST Imaging where your source will be stored/updated.
 
 ### Installation (and Update)
@@ -136,27 +135,6 @@ You can manually add environment variables to a build or use global jenkins envi
 * *sleep duration* : Amount of seconds used to fetch the ongoing job status (defaulted to **1s**).
 
 ## Other Topics
-
-[//]: # (#### Authentication with username &#40;AIP Console Standalone&#41;)
-
-[//]: # ()
-[//]: # (**This section only applies to AIP Console Standalone**)
-
-[//]: # ()
-[//]: # (In AIP Console Standalone, authentication doesn't use an API Key as it is not handled by the authentication mechanism.)
-
-[//]: # (Instead, you will have to use username/password combo to interact with AIP Console Standalone.)
-
-[//]: # ()
-[//]: # (To do this, go to **Configure System** page of Jenkins, under **AIP Console Global Configuration**, click on the)
-
-[//]: # (Advanced Settings button.)
-
-[//]: # ()
-[//]: # (You should see a Username field. Enter the username there and the password in the API Key field.)
-
-[//]: # ()
-[//]: # (Authentication will then be done using this username/password combo.)
 
 #### Issues and Logging
 
