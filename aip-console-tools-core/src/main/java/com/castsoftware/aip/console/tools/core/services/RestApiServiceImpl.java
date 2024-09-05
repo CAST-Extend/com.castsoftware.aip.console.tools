@@ -285,9 +285,9 @@ public class RestApiServiceImpl implements RestApiService {
 
     private <T> T exchangeForEntity(String method, String endpoint, Object entity, JavaType javaType) throws ApiCallException {
         RequestBody body = HttpMethod.requiresRequestBody(method) ? getRequestBodyForEntity(entity) : null;
-        Request.Builder requestBuilder = getRequestBuilder(endpoint);
-                requestBuilder.addHeader(PARAM_X_API_KEY, key);
-                requestBuilder.method(method, body);
+        Request.Builder requestBuilder = getRequestBuilder(endpoint)
+                .addHeader(PARAM_X_API_KEY, key)
+                .method(method, body);
 
         String caipVersion = null;
         String targetNode = null;
