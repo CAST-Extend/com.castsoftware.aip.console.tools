@@ -3,6 +3,7 @@ package com.castsoftware.aip.console.tools.core.services;
 import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Response;
 
 import java.io.File;

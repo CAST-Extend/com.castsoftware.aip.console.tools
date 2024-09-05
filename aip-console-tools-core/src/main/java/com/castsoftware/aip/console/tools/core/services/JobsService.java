@@ -72,6 +72,8 @@ public interface JobsService {
 
     String startPublishToImaging(String applicationGuid, String nodeName, String caipVersion) throws JobServiceException;
 
+    String startComputeFunctionPoints(String applicationGuid, String targetNode) throws JobServiceException;
+
     /**
      * @param cssServerName target CSS server name
      * @return existing CSS Server Guid

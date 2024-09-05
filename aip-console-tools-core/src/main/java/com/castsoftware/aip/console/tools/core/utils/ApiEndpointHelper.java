@@ -49,6 +49,9 @@ public class ApiEndpointHelper {
     public static final String RE_DISCOVER_APPLICATION_PATH = "/rediscover-application";
     public static final String DEEP_ANALYSIS_PATH = "/deep-analysis";
     public static final String PUBLISH_PATH = "/publish";
+    public static final String FUNCTION_POINTS = "/function-points";
+    public static final String CONFIGURATION_RULES = "/configuration-rules";
+    public static final String COMPUTATION_SETTINGS = "/computation-settings";
     public static final String SECURITY_DATAFLOW_PATH = "/security-dataflow";
     public static final String ARCHITECTURE_ENDPOINT = "/architecture";
     public static final String MODELS = "/models";
@@ -144,6 +147,22 @@ public class ApiEndpointHelper {
 
     public static String getPublishToImagingEndPoint() {
         return getJobsEndpoint() + PUBLISH_PATH;
+    }
+
+    public static String getComputeFunctionPointsEndPoint() {
+        return getJobsEndpoint() + FUNCTION_POINTS;
+    }
+
+    public static String getUpdateFunctionPointSettingEndPoint(String appGuid, String key, String value) {
+        return getApplicationsPath() + "/" + appGuid + FUNCTION_POINTS + COMPUTATION_SETTINGS + String.format("?key=%s&value=%s", key, value);
+    }
+
+    public static String getApplicationFunctionPointRules(String appGuid) {
+        return getApplicationsPath() + "/" + appGuid + FUNCTION_POINTS + CONFIGURATION_RULES;
+    }
+
+    public static String getApplicationRuleContent(String appGuid) {
+        return getApplicationFunctionPointRules(appGuid) + "/check";
     }
 
     public static String getEnableOnboardingSettingsEndPoint() {

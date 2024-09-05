@@ -1,6 +1,7 @@
 package com.castsoftware.aip.console.tools.core.dto;
 
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobType;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 

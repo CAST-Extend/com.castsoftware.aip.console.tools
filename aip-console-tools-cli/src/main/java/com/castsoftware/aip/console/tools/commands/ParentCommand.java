@@ -1,5 +1,6 @@
 package com.castsoftware.aip.console.tools.commands;
 
+import com.castsoftware.aip.console.tools.commands.TccCommands.TccCommand;
 import com.castsoftware.aip.console.tools.providers.VersionProvider;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +23,8 @@ import java.util.concurrent.Callable;
                 FastScanCommand.class,
                 DeepAnalysisCommand.class,
                 PublishToImagingCommand.class,
-                OnboardApplicationCommand.class
+                OnboardApplicationCommand.class,
+                TccCommand.class
         },
         commandListHeading = "%nPossible values for COMMAND:%n%n",
         versionProvider = VersionProvider.class

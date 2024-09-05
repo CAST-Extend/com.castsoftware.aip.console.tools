@@ -4,6 +4,7 @@ import com.castsoftware.aip.console.tools.core.dto.ApiInfoDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationCommonDetailsDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
+import com.castsoftware.aip.console.tools.core.dto.tcc.ComputeFunctionPointsProperties;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DeepAnalyzeProperties;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
@@ -23,6 +24,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidExce
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -34,6 +36,14 @@ public interface ApplicationService {
     int deepAnalyze(DeepAnalyzeProperties properties) throws JobServiceException;
 
     int publishToImaging(String applicationName, long sleepDuration, boolean verbose, LogPollingProvider logPollingProvider);
+
+    int computeFunctionPoints(ComputeFunctionPointsProperties computeFunctionPointsProperties) throws  JobServiceException;
+
+    int listFunctionPointRules(String applicationName, String type);
+
+    int checkRuleContent(String applicationName, String ruleId, String ruleType);
+
+    int updateFunctionPointSettings(String applicationName, Map<String, String> settingValueMap);
 
     boolean checkServerFoldersExists(String pathToCheck);
 
@@ -177,4 +187,5 @@ public interface ApplicationService {
     void updateModuleGenerationType(String applicationGuid, JobRequestBuilder builder, ModuleGenerationType generationType, boolean firstVersion);
 
     ApplicationCommonDetailsDto getApplicationDetailsFromName(String applicationName) throws ApplicationServiceException;
+
 }
