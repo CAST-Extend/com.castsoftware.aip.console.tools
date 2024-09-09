@@ -14,8 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,22 +28,14 @@ public class UpdateSettings extends BasicCallable {
     private TccCommand parentCommand;
 
     boolean isValidKeyValueString(String input) {
-        String regex = "^([a-zA-Z_][a-zA-Z0-9_]*=[a-zA-Z0-9]+)(,[a-zA-Z_][a-zA-Z0-9_]*=[a-zA-Z0-9]+)*$";
+        // regex for checking if the input is in format key=value,key=value.....
+        String regex = "^([a-zA-Z_][a-zA-Z0-9_]*=[a-zA-Z0-9 ]+)(,[a-zA-Z_][a-zA-Z0-9_]*=[a-zA-Z0-9 ]+)*$";
 ;
         return !input.isEmpty() && input.matches(regex);
     }
 
     @CommandLine.Option(names = "--new-settings", required = true, description = "A list of comma(,) separated values of setting=newValue pairs that have to be updated. Eg. \"FILTER_LOOKUP_TABLES=true,DF_DEFAULT_TYPE=EIF\"")
     String settings = "";
-
-    Map<String, List<String>> validValues = new HashMap<String, List<String>>() {{
-        put("AUTO_CONFIG_REFRESH", new ArrayList<>(Arrays.asList("true", "false")));
-        put("DF_DEFAULT_TYPE", new ArrayList<>(Arrays.asList("EIF", "ILF")));
-        put("DF_FILTER_LOOKUP_TABLES", new ArrayList<>(Arrays.asList("true", "false")));
-        put("DF_FKPK_MERGE", new ArrayList<>(Arrays.asList("true", "false")));
-        put("SAVE_EMPTY_TR_OBJECTS", new ArrayList<>(Arrays.asList("ALWAYS", "NEVER", "ONLY AEP")));
-        put("TF_ESTIMATED_FP_VALUE", new ArrayList<>(Arrays.asList("0", "3", "4", "5", "6", "7", "ASSESS")));
-    }};
 
     public UpdateSettings(RestApiService restApiService, JobsService jobsService, ApplicationService applicationService) {
         super(restApiService, jobsService, applicationService);
@@ -60,6 +50,8 @@ public class UpdateSettings extends BasicCallable {
         }
         String[] keyValues = settings.split(",");
         Map<String, String> settingValueMap = new HashMap<>();
+
+        Map<String, List<String>> validValues = TccConstants.validSettingValues;
 
         for (String keyVal : keyValues) {
             String[] parts = keyVal.split("=", 2);

@@ -352,21 +352,21 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
 
             if(groupedByType.size() > 0) {
-                System.out.println("=========================================\n");
+                log.info("=========================================\n");
             }
 
             groupedByType.forEach((type, list) -> {
                 if(ruleType != null && !ruleType.toLowerCase().equals(type)) return;
 
-                System.out.println("Type: " + type);
+                log.info("Type: " + type);
                 for (int i = 0; i < list.size(); i++) {
                     if(i == list.size() - 1) {
-                        System.out.println(list.get(i).toString());
+                        log.info(list.get(i).toString());
                     } else {
-                        System.out.println(list.get(i).toString() + ',');
+                        log.info(list.get(i).toString() + ',');
                     }
                 }
-                System.out.println("\n=========================================\n");
+                log.info("=========================================\n");
             });
 
         } catch(Exception e) {
@@ -409,9 +409,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                 log.info("Printing the content for rule with {} '{}'.", filterFactor, filterFactorValue);
                 for (int i = 0; i < ruleContents.size(); i++) {
                     if(i == ruleContents.size() - 1) {
-                        System.out.println(ruleContents.get(i).toString());
+                        log.info(ruleContents.get(i).toString());
                     } else {
-                        System.out.println(ruleContents.get(i).toString() + ',');
+                        log.info(ruleContents.get(i).toString() + ',');
                     }
                 }
             }
