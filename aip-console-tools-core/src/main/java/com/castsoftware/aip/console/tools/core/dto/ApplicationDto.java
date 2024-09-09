@@ -27,5 +27,6 @@ public class ApplicationDto {
     private String imagingTenant;
     private boolean onboarded;
     private boolean onboardedNotAnalyzed;
+    private boolean managed;
     private VersionDto version;
 }

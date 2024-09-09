@@ -6,6 +6,8 @@ import com.castsoftware.aip.console.tools.core.dto.ApplicationDto;
 import com.castsoftware.aip.console.tools.core.dto.ApplicationOnboardingDto;
 import com.castsoftware.aip.console.tools.core.dto.Applications;
 import com.castsoftware.aip.console.tools.core.dto.BaseDto;
+import com.castsoftware.aip.console.tools.core.dto.tcc.CheckRuleContentRequest;
+import com.castsoftware.aip.console.tools.core.dto.tcc.ComputeFunctionPointsProperties;
 import com.castsoftware.aip.console.tools.core.dto.DebugOptionsDto;
 import com.castsoftware.aip.console.tools.core.dto.DeepAnalyzeProperties;
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
@@ -26,6 +28,8 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.JobRequestBuilder;
 import com.castsoftware.aip.console.tools.core.dto.jobs.JobState;
 import com.castsoftware.aip.console.tools.core.dto.jobs.LogPollingProvider;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplicationJobRequest;
+import com.castsoftware.aip.console.tools.core.dto.tcc.FunctionPointRuleDto;
+import com.castsoftware.aip.console.tools.core.dto.tcc.RuleContentDto;
 import com.castsoftware.aip.console.tools.core.exceptions.ApiCallException;
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
@@ -48,6 +52,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -268,6 +273,182 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public int computeFunctionPoints(ComputeFunctionPointsProperties computeFunctionPointsProperties) throws JobServiceException {
+        String applicationName = computeFunctionPointsProperties.getApplicationName();
+        log.info("Args:");
+        log.info(String.format("\tApplication: %s%n\tverbose: %s%n\twait: %s%n",
+                applicationName, computeFunctionPointsProperties.isVerbose(), computeFunctionPointsProperties.isWait()));
+
+        String applicationGuid;
+        try {
+            log.info("Searching for application '{}' on CAST Imaging Console.", applicationName);
+            ApplicationCommonDetailsDto applicationCommonDetailsDto = getApplicationDetailsFromName(applicationName);
+            if (applicationCommonDetailsDto == null) {
+                log.info("Application not found.");
+                return Constants.RETURN_APPLICATION_NOT_FOUND;
+            }
+            applicationGuid = applicationCommonDetailsDto.getGuid();
+            ApplicationDto applicationDto = getApplicationDetails(applicationGuid);
+
+            if(!applicationDto.isManaged()) {
+                log.info("Compute function points is not available for this application. This maybe because the application has not been analyzed or the analysis is in process.");
+                return Constants.RETURN_APPLICATION_INFO_MISSING;
+            }
+
+            String targetNode = applicationDto.getTargetNode();
+            LogPollingProvider logPollingProvider = computeFunctionPointsProperties.getLogPollingProvider();
+
+            log.info("Starting Compute function points action for application '{}'.", applicationName);
+            log.info("Starting Compute function points job for application GUID = '{}'.", applicationGuid);
+
+            String jobGuid = jobService.startComputeFunctionPoints(applicationGuid, targetNode);
+
+            log.info("Compute function points job is ongoing: GUID= '{}'.", jobGuid);
+
+            if(!computeFunctionPointsProperties.isWait()) {
+                log.info("Exiting as wait flag is set to false.");
+                return Constants.RETURN_OK;
+            }
+
+            String jobStatus = logPollingProvider != null ? logPollingProvider.pollJobLog(jobGuid) : null;
+            if (jobStatus != null && jobStatus.equalsIgnoreCase(JobState.COMPLETED.toString())) {
+                log.info("Compute function points completed successfully.");
+            } else {
+                log.info("Compute function points failed.");
+                return Constants.RETURN_JOB_FAILED;
+            }
+        } catch (ApplicationServiceException e) {
+            return Constants.RETURN_APPLICATION_INFO_MISSING;
+        } catch (JobServiceException e) {
+            return Constants.RETURN_JOB_FAILED;
+        }
+
+        return Constants.RETURN_OK;
+    }
+
+    @Override
+    public int listFunctionPointRules(String applicationName, String ruleType) {
+        String applicationGuid;
+        try {
+            ApplicationCommonDetailsDto applicationCommonDetailsDto = getApplicationDetailsFromName(applicationName);
+            if (applicationCommonDetailsDto == null) {
+                log.info("Application not found.");
+                return Constants.RETURN_APPLICATION_NOT_FOUND;
+            }
+            applicationGuid = applicationCommonDetailsDto.getGuid();
+            ApplicationDto applicationDto = getApplicationDetails(applicationGuid);
+
+            if (!applicationDto.isManaged()) {
+                log.info("List rules is not available for this application. This maybe because the application has not been analyzed or the analysis is in process.");
+                return Constants.RETURN_APPLICATION_INFO_MISSING;
+            }
+
+            List<FunctionPointRuleDto> functionPointRules = restApiService.getForEntity(ApiEndpointHelper.getApplicationFunctionPointRules(applicationGuid), new TypeReference<List<FunctionPointRuleDto>>() {});
+            Map<String, List<FunctionPointRuleDto>> groupedByType = functionPointRules.stream().collect(Collectors.groupingBy(rule -> rule.getType().toLowerCase()));
+
+            if(ruleType != null && !groupedByType.containsKey(ruleType.toLowerCase())) {
+                log.error("Invalid rule type");
+                return Constants.RETURN_INVALID_PARAMETERS_ERROR;
+            }
+
+            if(groupedByType.size() > 0) {
+                log.info("=========================================\n");
+            }
+
+            groupedByType.forEach((type, list) -> {
+                if(ruleType != null && !ruleType.toLowerCase().equals(type)) return;
+
+                log.info("Type: " + type);
+                for (int i = 0; i < list.size(); i++) {
+                    if(i == list.size() - 1) {
+                        log.info(list.get(i).toString());
+                    } else {
+                        log.info(list.get(i).toString() + ',');
+                    }
+                }
+                log.info("=========================================\n");
+            });
+
+        } catch(Exception e) {
+            log.error("Something went wrong.", e);
+        }
+        return Constants.RETURN_OK;
+    }
+
+    @Override
+    public int checkRuleContent(String applicationName, String ruleId, String ruleType) {
+        String applicationGuid;
+        try {
+            log.info("Searching for application '{}' on CAST Imaging Console.", applicationName);
+            ApplicationCommonDetailsDto applicationCommonDetailsDto = getApplicationDetailsFromName(applicationName);
+            if (applicationCommonDetailsDto == null) {
+                log.info("Application not found.");
+                return Constants.RETURN_APPLICATION_NOT_FOUND;
+            }
+            applicationGuid = applicationCommonDetailsDto.getGuid();
+            ApplicationDto applicationDto = getApplicationDetails(applicationGuid);
+
+            if (!applicationDto.isManaged()) {
+                log.info("Rules are not available for this application. This maybe because the application has not been analyzed or the analysis is in process.");
+                return Constants.RETURN_APPLICATION_INFO_MISSING;
+            }
+            String filterFactor = ruleId != null ? "id" : "type";
+            String filterFactorValue = ruleId != null ? ruleId : ruleType;
+            log.info("Finding content for rule with {} '{}'.", filterFactor, filterFactorValue);
+            CheckRuleContentRequest.CheckRuleContentRequestBuilder checkRuleContentRequestBuilder = CheckRuleContentRequest.builder();
+            if(ruleId != null) {
+                checkRuleContentRequestBuilder.ruleId(ruleId);
+            }
+            if(ruleType != null) {
+                checkRuleContentRequestBuilder.ruleType(ruleType);
+            }
+            List<RuleContentDto> ruleContents = restApiService.postForEntity(ApiEndpointHelper.getApplicationRuleContent(applicationGuid), checkRuleContentRequestBuilder.build(), new TypeReference<List<RuleContentDto>>() {});
+            if(ruleContents.isEmpty()) {
+                log.info("No content available for rule with {} '{}'.", filterFactor, filterFactorValue);
+            } else {
+                log.info("Printing the content for rule with {} '{}'.", filterFactor, filterFactorValue);
+                for (int i = 0; i < ruleContents.size(); i++) {
+                    if(i == ruleContents.size() - 1) {
+                        log.info(ruleContents.get(i).toString());
+                    } else {
+                        log.info(ruleContents.get(i).toString() + ',');
+                    }
+                }
+            }
+        } catch(Exception e) {
+            log.error("Something went wrong.", e);
+        }
+        return Constants.RETURN_OK;
+    }
+
+    @Override
+    public int updateFunctionPointSettings(String applicationName, Map<String, String> settingValueMap) {
+        String applicationGuid;
+        try {
+            ApplicationCommonDetailsDto applicationCommonDetailsDto = getApplicationDetailsFromName(applicationName);
+            if (applicationCommonDetailsDto == null) {
+                log.info("Application not found.");
+                return Constants.RETURN_APPLICATION_NOT_FOUND;
+            }
+            applicationGuid = applicationCommonDetailsDto.getGuid();
+            ApplicationDto applicationDto = getApplicationDetails(applicationGuid);
+
+            if (!applicationDto.isManaged()) {
+                log.info("Action not available for this application. This maybe because the application has not been analyzed or the analysis is in process.");
+                return Constants.RETURN_APPLICATION_INFO_MISSING;
+            }
+            for(Map.Entry<String, String> setting: settingValueMap.entrySet()) {
+                restApiService.putForEntity(ApiEndpointHelper.getUpdateFunctionPointSettingEndPoint(applicationGuid, setting.getKey(), setting.getValue()), null, String.class);
+                log.info("Updated {} to {}", setting.getKey(), setting.getValue());
+            }
+            log.info("Updated settings successfully.");
+        } catch (ApplicationServiceException | ApiCallException e) {
+            throw new RuntimeException(e);
+        }
+        return Constants.RETURN_OK;
+    }
+
+    @Override
     public boolean checkServerFoldersExists(String pathToCheck) {
         try {
             FileCommandRequest fileCommandRequest = FileCommandRequest.builder().command("LS").path("SOURCES:" + Paths.get(pathToCheck)).build();
@@ -312,7 +493,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new ApplicationServiceException("Unable to get an application with GUID: " + applicationGuid, e);
         }
     }
-    
+
     @Override
     public ApplicationDto getApplicationFromName(String applicationName) throws ApplicationServiceException {
         return getApplications()

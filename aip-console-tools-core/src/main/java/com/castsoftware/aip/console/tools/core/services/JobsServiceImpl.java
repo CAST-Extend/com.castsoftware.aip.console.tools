@@ -5,6 +5,7 @@ import com.castsoftware.aip.console.tools.core.dto.DatabaseConnectionSettingsDto
 import com.castsoftware.aip.console.tools.core.dto.DeliveryConfigurationDto;
 import com.castsoftware.aip.console.tools.core.dto.ModuleGenerationType;
 import com.castsoftware.aip.console.tools.core.dto.jobs.ChangeJobStateRequest;
+import com.castsoftware.aip.console.tools.core.dto.tcc.ComputeFuntionPointsJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateApplicationJobRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.CreateJobsRequest;
 import com.castsoftware.aip.console.tools.core.dto.jobs.DiscoverApplicationJobRequest;
@@ -234,6 +235,25 @@ public class JobsServiceImpl implements JobsService {
         } catch (ApiCallException e) {
             log.log(Level.SEVERE, "Unable to perform ReScan application action (Run Analysis)", e);
             throw new JobServiceException("ReScan application job failed", e);
+        }
+    }
+
+    @Override
+    public String startComputeFunctionPoints(String applicationGuid, String targetNode) throws JobServiceException {
+         ComputeFuntionPointsJobRequest.ComputeFuntionPointsJobRequestBuilder requestBuilder = ComputeFuntionPointsJobRequest.builder()
+                .appGuid(applicationGuid);
+
+         if(targetNode != null) {
+             requestBuilder.targetNode(targetNode);
+         }
+
+        try {
+            SuccessfulJobStartDto jobStartDto = restApiService.postForEntity(ApiEndpointHelper.getComputeFunctionPointsEndPoint(), requestBuilder.build(), SuccessfulJobStartDto.class);
+            return jobStartDto.getJobGuid();
+        } catch (ApiCallException e) {
+            log.log(Level.SEVERE, "Unable to perform the Compute Function Points action for application '" + applicationGuid);
+            log.log(Level.SEVERE, e.getMessage());
+            throw new JobServiceException("Compute Function Points action failed", e);
         }
     }
 

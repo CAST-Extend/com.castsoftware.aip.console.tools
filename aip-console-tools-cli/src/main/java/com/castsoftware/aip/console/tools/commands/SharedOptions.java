@@ -11,28 +11,28 @@ public class SharedOptions {
     /**
      * Connection to AIP Console parameters
      **/
-    @CommandLine.Option(names = {"-s", "--server-url"}, paramLabel = "AIP_CONSOLE_URL", description = "The base URL for AIP Console (defaults to ${DEFAULT-VALUE})", defaultValue = "http://localhost:8081")
+    @CommandLine.Option(names = {"-s", "--server-url"}, paramLabel = "AIP_CONSOLE_URL", description = "The base URL for AIP Console (defaults to ${DEFAULT-VALUE})", defaultValue = "http://localhost:8081", scope = CommandLine.ScopeType.INHERIT)
     private String serverRootUrl;
 
-    @CommandLine.Option(names = {"--apikey"}, description = "The API Key to access AIP Console. Will prompt entry if no value is passed.", interactive = true, arity = "0..1")
+    @CommandLine.Option(names = {"--apikey"}, description = "The API Key to access AIP Console. Will prompt entry if no value is passed.", interactive = true, arity = "0..1", scope = CommandLine.ScopeType.INHERIT)
     private String apiKey;
 
-    @CommandLine.Option(names = {"--apikey:env"}, paramLabel = "ENV_VAR_NAME", description = "The name of the environment variable containing the AIP Key to access AIP Console")
+    @CommandLine.Option(names = {"--apikey:env"}, paramLabel = "ENV_VAR_NAME", description = "The name of the environment variable containing the AIP Key to access AIP Console", scope = CommandLine.ScopeType.INHERIT)
     private String apiKeyEnvVariable;
 
-    @CommandLine.Option(names = {"--user"}, description = "User name. Use this if no API Key generation is available on AIP Console. Provide the user's password in the apikey parameter.")
+    @CommandLine.Option(names = {"--user"}, description = "User name. Use this if no API Key generation is available on AIP Console. Provide the user's password in the apikey parameter.", scope = CommandLine.ScopeType.INHERIT)
     private String username;
 
-    @CommandLine.Option(names = {"--timeout"}, description = "The timeout in seconds for calls to AIP Console. Defaults to a 90s timeout", defaultValue = "90")
+    @CommandLine.Option(names = {"--timeout"}, description = "The timeout in seconds for calls to AIP Console. Defaults to a 90s timeout", defaultValue = "90", scope = CommandLine.ScopeType.INHERIT)
     private long timeout;
 
     @CommandLine.Option(names = {"--verbose"}, description = "Whether the command log should be output to the console or not, defaulted to true"
-            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true")
+            + " if specified without parameter: ${FALLBACK-VALUE}", fallbackValue = "true", scope = CommandLine.ScopeType.INHERIT)
     private boolean verbose = true;
 
     @CommandLine.Option(names = {"--sleep-duration"},
             description = "Number of seconds used to refresh the ongoing job status. The default value is: ${DEFAULT-VALUE}",
-            defaultValue = "10")
+            defaultValue = "10", scope = CommandLine.ScopeType.INHERIT)
     private long sleepDuration;
 
     @CommandLine.Unmatched
