@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@CommandLine.Command(name = "view-settings", description = "Shows the computation settings, their current values and their possible values.")
+@CommandLine.Command(name = "view-settings", mixinStandardHelpOptions = true, description = "Shows the computation settings, their current values and their possible values.")
 @Slf4j
 @Getter
 @Setter
