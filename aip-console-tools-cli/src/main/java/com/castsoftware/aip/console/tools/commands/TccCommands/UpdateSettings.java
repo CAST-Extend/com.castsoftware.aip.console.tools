@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@CommandLine.Command(name = "update-settings", description = "Updates the computation settings.")
+@CommandLine.Command(name = "update-settings", mixinStandardHelpOptions = true, description = "Updates the computation settings.")
 @Slf4j
 @Getter
 @Setter

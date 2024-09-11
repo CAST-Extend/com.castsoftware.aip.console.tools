@@ -5,7 +5,7 @@
 The purpose of the CAST Imaging Tools CLI is to provide methods to start Application analysis without needing to interact
 directly with the CAST Imaging UI, by leveraging its REST API.
 
-The CLI can onboard new applications, scan the application and run application deep-analysis. 
+The CLI can onboard new applications, scan the application, run application deep-analysis and perform TCC actions. 
 
 ### Requirements
 
@@ -27,7 +27,7 @@ You will also need the following :
 
 ### Quick Start
 For any of the command line listed below, you can use *--verbose* argument to decide whether to display API log information or not.
-They can be executed un Linux and Windows environment as well.
+They can be executed in Linux and Windows environment as well.
 
 #### Onboard Application
 
@@ -37,7 +37,7 @@ The *Onboard Application* feature is using following strategies in a separated c
 
 - *Fast-Scan*: for the sources' delivery contents without running the analysis. This strategy can be used as much as
   required by providing the sources file.
-- *Deep-Analyze: to trigger the analysis after the Fast-Scan has been performed. This also manage to upload data to CAST
+- *Deep-Analyze*: to trigger the analysis after the Fast-Scan has been performed. This also manage to upload data to CAST
   imaging depending on the available configuration.
 - *Publish-Imaging* to publish existing application data to CAST-Imaging
 
@@ -78,6 +78,14 @@ When running the CLI, you must specify a command to be run. The list of commands
 * `Fast-Scan` to perform a *fast-scan* on the sources contents and optionally do a Deep-Analysis (run the analysis).
 * `Deep-Analyze` to perform a *Deep-Analysis* on an existing application. It does run the analysis and publish to the dashboard and Imaging depending on the operating settings
 * `Onboard-Application` to perform an *Onboard-Application* on an existing application. It does run the fast-scan, deep-analysis and publish to the dashboard and Imaging depending on the operating settings.
+* `TCC` to perform TCC actions on an existing application with **analysis results**. This command has multiple subcommands. You can view all the TCC subcommands by using *--help* option. The following TCC subcommands are available:
+  * `compute-function-points` to compute function points for an application.
+  * `compute-transactions` to compute transactions for an application.
+  * `list-rules` to list the configuration rules available.
+  * `check-content` to check content for a particular rule.
+  * `check-all-content` to check all content for rules of a particular type.
+  * `view-settings` to show the function point computation settings, their current values and their possible values.
+  * `update-settings` to update the function point computation settings.
 
 Each command have a `--help` parameter, providing a list of all parameters available.
 
@@ -165,6 +173,64 @@ Passing the --exclusion-rules parameter as an array of mnemonics like in this ex
 (no blank space allowed between)
 
 --exclusion-rules="EXCLUDE_EMPTY_PROJECTS,PREFER_FULL_DOT_NET_TO_BASIC_DOT_NET_WEB,PREFER_DOT_NET_WEB_TO_ASP,PREFER_FULL_JAVA_PROJECTS_TO_BASIC_JSP,PREFER_MAVEN_TO_ECLIPSE,EXCLUDE_EMBEDDED_ECLIPSE_PROJECTS,EXCLUDE_ECLIPSE_PROJECT_WITH_DUPLICATED_NAME,EXCLUDE_DUPLICATE_DOT_NET_PROJECT_IN_SAME_FOLDER,EXCLUDE_TEST_CODE"
+
+### TCC
+This command is used to perform TCC actions on an existing application with **analysis results**.
+The available options for this command are:
+
+* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default* : localhost:8081
+* `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to CAST Imaging**OR** the environment
+* `--app-name` or `-n` (**required**): The application name.
+* `--sleep-duration`  (**optional**):Amount of seconds used to fetch the ongoing job status (defaulted to **15s**).
+
+**NOTE**: This command by itself doesn't do anything, but it has options that are required for running the subcommands. This command has subcommands that can used to perform various TCC actions. The subcommands and its options have been documented below.
+
+### TCC Subcommands
+* <h3>`compute-function-points`</h3> Compute function points for an application. 
+  ##### Available options:
+  * `--wait` or `--no-wait`  (**optional**):Wait for the compute to finish.
+  ```bash
+  java -jar .\aip-console-tools-cli.jar TCC compute-function-points --apikey="valid.key" -n "my app" --verbose=false
+  ```
+* <h3>`compute-transactions`</h3> Compute transactions for an application.
+  ##### Available options:
+  * `--wait` or `--no-wait`  (**optional**):Wait for the compute to finish.
+  ```bash
+  java -jar .\aip-console-tools-cli.jar TCC compute-function-points --apikey="valid.key" -n "my app" --verbose=false
+  ```
+* <h3>`list-rules`</h3> List the configuration rules available.
+  ##### Available options:
+  * `--ruleType` (**optional**):The type of rule to filter on.
+  ```bash
+  // list rules of all types
+  java -jar .\aip-console-tools-cli.jar TCC list-rules --apikey="valid.key" -n "my app"
+  
+  // list rules of type "Data Functions"
+  java -jar .\aip-console-tools-cli.jar TCC list-rules --apikey="valid.key" -n "my app" --ruleType "Data Functions"
+  ```
+* <h3>`check-content`</h3> Check content for a particular rule.
+  ##### Available options:
+  * `--rule` (**required**):The rule id whose content you want to see.
+  ```bash
+  java -jar .\aip-console-tools-cli.jar TCC check-content --apikey="valid.key" -n "my app" --rule 121
+  ```
+* <h3>`check-all-content`</h3> Check all content for rules of a particular type.
+  ##### Available options:
+  * `--ruleType` (**optional**):The rule type whose content you want to see.
+  ```bash
+  java -jar .\aip-console-tools-cli.jar TCC check-all-content --apikey="valid.key" -n "my app" --ruleType entry
+  ```
+* <h3>`view-settings`</h3> Show the function point computation settings, their current values and their possible values. This subcommand has no options.
+  ```bash
+  java -jar .\aip-console-tools-cli.jar TCC view-settings --apikey="valid.key" -n "my app" --ruleType entry
+  ```
+* <h3>`update-settings`</h3> Update the function point computation settings.
+  ##### Available options:
+  * `--new-settings` (**required**):A list of comma(,) separated values of setting=newValue pairs that have to be updated. Eg. "FILTER_LOOKUP_TABLES=true,DF_DEFAULT_TYPE=EIF"
+  ```bash
+  java -jar .\aip-console-tools-cli.jar TCC update-settings --apikey="valid.key" -n "my app" --new-settings "FILTER_LOOKUP_TABLES=true,DF_DEFAULT_TYPE=EIF"
+  ```
+
 
 ## Execution results
 
