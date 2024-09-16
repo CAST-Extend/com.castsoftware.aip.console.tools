@@ -99,7 +99,7 @@ This command is used to perform the *first scan* or to *refresh* the sources con
 
 The available options are :
 
-* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default* : localhost:8081
+* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default* : localhost:8090
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to CAST Imaging**OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--file` or `-f`: (**required**) Represents either the local zip or tar.gz file full path to the sources or a relative path using the Source Folder Location configured.
@@ -116,7 +116,7 @@ java -jar .\aip-console-tools-cli.jar Fast-Scan --apikey="valid.key" -n "my app"
 
 ### Deep Analyze
 
-* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default* : localhost:8081
+* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default* : localhost:8090
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to CAST Imaging**OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--snapshot-name` or `-S` (optional): Used to specify the snapshot name other than the default one provided internally.
@@ -133,7 +133,7 @@ java -jar .\aip-console-tools-cli.jar Deep-Analyze --apikey="valid.key" -n "my a
 
 The available options are :
 
-* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default* : localhost:8081
+* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default* : localhost:8090
 * `--apikey` or `--apikey:env` (**either is required**) : the API Key to log in to CAST Imaging**OR** the environment
 * `--app-name` or `-n` (**required**): The application name.
 * `--file-path` or `-f`: **required** only when performing the FIRST_SCAN. Represents either the local zip or tar.gz file full path to the sources or a relative path using the Source Folder Location configured.
@@ -148,7 +148,7 @@ The available options are :
 * `--publish-engineering` (optional) Default: true, if true it will upload the application results and publish them to the Dashboards. If used without value associated then assumes true.
 
 ```bash
-java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid key" -s "http://lfolap1.corp.castsoftware.com:8081" -n "APP name" -f="zip file full path" --domain-name="Some Domain name" --snapshot-name="SNAP name" --sleep-duration 5 --module-option="one_per_techno"
+java -jar .\aip-console-tools-cli.jar Onboard-Application --apikey="valid key" -s "http://lfolap1.corp.castsoftware.com:8090" -n "APP name" -f="zip file full path" --domain-name="Some Domain name" --snapshot-name="SNAP name" --sleep-duration 5 --module-option="one_per_techno"
 ```
 ## Exclusion Rules
 The value of the '--exclusion-rules' parameter it's an array of mnemonics separated with comma (see details bellow)
@@ -180,7 +180,7 @@ This command is used to perform TCC actions on an existing application with **an
 
 The available options for this command are:
 
-* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default*: `localhost:8081`
+* `--server-url` or `-s` (optional): Specify the URL to your CAST Imaging server. *default*: `localhost:8090`
 * `--apikey` or `--apikey:env` (**either is required**): The API Key to log in to CAST Imaging **OR** the environment.
 * `--app-name` or `-n` (**required**): The application name.
 * `--sleep-duration` (**optional**): Amount of seconds used to fetch the ongoing job status (default: **15s**).

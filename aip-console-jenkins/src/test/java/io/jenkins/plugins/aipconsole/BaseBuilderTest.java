@@ -30,7 +30,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 public class BaseBuilderTest {
-    protected static final String TEST_URL = "http://localhost:8081";
+    protected static final String TEST_URL = "http://localhost:8090";
     protected static final String TEST_KEY = "key";
     protected static final String TEST_CONTENT = "test";
     protected static final String TEST_APP_NAME = "appName";
