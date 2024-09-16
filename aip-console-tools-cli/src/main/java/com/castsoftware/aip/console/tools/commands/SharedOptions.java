@@ -11,7 +11,7 @@ public class SharedOptions {
     /**
      * Connection to AIP Console parameters
      **/
-    @CommandLine.Option(names = {"-s", "--server-url"}, paramLabel = "AIP_CONSOLE_URL", description = "The base URL for AIP Console (defaults to ${DEFAULT-VALUE})", defaultValue = "http://localhost:8081", scope = CommandLine.ScopeType.INHERIT)
+    @CommandLine.Option(names = {"-s", "--server-url"}, paramLabel = "AIP_CONSOLE_URL", description = "The base URL for AIP Console (defaults to ${DEFAULT-VALUE})", defaultValue = "http://localhost:8090", scope = CommandLine.ScopeType.INHERIT)
     private String serverRootUrl;
 
     @CommandLine.Option(names = {"--apikey"}, description = "The API Key to access AIP Console. Will prompt entry if no value is passed.", interactive = true, arity = "0..1", scope = CommandLine.ScopeType.INHERIT)
