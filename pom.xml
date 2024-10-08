@@ -22,7 +22,7 @@
     </scm>
 
     <properties>
-        <revision>2.12.0-SNAPSHOT</revision>
+        <revision>2.11.9</revision>
         <java.version>1.8</java.version>
         <spring-boot.version>${project.parent.version}</spring-boot.version>
         <picocli.version>4.7.5</picocli.version>
