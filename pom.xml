@@ -178,13 +178,13 @@
         </repository>
         <repository>
             <id>jenkins2</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/releases/</url>
         </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
             <id>jenkins2</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/releases/</url>
         </pluginRepository>
         <pluginRepository>
             <id>thirdPartyJars</id>
