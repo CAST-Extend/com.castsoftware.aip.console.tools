@@ -3,35 +3,41 @@ name: Maven Build and Test
 on:
   push:
     branches:
-      - develop
+      - build-test
   pull_request:
     branches:
-      - develop
-
+      - build-test
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - uses: actions/cache@v1
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-    - uses: actions/upload-artifact@v2
-      with:
-        name: aip-console-tools-cli.jar
-        path: aip-console-tools-cli/target/aip-console-tools-cli.jar
-    - uses: actions/upload-artifact@v2
-      with:
-        name: aip-console-jenkins.hpi
-        path: aip-console-jenkins/target/aip-console-jenkins.hpi
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      # Set up JDK 8
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v3
+        with:
+          java-version: 8
+          distribution: temurin # Recommended JDK vendor
+          cache: maven # Enable Maven dependency caching
+
+      # Build the project using Maven
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      # Upload CLI artifact
+      - name: Upload AIP Console Tools CLI
+        uses: actions/upload-artifact@v4
+        with:
+          name: aip-console-tools-cli.jar
+          path: aip-console-tools-cli/target/aip-console-tools-cli.jar
+
+      # Upload Jenkins plugin artifact
+      - name: Upload AIP Console Jenkins Plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: aip-console-jenkins.hpi
+          path: aip-console-jenkins/target/aip-console-jenkins.hpi
