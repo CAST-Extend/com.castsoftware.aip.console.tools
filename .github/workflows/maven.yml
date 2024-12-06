@@ -3,10 +3,10 @@ name: Maven Build and Test
 on:
   push:
     branches:
-      - build-test
+      - v3
   pull_request:
     branches:
-      - build-test
+      - v3
 
 jobs:
   build:
