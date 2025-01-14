@@ -4,8 +4,9 @@ env:
 on:
   push:
     branches:
-      - master
-      - main
+      #- master
+      #- main
+      - build-test
   workflow_dispatch:
 jobs:
   run-imaging-cloud-analyzer:
