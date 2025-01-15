@@ -16,6 +16,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.DateUtils;
 import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
@@ -28,6 +29,7 @@ import picocli.CommandLine;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Optional;
@@ -134,8 +136,9 @@ public class SnapshotCommand extends BasicCallable {
                 foundVersion = optionalVersionDto.get();
             }
 
+            LocalDateTime snapshoteDate = applicationService.getVersionLocalDateTime(snapshotDateString);
             if (StringUtils.isBlank(snapshotName)) {
-                snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
+                snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss").format(applicationService.getVersionDate(snapshotDateString)));
             }
 
             boolean forcedConsolidation = processImaging || consolidation;
@@ -178,7 +181,7 @@ public class SnapshotCommand extends BasicCallable {
                     .versionName(foundVersion.getName())
                     .snapshotName(snapshotName)
                     .uploadApplication(true)
-                    .snapshotDate(applicationService.getVersionDate(snapshotDateString))
+                    .releaseAndSnapshotDateStr(DateUtils.toJsonString(snapshoteDate))
                     .processImaging(processImaging)
                     .uploadApplication(true)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
