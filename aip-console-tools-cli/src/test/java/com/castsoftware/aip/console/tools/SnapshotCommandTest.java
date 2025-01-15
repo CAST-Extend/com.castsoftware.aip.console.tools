@@ -42,6 +42,24 @@ public class SnapshotCommandTest extends AipCommandTest<SnapshotCommand> {
         assertEquals(true, aipCommand.getSharedOptions().isVerbose());
         assertEquals(true, aipCommand.isProcessImaging());
     }
+    @Test
+    public void testSnapshotCommand_WithSomeParameters() {
+        String[] sb = new String[]{"--apikey",
+                TestConstants.TEST_API_KEY, "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+                "--process-imaging","--snapshot-date","2025-01-15T15:14:00"
+        };
+
+        aipCommandLine.parseArgs(sb);
+        assertEquals(TestConstants.TEST_API_KEY, aipCommand.getSharedOptions().getApiKey());
+        assertEquals(TestConstants.TEST_CREATRE_APP, aipCommand.getApplicationName());
+        assertEquals(TestConstants.TEST_VERSION_NAME, aipCommand.getVersionName());
+        assertEquals(true, aipCommand.getSharedOptions().isVerbose());
+        assertEquals(true, aipCommand.isProcessImaging());
+
+         assertEquals("2025-01-15T15:14:00", aipCommand.getSnapshotDateString());
+
+    }
 
     @Test(expected = CommandLine.MissingParameterException.class)
     public void testSnapshotCommand_WithMissingRequiredParams() {
