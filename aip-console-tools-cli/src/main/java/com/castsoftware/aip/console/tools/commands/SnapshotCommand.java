@@ -53,6 +53,7 @@ public class SnapshotCommand extends BasicCallable {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
+    private static final VersionInformation MAX_VERSION = VersionInformation.fromVersionString("3.0.0");
 
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
@@ -136,7 +137,7 @@ public class SnapshotCommand extends BasicCallable {
                 foundVersion = optionalVersionDto.get();
             }
 
-            LocalDateTime snapshoteDate = applicationService.getVersionLocalDateTime(snapshotDateString);
+            LocalDateTime snapshotDate = applicationService.getVersionLocalDateTime(snapshotDateString);
             if (StringUtils.isBlank(snapshotName)) {
                 snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss").format(applicationService.getVersionDate(snapshotDateString)));
             }
@@ -181,7 +182,7 @@ public class SnapshotCommand extends BasicCallable {
                     .versionName(foundVersion.getName())
                     .snapshotName(snapshotName)
                     .uploadApplication(true)
-                    .releaseAndSnapshotDateStr(DateUtils.toJsonString(snapshoteDate))
+                    .releaseAndSnapshotDateStr(DateUtils.toJsonString(snapshotDate))
                     .processImaging(processImaging)
                     .uploadApplication(true)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
@@ -230,6 +231,10 @@ public class SnapshotCommand extends BasicCallable {
     @Override
     protected VersionInformation getMinVersion() {
         return null;
+    }
+    @Override
+    protected VersionInformation getMaxVersion() {
+        return MAX_VERSION;
     }
 
     @Override
