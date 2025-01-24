@@ -18,10 +18,7 @@ import com.castsoftware.aip.console.tools.core.services.ApplicationService;
 import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
-import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
-import com.castsoftware.aip.console.tools.core.utils.Constants;
-import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
-import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
+import com.castsoftware.aip.console.tools.core.utils.*;
 import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,6 +28,7 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Function;
@@ -46,6 +44,7 @@ import java.util.function.Function;
 @Getter
 @Setter
 public class AddVersionCommand extends BasicCallable {
+    private static final VersionInformation MAX_VERSION = VersionInformation.fromVersionString("3.0.0");
 
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
@@ -222,12 +221,14 @@ public class AddVersionCommand extends BasicCallable {
 
             // check that the application actually has versions, otherwise it's just an add version job
             boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
+            snapshotName = applicationService.buildSnapshotName(snapshotName);
+            LocalDateTime snapshotDate = applicationService.getVersionLocalDateTime(snapshotDateString);
 
             builder = JobRequestBuilder.newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion())
                     .nodeName(app.getTargetNode())
                     .versionName(versionName)
-                    .versionReleaseDate(applicationService.getVersionDate(versionDateString))
-                    .snapshotDate(applicationService.getVersionDate(snapshotDateString))
+                    .releaseAndSnapshotDateStr(DateUtils.toJsonString(snapshotDate))
+                    .snapshotName(snapshotName)
                     .objectives(VersionObjective.DATA_SAFETY, enableDataSafety)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)
@@ -242,11 +243,6 @@ public class AddVersionCommand extends BasicCallable {
             builder.objectives(VersionObjective.SECURITY, enableSecurityDataflow);
 
             applicationService.updateModuleGenerationType(applicationGuid, builder, moduleGenerationType, !cloneVersion);
-
-            if (StringUtils.isNotBlank(snapshotName)) {
-                builder.snapshotName(snapshotName);
-            }
-
             //Snapshot required now see whether we upload application or not
             boolean forcedConsolidation = processImaging || consolidation;
             builder.uploadApplication(forcedConsolidation);
@@ -342,6 +338,10 @@ public class AddVersionCommand extends BasicCallable {
     @Override
     protected VersionInformation getMinVersion() {
         return null; // for this feature to run on all server versions
+    }
+    @Override
+    protected VersionInformation getMaxVersion() {
+        return MAX_VERSION;
     }
 
     @Override

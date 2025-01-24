@@ -16,6 +16,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.DateUtils;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.castsoftware.aip.console.tools.core.utils.VersionObjective;
 import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -212,14 +214,15 @@ public class DeliverVersionCommand extends BasicCallable {
 
             // Clone the version if we're in "in-place" mode or the user wants to clone the version and the application has versions
             boolean cloneVersion = (app.isInPlaceMode() || !disableClone) && applicationService.applicationHasVersion(applicationGuid);
+            LocalDateTime versionDate = applicationService.getVersionLocalDateTime(versionDateString);
 
             JobRequestBuilder builder = JobRequestBuilder
                     .newInstance(applicationGuid, sourcePath, cloneVersion ? JobType.CLONE_VERSION : JobType.ADD_VERSION, app.getCaipVersion())
                     .endStep(autoDeploy ? Constants.SET_CURRENT_STEP_NAME : Constants.DELIVER_VERSION)
                     .versionName(versionName)
                     .nodeName(app.getTargetNode())
-                    .versionReleaseDate(applicationService.getVersionDate(versionDateString))
-                    .snapshotDate(new Date())
+                    .versionReleaseDateStr(DateUtils.toJsonString(versionDate))
+                    .snapshotDateStr(DateUtils.toJsonString(LocalDateTime.now()))
                     .objectives(VersionObjective.DATA_SAFETY, enableDataSafety)
                     .backupApplication(backupEnabled)
                     .backupName(backupName)

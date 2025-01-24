@@ -185,6 +185,9 @@ public class JobRequestBuilder {
         String dateStr = RELEASE_DATE_FORMATTER.format(releaseDate);
         return releaseDateStr(dateStr);
     }
+    public JobRequestBuilder versionReleaseDateStr(String releaseDate) {
+        return releaseDateStr(releaseDate);
+    }
 
     public JobRequestBuilder snapshotDateStr(String snapshotDateStr) {
         this.snapshotDateStr = snapshotDateStr;

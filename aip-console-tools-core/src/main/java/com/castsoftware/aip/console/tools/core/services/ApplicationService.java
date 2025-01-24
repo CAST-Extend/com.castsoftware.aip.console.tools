@@ -52,6 +52,7 @@ public interface ApplicationService {
     DomainDto getDomainFromName(String domainName) throws ApplicationServiceException;
 
     LocalDateTime getVersionLocalDateTime(String versionDateString) throws ApplicationServiceException ;
+    String buildSnapshotName( String actualName ) throws ApplicationServiceException;
     Date getVersionDate(String versionDateString) throws ApplicationServiceException;
 
     /**

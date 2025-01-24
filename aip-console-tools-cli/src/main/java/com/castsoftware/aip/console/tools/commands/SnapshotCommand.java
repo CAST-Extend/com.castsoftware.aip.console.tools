@@ -138,9 +138,7 @@ public class SnapshotCommand extends BasicCallable {
             }
 
             LocalDateTime snapshotDate = applicationService.getVersionLocalDateTime(snapshotDateString);
-            if (StringUtils.isBlank(snapshotName)) {
-                snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss").format(applicationService.getVersionDate(snapshotDateString)));
-            }
+            snapshotName = applicationService.buildSnapshotName(snapshotName);
 
             boolean forcedConsolidation = processImaging || consolidation;
             //TODO: refactor after release to get separated workflows
