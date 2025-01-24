@@ -40,6 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -366,6 +367,11 @@ public class ApplicationServiceImpl implements ApplicationService {
                 LocalDateTime.now(): DateUtils.parseJsonLocalDateTime(versionDateString + ".000Z");
     }
 
+    public String buildSnapshotName( String actualName ) throws ApplicationServiceException {
+        return StringUtils.isEmpty(actualName) ?
+                String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss").format(getVersionDate(actualName)))
+                : actualName;
+    }
     @Override
     public Date getVersionDate(String versionDateString) throws ApplicationServiceException {
         if (StringUtils.isEmpty(versionDateString)) {
