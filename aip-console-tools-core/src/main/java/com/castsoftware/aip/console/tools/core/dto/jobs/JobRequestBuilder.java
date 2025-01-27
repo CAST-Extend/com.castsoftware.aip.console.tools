@@ -17,7 +17,7 @@ import java.util.Map;
 public class JobRequestBuilder {
     public static final DateTimeFormatter DELIVERY_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
     public static final DateTimeFormatter DELIVERY_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    public static final String RELEASE_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    public static final String      RELEASE_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     public static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat(RELEASE_DATE_FORMAT);
     private static final DateFormat VERSION_NAME_FORMATTER = new SimpleDateFormat("yyMMdd.HHmmss");
     private static final String GLOBAL_RISK_OBJECTIVE = "GLOBAL_RISK";
@@ -163,6 +163,13 @@ public class JobRequestBuilder {
                 .snapshotDateStr(dateStr);
     }
 
+    public JobRequestBuilder releaseAndSnapshotDateStr(String dateString) {
+        if (dateString == null) {
+            return this;
+        }
+        return releaseDateStr(dateString)
+                .snapshotDateStr(dateString);
+    }
     public JobRequestBuilder snapshotDate(Date date) {
         if (date == null) {
             return this;
@@ -177,6 +184,9 @@ public class JobRequestBuilder {
         }
         String dateStr = RELEASE_DATE_FORMATTER.format(releaseDate);
         return releaseDateStr(dateStr);
+    }
+    public JobRequestBuilder versionReleaseDateStr(String releaseDate) {
+        return releaseDateStr(releaseDate);
     }
 
     public JobRequestBuilder snapshotDateStr(String snapshotDateStr) {

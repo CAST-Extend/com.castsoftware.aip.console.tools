@@ -21,6 +21,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidException;
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -50,6 +51,8 @@ public interface ApplicationService {
 
     DomainDto getDomainFromName(String domainName) throws ApplicationServiceException;
 
+    LocalDateTime getVersionLocalDateTime(String versionDateString) throws ApplicationServiceException ;
+    String buildSnapshotName( String actualName ) throws ApplicationServiceException;
     Date getVersionDate(String versionDateString) throws ApplicationServiceException;
 
     /**

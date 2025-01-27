@@ -11,6 +11,7 @@ import com.castsoftware.aip.console.tools.core.dto.jobs.ScanAndReScanApplication
 import com.castsoftware.aip.console.tools.core.exceptions.ApplicationServiceException;
 import com.castsoftware.aip.console.tools.core.exceptions.JobServiceException;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.DateUtils;
 import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -22,6 +23,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import picocli.CommandLine;
 
+import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +80,48 @@ public class SnapshotCommandIntegrationTest extends AipConsoleToolsCliBaseTest {
         CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
         assertThat(spec, is(notNullValue()));
         assertThat(exitCode, is(Constants.RETURN_VERSION_WITH_ANALYSIS_DONE_NOT_FOUND));
+    }
+    @Test
+    public void testSnapshotCommand_LegacyWorkFlow() throws ApplicationServiceException, ParseException, JobServiceException {
+        boolean verbose = true;
+        String SNAPSHOT_DATE="2025-01-15T15:14:00";
+        String[] args = new String[]{"--apikey", TestConstants.TEST_API_KEY,
+                "--app-name=" + TestConstants.TEST_CREATRE_APP,
+                "--version-name", TestConstants.TEST_VERSION_NAME,
+               "--snapshot-date",SNAPSHOT_DATE,
+                "--process-imaging"};
+
+        ApplicationDto applicationDto = ApplicationDto.builder()
+                .guid(TestConstants.TEST_APP_GUID)
+                .name(TestConstants.TEST_CREATRE_APP)
+                .onboarded(false)
+                .schemaPrefix("ShouldHave_One").build();
+
+        when(applicationService.getApplicationFromName(TestConstants.TEST_CREATRE_APP)).thenReturn(applicationDto);
+        VersionDto versionDto = new VersionDto();
+        versionDto.setName(TestConstants.TEST_VERSION_NAME);
+        versionDto.setStatus(VersionStatus.ANALYSIS_DONE);
+        when(applicationService.getApplicationVersion(TestConstants.TEST_APP_GUID)).thenReturn(Sets.newSet(versionDto));
+
+        String snapshotDateString = SNAPSHOT_DATE + ".000Z";
+        Date suffixDate = JobRequestBuilder.RELEASE_DATE_FORMATTER.parse(snapshotDateString);;
+        when(applicationService.getVersionDate(anyString())).thenReturn(suffixDate);
+        when(applicationService.getVersionLocalDateTime(anyString())).thenReturn(DateUtils.parseJsonLocalDateTime(snapshotDateString));
+
+        when(jobsService.startJob(any(JobRequestBuilder.class))).thenReturn(TestConstants.TEST_JOB_GUID);
+        JobExecutionDto jobStatus = new JobExecutionDto();
+        jobStatus.setAppGuid(TestConstants.TEST_APP_GUID);
+        jobStatus.setState(JobState.COMPLETED);
+        jobStatus.setCreatedDate(new Date());
+        jobStatus.setAppName(TestConstants.TEST_CREATRE_APP);
+        when(jobsService.pollAndWaitForJobFinished(anyString(), any(Function.class), anyBoolean())).thenReturn(jobStatus);
+
+        runStringArgs(snapshotCommand, args);
+
+        CommandLine.Model.CommandSpec spec = cliToTest.getCommandSpec();
+        assertThat(spec, is(notNullValue()));
+        assertThat(snapshotCommand.getSnapshotName(), is("Snapshot-2025-01-15T15-14-00"));
+        assertThat(exitCode, is(Constants.RETURN_OK));
     }
 
     @Test

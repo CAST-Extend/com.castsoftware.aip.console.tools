@@ -16,6 +16,7 @@ import com.castsoftware.aip.console.tools.core.services.JobsService;
 import com.castsoftware.aip.console.tools.core.services.RestApiService;
 import com.castsoftware.aip.console.tools.core.services.UploadService;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.DateUtils;
 import com.castsoftware.aip.console.tools.core.utils.SemVerUtils;
 import com.castsoftware.aip.console.tools.core.utils.VersionInformation;
 import com.castsoftware.aip.console.tools.providers.CliLogPollingProviderImpl;
@@ -28,6 +29,7 @@ import picocli.CommandLine;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Optional;
@@ -51,6 +53,7 @@ public class SnapshotCommand extends BasicCallable {
     private static final DateFormat RELEASE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     @CommandLine.Mixin
     private SharedOptions sharedOptions;
+    private static final VersionInformation MAX_VERSION = VersionInformation.fromVersionString("3.0.0");
 
     @CommandLine.Option(names = {"-n", "--app-name"},
             paramLabel = "APPLICATION_NAME",
@@ -134,9 +137,8 @@ public class SnapshotCommand extends BasicCallable {
                 foundVersion = optionalVersionDto.get();
             }
 
-            if (StringUtils.isBlank(snapshotName)) {
-                snapshotName = String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()));
-            }
+            LocalDateTime snapshotDate = applicationService.getVersionLocalDateTime(snapshotDateString);
+            snapshotName = applicationService.buildSnapshotName(snapshotName);
 
             boolean forcedConsolidation = processImaging || consolidation;
             //TODO: refactor after release to get separated workflows
@@ -178,7 +180,7 @@ public class SnapshotCommand extends BasicCallable {
                     .versionName(foundVersion.getName())
                     .snapshotName(snapshotName)
                     .uploadApplication(true)
-                    .snapshotDate(applicationService.getVersionDate(snapshotDateString))
+                    .releaseAndSnapshotDateStr(DateUtils.toJsonString(snapshotDate))
                     .processImaging(processImaging)
                     .uploadApplication(true)
                     .endStep(SemVerUtils.isNewerThan115(apiInfoDto.getApiVersionSemVer()) ?
@@ -227,6 +229,10 @@ public class SnapshotCommand extends BasicCallable {
     @Override
     protected VersionInformation getMinVersion() {
         return null;
+    }
+    @Override
+    protected VersionInformation getMaxVersion() {
+        return MAX_VERSION;
     }
 
     @Override

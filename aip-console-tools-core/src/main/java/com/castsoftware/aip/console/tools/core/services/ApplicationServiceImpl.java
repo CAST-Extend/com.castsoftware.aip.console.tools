@@ -32,6 +32,7 @@ import com.castsoftware.aip.console.tools.core.exceptions.PackagePathInvalidExce
 import com.castsoftware.aip.console.tools.core.exceptions.UploadException;
 import com.castsoftware.aip.console.tools.core.utils.ApiEndpointHelper;
 import com.castsoftware.aip.console.tools.core.utils.Constants;
+import com.castsoftware.aip.console.tools.core.utils.DateUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
@@ -39,6 +40,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -354,6 +357,21 @@ public class ApplicationServiceImpl implements ApplicationService {
                 !appVersions.isEmpty();
     }
 
+    @Override
+    public LocalDateTime getVersionLocalDateTime(String versionDateString) throws ApplicationServiceException {
+        if (!StringUtils.isEmpty(versionDateString)) {
+            // Ensure format is supported if not exception will be thrown
+            getVersionDate(versionDateString);
+        }
+        return (StringUtils.isEmpty(versionDateString)) ?
+                LocalDateTime.now(): DateUtils.parseJsonLocalDateTime(versionDateString + ".000Z");
+    }
+
+    public String buildSnapshotName( String actualName ) throws ApplicationServiceException {
+        return StringUtils.isEmpty(actualName) ?
+                String.format("Snapshot-%s", new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss").format(getVersionDate(actualName)))
+                : actualName;
+    }
     @Override
     public Date getVersionDate(String versionDateString) throws ApplicationServiceException {
         if (StringUtils.isEmpty(versionDateString)) {
