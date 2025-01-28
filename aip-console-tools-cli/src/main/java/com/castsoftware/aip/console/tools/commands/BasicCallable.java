@@ -66,6 +66,7 @@ public abstract class BasicCallable implements Callable<Integer> {
             if (getSharedOptions().getTimeout() != Constants.DEFAULT_HTTP_TIMEOUT) {
                 restApiService.setTimeout(getSharedOptions().getTimeout(), TimeUnit.SECONDS);
             }
+            log.info(getSharedOptions().toString());
             restApiService.validateUrlAndKey(getSharedOptions().getFullServerRootUrl(), getSharedOptions().getUsername(), getSharedOptions().getApiKeyValue());
         } catch (ApiKeyMissingException e) {
             return Constants.RETURN_NO_PASSWORD;
