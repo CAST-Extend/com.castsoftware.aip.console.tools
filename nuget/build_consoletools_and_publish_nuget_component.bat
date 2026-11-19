@@ -119,7 +119,7 @@ set VERSION=%VERSION:-SNAPSHOT=%
 set ID=com.castsoftware.aip.console.tools
 
 set MVNOPT=-f %ACTOOLSDIR%\pom.xml -Dmaven.repo.local=%WKSP%\.repository -U -B
-if exist %ENGTOOLS%\certificates\settings_maven.xml set MVNOPT=%MVNOPT% -s %ENGTOOLS%\certificates\settings_maven.xml
+if exist %ENGTOOLS%\certificates\settings_maven-artifactory.xml set MVNOPT=%MVNOPT% -s %ENGTOOLS%\certificates\settings_maven-artifactory.xml
 
 @echo.
 @echo ================================================

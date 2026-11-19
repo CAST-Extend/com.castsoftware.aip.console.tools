@@ -203,7 +203,7 @@
         </pluginRepository>
         <pluginRepository>
             <id>internal plugins</id>
-            <url>http://jnk-maven:8081/artifactory/ext-release-local</url>
+            <url>https://artifactory.castsoftware.com/artifactory/imaging-core-maven-external-local/</url>
         </pluginRepository>
     </pluginRepositories>
 </project>
